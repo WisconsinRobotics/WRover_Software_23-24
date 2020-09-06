@@ -1,0 +1,27 @@
+# ros build output
+build/
+devel/
+
+# python env
+/venv/
+
+# ide
+/.vscode/
+
+# fetched external libs
+# NOTE: these may be removed in the future, tbd
+src/BadgerCommandLibrary
+src/InertialSenseSDK
+src/JoystickLibrary
+src/combinatory_processing
+src/combinatory_input
+src/roswell
+src/sick_scan
+
+# external lib destination dirs
+src/drive/lib
+src/manager/lib
+src/science/lib
+
+*.pyc
+src/arm/lib

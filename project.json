@@ -1,0 +1,30 @@
+{
+  "deps": [
+    {
+      "name": "JoystickLibrary",
+      "repo": "https://github.com/WisconsinRobotics/JoystickLibrary",
+      "build": {
+        "provider": "cmake",
+        "build_dir": "cpp",
+        "artifacts": [
+          "cpp/src/libJoystickLibrary.a"
+        ],
+        "dependents": []
+      }
+    },
+    {
+      "name": "combinatory_processing",
+      "repo": "https://github.com/phantamanta44/combinatory_processing",
+      "build": {
+        "provider": "pip"
+      }
+    },
+    {
+      "name": "combinatory_input",
+      "repo": "https://github.com/phantamanta44/combinatory_input",
+      "build": {
+        "provider": "pip"
+      }
+    }
+  ]
+}
