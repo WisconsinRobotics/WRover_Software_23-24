@@ -6,4 +6,8 @@
 
 * `/hci/example: std_msgs/Float32`
   
-  This topic allows information to flow from the high-level logic layer up to the HSI layer.
+  This topic allows information to flow from the high-level logic layer up to the HSI layer
+
+* `/logic/drive_joystick_left/axis/y: std_msgs/Float32`
+
+  This topic publishes y-coordinate of the left drive joystick's position.
