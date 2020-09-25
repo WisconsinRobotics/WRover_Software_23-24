@@ -10,4 +10,4 @@
 
 * `/control/drive_train_cmd: wr_drive_msgs/DriveTrainCmd`
 
-  This topic allows the logic layer to send a pair of real numbers to the drivetrain as power commands.  Format: [Left Power, Right Power].
+  This topic allows the logic layer to send a pair of real numbers to the drivetrain as power commands.  Format: [Left Power, Right Power], Range: [-1,1] on each position.

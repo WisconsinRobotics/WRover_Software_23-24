@@ -12,6 +12,10 @@
 
   This topic publishes x- or y-coordinate of the drive joystick's position to the logic layer (Range: [-1, 1]).
 
+* `/logic/drive_joystick_(left|right)/axis/throttle: std_msgs/Float32`
+
+  This topic publishes the throttle value of the drive joystick's position to the logic layer (Range: [0,1]).
+
 * `/logic/drive_joystick_(left|right)/button/(1-12): std_msgs/Bool`
 
   This topic publishes the status of buttons 1-12 on the drive joysticks to the logic layer.
