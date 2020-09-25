@@ -8,6 +8,6 @@
   
   This topic allows information to flow from the control systems layer up to the high-level logic layer.
 
-* `/control/drive_train_cmd: wr_drive_msgs/2D_Float32`
+* `/control/drive_train_cmd: wr_drive_msgs/drive_train_cmd`
 
   This topic allows the logic layer to send a pair of real numbers to the drivetrain as power commands.  Format: [Left Power, Right Power].
