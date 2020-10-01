@@ -11,7 +11,7 @@
 float speedRatio[] = {0.0, 0.0};
 float speedRaw[] = {0.0, 0.0};
 //Holds the constant speed ratios (provided by parameters)
-float SPEED_RATIO_VALUES[4];
+float SPEED_RATIO_VALUES[] = {0.25, 0.5, 0.75, 1.0};
 
 //////////////////////////////////////////////////////////////////
 //			BUTTON CALLBACKS			//
@@ -78,19 +78,20 @@ void djR_axY_callback(const std_msgs::Float32::ConstPtr& msg){
 //Main Method
 
 int main(int argc, char** argv){
-	
-	//Speed Ratio constants MUST be provided.
-	//If there aren't enough arguments, terminate.
-	if(argc != 5) return 0;
 
-	//Convert the parameters to floats and assign them to the constants array
-	for(int i = 1; i < 5; i++) SPEED_RATIO_VALUES[i-1] = strtof(argv[i],NULL);
-	
 	//ROS initialization
 	ros::init(argc,argv,"TeleopDriveTrainLogic");
 
 	//Handler to the current node
 	ros::NodeHandle n;
+	//Handler for private namespace
+	ros::NodeHandle nh("~");
+
+	//Get Custom Speed Parameters
+	nh.getParam("speed_step1", SPEED_RATIO_VALUES[0]);
+	nh.getParam("speed_step2", SPEED_RATIO_VALUES[1]);
+	nh.getParam("speed_step3", SPEED_RATIO_VALUES[2]);
+        nh.getParam("speed_step4", SPEED_RATIO_VALUES[3]);
 	
 	//Publisher for output data to the drivetrain
 	ros::Publisher driveCommand = n.advertise<wr_logic_teleop_ds::DriveTrainCmd>("/control/drive_train_cmd", 1000);
