@@ -3,7 +3,6 @@
 #include "std_msgs/Bool.h"
 #include "std_msgs/Float32.h"
 
-#include <sstream>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -13,6 +12,9 @@ float speedRaw[] = {0.0, 0.0};
 //Holds the constant speed ratios (provided by parameters)
 float SPEED_RATIO_VALUES[] = {0.25, 0.5, 0.75, 1.0};
 
+#define Std_Bool std_msgs::Bool::ConstPtr&
+#define Std_Float32 std_msgs::Float32::ConstPtr&
+
 //////////////////////////////////////////////////////////////////
 //			BUTTON CALLBACKS			//
 //								//
@@ -20,41 +22,22 @@ float SPEED_RATIO_VALUES[] = {0.25, 0.5, 0.75, 1.0};
 // when their button is pressed.				//
 //////////////////////////////////////////////////////////////////
 
+//Generic Button Callback
+void genCallback(const Std_Bool msg, int ind1, int ind2){
+	if(msg->data) speedRatio[ind1]=SPEED_RATIO_VALUES[ind2];
+}
+
 //Left Drive Joystick
-
-void djL_btn5_callback(const std_msgs::Bool::ConstPtr& msg){
-        if(msg->data) speedRatio[0] = SPEED_RATIO_VALUES[0];
-}
-
-void djL_btn3_callback(const std_msgs::Bool::ConstPtr& msg){
-        if(msg->data) speedRatio[0] = SPEED_RATIO_VALUES[1];
-}
-
-void djL_btn4_callback(const std_msgs::Bool::ConstPtr& msg){
-        if(msg->data) speedRatio[0] = SPEED_RATIO_VALUES[2];
-}
-
-void djL_btn6_callback(const std_msgs::Bool::ConstPtr& msg){
-	if(msg->data) speedRatio[0] = SPEED_RATIO_VALUES[3];
-}
+void (*L5_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 0, 0);};
+void (*L3_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 0, 1);};
+void (*L4_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 0, 2);};
+void (*L6_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 0, 3);};
 
 //Right Drive Joystick
-
-void djR_btn5_callback(const std_msgs::Bool::ConstPtr& msg){
-	if(msg->data) speedRatio[1] = SPEED_RATIO_VALUES[0];
-}
-
-void djR_btn3_callback(const std_msgs::Bool::ConstPtr& msg){
-	if(msg->data) speedRatio[1] = SPEED_RATIO_VALUES[1];
-}
-
-void djR_btn4_callback(const std_msgs::Bool::ConstPtr& msg){
-	if(msg->data) speedRatio[1] = SPEED_RATIO_VALUES[2];
-}
-
-void djR_btn6_callback(const std_msgs::Bool::ConstPtr& msg){
-	if(msg->data) speedRatio[1] = SPEED_RATIO_VALUES[3];
-}
+void (*R5_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 1, 0);};
+void (*R3_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 1, 1);};
+void (*R4_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 1, 2);};
+void (*R6_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 1, 3);};
 
 //////////////////////////////////////////////////////////////////
 //                      JOYSTICK CALLBACKS                      //
@@ -103,14 +86,14 @@ int main(int argc, char** argv){
 	ros::Subscriber s1, s2, s3, s4, s5, s6, s7, s8, sL, sR;
 	
 	//Assign the button callbacks to their respective topics
-	s1 = n.subscribe("/logic/drive_joystick_left/button/3", 1000, djL_btn3_callback);
-	s2 = n.subscribe("/logic/drive_joystick_left/button/4", 1000, djL_btn4_callback);
-	s3 = n.subscribe("/logic/drive_joystick_left/button/5", 1000, djL_btn5_callback);
-        s4 = n.subscribe("/logic/drive_joystick_left/button/6", 1000, djL_btn6_callback);
-	s5 = n.subscribe("/logic/drive_joystick_right/button/3", 1000, djR_btn3_callback);
-        s6 = n.subscribe("/logic/drive_joystick_right/button/4", 1000, djR_btn4_callback);
-	s7 = n.subscribe("/logic/drive_joystick_right/button/5", 1000, djR_btn5_callback);
-        s8 = n.subscribe("/logic/drive_joystick_right/button/6", 1000, djR_btn6_callback);
+	s1 = n.subscribe("/logic/drive_joystick_left/button/3", 1000, L3_cb);
+	s2 = n.subscribe("/logic/drive_joystick_left/button/4", 1000, L4_cb);
+	s3 = n.subscribe("/logic/drive_joystick_left/button/5", 1000, L5_cb);
+        s4 = n.subscribe("/logic/drive_joystick_left/button/6", 1000, L6_cb);
+	s5 = n.subscribe("/logic/drive_joystick_right/button/3", 1000, R3_cb);
+        s6 = n.subscribe("/logic/drive_joystick_right/button/4", 1000, R4_cb);
+	s7 = n.subscribe("/logic/drive_joystick_right/button/5", 1000, R5_cb);
+        s8 = n.subscribe("/logic/drive_joystick_right/button/6", 1000, R6_cb);
 
 	//Assign the joystick callbacks to their respective topics
 	sL = n. subscribe("/logic/drive_joystick_left/axis/y", 1000, djL_axY_callback);
