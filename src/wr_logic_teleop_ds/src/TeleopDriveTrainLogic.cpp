@@ -28,16 +28,16 @@ void genCallback(const Std_Bool msg, int ind1, int ind2){
 }
 
 //Left Drive Joystick
-void (*L5_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 0, 0);};
-void (*L3_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 0, 1);};
-void (*L4_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 0, 2);};
-void (*L6_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 0, 3);};
+void (*L_S3_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 0, 3);};
+void (*L_S2_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 0, 2);};
+void (*L_S1_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 0, 1);};
+void (*L_S0_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 0, 0);};
 
 //Right Drive Joystick
-void (*R5_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 1, 0);};
-void (*R3_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 1, 1);};
-void (*R4_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 1, 2);};
-void (*R6_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 1, 3);};
+void (*R_S0_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 1, 0);};
+void (*R_S1_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 1, 1);};
+void (*R_S2_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 1, 2);};
+void (*R_S3_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 1, 3);};
 
 //////////////////////////////////////////////////////////////////
 //                      JOYSTICK CALLBACKS                      //
@@ -86,14 +86,14 @@ int main(int argc, char** argv){
 	ros::Subscriber s1, s2, s3, s4, s5, s6, s7, s8, sL, sR;
 	
 	//Assign the button callbacks to their respective topics
-	s1 = n.subscribe("/logic/drive_joystick_left/button/3", 1000, L3_cb);
-	s2 = n.subscribe("/logic/drive_joystick_left/button/4", 1000, L4_cb);
-	s3 = n.subscribe("/logic/drive_joystick_left/button/5", 1000, L5_cb);
-        s4 = n.subscribe("/logic/drive_joystick_left/button/6", 1000, L6_cb);
-	s5 = n.subscribe("/logic/drive_joystick_right/button/3", 1000, R3_cb);
-        s6 = n.subscribe("/logic/drive_joystick_right/button/4", 1000, R4_cb);
-	s7 = n.subscribe("/logic/drive_joystick_right/button/5", 1000, R5_cb);
-        s8 = n.subscribe("/logic/drive_joystick_right/button/6", 1000, R6_cb);
+	s1 = n.subscribe("/logic/drive_joystick_left/button/3", 1000, L_S2_cb);
+	s2 = n.subscribe("/logic/drive_joystick_left/button/4", 1000, L_S1_cb);
+	s3 = n.subscribe("/logic/drive_joystick_left/button/5", 1000, L_S3_cb);
+        s4 = n.subscribe("/logic/drive_joystick_left/button/6", 1000, L_S0_cb);
+	s5 = n.subscribe("/logic/drive_joystick_right/button/3", 1000, R_S1_cb);
+        s6 = n.subscribe("/logic/drive_joystick_right/button/4", 1000, R_S2_cb);
+	s7 = n.subscribe("/logic/drive_joystick_right/button/5", 1000, R_S0_cb);
+        s8 = n.subscribe("/logic/drive_joystick_right/button/6", 1000, R_S3_cb);
 
 	//Assign the joystick callbacks to their respective topics
 	sL = n. subscribe("/logic/drive_joystick_left/axis/y", 1000, djL_axY_callback);
