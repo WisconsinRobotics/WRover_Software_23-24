@@ -1,0 +1,2 @@
+float32 left_value
+float32 right_value
