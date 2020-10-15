@@ -10,7 +10,8 @@ project(wr_logic_teleop_ds)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
-  message_generation
+  #  message_generation
+  wr_drive_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -47,10 +48,10 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-add_message_files(
-  FILES
-  DriveTrainCmd.msg
-)
+#add_message_files(
+    #FILES
+    #DriveTrainCmd.msg
+#)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -67,10 +68,10 @@ add_message_files(
 # )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages(
-  DEPENDENCIES
-  std_msgs  # Or other packages containing msgs
-)
+#generate_messages(
+#  DEPENDENCIES
+#  std_msgs  # Or other packages containing msgs
+#)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -104,7 +105,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES wr_logic_teleop_ds
-  CATKIN_DEPENDS roscpp rospy message_runtime
+  CATKIN_DEPENDS roscpp rospy message_runtime wr_drive_msgs
 #  DEPENDS system_lib
 )
 

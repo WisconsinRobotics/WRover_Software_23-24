@@ -55,6 +55,9 @@
   <build_export_depend>rospy</build_export_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>
+  <build_depend>wr_drive_msgs</build_depend>
+  <build_export_depend>wr_drive_msgs</build_export_depend>
+  <exec_depend>wr_drive_msgs</exec_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

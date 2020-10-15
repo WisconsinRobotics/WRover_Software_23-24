@@ -1,5 +1,5 @@
 #include "ros/ros.h"
-#include "wr_logic_teleop_ds/DriveTrainCmd.h"
+#include "wr_drive_msgs/DriveTrainCmd.h"
 #include "std_msgs/Bool.h"
 #include "std_msgs/Float32.h"
 
@@ -77,7 +77,7 @@ int main(int argc, char** argv){
         nh.getParam("speed_step4", SPEED_RATIO_VALUES[3]);
 	
 	//Publisher for output data to the drivetrain
-	ros::Publisher driveCommand = n.advertise<wr_logic_teleop_ds::DriveTrainCmd>("/control/drive_train_cmd", 1000);
+	ros::Publisher driveCommand = n.advertise<wr_drive_msgs::DriveTrainCmd>("/control/drive_train_cmd", 1000);
 	
 	//Loop Rate - 50 Hz
 	ros::Rate loop(50);
@@ -103,7 +103,7 @@ int main(int argc, char** argv){
 	while(ros::ok()){
 	
 		//Define the output message
-		wr_logic_teleop_ds::DriveTrainCmd output;
+		wr_drive_msgs::DriveTrainCmd output;
 		
 		//Set the left and right values to be the product of respective raw speeds and speed ratios
 		output.left_value = speedRaw[0]*speedRatio[0];
