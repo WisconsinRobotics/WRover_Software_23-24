@@ -4,8 +4,8 @@
 
 You should have the following installed beforehand:
 
-* ROS Melodic (preferrably on Ubuntu 18.04, but ROS on WSL may also work...?)
-* Python 2.7.x with pip and virtualenv
+* ROS Noetic (preferrably on Ubuntu 20.04; it is recommended, but not necessarily required, to dual-boot for this)
+* Python 3.8.x+ with pip and virtualenv
 
 ## Setting Up the Workspace
 
@@ -14,12 +14,12 @@ You'll want to clone the repo to wherever you wish to store your workspaces.
 Once you have a local copy, you'll want to open a terminal in the workspace.
 For initial setup, do the following:
 
-
 ```sh
 $ . setup.sh          # set up the workspace environment
 $ ./assemble.py init  # initialize the catkin workspace + venv
 $ ./assemble.py build # build dependencies
 ```
+
 Every time you want to work in the workspace, you'll have to run `source setup.sh` again to set up your shell with the workspace environment. Alternatively, you can do this automatically in your `.bashrc` if you don't anticipate working in any other ROS workspaces.
 
 ## Booting the Full Robot System

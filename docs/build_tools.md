@@ -5,7 +5,7 @@ This document provides an overview of its functionality.
 
 ## Usage
 
-First, you'll need to have Python 2.7.x and the `pip` and `virtualenv` tools installed.
+First, you'll need to have Python 3.8.x+ and the `pip` and `virtualenv` modules installed.
 The script is invoked from the command line as follows:
 
 ```shell
@@ -97,7 +97,7 @@ The build provider configuration is as follows:
 ```js
 {
     "provider": "apt",
-    "package": "ros-melodic-moveit" // the name of the package to install
+    "package": "ros-noetic-moveit" // the name of the package to install
 }
 ```
 

@@ -11,20 +11,6 @@
         ],
         "dependents": []
       }
-    },
-    {
-      "name": "combinatory_processing",
-      "repo": "https://github.com/phantamanta44/combinatory_processing",
-      "build": {
-        "provider": "pip"
-      }
-    },
-    {
-      "name": "combinatory_input",
-      "repo": "https://github.com/phantamanta44/combinatory_input",
-      "build": {
-        "provider": "pip"
-      }
     }
   ]
 }
