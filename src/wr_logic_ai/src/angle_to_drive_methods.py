@@ -3,7 +3,9 @@ import math
 
 # Used to get the difference between the target angle and the current heading.  Used to abstract left from right.
 def get_x(heading: float, target_angle: float) -> float:
-    return heading - target_angle
+    x = heading - target_angle
+    # Placeholder for extra logic on computing x during development
+    return x
 
 # Creates a DriveTrainCmd using piecewise linear functions that are linear on 
 # the domain [-90, 0] or [0, 90] (depending on the side) and extend 1 and -1 outside of that domain
