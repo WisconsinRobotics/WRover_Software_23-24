@@ -44,7 +44,7 @@ def initialize():
 def set_target_angle(data):
     global target_angle
     imu = AngleCalculations(data.cur_lat, data.cur_long, data.tar_lat, data.tar_long)
-    target_angle = imu.get_target_angle(data.heading)
+    target_angle = imu.get_angle()
     print('Target angle: ' + str(target_angle))
 
 # TODO: consider wheter to directly call from callback
