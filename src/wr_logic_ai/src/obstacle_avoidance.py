@@ -66,7 +66,8 @@ def update_navigation(data):
             SECTOR_ANGLE,
             HIST_TRESH,
             VISION_ANGLE,
-            data)
+            data,
+            smoothing_constant = rospy.get_param("smoothing_constant", 3))
 
         turn_left = True if target_angle % 180 > 90 else False
         turn_left = turn_left if target_angle >= 180 else not turn_left
@@ -83,12 +84,12 @@ def update_navigation(data):
 #        drive_cmd = drive_cmd / np.linalg.norm(drive_cmd, 2)
         # drive_cmd *= 100  #LEGACY CODE, NOT IN USE THIS YEAR
         # ensures we received a valid speed factor
-        speed_factor = 0.8
+        speed_factor = rospy.get_param("speed_factor", 0.8)
         speed_factor = 0 if speed_factor < 0 else speed_factor
         speed_factor = 1 if speed_factor > 1 else speed_factor
         msg = angle_calc.piecewise_linear(data.heading, target_angle) # Double check parameters
-#        msg.left_value = drive_cmd[0] * speed_factor
-#        msg.right_value = drive_cmd[1] * speed_factor
+        msg.left_value *= speed_factor
+        msg.right_value *= speed_factor
         drive_pub.publish(msg)
 
 if __name__ == '__main__':

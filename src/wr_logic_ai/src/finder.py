@@ -34,12 +34,14 @@ def get_valley(
         sector_angle,
         threshold,
         vision_angle,
-        data):
+        data,
+        smoothing=3):
     hist = histogram.Histogram(
         sector_count,
         threshold,
         vision_angle,
-        data)  # TODO histogram and parameters
+        data,
+        smoothing)  # TODO histogram and parameters
     output_file = open('sectors.data', 'wb')
     pickle.dump(hist.sectors, output_file)
     output_file.close()
@@ -79,14 +81,16 @@ def get_navigation_angle(
         sector_angle,
         threshold,
         vision_angle,
-        data):
+        data,
+        smoothing_constant = 3):
     best_valley = get_valley(
         target,
         sector_count,
         sector_angle,
         threshold,
         vision_angle,
-        data)
+        data,
+        smoothing = smoothing_constant)
     # research suggest that the biggest valley should not be bigger than 90
     # degrees
     max_valley = int(90 / sector_angle)
