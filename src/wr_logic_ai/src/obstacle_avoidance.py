@@ -32,19 +32,23 @@ rospy.init_node('nav_autonomous', anonymous=False)
 drive_pub = rospy.Publisher('/drive_cmd', DriveTrainCmd, queue_size=1)
 
 def initialize():
-    ## Subscribers
+    ## Subscribe to lidar data
     rospy.Subscriber('/scan', LaserScan, update_navigation)
+    ## Subscribe to location data
     rospy.Subscriber('/nav_data', NavigationMsg, set_target_angle)
 
+    ## Asynchronously update the target navigation
     th = threading.Thread(target=update_target_sector)
     th.daemon = True
     th.start()
 
-
+## Calculate the planar target angle
 def set_target_angle(data):
     global target_angle
+    ## Construct the planar target angle relative to east, accounting for curvature
     imu = AngleCalculations(data.cur_lat, data.cur_long, data.tar_lat, data.tar_long)
     target_angle = imu.get_angle()
+    ## Debug Out the target angle
     print('Target angle: ' + str(target_angle))
 
 # TODO: consider wheter to directly call from callback
@@ -87,7 +91,7 @@ def update_navigation(data):
         speed_factor = rospy.get_param("speed_factor", 0.8)
         speed_factor = 0 if speed_factor < 0 else speed_factor
         speed_factor = 1 if speed_factor > 1 else speed_factor
-        msg = angle_calc.piecewise_linear(data.heading, target_angle) # Double check parameters
+        msg = angle_calc.piecewise_linear(data.heading, result) # TODO: Double check parameters
         msg.left_value *= speed_factor
         msg.right_value *= speed_factor
         drive_pub.publish(msg)
