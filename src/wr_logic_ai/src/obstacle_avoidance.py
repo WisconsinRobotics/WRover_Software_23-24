@@ -31,7 +31,8 @@ rospy.init_node('nav_autonomous', anonymous=False)
 ## Publisher
 drive_pub = rospy.Publisher('/drive_cmd', DriveTrainCmd, queue_size=1)
 
-def initialize():
+# Start the tasks managed to drive autonomously
+def initialize() -> None:
     ## Subscribe to lidar data
     rospy.Subscriber('/scan', LaserScan, update_navigation)
     ## Subscribe to location data
@@ -43,7 +44,7 @@ def initialize():
     th.start()
 
 ## Calculate the planar target angle
-def set_target_angle(data):
+def set_target_angle(data) -> None:
     global target_angle
     ## Construct the planar target angle relative to east, accounting for curvature
     imu = AngleCalculations(data.cur_lat, data.cur_long, data.tar_lat, data.tar_long)
@@ -53,13 +54,16 @@ def set_target_angle(data):
 
 # TODO: consider wheter to directly call from callback
 # or every 2 seconds, depends on the computational cost
-def update_target_sector():
+
+# Update the target sector based on the target angle
+def update_target_sector() -> None:
     global target_sector
     while True:
         # map angle to sector
         target_sector = target_angle / SECTOR_ANGLE
 
-def update_navigation(data):
+# Update the robot's navigation and drive it towards the target angle
+def update_navigation(data) -> None:
     data_avg = sum(cur_range for cur_range in data.ranges) / len(data.ranges)
     # TODO: data threshold might depend of lidar model, double check
     if data_avg >= 0.5:
@@ -73,36 +77,35 @@ def update_navigation(data):
             data,
             smoothing_constant = rospy.get_param("smoothing_constant", 3))
 
-        turn_left = True if target_angle % 180 > 90 else False
-        turn_left = turn_left if target_angle >= 180 else not turn_left
-#        if turn_left:
-#            print('Turn Right')
-#            alpha = 180
-#            beta = (target_angle + 90) % 360
-#        else:
-#            print('Turn Left')
-#            alpha = 270 - target_angle # t_a from 270-90
-#            beta = 180
-#
-#        drive_cmd = [alpha, beta]
-#        drive_cmd = drive_cmd / np.linalg.norm(drive_cmd, 2)
-        # drive_cmd *= 100  #LEGACY CODE, NOT IN USE THIS YEAR
-        # ensures we received a valid speed factor
+        # Get the speed multiplier of the current runtime for the obstacle_avoidance
         speed_factor = rospy.get_param("speed_factor", 0.8)
+        # Set the bounds of the speed multiplier
         speed_factor = 0 if speed_factor < 0 else speed_factor
         speed_factor = 1 if speed_factor > 1 else speed_factor
+        
+        # Get the DriveTrainCmd relating to the heading of the robot and the resulting best navigation angle
         msg = angle_calc.piecewise_linear(data.heading, result) # TODO: Double check parameters
+        # Scale the resultant DriveTrainCmd by the speed multiplier
         msg.left_value *= speed_factor
         msg.right_value *= speed_factor
+        # Publish the DriveTrainCmd to the topic
         drive_pub.publish(msg)
 
+# If this file was executed...
 if __name__ == '__main__':
     try:
+        # Initialize the running environment for this program
         initialize()
+        # Spin RosPy to the next update cycle
         rospy.spin()
+    
+    # Ignore ROS Interrupt Exceptions
     except rospy.ROSInterruptException:
         pass
+
+    # If there is some other error (i.e. ROS Termination)
     finally:
+        # Stop the drive motors before shutting down
         print("Stopping motors")
         msg_stop = DriveTrainCmd()
         msg_stop.left_value = 0
