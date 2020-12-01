@@ -29,7 +29,7 @@ target_sector = target_angle / SECTOR_COUNT
 rospy.init_node('nav_autonomous', anonymous=False)
 
 ## Publisher
-drive_pub = rospy.Publisher('/drive_cmd', DriveTrainCmd, queue_size=1)
+drive_pub = rospy.Publisher('/control/drive_train_cmd', DriveTrainCmd, queue_size=1)
 
 # Start the tasks managed to drive autonomously
 def initialize() -> None:
