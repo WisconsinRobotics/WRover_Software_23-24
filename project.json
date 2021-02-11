@@ -13,6 +13,13 @@
       "build": {
         "provider": "pip"
       }
+    },
+    {
+      "name": "wroboclaw",
+      "repo": "https://github.com/WisconsinRobotics/wroboclaw",
+      "build": {
+        "provider": "pip"
+      }
     }
   ]
 }
