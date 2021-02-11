@@ -1,0 +1,8 @@
+<!-- Launches the control systems nodes that make the drive system go. -->
+<launch>
+  <group ns="control">
+    <group ns="drive_system">
+      <!-- TODO: drive system control systems -->
+    </group>
+  </group>
+</launch>

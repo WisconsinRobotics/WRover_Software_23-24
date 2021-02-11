@@ -1,0 +1,14 @@
+<!-- Launches a mock hardware interface for testing the drive system. -->
+<launch>
+  <arg name="use_encoders" default="false"/>
+
+  <group ns="hsi">
+    <group ns="drive_system">
+      <node name="ds_roboclaw_mock" pkg="wroboclaw" type="drive_roboclaw.py" machine="wrover">
+        <rosparam file="$(find wr_entry_point)/config/roboclaw_enc.yaml" if="$(arg use_encoders)"/>
+        <rosparam file="$(find wr_entry_point)/config/roboclaw_noenc.yaml" unless="$(arg use_encoders)"/>
+        <param name="mock" value="true"/>
+      </node>
+    </group>
+  </group>
+</launch>

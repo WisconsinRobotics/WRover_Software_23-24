@@ -1,0 +1,17 @@
+<!-- Launches the full robot system, configured for the planetary science URC task. -->
+<launch>
+  <env name="WROVER_MODE" value="SCIENCE"/>
+
+  <include file="$(find wr_entry_point)/launch/comp/init.launch"/>
+  
+  <include file="$(find wr_entry_point)/launch/comp/proprioception.launch"/>
+
+  <include file="$(find wr_entry_point)/launch/comp/roboclaw.launch"/>
+  
+  <include file="$(find wr_entry_point)/launch/comp/ds_control.launch"/>
+  <include file="$(find wr_entry_point)/launch/comp/ds_teleop.launch"/>
+  
+  <include file="$(find wr_entry_point)/launch/comp/ui.launch"/>
+  
+  <!-- TODO: science assembly control system -->
+</launch>

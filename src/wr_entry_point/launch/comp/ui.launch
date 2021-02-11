@@ -1,0 +1,4 @@
+<!-- Launches the robot UI on the base station. -->
+<launch>
+  <!-- TODO: ui -->
+</launch>

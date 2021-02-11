@@ -1,0 +1,19 @@
+<!-- Launches the full robot system, configured for the autonomous navigation URC task. -->
+<launch>
+  <env name="WROVER_MODE" value="AUTO_NAV"/>
+
+  <include file="$(find wr_entry_point)/launch/comp/init.launch"/>
+  
+  <include file="$(find wr_entry_point)/launch/comp/proprioception.launch"/>
+  
+  <include file="$(find wr_entry_point)/launch/comp/roboclaw.launch"/>
+  
+  <include file="$(find wr_entry_point)/launch/comp/ds_control.launch"/>
+  
+  <include file="$(find wr_entry_point)/launch/comp/ui.launch"/>
+  
+  <!-- TODO: camera feed -->
+  <!-- TODO: LIDAR feed -->
+  
+  <!-- TODO: autonomous navigation logic -->
+</launch>

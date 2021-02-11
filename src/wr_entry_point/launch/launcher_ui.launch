@@ -1,0 +1,4 @@
+<!-- Launches a friendly user interface for getting the robot up and running. -->
+<launch>
+  <!-- TODO: launcher ui -->
+</launch>

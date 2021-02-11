@@ -1,0 +1,13 @@
+com_port: '/dev/ttyTHS1'
+baud: 38400
+claws:
+  aux0: # arm turntable/shoulder, science ?
+    address: 0x80
+  aux1: # arm elbow/forearm, science ?
+    address: 0x81
+  aux2: # arm wrist, science ?
+    address: 0x82
+  aux3: # arm manip, science ?
+    address: 0x83
+  drive: # drive train
+    address: 0x84

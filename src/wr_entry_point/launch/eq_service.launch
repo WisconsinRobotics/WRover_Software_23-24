@@ -1,0 +1,19 @@
+<!-- Launches the full robot system, configured for the equipment servicing URC task. -->
+<launch>
+  <env name="WROVER_MODE" value="EQ_SERVICE"/>
+
+  <include file="$(find wr_entry_point)/launch/comp/init.launch"/>
+  
+  <include file="$(find wr_entry_point)/launch/comp/proprioception.launch"/>
+  
+  <include file="$(find wr_entry_point)/launch/comp/roboclaw.launch">
+    <arg name="use_encoders" value="true"/>
+  </include>
+  
+  <include file="$(find wr_entry_point)/launch/comp/ds_control.launch"/>
+  <include file="$(find wr_entry_point)/launch/comp/ds_teleop.launch"/>
+  
+  <include file="$(find wr_entry_point)/launch/comp/ui.launch"/>
+  
+  <!-- TODO: arm control system -->
+</launch>
