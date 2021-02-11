@@ -3,6 +3,6 @@
 <launch>
   <arg name="use_encoders" default="false"/>
 
-  <include file="$(find wr_entry_point)/launch/comp/roboclaw/roboclaw_real.launch" pass_all_args="true" if="$(eval env('WROVER_HW') == 'REAL')"/>
-  <include file="$(find wr_entry_point)/launch/comp/roboclaw/roboclaw_mock.launch" pass_all_args="true" if="$(eval env('WROVER_HW') == 'MOCK')"/>
+  <include file="$(find wr_hsi_roboclaw)/launch/roboclaw_real.launch" pass_all_args="true" if="$(eval env('WROVER_HW') == 'REAL')"/>
+  <include file="$(find wr_hsi_roboclaw)/launch/roboclaw_mock.launch" pass_all_args="true" if="$(eval env('WROVER_HW') == 'MOCK')"/>
 </launch>
