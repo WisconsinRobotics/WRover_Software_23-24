@@ -1,15 +1,17 @@
 {
   "deps": [
     {
-      "name": "JoystickLibrary",
-      "repo": "https://github.com/WisconsinRobotics/JoystickLibrary",
+      "name": "wroboclaw",
+      "repo": "https://github.com/WisconsinRobotics/wroboclaw.git",
       "build": {
-        "provider": "cmake",
-        "build_dir": "cpp",
-        "artifacts": [
-          "cpp/src/libJoystickLibrary.a"
-        ],
-        "dependents": []
+        "provider": "pip"
+      }
+    },
+    {
+      "name": "wready",
+      "repo": "https://github.com/WisconsinRobotics/wready.git",
+      "build": {
+        "provider": "pip"
       }
     }
   ]
