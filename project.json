@@ -15,8 +15,8 @@
       }
     },
     {
-      "name": "wroboclaw",
-      "repo": "https://github.com/WisconsinRobotics/wroboclaw",
+      "name": "wreadinput",
+      "repo": "https://github.com/WisconsinRobotics/wreadinput.git",
       "build": {
         "provider": "pip"
       }

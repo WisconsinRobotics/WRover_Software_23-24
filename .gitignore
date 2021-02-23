@@ -17,6 +17,8 @@ src/combinatory_processing
 src/combinatory_input
 src/roswell
 src/sick_scan
+src/wreadinput
+src/wready
 src/wroboclaw
 
 # external lib destination dirs
