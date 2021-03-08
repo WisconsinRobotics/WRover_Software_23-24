@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--This does not replace URDF, and is not an extension of URDF.
+    This is a format for representing semantic information about the robot structure.
+    A URDF file must exist for this robot as well, where the joints and the links that are referenced are defined
+-->
+<robot name="wroboarm_21">
+    <!--GROUPS: Representation of a set of joints and links. This can be useful for specifying DOF to plan for, defining arms, end effectors, etc-->
+    <!--LINKS: When a link is specified, the parent joint of that link (if it exists) is automatically included-->
+    <!--JOINTS: When a joint is specified, the child link of that joint (which will always exist) is automatically included-->
+    <!--CHAINS: When a chain is specified, all the links along the chain (including endpoints) are included in the group. Additionally, all the joints that are parents to included links are also included. This means that joints along the chain and the parent joint of the base link are included in the group-->
+    <!--SUBGROUPS: Groups can also be formed by referencing to already defined group names-->
+    <group name="arm">
+        <joint name="base"/>
+        <joint name="link1_joint"/>
+        <joint name="link2_joint"/>
+        <joint name="link3_joint"/>
+        <joint name="link4_joint"/>
+        <joint name="link5_joint"/>
+        <joint name="link6_joint"/>
+    </group>
+    <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
+    <end_effector name="hand" parent_link="turntable" group="arm"/>
+    <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
+    <virtual_joint name="base" type="fixed" parent_frame="odom_combined" child_link="turntable"/>
+    <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->
+    <disable_collisions link1="elbow" link2="forearm" reason="Adjacent"/>
+    <disable_collisions link1="elbow" link2="gearbox" reason="Never"/>
+    <disable_collisions link1="elbow" link2="manipulator" reason="Never"/>
+    <disable_collisions link1="elbow" link2="turntable" reason="Never"/>
+    <disable_collisions link1="elbow" link2="upperarm" reason="Adjacent"/>
+    <disable_collisions link1="elbow" link2="wrist" reason="Never"/>
+    <disable_collisions link1="forearm" link2="manipulator" reason="Default"/>
+    <disable_collisions link1="forearm" link2="wrist" reason="Adjacent"/>
+    <disable_collisions link1="gearbox" link2="turntable" reason="Adjacent"/>
+    <disable_collisions link1="gearbox" link2="upperarm" reason="Adjacent"/>
+    <disable_collisions link1="manipulator" link2="wrist" reason="Adjacent"/>
+</robot>
