@@ -2,12 +2,17 @@ com_port: '/dev/ttyTHS1'
 baud: 38400
 claws:
   aux0: # arm turntable/shoulder, science ?
+    topic: '/hsi/roboclaw/aux0'
     address: 0x80
   aux1: # arm elbow/forearm, science ?
+    topic: '/hsi/roboclaw/aux1'
     address: 0x81
   aux2: # arm wrist, science ?
+    topic: '/hsi/roboclaw/aux2'
     address: 0x82
   aux3: # arm manip, science ?
+    topic: '/hsi/roboclaw/aux3'
     address: 0x83
   drive: # drive train
+    topic: '/hsi/roboclaw/drive'
     address: 0x84
