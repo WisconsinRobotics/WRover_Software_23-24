@@ -34,15 +34,15 @@ int main(int argc, char** argv){
 	// Create the processing rate (50 Hz)
 	ros::Rate loop(50);
 
+	// Create the (resuable) output message
+	wroboclaw::Int16Pair output;
+
 	// While ROS is active...
 	while(ros::ok()){
 
-		// Create the current output message
-		wroboclaw::Int16Pair output;
-
 		// Convert input power values to duty cycle numbers by scaling to a signed 16 bit number.
-		output.left = (int16_t)(inp_vals[0] * ((1<<15)-1));
-		output.right = (int16_t)(inp_vals[1] * ((1<<15)-1));
+		output.left = (int16_t)(inp_vals[0] * INT16_MAX);
+		output.right = (int16_t)(inp_vals[1] * INT16_MAX);
 
 		// Publish the current message
 		outTopic.publish(output);
