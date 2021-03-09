@@ -1,0 +1,3 @@
+<launch>
+	<node pkg="wr_control_drive_ds" type="DriveTrainControlSystem" name="wr_control_drive_ds"/>
+</launch>
