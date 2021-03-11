@@ -10,6 +10,8 @@ project(wr_control_arm)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
+  actionlib
+  actionlib_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -104,7 +106,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES wr_control_arm
-#  CATKIN_DEPENDS roscpp rospy
+  CATKIN_DEPENDS roscpp rospy message_runtime actionlib actionlib_msgs
 #  DEPENDS system_lib
 )
 
@@ -133,6 +135,8 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/wr_control_arm_node.cpp)
+add_executable(ArmControlSystem src/ArmControlSystem.cpp)
+target_link_libraries(ArmControlSystem ${catkin_LIBRARIES})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
