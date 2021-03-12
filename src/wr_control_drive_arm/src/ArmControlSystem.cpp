@@ -9,6 +9,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
     as->setSucceeded();
 }
 
+
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "ArmControlSystem");

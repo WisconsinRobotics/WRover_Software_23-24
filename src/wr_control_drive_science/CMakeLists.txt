@@ -10,6 +10,8 @@ project(wr_control_drive_science)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
+  actionlib
+  actionlib_msgs
 )
 
 ## System dependencies are found with CMake's conventions
@@ -132,7 +134,13 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
+<<<<<<< HEAD:src/wr_control_drive_science/CMakeLists.txt
 # add_executable(${PROJECT_NAME}_node src/wr_control_drive_science_node.cpp)
+=======
+# add_executable(${PROJECT_NAME}_node src/wr_control_drive_arm_node.cpp)
+add_executable(ArmControlSystem src/ArmControlSystem.cpp)
+target_link_libraries(ArmControlSystem ${catkin_LIBRARIES})
+>>>>>>> Moved wr_control_arm to pre-existing package wr_control_drive_arm and tested the SimpleActionServer with MoveIt configuration in the demo_test.launch wroboarm_21 launch file.  MoveIt confirmed to be talking to the server and hearing the A-OK message.:src/wr_control_drive_arm/CMakeLists.txt
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
