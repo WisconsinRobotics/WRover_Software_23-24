@@ -53,14 +53,37 @@ class ArmMotor{
         }
 
         // void resetEncoder();
+
         void runToTarget(int targetCounts, float power){
-            power = -1;
+            this->runToTarget(targetCounts, power, false);
         }
-        MotorState getMotorState();
+
+        bool hasReachedTarget(int targetCounts){
+            return abs(targetCounts - this->getEncoderCounts()) < 10;
+        }
+
+        MotorState getMotorState(){
+            return this->currState;
+        }
+
         void setPower(float power){
+            if(abs(power) > 1) throw ((std::string)"Power ") + std::to_string(power) + " is not on the interval [-1, 1]";
+
             std_msgs::UInt16 msg;
             msg.data = power * INT16_MAX;
-            speedPub.publish(msg);
-            currState = power == 0.f ? MotorState::STOP : MotorState::MOVING;
-        };
+            this->speedPub.publish(msg);
+            this->currState = power == 0.f ? MotorState::STOP : MotorState::MOVING;
+        }
+
+        void runToTarget(int targetCounts, float power, bool block){
+            if(targetCounts - this->getEncoderCounts() == 0) return;
+            power = abs(power) * abs(targetCounts - this->getEncoderCounts())/(targetCounts - this->getEncoderCounts());
+            this->setPower(power);
+            this->currState = MotorState::RUN_TO_TARGET;
+            if(block){
+                while(!this->hasReachedTarget(targetCounts));
+                this->setPower(0.f);
+                this->currState = MotorState::STOP;
+            }
+        }
 };
