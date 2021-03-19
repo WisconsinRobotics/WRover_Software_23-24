@@ -13,6 +13,7 @@ class ArmMotor{
         int getEncoderCounts();
         // void resetEncoder();
         void runToTarget(int targetCounts, float power);
+        void runToTarget(int targetCounts, float power, bool block);
         MotorState getMotorState();
         void setPower(float power);
 };
