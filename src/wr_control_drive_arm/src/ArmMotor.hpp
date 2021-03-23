@@ -17,4 +17,5 @@ class ArmMotor{
         void runToTarget(double rads, float power);
         MotorState getMotorState();
         void setPower(float power);
+        double getRads();
 };
