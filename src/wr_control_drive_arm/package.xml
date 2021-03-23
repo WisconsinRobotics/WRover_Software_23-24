@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>wr_control_drive_science</name>
+  <name>wr_control_drive_arm</name>
   <version>0.0.0</version>
-  <description>Control systems subsystem package that drives the science subsystem.</description>
+  <description>Control systems subsystem package that drives the arm subsystem.</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
@@ -55,6 +55,8 @@
   <build_export_depend>rospy</build_export_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>
+  <depend>actionlib</depend>
+  <depend>actionlib_msgs</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
