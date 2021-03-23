@@ -92,4 +92,8 @@ class ArmMotor{
         void runToTarget(double rads, float power){
             runToTarget(this->radToEnc(rads), power, false);
         }
+
+        double getRads(){
+            return this->getEncoderCounts() * 2 * M_PI / COUNTS_PER_ROTATION;
+        }
 };
