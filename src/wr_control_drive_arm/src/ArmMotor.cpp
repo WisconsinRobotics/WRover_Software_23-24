@@ -9,9 +9,6 @@
 
 class ArmMotor{
     private:
-        enum MotorState{
-            STOP, MOVING, RUN_TO_TARGET
-        };
         MotorState currState;
         std::string motorName;
         unsigned int controllerID;
@@ -20,9 +17,9 @@ class ArmMotor{
         ros::Publisher speedPub;
         int encoderVal;
 
-        const int COUNTS_PER_ROTATION = 0;
+        static const int COUNTS_PER_ROTATION = UINT_FAST32_MAX;
 
-        float radToEnc(float rads){
+        static float radToEnc(float rads){
             return COUNTS_PER_ROTATION * rads / (2 * M_PI);
         }
 
@@ -76,14 +73,23 @@ class ArmMotor{
         }
 
         void runToTarget(int targetCounts, float power, bool block){
-            if(targetCounts - this->getEncoderCounts() == 0) return;
-            power = abs(power) * abs(targetCounts - this->getEncoderCounts())/(targetCounts - this->getEncoderCounts());
-            this->setPower(power);
-            this->currState = MotorState::RUN_TO_TARGET;
+            if(this->getMotorState() != MotorState::RUN_TO_TARGET){
+                power = abs(power) * abs(targetCounts - this->getEncoderCounts())/(targetCounts - this->getEncoderCounts());
+                this->setPower(power);
+                this->currState = MotorState::RUN_TO_TARGET;
+            }
+            if(this->hasReachedTarget(targetCounts)){
+                this->setPower(0.f);
+                this->currState = MotorState::STOP;
+            }
             if(block){
                 while(!this->hasReachedTarget(targetCounts));
                 this->setPower(0.f);
                 this->currState = MotorState::STOP;
             }
+        }
+
+        void runToTarget(double rads, float power){
+            runToTarget(this->radToEnc(rads), power, false);
         }
 };

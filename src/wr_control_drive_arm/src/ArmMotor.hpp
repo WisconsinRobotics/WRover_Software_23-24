@@ -1,8 +1,8 @@
-class ArmMotor{
-    private:
-        enum MotorState{
+enum MotorState{
             STOP, MOVING, RUN_TO_TARGET
         };
+class ArmMotor{
+    private:
         MotorState currState;
         std::string motorName;
         unsigned int controllerID;
@@ -14,6 +14,7 @@ class ArmMotor{
         // void resetEncoder();
         void runToTarget(int targetCounts, float power);
         void runToTarget(int targetCounts, float power, bool block);
+        void runToTarget(double rads, float power);
         MotorState getMotorState();
         void setPower(float power);
 };
