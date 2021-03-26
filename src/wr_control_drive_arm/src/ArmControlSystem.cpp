@@ -16,18 +16,25 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
       }
 
       bool hasPositionFinished = false;
-      std::vector<std::string> names();
-      std::vector<double> positions();
+      std::vector<std::string> names;
+      std::vector<double> positions;
       while(!hasPositionFinished){
         bool temp = true;
-        sensor_msgs::JointState* js_msg;
+        sensor_msgs::JointState js_msg;
+
         names.clear();
         positions.clear();
+
         for(int j = 0; j < currTargetPosition.positions.size(); j++){
           motors[j].runToTarget(currTargetPosition.positions[j], 0.1);
           temp &= motors[j].getMotorState() == MotorState::STOP;
+          names.push_back(motors[j].getMotorName());
+          positions.push_back(motors[j].getRads());
         }
         //TODO: Set js_msg
+        js_msg.name = names;
+        js_msg.position = positions;
+
         jointStatePublisher.publish(js_msg);
         hasPositionFinished = temp;
       }
@@ -38,11 +45,19 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
 
 int main(int argc, char** argv)
 {
-
   ros::init(argc, argv, "ArmControlSystem");
   ros::NodeHandle n;
-  jointStatePublisher = n.advertise<sensor_msgs::JointState>("", 1000);
+
+  motors[0] = ArmMotor("link1_joint", 0, 0, &n);
+  motors[1] = ArmMotor("link2_joint", 0, 1, &n);
+  motors[2] = ArmMotor("link3_joint", 1, 0, &n);
+  motors[3] = ArmMotor("link4_joint", 1, 1, &n);
+  motors[4] = ArmMotor("link5_joint", 2, 0, &n);
+  motors[5] = ArmMotor("link6_joint", 2, 1, &n);
+
+  jointStatePublisher = n.advertise<sensor_msgs::JointState>("/control/arm_joint_states", 1000);
   Server server(n, "/arm_controller/follow_joint_trajectory", boost::bind(&execute, _1, &server), false);
+
   server.start();
   ros::spin();
   return 0;
