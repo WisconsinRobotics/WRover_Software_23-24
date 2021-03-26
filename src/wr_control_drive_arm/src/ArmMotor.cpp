@@ -24,7 +24,7 @@ ArmMotor::ArmMotor(std::string motorName, unsigned int controllerID, unsigned in
     this->motorID = motorID;
     this->currState = MotorState::STOP;
 
-    std::string tpString = ((std::string)"/hsi/wroboclaw/aux") + std::to_string(controllerID);
+    std::string tpString = ((std::string)"/hsi/roboclaw/aux") + std::to_string(controllerID);
 
     this->encRead = n->subscribe(tpString + "/enc/" + (motorID == 0 ? "left" : "right"), 1000, &ArmMotor::storeEncoderVals, this);
     this->speedPub = n->advertise<std_msgs::UInt16>(tpString + "/cmd/" + (motorID == 0 ? "left" : "right"), 1000);
