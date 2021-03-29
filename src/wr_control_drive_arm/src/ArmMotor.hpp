@@ -1,7 +1,7 @@
 #include <iostream>
 #include "ros/ros.h"
 #include "std_msgs/UInt32.h"
-#include "std_msgs/UInt16.h"
+#include "std_msgs/Int16.h"
 #include "math.h"
 #include <string>
 
