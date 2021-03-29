@@ -2,7 +2,7 @@
 
 #define Std_UInt32 std_msgs::UInt32::ConstPtr&
 
-static const int COUNTS_PER_ROTATION = UINT_FAST32_MAX;
+static const unsigned long int COUNTS_PER_ROTATION = UINT_FAST32_MAX;
 
 int ArmMotor::radToEnc(float rads){
     return COUNTS_PER_ROTATION * rads / (2 * M_PI);
@@ -27,7 +27,7 @@ ArmMotor::ArmMotor(std::string motorName, unsigned int controllerID, unsigned in
     std::string tpString = ((std::string)"/hsi/roboclaw/aux") + std::to_string(controllerID);
 
     this->encRead = n->subscribe(tpString + "/enc/" + (motorID == 0 ? "left" : "right"), 1000, &ArmMotor::storeEncoderVals, this);
-    this->speedPub = n->advertise<std_msgs::UInt16>(tpString + "/cmd/" + (motorID == 0 ? "left" : "right"), 1000);
+    this->speedPub = n->advertise<std_msgs::Int16>(tpString + "/cmd/" + (motorID == 0 ? "left" : "right"), 1000);
 }
 
 // ~ArmMotor();
@@ -53,7 +53,7 @@ MotorState ArmMotor::getMotorState(){
 void ArmMotor::setPower(float power){
     if(abs(power) > 1) throw ((std::string)"Power ") + std::to_string(power) + " is not on the interval [-1, 1]";
 
-    std_msgs::UInt16 msg;
+    std_msgs::Int16 msg;
     msg.data = power * INT16_MAX;
     this->speedPub.publish(msg);
     this->currState = power == 0.f ? MotorState::STOP : MotorState::MOVING;
