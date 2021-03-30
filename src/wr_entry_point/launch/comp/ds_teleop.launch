@@ -1,8 +1,0 @@
-<!-- Launches node providing teleoperation for the drive system. -->
-<launch>
-  <group ns="logic">
-    <group ns="drive_system">
-      <node name="teleop_drive" pkg="wr_logic_teleop_ds" type="TeleopDriveTrainLogic"/>
-    </group>
-  </group>
-</launch>
