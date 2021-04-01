@@ -10,32 +10,32 @@ enum MotorState{
 };
 class ArmMotor{
     private:
-        static unsigned int const COUNTS_PER_ROTATION;
-        static unsigned int const ENCODER_BOUNDS[2];
+        static unsigned long int const COUNTS_PER_ROTATION;
+        static unsigned long int const ENCODER_BOUNDS[2];
         MotorState currState;
         std::string motorName;
-        unsigned int controllerID;
-        unsigned int motorID;
-        unsigned int encoderVal;
+        unsigned long int controllerID;
+        unsigned long int motorID;
+        unsigned long int encoderVal;
         ros::Subscriber encRead;
         ros::Publisher speedPub;
         std_msgs::Int16 *powerMsg;
-        static unsigned int radToEnc(float rad);
+        static unsigned long int radToEnc(float rad);
         void storeEncoderVals(const std_msgs::UInt32::ConstPtr& msg);
     public:
         ArmMotor();
-        ArmMotor(std::string motorName, unsigned int controllerID, unsigned int motorID, ros::NodeHandle* n);
+        ArmMotor(std::string motorName, unsigned long int controllerID, unsigned long int motorID, ros::NodeHandle* n);
         // ~ArmMotor();
-        unsigned int getEncoderCounts();
+        unsigned long int getEncoderCounts();
         // void resetEncoder();
-        void runToTarget(unsigned int targetCounts, float power);
-        void runToTarget(unsigned int targetCounts, float power, bool block);
+        void runToTarget(unsigned long int targetCounts, float power);
+        void runToTarget(unsigned long int targetCounts, float power, bool block);
         void runToTarget(double rads, float power);
         MotorState getMotorState();
         void setPower(float power);
         double getRads();
         std::string getMotorName();
-        bool hasReachedTarget(unsigned int targetCounts);
-        bool hasReachedTarget(unsigned int targetCounts, unsigned int tolerance);
+        bool hasReachedTarget(unsigned long int targetCounts);
+        bool hasReachedTarget(unsigned long int targetCounts, unsigned long int tolerance);
         float getPower();
 };
