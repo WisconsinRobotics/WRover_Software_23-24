@@ -19,8 +19,8 @@ void ArmMotor::storeEncoderVals(const Std_UInt32 msg){
 ArmMotor::ArmMotor(){}
 
 ArmMotor::ArmMotor(std::string motorName, unsigned int controllerID, unsigned int motorID, ros::NodeHandle* n){
-    if(controllerID > 3) throw ((std::string)"Controller ID ") + std::to_string(controllerID) + "is not valid on [0,3]";
-    if(motorID > 1) throw ((std::string)"Motor ID ") + std::to_string(motorID) + "is not valid on [0,1]";
+    if(controllerID > 3) throw ((std::string)"Controller ID ") + std::to_string(controllerID) + "is only valid on [0,3]";
+    if(motorID > 1) throw ((std::string)"Motor ID ") + std::to_string(motorID) + "is only valid on [0,1]";
     
     this->motorName = motorName;
     this->controllerID = controllerID;
