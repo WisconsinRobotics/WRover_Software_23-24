@@ -14,14 +14,15 @@ class ArmMotor{
         std::string motorName;
         unsigned int controllerID;
         unsigned int motorID;
-        unsigned int encoderVal;
+        unsigned long int encoderVal;
         ros::Subscriber encRead;
         ros::Publisher speedPub;
+        std_msgs::Int16 *powerMsg;
         static int radToEnc(float rad);
         void storeEncoderVals(const std_msgs::UInt32::ConstPtr& msg);
     public:
         ArmMotor();
-        ArmMotor(std::string motorName, unsigned int controllerID, unsigned int motorID, ros::NodeHandle* n);
+        ArmMotor(std::string motorName, unsigned int controllerID, unsigned int motorID, ros::NodeHandle n);
         // ~ArmMotor();
         int getEncoderCounts();
         // void resetEncoder();
@@ -33,4 +34,5 @@ class ArmMotor{
         double getRads();
         std::string getMotorName();
         bool hasReachedTarget(int targetCounts);
+        float getPower();
 };

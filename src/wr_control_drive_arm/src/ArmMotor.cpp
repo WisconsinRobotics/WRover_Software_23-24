@@ -9,13 +9,16 @@ int ArmMotor::radToEnc(float rads){
 }
 
 void ArmMotor::storeEncoderVals(const Std_UInt32 msg){
+    // std::cout<<"I ran "/*mtr:"<<this->getMotorName()<<*/" val: "<<msg->data<<std::endl;
     this->encoderVal = msg->data;
+    // std::cout<<"value stored: "<<this->encoderVal<<std::endl;
+    // std::cout<<"value in method: "<<this->getEncoderCounts()<<std::endl;
 }
 
 
 ArmMotor::ArmMotor(){}
 
-ArmMotor::ArmMotor(std::string motorName, unsigned int controllerID, unsigned int motorID, ros::NodeHandle* n){
+ArmMotor::ArmMotor(std::string motorName, unsigned int controllerID, unsigned int motorID, ros::NodeHandle n){
     if(controllerID > 3) throw ((std::string)"Controller ID ") + std::to_string(controllerID) + "is not valid on [0,3]";
     if(motorID > 1) throw ((std::string)"Motor ID ") + std::to_string(motorID) + "is not valid on [0,1]";
     
@@ -26,8 +29,8 @@ ArmMotor::ArmMotor(std::string motorName, unsigned int controllerID, unsigned in
 
     std::string tpString = ((std::string)"/hsi/roboclaw/aux") + std::to_string(controllerID);
 
-    this->encRead = n->subscribe(tpString + "/enc/" + (motorID == 0 ? "left" : "right"), 1000, &ArmMotor::storeEncoderVals, this);
-    this->speedPub = n->advertise<std_msgs::Int16>(tpString + "/cmd/" + (motorID == 0 ? "left" : "right"), 1000);
+    this->encRead = n.subscribe(tpString + "/enc/" + (motorID == 0 ? "left" : "right"), 1000, &ArmMotor::storeEncoderVals, this);
+    this->speedPub = n.advertise<std_msgs::Int16>(tpString + "/cmd/" + (motorID == 0 ? "left" : "right"), 1000);
 }
 
 // ~ArmMotor();
@@ -53,9 +56,9 @@ MotorState ArmMotor::getMotorState(){
 void ArmMotor::setPower(float power){
     if(abs(power) > 1) throw ((std::string)"Power ") + std::to_string(power) + " is not on the interval [-1, 1]";
 
-    std_msgs::Int16 msg;
-    msg.data = power * INT16_MAX;
-    this->speedPub.publish(msg);
+    this->powerMsg = new std_msgs::Int16();
+    this->powerMsg->data = power * INT16_MAX;
+    this->speedPub.publish(*(this->powerMsg));
     this->currState = power == 0.f ? MotorState::STOP : MotorState::MOVING;
 }
 
@@ -86,4 +89,8 @@ double ArmMotor::getRads(){
 
 std::string ArmMotor::getMotorName(){
     return this->motorName;
+}
+
+float ArmMotor::getPower(){
+    return ((float)this->powerMsg->data)/INT16_MAX;
 }
