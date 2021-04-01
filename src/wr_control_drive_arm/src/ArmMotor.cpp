@@ -18,7 +18,7 @@ void ArmMotor::storeEncoderVals(const Std_UInt32 msg){
 
 ArmMotor::ArmMotor(){}
 
-ArmMotor::ArmMotor(std::string motorName, unsigned int controllerID, unsigned int motorID, ros::NodeHandle n){
+ArmMotor::ArmMotor(std::string motorName, unsigned int controllerID, unsigned int motorID, ros::NodeHandle* n){
     if(controllerID > 3) throw ((std::string)"Controller ID ") + std::to_string(controllerID) + "is not valid on [0,3]";
     if(motorID > 1) throw ((std::string)"Motor ID ") + std::to_string(motorID) + "is not valid on [0,1]";
     
@@ -29,8 +29,8 @@ ArmMotor::ArmMotor(std::string motorName, unsigned int controllerID, unsigned in
 
     std::string tpString = ((std::string)"/hsi/roboclaw/aux") + std::to_string(controllerID);
 
-    this->encRead = n.subscribe(tpString + "/enc/" + (motorID == 0 ? "left" : "right"), 1000, &ArmMotor::storeEncoderVals, this);
-    this->speedPub = n.advertise<std_msgs::Int16>(tpString + "/cmd/" + (motorID == 0 ? "left" : "right"), 1000);
+    this->encRead = n->subscribe(tpString + "/enc/" + (motorID == 0 ? "left" : "right"), 1000, &ArmMotor::storeEncoderVals, this);
+    this->speedPub = n->advertise<std_msgs::Int16>(tpString + "/cmd/" + (motorID == 0 ? "left" : "right"), 1000);
 }
 
 // ~ArmMotor();

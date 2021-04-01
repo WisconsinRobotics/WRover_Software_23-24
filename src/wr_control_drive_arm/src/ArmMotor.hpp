@@ -22,7 +22,7 @@ class ArmMotor{
         void storeEncoderVals(const std_msgs::UInt32::ConstPtr& msg);
     public:
         ArmMotor();
-        ArmMotor(std::string motorName, unsigned int controllerID, unsigned int motorID, ros::NodeHandle n);
+        ArmMotor(std::string motorName, unsigned int controllerID, unsigned int motorID, ros::NodeHandle* n);
         // ~ArmMotor();
         int getEncoderCounts();
         // void resetEncoder();

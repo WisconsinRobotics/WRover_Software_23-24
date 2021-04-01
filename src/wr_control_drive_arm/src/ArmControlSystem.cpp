@@ -56,12 +56,12 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "ArmControlSystem");
   ros::NodeHandle n;
 
-  motors[0] = new ArmMotor("link1_joint", 0, 0, n);
-  motors[1] = new ArmMotor("link2_joint", 0, 1, n);
-  motors[2] = new ArmMotor("link3_joint", 1, 0, n);
-  motors[3] = new ArmMotor("link4_joint", 1, 1, n);
-  motors[4] = new ArmMotor("link5_joint", 2, 0, n);
-  motors[5] = new ArmMotor("link6_joint", 2, 1, n);
+  motors[0] = new ArmMotor("link1_joint", 0, 0, &n);
+  motors[1] = new ArmMotor("link2_joint", 0, 1, &n);
+  motors[2] = new ArmMotor("link3_joint", 1, 0, &n);
+  motors[3] = new ArmMotor("link4_joint", 1, 1, &n);
+  motors[4] = new ArmMotor("link5_joint", 2, 0, &n);
+  motors[5] = new ArmMotor("link6_joint", 2, 1, &n);
 
   jointStatePublisher = n.advertise<sensor_msgs::JointState>("/control/arm_joint_states", 1000);
   Server server(n, "/arm_controller/follow_joint_trajectory", boost::bind(&execute, _1, &server), false);
