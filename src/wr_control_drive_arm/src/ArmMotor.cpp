@@ -5,7 +5,11 @@
 static const unsigned long int COUNTS_PER_ROTATION = UINT_FAST32_MAX;
 
 int ArmMotor::radToEnc(float rads){
-    return COUNTS_PER_ROTATION * rads / (2 * M_PI);
+    return COUNTS_PER_ROTATION * (rads + M_PI) / (2 * M_PI);
+}
+
+double ArmMotor::getRads(){
+    return this->getEncoderCounts() * 2 * M_PI / COUNTS_PER_ROTATION - M_PI;
 }
 
 void ArmMotor::storeEncoderVals(const Std_UInt32 msg){
@@ -81,10 +85,6 @@ void ArmMotor::runToTarget(int targetCounts, float power, bool block){
 
 void ArmMotor::runToTarget(double rads, float power){
     runToTarget(this->radToEnc(rads), power, false);
-}
-
-double ArmMotor::getRads(){
-    return this->getEncoderCounts() * 2 * M_PI / COUNTS_PER_ROTATION;
 }
 
 std::string ArmMotor::getMotorName(){
