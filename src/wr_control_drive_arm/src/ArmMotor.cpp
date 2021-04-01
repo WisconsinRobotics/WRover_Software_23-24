@@ -2,14 +2,15 @@
 
 #define Std_UInt32 std_msgs::UInt32::ConstPtr&
 
-static const unsigned long int COUNTS_PER_ROTATION = UINT_FAST32_MAX;
+unsigned int const ArmMotor::COUNTS_PER_ROTATION = UINT_FAST32_MAX;
+unsigned int const ArmMotor::ENCODER_BOUNDS[2] = {0, ArmMotor::COUNTS_PER_ROTATION};
 
-int ArmMotor::radToEnc(float rads){
-    return COUNTS_PER_ROTATION * (rads + M_PI) / (2 * M_PI);
+unsigned int ArmMotor::radToEnc(float rads){
+    return ArmMotor::COUNTS_PER_ROTATION * (rads + M_PI) / (2 * M_PI);
 }
 
 double ArmMotor::getRads(){
-    return this->getEncoderCounts() * 2 * M_PI / COUNTS_PER_ROTATION - M_PI;
+    return this->getEncoderCounts() * 2 * M_PI / ArmMotor::COUNTS_PER_ROTATION - M_PI;
 }
 
 void ArmMotor::storeEncoderVals(const Std_UInt32 msg){
@@ -39,18 +40,27 @@ ArmMotor::ArmMotor(std::string motorName, unsigned int controllerID, unsigned in
 
 // ~ArmMotor();
 
-int ArmMotor::getEncoderCounts(){
+unsigned int ArmMotor::getEncoderCounts(){
     return this->encoderVal;
 }
 
 // void resetEncoder();
 
-void ArmMotor::runToTarget(int targetCounts, float power){
+void ArmMotor::runToTarget(unsigned int targetCounts, float power){
     this->runToTarget(targetCounts, power, false);
 }
 
-bool ArmMotor::hasReachedTarget(int targetCounts){
-    return abs(targetCounts - this->getEncoderCounts()) < 10;
+bool ArmMotor::hasReachedTarget(unsigned int targetCounts, unsigned int tolerance){
+    unsigned int lBound = ((targetCounts - tolerance) % ArmMotor::ENCODER_BOUNDS[1] < 0 ? 2 * targetCounts - tolerance : targetCounts - tolerance) % ArmMotor::ENCODER_BOUNDS[1];
+    unsigned int uBound = (targetCounts + tolerance) % ArmMotor::ENCODER_BOUNDS[1];
+    if(lBound < uBound)
+        return this->getEncoderCounts() <= uBound && this->getEncoderCounts() >=lBound;
+    else
+        return this->getEncoderCounts() <= uBound || this->getEncoderCounts() >=lBound;
+}
+
+bool ArmMotor::hasReachedTarget(unsigned int targetCounts){
+    return ArmMotor::hasReachedTarget(targetCounts, 10);
 }
 
 MotorState ArmMotor::getMotorState(){
@@ -66,9 +76,9 @@ void ArmMotor::setPower(float power){
     this->currState = power == 0.f ? MotorState::STOP : MotorState::MOVING;
 }
 
-void ArmMotor::runToTarget(int targetCounts, float power, bool block){
+void ArmMotor::runToTarget(unsigned int targetCounts, float power, bool block){
     if(this->getMotorState() != MotorState::RUN_TO_TARGET){
-        power = abs(power) * abs(targetCounts - this->getEncoderCounts())/(targetCounts - this->getEncoderCounts());
+        power = abs(power) * abs(((long)targetCounts - this->getEncoderCounts()))/(targetCounts - this->getEncoderCounts());
         this->setPower(power);
         this->currState = MotorState::RUN_TO_TARGET;
     }
