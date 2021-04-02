@@ -1,0 +1,16 @@
+#!/bin/bash
+ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd $ROOT_DIR
+catkin_make
+gnome-terminal -- roscore
+rostopic list &>./out.temp;
+COUNT=$(grep -Ec "Unable to communicate with master" out.temp)
+while [ $COUNT -ne 0 ]; do
+	rostopic list &>./out.temp;
+	COUNT=$(grep -Ec "Unable to communicate with master" out.temp)
+done
+rm ./out.temp;
+export WROVER_LOCAL=true
+gnome-terminal -- roslaunch wr_entry_point test_arm.launch
+gnome-terminal -- rosrun wr_control_drive_arm ArmControlSystem
+gnome-terminal -- roslaunch wroboarm_21 demo_test.launch
