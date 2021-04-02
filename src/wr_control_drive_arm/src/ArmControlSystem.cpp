@@ -18,20 +18,12 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
       bool hasPositionFinished = false;
       std::vector<std::string> names;
       std::vector<double> positions;
-      unsigned long long int i2 = 0;
       while(!hasPositionFinished){
         bool temp = true;
         sensor_msgs::JointState js_msg;
 
         names.clear();
         positions.clear();
-
-        if(i2%10000==0){
-          std::cout<<"Motor0 Target (rads):\t"<<currTargetPosition.positions[0]<<std::endl;
-          std::cout<<"Motor0 Position (enc):\t"<<motors[0]->getEncoderCounts()<<std::endl;
-          std::cout<<"Motor0 Position (rads):\t"<<motors[0]->getRads()<<std::endl;
-          std::cout<<std::endl;
-        }
 
         for(int j = 0; j < currTargetPosition.positions.size(); j++){
           motors[j]->runToTarget(currTargetPosition.positions[j], 0.1);
