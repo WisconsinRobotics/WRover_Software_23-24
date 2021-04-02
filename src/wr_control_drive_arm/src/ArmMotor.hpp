@@ -33,7 +33,7 @@ class ArmMotor{
         void runToTarget(double rads, float power);
         MotorState getMotorState();
         void setPower(float power);
-        double getRads();
+        float getRads();
         std::string getMotorName();
         bool hasReachedTarget(unsigned long int targetCounts);
         bool hasReachedTarget(unsigned long int targetCounts, unsigned long int tolerance);

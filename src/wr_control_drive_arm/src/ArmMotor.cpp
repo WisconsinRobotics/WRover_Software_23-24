@@ -6,11 +6,11 @@ unsigned long int const ArmMotor::COUNTS_PER_ROTATION = UINT_FAST32_MAX;
 unsigned long int const ArmMotor::ENCODER_BOUNDS[2] = {0, ArmMotor::COUNTS_PER_ROTATION};
 
 unsigned long int ArmMotor::radToEnc(float rads){
-    return ((unsigned long int)ArmMotor::COUNTS_PER_ROTATION*fmod(rads,2 * M_PI)/(2 * M_PI));
+    return ArmMotor::COUNTS_PER_ROTATION*fmod(rads,2 * M_PI)/(2 * M_PI);
 }
 
-double ArmMotor::getRads(){
-    return fmod(this->getEncoderCounts() / ArmMotor::COUNTS_PER_ROTATION * 2 * M_PI - M_PI, 2 * M_PI);
+float ArmMotor::getRads(){
+    return fmod((this->getEncoderCounts()) / ((float)ArmMotor::COUNTS_PER_ROTATION) * 2 * M_PI + M_PI, 2 * M_PI) - M_PI;
 }
 
 void ArmMotor::storeEncoderVals(const Std_UInt32 msg){

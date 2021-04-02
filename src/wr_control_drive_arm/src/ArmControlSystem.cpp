@@ -26,11 +26,14 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
         positions.clear();
 
         for(int j = 0; j < currTargetPosition.positions.size(); j++){
-          motors[j]->runToTarget(currTargetPosition.positions[j], 0.1);
+          motors[j]->runToTarget(currTargetPosition.positions[j], 0.5);
           temp &= motors[j]->getMotorState() == MotorState::STOP;
           names.push_back(motors[j]->getMotorName());
           positions.push_back(motors[j]->getRads());
+          std::cout<<motors[j]->getMotorName()<<":"<<std::setw(30-motors[j]->getMotorName().length())<<motors[j]->getRads()<<std::endl;
+          std::cout<<std::setw(30)<<motors[j]->getEncoderCounts()<<std::endl;
         }
+        std::cout<<"-----------------------"<<std::endl;
         //TODO: Set js_msg
         js_msg.name = names;
         js_msg.position = positions;
