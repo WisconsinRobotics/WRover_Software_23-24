@@ -18,6 +18,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
       bool hasPositionFinished = false;
       std::vector<std::string> names;
       std::vector<double> positions;
+      ros::Rate loop(50);
       while(!hasPositionFinished){
         bool temp = true;
         sensor_msgs::JointState js_msg;
@@ -26,7 +27,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
         positions.clear();
 
         for(int j = 0; j < currTargetPosition.positions.size(); j++){
-          motors[j]->runToTarget(currTargetPosition.positions[j], 0.5);
+          motors[j]->runToTarget(currTargetPosition.positions[j], 1);
           temp &= motors[j]->getMotorState() == MotorState::STOP;
           names.push_back(motors[j]->getMotorName());
           positions.push_back(motors[j]->getRads());
@@ -40,6 +41,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
 
         jointStatePublisher.publish(js_msg);
         hasPositionFinished = temp;
+        loop.sleep();
       }
     }
     as->setSucceeded();
