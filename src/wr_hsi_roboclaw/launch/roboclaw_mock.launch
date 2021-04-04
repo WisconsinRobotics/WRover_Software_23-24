@@ -8,6 +8,7 @@
         <rosparam file="$(find wr_hsi_roboclaw)/config/roboclaw_enc.yaml" if="$(arg use_encoders)"/>
         <rosparam file="$(find wr_hsi_roboclaw)/config/roboclaw_noenc.yaml" unless="$(arg use_encoders)"/>
         <param name="mock" value="true"/>
+        <param name="time_warp" value="10000"/>
       </node>
     </group>
   </group>
