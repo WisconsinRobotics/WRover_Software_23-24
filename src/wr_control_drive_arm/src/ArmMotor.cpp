@@ -2,7 +2,7 @@
 
 #define Std_UInt32 std_msgs::UInt32::ConstPtr&
 
-unsigned long int const ArmMotor::COUNTS_PER_ROTATION = UINT_FAST32_MAX;
+unsigned long int const ArmMotor::COUNTS_PER_ROTATION = UINT32_MAX;
 unsigned long int const ArmMotor::ENCODER_BOUNDS[2] = {0, ArmMotor::COUNTS_PER_ROTATION};
 
 template<class T> T ArmMotor::corrMod(T i, T j){
