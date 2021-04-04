@@ -66,7 +66,7 @@ bool ArmMotor::hasReachedTarget(unsigned long int targetCounts, unsigned long in
 }
 
 bool ArmMotor::hasReachedTarget(unsigned long int targetCounts){
-    return ArmMotor::hasReachedTarget(targetCounts, 10);
+    return ArmMotor::hasReachedTarget(targetCounts, 1200000);
 }
 
 MotorState ArmMotor::getMotorState(){
