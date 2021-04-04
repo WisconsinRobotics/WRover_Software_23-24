@@ -5,12 +5,18 @@
 unsigned long int const ArmMotor::COUNTS_PER_ROTATION = UINT_FAST32_MAX;
 unsigned long int const ArmMotor::ENCODER_BOUNDS[2] = {0, ArmMotor::COUNTS_PER_ROTATION};
 
-unsigned long int ArmMotor::radToEnc(float rads){
-    return ArmMotor::COUNTS_PER_ROTATION*fmod(rads,2 * M_PI)/(2 * M_PI);
+template<class T> T ArmMotor::corrMod(T i, T j){
+    int dir = -((i-j>0)-(i-j<0));
+    while(i<0||i>=j)i+=dir*j;
+    return i;
+}
+
+unsigned long int ArmMotor::radToEnc(double rads){
+    return ArmMotor::COUNTS_PER_ROTATION*ArmMotor::corrMod(rads,2 * M_PI)/(2 * M_PI);
 }
 
 float ArmMotor::getRads(){
-    return fmod((this->getEncoderCounts()) / ((float)ArmMotor::COUNTS_PER_ROTATION) * 2 * M_PI + M_PI, 2 * M_PI) - M_PI;
+    return ArmMotor::corrMod(this->getEncoderCounts() / ((float)ArmMotor::COUNTS_PER_ROTATION) * 2 * M_PI + M_PI, 2 * M_PI) - M_PI;
 }
 
 void ArmMotor::storeEncoderVals(const Std_UInt32 msg){
@@ -78,8 +84,8 @@ void ArmMotor::setPower(float power){
 
 void ArmMotor::runToTarget(unsigned long int targetCounts, float power, bool block){
     if(this->getMotorState() != MotorState::RUN_TO_TARGET && !this->hasReachedTarget(targetCounts)){
-        unsigned long int direction = targetCounts - this->getEncoderCounts();
-        power = abs(power) * ((direction > 0) - (direction < 0));
+        long long int direction = targetCounts - this->getEncoderCounts();
+        power = abs(power) * (corrMod(direction, ((long long int)ArmMotor::COUNTS_PER_ROTATION)) < corrMod(-direction, ((long long int)ArmMotor::COUNTS_PER_ROTATION)) ? 1 : -1);
         this->setPower(power);
         this->currState = MotorState::RUN_TO_TARGET;
     }

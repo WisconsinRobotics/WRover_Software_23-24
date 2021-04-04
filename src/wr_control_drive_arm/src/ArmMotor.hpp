@@ -20,8 +20,9 @@ class ArmMotor{
         ros::Subscriber encRead;
         ros::Publisher speedPub;
         std_msgs::Int16 *powerMsg;
-        static unsigned long int radToEnc(float rad);
+        static unsigned long int radToEnc(double rad);
         void storeEncoderVals(const std_msgs::UInt32::ConstPtr& msg);
+        template<class T> static T corrMod(T i, T j);
     public:
         ArmMotor();
         ArmMotor(std::string motorName, unsigned long int controllerID, unsigned long int motorID, ros::NodeHandle* n);
