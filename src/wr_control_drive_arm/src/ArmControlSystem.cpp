@@ -31,6 +31,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
           temp &= motors[j]->getMotorState() == MotorState::STOP;
           names.push_back(motors[j]->getMotorName());
           positions.push_back(motors[j]->getRads());
+          
           std::cout<<motors[j]->getMotorName()<<":"<<std::setw(30-motors[j]->getMotorName().length())<<motors[j]->getRads()<<std::endl;
           std::cout<<std::setw(30)<<motors[j]->getEncoderCounts()<<std::endl;
         }
