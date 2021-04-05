@@ -10,33 +10,33 @@ enum MotorState{
 };
 class ArmMotor{
     private:
-        static unsigned long int const COUNTS_PER_ROTATION;
-        static unsigned long int const ENCODER_BOUNDS[2];
+        static unsigned int const COUNTS_PER_ROTATION;
+        static unsigned int const ENCODER_BOUNDS[2];
         MotorState currState;
         std::string motorName;
-        unsigned long int controllerID;
-        unsigned long int motorID;
-        unsigned long int encoderVal;
+        unsigned int controllerID;
+        unsigned int motorID;
+        unsigned int encoderVal;
         ros::Subscriber encRead;
         ros::Publisher speedPub;
         std_msgs::Int16 *powerMsg;
-        static unsigned long int radToEnc(double rad);
+        static unsigned int radToEnc(double rad);
         void storeEncoderVals(const std_msgs::UInt32::ConstPtr& msg);
         template<class T> static T corrMod(T i, T j);
     public:
         ArmMotor();
-        ArmMotor(std::string motorName, unsigned long int controllerID, unsigned long int motorID, ros::NodeHandle* n);
+        ArmMotor(std::string motorName, unsigned int controllerID, unsigned int motorID, ros::NodeHandle* n);
         // ~ArmMotor();
-        unsigned long int getEncoderCounts();
+        unsigned int getEncoderCounts();
         // void resetEncoder();
-        void runToTarget(unsigned long int targetCounts, float power);
-        void runToTarget(unsigned long int targetCounts, float power, bool block);
+        void runToTarget(unsigned int targetCounts, float power);
+        void runToTarget(unsigned int targetCounts, float power, bool block);
         void runToTarget(double rads, float power);
         MotorState getMotorState();
         void setPower(float power);
         float getRads();
         std::string getMotorName();
-        bool hasReachedTarget(unsigned long int targetCounts);
-        bool hasReachedTarget(unsigned long int targetCounts, unsigned long int tolerance);
+        bool hasReachedTarget(unsigned int targetCounts);
+        bool hasReachedTarget(unsigned int targetCounts, unsigned int tolerance);
         float getPower();
 };
