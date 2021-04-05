@@ -4,22 +4,38 @@
 #include <sensor_msgs/JointState.h>
 #include "ArmMotor.hpp"
 
+// Define space for 6 ArmMotors
 ArmMotor *motors[6];
+// Define the Joint State Data Publisher
 ros::Publisher jointStatePublisher;
+// Simplify the SimpleActionServer typename
 typedef actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> Server;
 
+/**
+ * @brief Perform the given action as interpreted as moving the arm joints to specified positions
+ * 
+ * @param goal The goal state given
+ * @param as The Action Server this is occuring on
+ */
 void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server* as) {
     // For each point in the trajectory execution sequence...
     for(int i = 0; i < goal->trajectory.points.size(); i++){
       // Capture the current goal for easy reference
       trajectory_msgs::JointTrajectoryPoint currTargetPosition = goal->trajectory.points[i];
 
+      // Track whether or not the current position is done
       bool hasPositionFinished = false;
+      // Capture the names of the motors
       std::vector<std::string> names;
+      // Capture the positions of the motors
       std::vector<double> positions;
+      // Keep max loop rate at 50 Hz
       ros::Rate loop(50);
+
+      // While the current position is not complete yet...
       while(!hasPositionFinished){
-        bool temp = true;
+        // Assume the current action is done until proven otherwise
+        hasPositionFinished = true;
         sensor_msgs::JointState js_msg;
 
         names.clear();
@@ -27,7 +43,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
 
         for(int j = 0; j < currTargetPosition.positions.size(); j++){
           motors[j]->runToTarget(currTargetPosition.positions[j], 0.1);
-          temp &= motors[j]->getMotorState() == MotorState::STOP;
+          hasPositionFinished &= motors[j]->getMotorState() == MotorState::STOP;
           names.push_back(motors[j]->getMotorName());
           positions.push_back(motors[j]->getRads());
           
@@ -40,7 +56,6 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
         js_msg.position = positions;
 
         jointStatePublisher.publish(js_msg);
-        hasPositionFinished = temp;
         loop.sleep();
       }
     }
