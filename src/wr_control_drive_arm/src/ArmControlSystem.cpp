@@ -77,12 +77,21 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
     as->setSucceeded();
 }
 
-
+/**
+ * @brief The main executable method of the node.  Starts the ROS node and the Action Server for processing Arm Control commands
+ * 
+ * @param argc The number of program arguments
+ * @param argv The given program arguments
+ * @return int The status code on exiting the program
+ */
 int main(int argc, char** argv)
 {
+  // Initialize the current node as ArmControlSystem
   ros::init(argc, argv, "ArmControlSystem");
+  // Create the NodeHandle to the current ROS node
   ros::NodeHandle n;
 
+  // Initialize all motors with their MoveIt name, WRoboclaw initialization, and reference to the current node
   motors[0] = new ArmMotor("link1_joint", 0, 0, &n);
   motors[1] = new ArmMotor("link2_joint", 0, 1, &n);
   motors[2] = new ArmMotor("link3_joint", 1, 0, &n);
@@ -90,10 +99,16 @@ int main(int argc, char** argv)
   motors[4] = new ArmMotor("link5_joint", 2, 0, &n);
   motors[5] = new ArmMotor("link6_joint", 2, 1, &n);
 
+  // Initialize the Joint State Data Publisher
   jointStatePublisher = n.advertise<sensor_msgs::JointState>("/control/arm_joint_states", 1000);
-  Server server(n, "/arm_controller/follow_joint_trajectory", boost::bind(&execute, _1, &server), false);
 
+  // Initialize the Action Server
+  Server server(n, "/arm_controller/follow_joint_trajectory", boost::bind(&execute, _1, &server), false);
+  // Start the Action Server
   server.start();
+
+  // ROS spin for communication with other nodes
   ros::spin();
+  // Return 0 on exit (successful exit)
   return 0;
 }
