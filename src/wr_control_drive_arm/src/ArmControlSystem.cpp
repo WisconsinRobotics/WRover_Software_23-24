@@ -11,7 +11,7 @@
 #include "ArmMotor.hpp"
 
 /**
- * @brief Defines space for all ArmMotor.hpp references
+ * @brief Defines space for all ArmMotor references
  */
 ArmMotor *motors[6];
 /**
