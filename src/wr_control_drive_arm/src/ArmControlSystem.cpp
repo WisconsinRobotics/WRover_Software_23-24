@@ -36,29 +36,44 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
       while(!hasPositionFinished){
         // Assume the current action is done until proven otherwise
         hasPositionFinished = true;
+        // Create the Joint State message for the current update cycle
         sensor_msgs::JointState js_msg;
 
+        // Clear the list of motor names and position data
         names.clear();
         positions.clear();
 
+        // For each motor specified in the currTargetPosition...
         for(int j = 0; j < currTargetPosition.positions.size(); j++){
+          // Each motor should run to its respective target position at a fixed speed
+          // TODO: this speed should be capped/dynamic to reflect the input joint velocity parameters
           motors[j]->runToTarget(currTargetPosition.positions[j], 0.1);
+          // The position has only finished if every motor is STOPped
           hasPositionFinished &= motors[j]->getMotorState() == MotorState::STOP;
+          // Push the current motor name and position data to the Joint State data tracking list
           names.push_back(motors[j]->getMotorName());
           positions.push_back(motors[j]->getRads());
           
+          // DEBUGGING OUTPUT: Print each motor's name, radian position, and encoder position
           std::cout<<motors[j]->getMotorName()<<":"<<std::setw(30-motors[j]->getMotorName().length())<<motors[j]->getRads()<<std::endl;
           std::cout<<std::setw(30)<<motors[j]->getEncoderCounts()<<std::endl;
         }
+        // DEBUGGING OUTPUT: Print a divider line for cleanliness
         std::cout<<"-----------------------"<<std::endl;
-        //TODO: Set js_msg
+        // TODO: Make debugging output parameterized or pushed to the ROS output system to clean up output when desired
+        
+        // Set the name and position data for the Joint State Data message as tracked by the list of motor names and positions
         js_msg.name = names;
         js_msg.position = positions;
-
+        // Publish the Joint State message
         jointStatePublisher.publish(js_msg);
+
+        // Sleep until the next update cycle
         loop.sleep();
       }
     }
+
+    //When all positions have been reached, set the current task as succeeded
     as->setSucceeded();
 }
 
