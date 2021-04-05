@@ -9,11 +9,10 @@ ros::Publisher jointStatePublisher;
 typedef actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> Server;
 
 void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server* as) {
+    // For each point in the trajectory execution sequence...
     for(int i = 0; i < goal->trajectory.points.size(); i++){
+      // Capture the current goal for easy reference
       trajectory_msgs::JointTrajectoryPoint currTargetPosition = goal->trajectory.points[i];
-      for(int j = 0; j < currTargetPosition.positions.size(); j++){
-        motors[j]->runToTarget(currTargetPosition.positions[j], 0.1);
-      }
 
       bool hasPositionFinished = false;
       std::vector<std::string> names;
@@ -27,7 +26,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
         positions.clear();
 
         for(int j = 0; j < currTargetPosition.positions.size(); j++){
-          motors[j]->runToTarget(currTargetPosition.positions[j], 1);
+          motors[j]->runToTarget(currTargetPosition.positions[j], 0.1);
           temp &= motors[j]->getMotorState() == MotorState::STOP;
           names.push_back(motors[j]->getMotorName());
           positions.push_back(motors[j]->getRads());

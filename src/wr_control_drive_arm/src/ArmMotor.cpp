@@ -83,7 +83,7 @@ void ArmMotor::setPower(float power){
 }
 
 void ArmMotor::runToTarget(unsigned int targetCounts, float power, bool block){
-    if(this->getMotorState() != MotorState::RUN_TO_TARGET && !this->hasReachedTarget(targetCounts)){
+    if(!this->hasReachedTarget(targetCounts)){
         long int direction = targetCounts - this->getEncoderCounts();
         power = abs(power) * (corrMod(direction, ((long int)ArmMotor::COUNTS_PER_ROTATION)) < corrMod(-direction, ((long int)ArmMotor::COUNTS_PER_ROTATION)) ? 1 : -1);
         this->setPower(power);
