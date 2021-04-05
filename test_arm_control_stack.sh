@@ -14,3 +14,4 @@ export WROVER_LOCAL=true
 gnome-terminal -- roslaunch wr_entry_point test_arm.launch
 gnome-terminal -- rosrun wr_control_drive_arm ArmControlSystem
 gnome-terminal -- roslaunch wroboarm_21 demo_test.launch
+cd -
