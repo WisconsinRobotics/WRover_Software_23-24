@@ -1,14 +1,26 @@
+/**
+ * @file ArmControlSystem.cpp
+ * @author Ben Nowotny
+ * @brief The exeutable file to run the Arm Control Action Server
+ * @date 2021-04-05
+ */
 #include "ros/ros.h"
 #include <control_msgs/FollowJointTrajectoryAction.h>
 #include <actionlib/server/simple_action_server.h>
 #include <sensor_msgs/JointState.h>
 #include "ArmMotor.hpp"
 
-// Define space for 6 ArmMotors
+/**
+ * @brief Defines space for all ArmMotor.hpp references
+ */
 ArmMotor *motors[6];
-// Define the Joint State Data Publisher
+/**
+ * @brief The Joint State Publisher for MoveIt
+ */
 ros::Publisher jointStatePublisher;
-// Simplify the SimpleActionServer typename
+/**
+ * @brief Simplify the SimpleActionServer reference name
+ */
 typedef actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> Server;
 
 /**
