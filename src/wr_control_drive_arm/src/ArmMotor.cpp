@@ -1,3 +1,9 @@
+/**
+ * @file ArmMotor.cpp
+ * @author Ben Nowotny
+ * @brief The implementation of the ArmMotor class
+ * @date 2021-04-05
+ */
 #include "ArmMotor.hpp"
 
 #define Std_UInt32 std_msgs::UInt32::ConstPtr&
@@ -25,9 +31,6 @@ void ArmMotor::storeEncoderVals(const Std_UInt32 msg){
     // std::cout<<"value stored: "<<this->encoderVal<<std::endl;
     // std::cout<<"value in method: "<<this->getEncoderCounts()<<std::endl;
 }
-
-
-ArmMotor::ArmMotor(){}
 
 ArmMotor::ArmMotor(std::string motorName, unsigned int controllerID, unsigned int motorID, ros::NodeHandle* n){
     if(controllerID > 3) throw ((std::string)"Controller ID ") + std::to_string(controllerID) + "is only valid on [0,3]";
