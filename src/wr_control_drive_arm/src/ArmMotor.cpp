@@ -15,12 +15,8 @@ unsigned int const ArmMotor::COUNTS_PER_ROTATION = UINT32_MAX;
 unsigned int const ArmMotor::ENCODER_BOUNDS[2] = {0, ArmMotor::COUNTS_PER_ROTATION};
 
 template<class T> T ArmMotor::corrMod(T i, T j){
-    // Figure out which way to move i to [0,j)
-    int dir = -((i-j>0)-(i-j<0));
-    // Move i to [0,j) with j-sized steps
-    while(i<0||i>=j)i+=dir*j;
-    // Return the in-bounds i
-    return i;
+    // Stem i%j by j, which in modular arithmetic is the same as adding 0.
+    return fmod(fmod(i,j)+j,j);
 }
 
 /// Currently consistent with the rad->enc equation as specified <a target="_blank" href="https://www.desmos.com/calculator/nwxtenccc6">here</a>.
