@@ -15,8 +15,8 @@ Once you have a local copy, you'll want to open a terminal in the workspace.
 For initial setup, do the following:
 
 ```sh
-$ . setup.sh          # set up the workspace environment
 $ ./assemble.py init  # initialize the catkin workspace + venv
+$ . setup.sh          # acquire the workspace environment
 $ ./assemble.py build # build dependencies
 ```
 
