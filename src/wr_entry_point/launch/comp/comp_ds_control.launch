@@ -1,8 +1,4 @@
 <!-- Launches the control systems nodes that make the drive system go. -->
 <launch>
-  <group ns="control">
-    <group ns="drive_system">
-      <!-- TODO: drive system control systems -->
-    </group>
-  </group>
+  <include file="$(find wr_control_drive_ds)/launch/std.launch"/>
 </launch>

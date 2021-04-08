@@ -1,4 +1,7 @@
 <!-- Launches the robot UI on the base station. -->
 <launch>
   <!-- TODO: ui -->
+  
+  <!-- placeholder wready server, since the UI should have the actual wready server -->
+  <node name="wready" pkg="wready" type="default_server.py" output="screen"/>
 </launch>
