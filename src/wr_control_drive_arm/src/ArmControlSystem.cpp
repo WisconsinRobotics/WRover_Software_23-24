@@ -8,6 +8,7 @@
 #include <control_msgs/FollowJointTrajectoryAction.h>
 #include <actionlib/server/simple_action_server.h>
 #include <sensor_msgs/JointState.h>
+#include <algorithm>
 #include "ArmMotor.hpp"
 
 /**
@@ -55,22 +56,28 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
         names.clear();
         positions.clear();
 
+        double velMax = 0;
         // For each motor specified in the currTargetPosition...
         for(int j = 0; j < currTargetPosition.positions.size(); j++){
           // Each motor should run to its respective target position at a fixed speed
           // TODO: this speed should be capped/dynamic to reflect the input joint velocity parameters
-          motors[j]->runToTarget(currTargetPosition.positions[j], 0.1);
+          velMax = abs(*std::max_element(currTargetPosition.velocities.begin(), currTargetPosition.velocities.end(), [](double a, double b) {return abs(a)<abs(b);}));
+          float currPower = 0.1 * currTargetPosition.velocities[j]/velMax;
+          currPower = abs(velMax) <= 0.0001 ? 0.1 : currPower;
+          motors[j]->runToTarget(currTargetPosition.positions[j], currPower);
           // The position has only finished if every motor is STOPped
           hasPositionFinished &= motors[j]->getMotorState() == MotorState::STOP;
           // Push the current motor name and position data to the Joint State data tracking list
           names.push_back(motors[j]->getMotorName());
           positions.push_back(motors[j]->getRads());
           
-          // DEBUGGING OUTPUT: Print each motor's name, radian position, and encoder position
+          // DEBUGGING OUTPUT: Print each motor's name, radian position, encoder position, and power
           std::cout<<motors[j]->getMotorName()<<":"<<std::setw(30-motors[j]->getMotorName().length())<<motors[j]->getRads()<<std::endl;
           std::cout<<std::setw(30)<<motors[j]->getEncoderCounts()<<std::endl;
+          std::cout<<std::setw(30)<<motors[j]->getPower()<<std::endl;
         }
         // DEBUGGING OUTPUT: Print a divider line for cleanliness
+        std::cout<<velMax<<std::endl;
         std::cout<<"-----------------------"<<std::endl;
         // TODO: Make debugging output parameterized or pushed to the ROS output system to clean up output when desired
         
