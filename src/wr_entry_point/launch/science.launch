@@ -13,5 +13,5 @@
   
   <include file="$(find wr_entry_point)/launch/comp/comp_ui.launch"/>
   
-  <include file="$(find wr_entry_point)/launch/comp/comp_science.launch">
+  <include file="$(find wr_entry_point)/launch/comp/comp_science.launch"/>
 </launch>

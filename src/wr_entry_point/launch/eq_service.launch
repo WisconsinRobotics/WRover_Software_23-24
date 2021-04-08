@@ -15,5 +15,5 @@
   
   <include file="$(find wr_entry_point)/launch/comp/comp_ui.launch"/>
   
-  <include file="$(find wr_entry_point)/launch/comp/comp_arm.launch">
+  <include file="$(find wr_entry_point)/launch/comp/comp_arm.launch"/>
 </launch>
