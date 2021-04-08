@@ -25,6 +25,7 @@ enum class MotorState{
 /**
  * @brief A way to control arm motors with WRoboclaw
  */
+// TODO: Update the encoder datatypes to be uint32_t instead of unsigned int for platform independence.
 class ArmMotor{
     private:
         /// The number of encoder counts per rotation
