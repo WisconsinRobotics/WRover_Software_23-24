@@ -26,10 +26,10 @@ int main(int argc, char** argv){
 	ros::NodeHandle n;
 
 	// Create a subscriber to the input topic for power values
-	ros::Subscriber inTopic = n.subscribe("/control/drive_train_cmd", 1000, setDSPower_callback);
+	ros::Subscriber inTopic = n.subscribe("/control/drive_system/cmd", 1000, setDSPower_callback);
 
 	// Create a publisher to the output topic for WRoboClaw duty cycle numbers for command 34
-	ros::Publisher outTopic = n.advertise<wroboclaw::Int16Pair>("/hsi/wroboclaw/drive/cmd", 1000);
+	ros::Publisher outTopic = n.advertise<wroboclaw::Int16Pair>("/hsi/roboclaw/drive/cmd", 1000);
 
 	// Create the processing rate (50 Hz)
 	ros::Rate loop(50);
