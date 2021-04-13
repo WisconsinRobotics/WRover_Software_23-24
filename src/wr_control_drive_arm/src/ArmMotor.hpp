@@ -25,13 +25,12 @@ enum class MotorState{
 /**
  * @brief A way to control arm motors with WRoboclaw
  */
-// TODO: Update the encoder datatypes to be uint32_t instead of unsigned int for platform independence.
 class ArmMotor{
     private:
         /// The number of encoder counts per rotation
-        static unsigned int const COUNTS_PER_ROTATION;
+        static uint32_t const COUNTS_PER_ROTATION;
         /// The upper and lower bounds of encoder rotation for absolute encoders (index 0 is lower, index 1 is upper)
-        static unsigned int const ENCODER_BOUNDS[2];
+        static uint32_t const ENCODER_BOUNDS[2];
         /// The current state of the motor
         MotorState currState;
         /// The joint name of the current motor
@@ -41,7 +40,7 @@ class ArmMotor{
         /// The ID of the motor within the WRoboclaw controller
         unsigned int motorID;
         /// The current encoder value
-        unsigned int encoderVal;
+        uint32_t encoderVal;
         /// The ROS Subscriber that reads the encoders
         ros::Subscriber encRead;
         /// The ROS Publisher that publishes motor speed commands
@@ -53,9 +52,9 @@ class ArmMotor{
          * @brief A static conversion from radians to encoder counts
          * 
          * @param rad The input number of radians
-         * @return unsigned int The corresponding encoder count bounded by ENCODER_BOUNDS
+         * @return uint32_t The corresponding encoder count bounded by ENCODER_BOUNDS
          */
-        static unsigned int radToEnc(double rad);
+        static uint32_t radToEnc(double rad);
 
         /**
          * @brief Subscriber callback for encRead, captured the encoder value of the current motor
@@ -88,9 +87,9 @@ class ArmMotor{
         /**
          * @brief Gets the encoder value of the motor
          * 
-         * @return unsigned int The current encoder value of the motor
+         * @return uint32_t The current encoder value of the motor
          */
-        unsigned int getEncoderCounts();
+        uint32_t getEncoderCounts();
 
         /**
          * @brief Sends the motor to run to a target encoder value at a given power without blocking
@@ -98,7 +97,7 @@ class ArmMotor{
          * @param targetCounts The target encoder value for the motor
          * @param power The power to move the motor at (Bounded between [-1, 1])
          */
-        void runToTarget(unsigned int targetCounts, float power);
+        void runToTarget(uint32_t targetCounts, float power);
 
         /**
          * @brief Sends the motor to run to a target encoder value at a given power
@@ -107,7 +106,7 @@ class ArmMotor{
          * @param power The power to move the motor at (Bounded between [-1, 1])
          * @param block Specifies whether or not this action should block until it is complete
          */
-        void runToTarget(unsigned int targetCounts, float power, bool block);
+        void runToTarget(uint32_t targetCounts, float power, bool block);
 
         /**
          * @brief Sends the motor to run to a specified position at a given power
@@ -152,7 +151,7 @@ class ArmMotor{
          * @return true The motor was within the target tolerance
          * @return false The motor was outside of the target tolerance
          */
-        bool hasReachedTarget(unsigned int targetCounts);
+        bool hasReachedTarget(uint32_t targetCounts);
 
         /**
          * @brief Checks if the motor is currently within a given tolerance of a target
@@ -162,6 +161,6 @@ class ArmMotor{
          * @return true The motor was within the target tolerance
          * @return false The motor was outside the target tolerance
          */
-        bool hasReachedTarget(unsigned int targetCounts, unsigned int tolerance);
+        bool hasReachedTarget(uint32_t targetCounts, uint32_t tolerance);
         float getPower();
 };

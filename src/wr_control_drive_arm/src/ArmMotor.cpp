@@ -10,9 +10,9 @@
 #define Std_UInt32 std_msgs::UInt32::ConstPtr&
 
 /// The current COUNTS_PER_ROTATION is UINT32_MAX
-unsigned int const ArmMotor::COUNTS_PER_ROTATION = UINT32_MAX;
+uint32_t const ArmMotor::COUNTS_PER_ROTATION = UINT32_MAX;
 /// The current encoders are absolute, and so can only perform one rotation
-unsigned int const ArmMotor::ENCODER_BOUNDS[2] = {0, ArmMotor::COUNTS_PER_ROTATION};
+uint32_t const ArmMotor::ENCODER_BOUNDS[2] = {0, ArmMotor::COUNTS_PER_ROTATION};
 
 template<class T> T ArmMotor::corrMod(T i, T j){
     // Stem i%j by j, which in modular arithmetic is the same as adding 0.
@@ -20,7 +20,7 @@ template<class T> T ArmMotor::corrMod(T i, T j){
 }
 
 /// Currently consistent with the rad->enc equation as specified <a target="_blank" href="https://www.desmos.com/calculator/nwxtenccc6">here</a>.
-unsigned int ArmMotor::radToEnc(double rads){
+uint32_t ArmMotor::radToEnc(double rads){
     return ArmMotor::COUNTS_PER_ROTATION*ArmMotor::corrMod(rads,2 * M_PI)/(2 * M_PI);
 }
 
@@ -56,18 +56,18 @@ ArmMotor::ArmMotor(std::string motorName, unsigned int controllerID, unsigned in
     this->speedPub = n->advertise<std_msgs::Int16>(tpString + "/cmd/" + (motorID == 0 ? "left" : "right"), 1000);
 }
 
-unsigned int ArmMotor::getEncoderCounts(){
+uint32_t ArmMotor::getEncoderCounts(){
     return this->encoderVal;
 }
 
-void ArmMotor::runToTarget(unsigned int targetCounts, float power){
+void ArmMotor::runToTarget(uint32_t targetCounts, float power){
     this->runToTarget(targetCounts, power, false);
 }
 
-bool ArmMotor::hasReachedTarget(unsigned int targetCounts, unsigned int tolerance){
+bool ArmMotor::hasReachedTarget(uint32_t targetCounts, uint32_t tolerance){
     // Compute the upper and lower bounds in the finite encoder space
-    unsigned int lBound = ArmMotor::corrMod(targetCounts - tolerance, ArmMotor::ENCODER_BOUNDS[1]);
-    unsigned int uBound = ArmMotor::corrMod(targetCounts + tolerance, ArmMotor::ENCODER_BOUNDS[1]);
+    uint32_t lBound = ArmMotor::corrMod(targetCounts - tolerance, ArmMotor::ENCODER_BOUNDS[1]);
+    uint32_t uBound = ArmMotor::corrMod(targetCounts + tolerance, ArmMotor::ENCODER_BOUNDS[1]);
     // If the computed lower bound is lower than the upper bound, perform the computation normally
     if(lBound < uBound)
         return this->getEncoderCounts() <= uBound && this->getEncoderCounts() >=lBound;
@@ -77,7 +77,7 @@ bool ArmMotor::hasReachedTarget(unsigned int targetCounts, unsigned int toleranc
 }
 
 /// Current tolerance is &pm;0.1 degree w.r.t. the current number of counts per rotation
-bool ArmMotor::hasReachedTarget(unsigned int targetCounts){
+bool ArmMotor::hasReachedTarget(uint32_t targetCounts){
     return ArmMotor::hasReachedTarget(targetCounts, 1200000);
 }
 
@@ -98,7 +98,7 @@ void ArmMotor::setPower(float power){
     this->currState = power == 0.f ? MotorState::STOP : MotorState::MOVING;
 }
 
-void ArmMotor::runToTarget(unsigned int targetCounts, float power, bool block){
+void ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block){
     // If we are not at our target...
     if(!this->hasReachedTarget(targetCounts)){
         // Set the power in the correct direction and continue running to the target
