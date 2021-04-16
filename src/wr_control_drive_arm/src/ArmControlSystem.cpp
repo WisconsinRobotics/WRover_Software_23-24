@@ -9,6 +9,7 @@
 #include <actionlib/server/simple_action_server.h>
 #include <sensor_msgs/JointState.h>
 #include <algorithm>
+#include <csignal>
 #include "ArmMotor.hpp"
 
 /**
@@ -23,6 +24,10 @@ ros::Publisher jointStatePublisher;
  * @brief Simplify the SimpleActionServer reference name
  */
 typedef actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> Server;
+/**
+ * @brief The ActionServer that executes the given motions
+ */
+Server* server;
 
 /**
  * @brief Perform the given action as interpreted as moving the arm joints to specified positions
@@ -122,9 +127,11 @@ int main(int argc, char** argv)
   jointStatePublisher = n.advertise<sensor_msgs::JointState>("/control/arm_joint_states", 1000);
 
   // Initialize the Action Server
-  Server server(n, "/arm_controller/follow_joint_trajectory", boost::bind(&execute, _1, &server), false);
+  server = new Server(n, "/arm_controller/follow_joint_trajectory", boost::bind(&execute, _1, server), false);
   // Start the Action Server
-  server.start();
+  server->start();
+
+  signal(SIGINT, [](int signal)->void{ros::shutdown(); exit(1);});
 
   // ROS spin for communication with other nodes
   ros::spin();
