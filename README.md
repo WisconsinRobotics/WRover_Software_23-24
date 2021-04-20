@@ -22,9 +22,62 @@ $ ./assemble.py build # build dependencies
 
 Every time you want to work in the workspace, you'll have to run `source setup.sh` again to set up your shell with the workspace environment. Alternatively, you can do this automatically in your `.bashrc` if you don't anticipate working in any other ROS workspaces.
 
+## Setting up the Rover
+
+On the rover, you'll need to clone a copy of this repo to `/home/wiscrobo/catkin_ws/WRover21_Software`.
+Once this is done, you'll want to set up the workspace as above using `assemble.py`.
+This will prepare the ROS workspace for the rover to run ROS nodes in.
+
+Additionally, you'll need to install an mDNS provider on the rover.
+This allows the base station to discover the rover without the need for static IP addresses or bulky DNS servers.
+If the rover is running a standard Ubuntu distribution, then it probably already comes with the Avahi daemon.
+In that case, all you'll need to do is update the rover's hostname to `wrover-nano` in the Avahi configuration file `/etc/avahi/avahi-daemon.conf`:
+
+```ini
+[server]
+host-name=wrover-nano
+```
+
+Once this is done, you can restart the Avahi daemon using the command:
+
+```sh
+$ sudo systemctl restart avahi-daemon
+```
+
+To make sure this worked correctly, you can try pinging the rover by hostname from the base station:
+
+```sh
+$ ping wrover-nano.local
+```
+
 ## Booting the Full Robot System
 
-*(TODO)*
+To launch the rover, you can use the launcher UI, which is opened with the command:
+
+```sh
+$ ./launch.sh
+```
+
+You should see a small window that looks like this:
+
+![](launcher_ui.png)
+
+From here, you can select a launch configuration from the drop-down box and press the "Launch!" button to launch the robot system.
+To shut down the rover system, you can simply send an interrupt to the terminal window using `Ctrl`+`C`.
+
+Alternatively, you can directly launch a full-system launch file from the `wr_entry_point` package.
+There are the `auto_nav.launch`, `eq_service.launch`, `erdm.launch` and `science.launch` files, each of which configures the robot system for a specific URC task.
+Additionally, several test configurations are available in launch files prefixed by `test_`, each of which allows for testing one robot subsystem in isolation.
+
+To use these launch files, you'll need to set certain environment variables which are described in the `README.md` document in the `wr_entry_point` package.
+These env vars provide information about the environment of the launch to the robot system.
+An example of a successful launch on real rover hardware might be:
+
+```sh
+$ WROVER_LOCAL=false WROVER_HW=REAL roslaunch wr_entry_point erdm.launch
+```
+
+Note that no explicit launch needs to be performed on the rover itself; remote nodes are launched automatically using roslaunch.
 
 ## Documentation
 
