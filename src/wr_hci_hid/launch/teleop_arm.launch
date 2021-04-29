@@ -1,0 +1,11 @@
+<!-- Launches the HID nodes for arm teleoperation via an Xbox 360 controller. -->
+<launch>
+  <group ns="hci">
+    <group ns="arm">
+      <node name="teleop_input" pkg="wreadinput" type="input_xbox360.py" machine="base_station">
+        <param name="name" value="Arm Drive"/>
+        <param name="namespace" value="/hci/arm/gamepad"/>
+      </node>
+    </group>
+  </group>
+</launch>

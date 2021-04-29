@@ -1,3 +1,8 @@
+<!-- Launches the drive system control node. -->
 <launch>
-	<node pkg="wr_control_drive_ds" type="DriveTrainControlSystem" name="wr_control_drive_ds"/>
+	<group ns="control">
+    <group ns="drive_system">
+      <node name="control" pkg="wr_control_drive_ds" type="DriveTrainControlSystem" machine="wrover"/>
+    </group>
+  </group>
 </launch>

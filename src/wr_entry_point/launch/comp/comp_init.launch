@@ -1,0 +1,11 @@
+<!-- Sets up the ROS(launch) environment needed to start up the rover. -->
+<launch>
+  <!-- Run script to ensure correctness of external args (e.g. env vars) -->
+  <node name="env_checker" pkg="wr_entry_point" type="env_checker.py" required="true"/>
+
+  <!-- Set up machine definitions -->
+  <machine name="base_station" address="localhost" env-loader="/opt/ros/noetic/env.sh" default="false"/>
+  <!-- If running in local mode, define "wiscrobo" to also be the local machine (i.e. base station) -->
+  <machine name="wrover" address="wrover-nano.local" env-loader="/home/wiscrobo/catkin_ws/WRover21_Software/env.sh" user="wiscrobo" default="true" unless="$(env WROVER_LOCAL)"/>
+  <machine name="wrover" address="localhost" env-loader="/opt/ros/noetic/env.sh" default="true" if="$(env WROVER_LOCAL)"/>
+</launch>

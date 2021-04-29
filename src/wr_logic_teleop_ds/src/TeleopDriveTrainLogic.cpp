@@ -77,7 +77,7 @@ int main(int argc, char** argv){
 	nh.getParam("speed_step4", SPEED_RATIO_VALUES[3]);
 	
 	//Publisher for output data to the drivetrain
-	ros::Publisher driveCommand = n.advertise<wr_drive_msgs::DriveTrainCmd>("/control/drive_train_cmd", 1000);
+	ros::Publisher driveCommand = n.advertise<wr_drive_msgs::DriveTrainCmd>("/control/drive_system/cmd", 1000);
 	
 	//Loop Rate - 50 Hz
 	ros::Rate loop(50);
@@ -86,18 +86,18 @@ int main(int argc, char** argv){
 	ros::Subscriber s1, s2, s3, s4, s5, s6, s7, s8, sL, sR;
 	
 	//Assign the button callbacks to their respective topics
-	s1 = n.subscribe("/logic/drive_joystick_left/button/3", 1000, L_S2_cb);
-	s2 = n.subscribe("/logic/drive_joystick_left/button/4", 1000, L_S1_cb);
-	s3 = n.subscribe("/logic/drive_joystick_left/button/5", 1000, L_S3_cb);
-	s4 = n.subscribe("/logic/drive_joystick_left/button/6", 1000, L_S0_cb);
-	s5 = n.subscribe("/logic/drive_joystick_right/button/3", 1000, R_S1_cb);
-	s6 = n.subscribe("/logic/drive_joystick_right/button/4", 1000, R_S2_cb);
-	s7 = n.subscribe("/logic/drive_joystick_right/button/5", 1000, R_S0_cb);
-	s8 = n.subscribe("/logic/drive_joystick_right/button/6", 1000, R_S3_cb);
+	s1 = n.subscribe("/logic/drive_system/joystick_left/button/3", 1000, L_S2_cb);
+	s2 = n.subscribe("/logic/drive_system/joystick_left/button/4", 1000, L_S1_cb);
+	s3 = n.subscribe("/logic/drive_system/joystick_left/button/5", 1000, L_S3_cb);
+	s4 = n.subscribe("/logic/drive_system/joystick_left/button/6", 1000, L_S0_cb);
+	s5 = n.subscribe("/logic/drive_system/joystick_right/button/3", 1000, R_S1_cb);
+	s6 = n.subscribe("/logic/drive_system/joystick_right/button/4", 1000, R_S2_cb);
+	s7 = n.subscribe("/logic/drive_system/joystick_right/button/5", 1000, R_S0_cb);
+	s8 = n.subscribe("/logic/drive_system/joystick_right/button/6", 1000, R_S3_cb);
 
 	//Assign the joystick callbacks to their respective topics
-	sL = n. subscribe("/logic/drive_joystick_left/axis/y", 1000, djL_axY_callback);
-	sR = n. subscribe("/logic/drive_joystick_right/axis/y", 1000, djR_axY_callback);
+	sL = n. subscribe("/logic/drive_system/joystick_left/axis/stick_y", 1000, djL_axY_callback);
+	sR = n. subscribe("/logic/drive_system/joystick_right/axis/stick_y", 1000, djR_axY_callback);
 
 	//ROS Main loop
 	while(ros::ok()){

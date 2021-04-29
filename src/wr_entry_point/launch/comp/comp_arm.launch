@@ -1,0 +1,6 @@
+<!-- Launches the nodes that provide operator control over the arm and manipulator. -->
+<launch>
+  <include file="$(find wr_hci_hid)/launch/teleop_arm.launch"/>
+  <!-- TODO: arm logic -->
+  <!-- TODO: arm control systems -->
+</launch>

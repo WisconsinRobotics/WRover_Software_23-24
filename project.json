@@ -13,6 +13,13 @@
       "build": {
         "provider": "pip"
       }
+    },
+    {
+      "name": "wreadinput",
+      "repo": "https://github.com/WisconsinRobotics/wreadinput.git",
+      "build": {
+        "provider": "pip"
+      }
     }
   ]
 }
