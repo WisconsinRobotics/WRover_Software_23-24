@@ -1,13 +1,44 @@
 import os
-import rospkg
+import re
+from typing import Optional
 
+from paramiko import SSHClient
 from qt_gui.plugin import Plugin
 import python_qt_binding as pyqt
 from python_qt_binding.QtWidgets import QApplication, QCheckBox, QComboBox, QPushButton, QWidget
+import rospkg
+
+INET_ADDR_PATTERN = re.compile(r'inet (\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/\d{1,2}')
 
 def do_launch(launch_file: str, local_mode: bool, mock_mode: bool):
+    # launch roscore on the rover
+    local_inet_addr: str
+    with SSHClient() as ssh_cli:
+        ssh_cli.load_system_host_keys()
+        ssh_cli.connect('wrover-nano.local', username='wiscrobo')
+        local_inet_addr = ssh_cli.get_transport().sock.getsockname()[0]
+        
+        # retrieve rover ethernet ip address
+        _, ip_addr_stdout, _ = ssh_cli.exec_command('ip addr show eth0')
+        rover_inet_addr: Optional[str] = None
+        with ip_addr_stdout:
+            for line in ip_addr_stdout:
+                match = INET_ADDR_PATTERN.search(line)
+                if match:
+                    rover_inet_addr = match.group(1)
+                    break
+        if rover_inet_addr is None:
+            raise ValueError('No eth0 internet address could be discovered on the rover!')
+        
+        # run roscore
+        ssh_cli.exec_command('~/catkin_ws/WRover21_Software/env.sh roscore',\
+            environment={'ROS_MASTER_URI': 'http://localhost:11311', 'ROS_IP': rover_inet_addr})
+
+    # run roslaunch
     os.environ['WROVER_LOCAL'] = 'true' if local_mode else 'false'
     os.environ['WROVER_HW'] = 'MOCK' if mock_mode else 'REAL'
+    os.environ['ROS_MASTER_URI'] = 'http://wrover-nano.local:11311'
+    os.environ['ROS_IP'] = local_inet_addr
     os.execlp('roslaunch', 'roslaunch', launch_file) # maybe a little unclean, since we aren't cleaning up qt
 
 class LauncherUI(Plugin):

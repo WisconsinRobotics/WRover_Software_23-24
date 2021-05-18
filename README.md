@@ -50,6 +50,8 @@ To make sure this worked correctly, you can try pinging the rover by hostname fr
 $ ping wrover-nano.local
 ```
 
+*TODO: something about setting up keypair auth for ssh*
+
 ## Booting the Full Robot System
 
 To launch the rover, you can use the launcher UI, which is opened with the command:
@@ -69,15 +71,19 @@ Alternatively, you can directly launch a full-system launch file from the `wr_en
 There are the `auto_nav.launch`, `eq_service.launch`, `erdm.launch` and `science.launch` files, each of which configures the robot system for a specific URC task.
 Additionally, several test configurations are available in launch files prefixed by `test_`, each of which allows for testing one robot subsystem in isolation.
 
-To use these launch files, you'll need to set certain environment variables which are described in the `README.md` document in the `wr_entry_point` package.
+To use these launch files, you'll first need to start `roscore` on the rover.
+You'll also need to set certain environment variables which are described in the `README.md` document in the `wr_entry_point` package.
 These env vars provide information about the environment of the launch to the robot system.
 An example of a successful launch on real rover hardware might be:
 
 ```sh
-$ WROVER_LOCAL=false WROVER_HW=REAL roslaunch wr_entry_point erdm.launch
+$ ssh wiscrobo@wrover-nano.local '~/catkin_ws/WRover21_Software/env.sh roscore'
+$ export ROS_MASTER_URI='http://wrover-nano.local:11311'
+$ export ROS_IP='192.168.1.111'
+$ export WROVER_LOCAL=false
+$ export WROVER_HW=REAL
+$ roslaunch wr_entry_point erdm.launch
 ```
-
-Note that no explicit launch needs to be performed on the rover itself; remote nodes are launched automatically using roslaunch.
 
 ## Documentation
 
