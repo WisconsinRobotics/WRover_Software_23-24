@@ -8,6 +8,7 @@
 
 /// Allow for referencing the UInt32 message type easier
 #define Std_UInt32 std_msgs::UInt32::ConstPtr&
+#define Std_Float64 std_msgs::Float64::ConstPtr&
 
 /// The current COUNTS_PER_ROTATION is UINT32_MAX
 uint32_t const ArmMotor::COUNTS_PER_ROTATION = UINT32_MAX;
@@ -32,6 +33,15 @@ float ArmMotor::getRads(){
 void ArmMotor::storeEncoderVals(const Std_UInt32 msg){
     // Store the message value in this ArmMotor's encoderVal variable
     this->encoderVal = msg->data;
+    // Send feedback
+    std_msgs::Float64 feedbackMsg;
+    feedbackMsg.data = msg->data;
+    this->feedbackPub.publish(feedbackMsg);
+}
+
+void ArmMotor::redirectPowerOutput(const Std_Float64 msg){
+    // Set the speed to be the contained data
+    this->setPower(msg->data);
 }
 
 /// controllerID is constrained between [0,3]
@@ -50,10 +60,14 @@ ArmMotor::ArmMotor(std::string motorName, unsigned int controllerID, unsigned in
 
     // Create the topic string prefix for WRoboclaw controllers
     std::string tpString = ((std::string)"/hsi/roboclaw/aux") + std::to_string(controllerID);
+    std::string controlString = "/control/arm/" + std::to_string(controllerID) + std::to_string(motorID);
 
     // Create the appropriate encoder-reading and speed-publishing subscribers and advertisers, respectfully
     this->encRead = n->subscribe(tpString + "/enc/" + (motorID == 0 ? "left" : "right"), 1000, &ArmMotor::storeEncoderVals, this);
     this->speedPub = n->advertise<std_msgs::Int16>(tpString + "/cmd/" + (motorID == 0 ? "left" : "right"), 1000);
+    this->targetPub = n->advertise<std_msgs::Float64>(controlString + "/setpoint", 1000);
+    this->feedbackPub = n->advertise<std_msgs::Float64>(controlString + "/feedback", 1000);
+    this->outputRead = n->subscribe(controlString + "/output", 1000, &ArmMotor::redirectPowerOutput, this);
 }
 
 uint32_t ArmMotor::getEncoderCounts(){
@@ -102,9 +116,9 @@ void ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block){
     // If we are not at our target...
     if(!this->hasReachedTarget(targetCounts)){
         // Set the power in the correct direction and continue running to the target
-        long int direction = targetCounts - this->getEncoderCounts();
-        power = abs(power) * (corrMod(direction, ((long int)ArmMotor::COUNTS_PER_ROTATION)) < corrMod(-direction, ((long int)ArmMotor::COUNTS_PER_ROTATION)) ? 1 : -1);
-        this->setPower(power);
+        std_msgs::Float64 setpointMsg;
+        setpointMsg.data = targetCounts;
+        this->targetPub.publish(setpointMsg);
         this->currState = MotorState::RUN_TO_TARGET;
     // Otherwise, stop the motor
     }else{

@@ -8,6 +8,7 @@
 #include "ros/ros.h"
 #include "std_msgs/UInt32.h"
 #include "std_msgs/Int16.h"
+#include "std_msgs/Float64.h"
 #include "math.h"
 #include <string>
 
@@ -43,6 +44,12 @@ class ArmMotor{
         uint32_t encoderVal;
         /// The ROS Subscriber that reads the encoders
         ros::Subscriber encRead;
+        /// The ROS Publisher that sets the encoder targets
+        ros::Publisher targetPub;
+        /// The ROS Publisher that sets encoder feedback data
+        ros::Publisher feedbackPub;
+        /// The ROS Subscriber that reads controlled output data
+        ros::Subscriber outputRead;
         /// The ROS Publisher that publishes motor speed commands
         ros::Publisher speedPub;
         /// A pointer to the most recent power message sent
@@ -57,11 +64,18 @@ class ArmMotor{
         static uint32_t radToEnc(double rad);
 
         /**
-         * @brief Subscriber callback for encRead, captured the encoder value of the current motor
+         * @brief Subscriber callback for encRead, captures the encoder value of the current motor
          * 
          * @param msg The encoder value message as captured by encRead 
          */
         void storeEncoderVals(const std_msgs::UInt32::ConstPtr& msg);
+
+        /**
+         * @brief Subscriber callback for outputRead, captures the PID output and sets the speed directly
+         * 
+         * @param msg The PID output as captured by outputRead
+         */
+        void redirectPowerOutput(const std_msgs::Float64::ConstPtr& msg);
 
         /**
          * @brief Performs Euclidean correct modulus between two inputs of the same type

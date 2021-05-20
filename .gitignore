@@ -20,6 +20,7 @@ src/sick_scan
 src/wreadinput
 src/wready
 src/wroboclaw
+src/wresponsecontrol
 
 # external lib destination dirs
 src/drive/lib
@@ -28,3 +29,4 @@ src/science/lib
 
 *.pyc
 src/arm/lib
+compile_commands.json
