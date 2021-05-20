@@ -147,6 +147,7 @@ include_directories(
 
 add_executable(TeleopDriveTrainLogic src/TeleopDriveTrainLogic.cpp)
 target_link_libraries(TeleopDriveTrainLogic ${catkin_LIBRARIES})
+add_dependencies(TeleopDriveTrainLogic ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
