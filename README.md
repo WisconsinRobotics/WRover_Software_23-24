@@ -1,60 +1,14 @@
 # Wisconsin Robotics -- 2021 Software System
 
-## Prerequisites
+## Setting Up the Software System
 
-You should have the following installed beforehand:
-
-* ROS Noetic (preferrably on Ubuntu 20.04; it is recommended, but not necessarily required, to dual-boot for this)
-* Python 3.8.x+ with pip and virtualenv
-
-## Setting Up the Workspace
-
-This repository consists of the ROS catkin workspace for the WRover software system.
-You'll want to clone the repo to wherever you wish to store your workspaces.
-Once you have a local copy, you'll want to open a terminal in the workspace.
-For initial setup, do the following:
-
-```sh
-$ ./assemble.py init  # initialize the catkin workspace + venv
-$ . setup.sh          # acquire the workspace environment
-$ ./assemble.py build # build dependencies
-```
-
-Every time you want to work in the workspace, you'll have to run `source setup.sh` again to set up your shell with the workspace environment. Alternatively, you can do this automatically in your `.bashrc` if you don't anticipate working in any other ROS workspaces.
-
-## Setting up the Rover
-
-On the rover, you'll need to clone a copy of this repo to `/home/wiscrobo/catkin_ws/WRover21_Software`.
-Once this is done, you'll want to set up the workspace as above using `assemble.py`.
-This will prepare the ROS workspace for the rover to run ROS nodes in.
-
-Additionally, you'll need to install an mDNS provider on the rover.
-This allows the base station to discover the rover without the need for static IP addresses or bulky DNS servers.
-If the rover is running a standard Ubuntu distribution, then it probably already comes with the Avahi daemon.
-In that case, all you'll need to do is update the rover's hostname to `wrover-nano` in the Avahi configuration file `/etc/avahi/avahi-daemon.conf`:
-
-```ini
-[server]
-host-name=wrover-nano
-```
-
-Once this is done, you can restart the Avahi daemon using the command:
-
-```sh
-$ sudo systemctl restart avahi-daemon
-```
-
-To make sure this worked correctly, you can try pinging the rover by hostname from the base station:
-
-```sh
-$ ping wrover-nano.local
-```
-
-*TODO: something about setting up keypair auth for ssh*
+To set up the software system on a base station or dev machine, see [`/docs/setup_dev.md`](docs/setup_dev.md).
+To set up the software system on a rover, see [`docs/setup_rover.md`](docs/setup_rover.md).
 
 ## Booting the Full Robot System
 
-To launch the rover, you can use the launcher UI, which is opened with the command:
+To launch the rover, you'll first want to start the base station radio and ensure that both the rover and base station are connected to it.
+Then, you can start the launcher UI on the base station, which is opened with the command:
 
 ```sh
 $ ./launch.sh
@@ -62,7 +16,7 @@ $ ./launch.sh
 
 You should see a small window that looks like this:
 
-![](launcher_ui.png)
+![](docs/launcher_ui.png)
 
 From here, you can select a launch configuration from the drop-down box and press the "Launch!" button to launch the robot system.
 To shut down the rover system, you can simply send an interrupt to the terminal window using `Ctrl`+`C`.
