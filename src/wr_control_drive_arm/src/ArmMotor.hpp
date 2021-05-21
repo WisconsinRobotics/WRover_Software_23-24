@@ -64,6 +64,14 @@ class ArmMotor{
         static uint32_t radToEnc(double rad);
 
         /**
+         * @brief A static conversion from encoder counts to radians
+         * 
+         * @param enc The input number of encoder counts
+         * @return double The corresponding radian measure
+         */
+        static double encToRad(uint32_t enc);
+
+        /**
          * @brief Subscriber callback for encRead, captures the encoder value of the current motor
          * 
          * @param msg The encoder value message as captured by encRead 

@@ -2,5 +2,5 @@
     <node name="WResponseControl_ArmMotors" pkg="wresponsecontrol" type="WResponseControl">
         <rosparam file="$(find wr_control_drive_arm)/config/arm_motor_PID.yaml"/>
     </node>
-    <node name="ArmControlSystem" pkg="wr_control_drive_arm" type="ArmControlSystem"/>
+    <node name="ArmControlSystem" pkg="wr_control_drive_arm" type="ArmControlSystem" output="screen" launch-prefix="valgrind -v"/>
 </launch>

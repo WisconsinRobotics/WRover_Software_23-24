@@ -25,9 +25,13 @@ uint32_t ArmMotor::radToEnc(double rads){
     return ArmMotor::COUNTS_PER_ROTATION*ArmMotor::corrMod(rads,2 * M_PI)/(2 * M_PI);
 }
 
+double ArmMotor::encToRad(uint32_t enc){
+    return ArmMotor::corrMod(enc / ((float)ArmMotor::COUNTS_PER_ROTATION) * 2 * M_PI + M_PI, 2 * M_PI) - M_PI;
+}
+
 /// Currently consistent with the enc->rad equation as specified <a target="_blank" href="https://www.desmos.com/calculator/nwxtenccc6">here</a>.
 float ArmMotor::getRads(){
-    return ArmMotor::corrMod(this->getEncoderCounts() / ((float)ArmMotor::COUNTS_PER_ROTATION) * 2 * M_PI + M_PI, 2 * M_PI) - M_PI;
+    return ArmMotor::encToRad(this->getEncoderCounts());
 }
 
 void ArmMotor::storeEncoderVals(const Std_UInt32 msg){
@@ -35,7 +39,7 @@ void ArmMotor::storeEncoderVals(const Std_UInt32 msg){
     this->encoderVal = msg->data;
     // Send feedback
     std_msgs::Float64 feedbackMsg;
-    feedbackMsg.data = msg->data;
+    feedbackMsg.data = ArmMotor::encToRad(msg->data);
     this->feedbackPub.publish(feedbackMsg);
 }
 
@@ -117,7 +121,7 @@ void ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block){
     if(!this->hasReachedTarget(targetCounts)){
         // Set the power in the correct direction and continue running to the target
         std_msgs::Float64 setpointMsg;
-        setpointMsg.data = targetCounts;
+        setpointMsg.data = ArmMotor::encToRad(targetCounts);
         this->targetPub.publish(setpointMsg);
         this->currState = MotorState::RUN_TO_TARGET;
     // Otherwise, stop the motor

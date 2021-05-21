@@ -24,10 +24,6 @@ ros::Publisher jointStatePublisher;
  * @brief Simplify the SimpleActionServer reference name
  */
 typedef actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> Server;
-/**
- * @brief The ActionServer that executes the given motions
- */
-Server* server;
 
 /**
  * @brief Perform the given action as interpreted as moving the arm joints to specified positions
@@ -66,10 +62,10 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
         for(int j = 0; j < currTargetPosition.positions.size(); j++){
           // Each motor should run to its respective target position at a fixed speed
           // TODO: this speed should be capped/dynamic to reflect the input joint velocity parameters
-          velMax = abs(*std::max_element(currTargetPosition.velocities.begin(), currTargetPosition.velocities.end(), [](double a, double b) {return abs(a)<abs(b);}));
-          float currPower = 0.1 * currTargetPosition.velocities[j]/velMax;
-          currPower = abs(velMax) <= 0.0001 ? 0.1 : currPower;
-          motors[j]->runToTarget(currTargetPosition.positions[j], currPower);
+          // velMax = abs(*std::max_element(currTargetPosition.velocities.begin(), currTargetPosition.velocities.end(), [](double a, double b) {return abs(a)<abs(b);}));
+          // float currPower = 0.1 * currTargetPosition.velocities[j]/velMax;
+          // currPower = abs(velMax) <= 0.0001 ? 0.1 : currPower;
+          motors[j]->runToTarget(currTargetPosition.positions[j], 0);//currPower);
           // The position has only finished if every motor is STOPped
           hasPositionFinished &= motors[j]->getMotorState() == MotorState::STOP;
           // Push the current motor name and position data to the Joint State data tracking list
@@ -127,9 +123,9 @@ int main(int argc, char** argv)
   jointStatePublisher = n.advertise<sensor_msgs::JointState>("/control/arm_joint_states", 1000);
 
   // Initialize the Action Server
-  server = new Server(n, "/arm_controller/follow_joint_trajectory", boost::bind(&execute, _1, server), false);
+  Server server(n, "/arm_controller/follow_joint_trajectory", boost::bind(&execute, _1, &server), false);
   // Start the Action Server
-  server->start();
+  server.start();
 
   signal(SIGINT, [](int signal)->void{ros::shutdown(); exit(1);});
 
