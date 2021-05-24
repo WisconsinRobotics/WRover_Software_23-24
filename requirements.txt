@@ -1,1 +1,2 @@
 paramiko==2.6.0
+rospkg==1.2.10
