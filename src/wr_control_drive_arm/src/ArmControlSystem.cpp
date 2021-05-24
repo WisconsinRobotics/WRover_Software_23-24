@@ -127,7 +127,7 @@ int main(int argc, char** argv)
   // Start the Action Server
   server.start();
 
-  signal(SIGINT, [](int signal)->void{ros::shutdown(); exit(1);});
+  // signal(SIGINT, [](int signal)->void{ros::shutdown(); exit(1);});
 
   // ROS spin for communication with other nodes
   ros::spin();
