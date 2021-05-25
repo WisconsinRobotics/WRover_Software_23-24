@@ -55,6 +55,8 @@
   <build_export_depend>rospy</build_export_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>
+  <depend>moveit_msgs</depend>
+  <depend>moveit_visual_tools</depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->

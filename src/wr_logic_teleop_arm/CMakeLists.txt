@@ -10,6 +10,8 @@ project(wr_logic_teleop_arm)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
+  moveit_msgs
+  moveit_visual_tools
 )
 
 ## System dependencies are found with CMake's conventions
@@ -133,6 +135,8 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/wr_logic_teleop_arm_node.cpp)
+add_executable(ArmTeleopLogic src/ArmTeleopLogic.cpp)
+target_link_libraries(ArmTeleopLogic ${catkin_LIBRARIES})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
