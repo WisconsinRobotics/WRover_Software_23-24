@@ -31,8 +31,11 @@ def do_launch(launch_file: str, local_mode: bool, mock_mode: bool):
             raise ValueError('No eth0 internet address could be discovered on the rover!')
         
         # run roscore
-        ssh_cli.exec_command('~/catkin_ws/WRover21_Software/env.sh roscore',\
+        ssh_cli.exec_command('~/catkin_ws/WRover21_Software/bootstrap.sh')
+        _, bootstrap_stdout, _ = ssh_cli.exec_command('~/catkin_ws/WRover21_Software/env.sh roscore',\
             environment={'ROS_MASTER_URI': 'http://localhost:11311', 'ROS_IP': rover_inet_addr})
+        with bootstrap_stdout:
+            bootstrap_stdout.read()
 
     # run roslaunch
     os.environ['WROVER_LOCAL'] = 'true' if local_mode else 'false'
