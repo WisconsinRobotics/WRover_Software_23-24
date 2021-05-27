@@ -6,6 +6,8 @@
   <!-- Set up machine definitions -->
   <machine name="base_station" address="localhost" env-loader="/opt/ros/noetic/env.sh" default="false"/>
   <!-- If running in local mode, define "wiscrobo" to also be the local machine (i.e. base station) -->
-  <machine name="wrover" address="wrover-nano.local" env-loader="/home/wiscrobo/catkin_ws/WRover21_Software/env.sh" user="wiscrobo" default="true" unless="$(env WROVER_LOCAL)"/>
+  <machine name="wrover" address="wrover-nano.local" env-loader="/home/wiscrobo/catkin_ws/WRover21_Software/env.sh" user="wiscrobo" default="true" unless="$(env WROVER_LOCAL)">
+    <env name="ROS_NAMESPACE" value="wrover-nano.local"/>
+  </machine>
   <machine name="wrover" address="localhost" env-loader="/opt/ros/noetic/env.sh" default="true" if="$(env WROVER_LOCAL)"/>
 </launch>
