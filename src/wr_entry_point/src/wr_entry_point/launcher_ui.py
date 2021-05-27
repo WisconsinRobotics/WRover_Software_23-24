@@ -45,6 +45,9 @@ def do_launch(launch_file: str, local_mode: bool, mock_mode: bool):
             })
             with bootstrap_stdout:
                 bootstrap_stdout.read()
+            
+            print(f'LOCAL ADDR: {local_inet_addr}')
+            print(f'REMOTE ADDR: {rover_inet_addr}')
         
         os.environ['WROVER_LOCAL'] = 'false'
         os.environ['ROS_MASTER_URI'] = 'http://wrover-nano.local:11311'
