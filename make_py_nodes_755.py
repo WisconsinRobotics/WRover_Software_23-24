@@ -10,4 +10,4 @@ for pkg_name in os.listdir('src'):
             for node_name in os.listdir(nodes_dir):
                 node_path = f'{nodes_dir}/{node_name}'
                 print(node_path)
-                os.chmod(node_path, 755)
+                os.chmod(node_path, 0o755)
