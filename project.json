@@ -27,6 +27,13 @@
       "build": {
         "provider": "noop"
       }
+    },
+    {
+      "name": "moveit",
+      "build": {
+        "package": "ros-noetic-moveit",
+        "provider": "apt"
+      }
     }
   ]
 }
