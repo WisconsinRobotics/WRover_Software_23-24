@@ -22,12 +22,12 @@ def main():
     rospy.init_node('bad_arm_driver')
 
     # retrieve params
-    controller_ns = cast(str, rospy.get_param('controller_ns'))
-    claw_ns_0 = cast(str, rospy.get_param('claw_ns_0'))
-    claw_ns_1 = cast(str, rospy.get_param('claw_ns_1'))
-    claw_ns_2 = cast(str, rospy.get_param('claw_ns_2'))
-    claw_ns_3 = cast(str, rospy.get_param('claw_ns_3'))
-    spin_rate = rospy.get_param('spin_rate', 50)
+    controller_ns = cast(str, rospy.get_param('~controller_ns'))
+    claw_ns_0 = cast(str, rospy.get_param('~claw_ns_0'))
+    claw_ns_1 = cast(str, rospy.get_param('~claw_ns_1'))
+    claw_ns_2 = cast(str, rospy.get_param('~claw_ns_2'))
+    claw_ns_3 = cast(str, rospy.get_param('~claw_ns_3'))
+    spin_rate = rospy.get_param('~spin_rate', 50)
 
     # create controller subs
     trigger_l: SubBuf[float] = SubBuf(f'{controller_ns}/axis/trigger_left', Float32)
