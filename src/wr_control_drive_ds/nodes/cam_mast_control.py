@@ -8,7 +8,7 @@ from wr_drive_msgs.msg import CamMastCmd
 def main():
     rospy.init_node('cam_mast_control')
 
-    pub = rospy.Publisher('/hsi/roboclaw/aux3/cmd/right', Int16)
+    pub = rospy.Publisher('/hsi/roboclaw/aux3/cmd/right', Int16, queue_size=4)
     
     def msg_cb(msg: CamMastCmd):
         pub.publish(Int16(round(msg.turn_speed * 32767)))
