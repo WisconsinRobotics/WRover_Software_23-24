@@ -3,4 +3,15 @@
   <include file="$(find wr_hci_hid)/launch/teleop_arm.launch"/>
   <!-- TODO: arm logic -->
   <!-- TODO: arm control systems -->
+  <node name="arm_gamepad" pkg="wreadinput" type="input_xbox360.py" machine="base_station">
+    <param name="name" value="Teleop Arm Controller"/>
+    <param name="namespace" value="/hci/arm/gamepad"/>
+  </node>
+  <node name="arm_driver" pkg="wr_logic_teleop_arm" type="bad_arm_driver.py">
+    <param name="controller_ns" value="/hci/arm/gamepad"/>
+    <param name="claw_ns_0" value="/hsi/roboclaw/aux0"/>
+    <param name="claw_ns_1" value="/hsi/roboclaw/aux1"/>
+    <param name="claw_ns_2" value="/hsi/roboclaw/aux2"/>
+    <param name="claw_ns_3" value="/hsi/roboclaw/aux3"/>
+  </node>
 </launch>
