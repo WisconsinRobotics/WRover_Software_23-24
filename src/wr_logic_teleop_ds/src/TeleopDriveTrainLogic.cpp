@@ -1,5 +1,6 @@
 #include "ros/ros.h"
 #include "wr_drive_msgs/DriveTrainCmd.h"
+#include "wr_drive_msgs/CamMastCmd.h"
 #include "std_msgs/Bool.h"
 #include "std_msgs/Float32.h"
 
@@ -11,6 +12,8 @@ float speedRatio[] = {0.0, 0.0};
 float speedRaw[] = {0.0, 0.0};
 //Holds the constant speed ratios (provided by parameters)
 float SPEED_RATIO_VALUES[] = {0.25, 0.5, 0.75, 1.0};
+//The camera mast speed value
+float speedCamMast = 0.0;
 
 #define Std_Bool std_msgs::Bool::ConstPtr&
 #define Std_Float32 std_msgs::Float32::ConstPtr&
@@ -58,6 +61,10 @@ void djR_axY_callback(const std_msgs::Float32::ConstPtr& msg){
 	speedRaw[1] = msg->data;
 }
 
+void djR_camMast_callback(const std_msgs::Float32::ConstPtr& msg){
+	speedCamMast = msg->data;
+}
+
 //Main Method
 
 int main(int argc, char** argv){
@@ -76,14 +83,15 @@ int main(int argc, char** argv){
 	nh.getParam("speed_step3", SPEED_RATIO_VALUES[2]);
 	nh.getParam("speed_step4", SPEED_RATIO_VALUES[3]);
 	
-	//Publisher for output data to the drivetrain
+	//Publisher for output data
 	ros::Publisher driveCommand = n.advertise<wr_drive_msgs::DriveTrainCmd>("/control/drive_system/cmd", 1000);
+	ros::Publisher camCommand = n.advertise<wr_drive_msgs::CamMastCmd>("/control/camera/cam_mast_cmd", 1000);
 	
 	//Loop Rate - 50 Hz
 	ros::Rate loop(50);
 	
 	//Set up dummy subscribers for input data
-	ros::Subscriber s1, s2, s3, s4, s5, s6, s7, s8, sL, sR;
+	ros::Subscriber s1, s2, s3, s4, s5, s6, s7, s8, sL, sR, sCamMast;
 	
 	//Assign the button callbacks to their respective topics
 	s1 = n.subscribe("/logic/drive_system/joystick_left/button/3", 1000, L_S2_cb);
@@ -99,9 +107,16 @@ int main(int argc, char** argv){
 	sL = n. subscribe("/logic/drive_system/joystick_left/axis/stick_y", 1000, djL_axY_callback);
 	sR = n. subscribe("/logic/drive_system/joystick_right/axis/stick_y", 1000, djR_axY_callback);
 
+	//Subscriber for camera mast control
+	sCamMast = n.subscribe("/logic/drive_system/joystick_right/axis/pov_x", 1000, djR_camMast_callback);
+
 	//ROS Main loop
 	while(ros::ok()){
 	
+		/*
+		 * Drive train message
+		 */
+
 		//Define the output message
 		wr_drive_msgs::DriveTrainCmd output;
 		
@@ -112,8 +127,16 @@ int main(int argc, char** argv){
 		//Publish the output message
 		driveCommand.publish(output);
 
+		/*
+		 * Camera mast message
+		 */
+
+		wr_drive_msgs::CamMastCmd cam_cmd;
+		cam_cmd.turn_speed = speedCamMast;
+		camCommand.publish(cam_cmd);
+
 		//Print the message to ROS INFO for logging
-		ROS_INFO("(%f, %f)",output.left_value, output.right_value);
+		//ROS_INFO("(%f, %f)",output.left_value, output.right_value);
 
 		//Trigger ROS Update cycle
 		ros::spinOnce();
