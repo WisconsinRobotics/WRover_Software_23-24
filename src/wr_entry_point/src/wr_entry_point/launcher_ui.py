@@ -55,7 +55,7 @@ def do_launch(launch_file: str, local_mode: bool, mock_mode: bool):
 
     # run roslaunch
     os.environ['WROVER_HW'] = 'MOCK' if mock_mode else 'REAL'
-    os.execlp('roslaunch', 'roslaunch', launch_file) # maybe a little unclean, since we aren't cleaning up qt
+    os.execlp('roslaunch', 'roslaunch', launch_file, "--screen") # maybe a little unclean, since we aren't cleaning up qt
 
 class LauncherUI(Plugin):
     def __init__(self, context):

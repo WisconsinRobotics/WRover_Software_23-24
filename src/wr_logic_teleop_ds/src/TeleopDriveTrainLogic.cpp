@@ -3,6 +3,7 @@
 #include "wr_drive_msgs/CamMastCmd.h"
 #include "std_msgs/Bool.h"
 #include "std_msgs/Float32.h"
+#include "Watchdog.hpp"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -18,6 +19,8 @@ float speedCamMast = 0.0;
 #define Std_Bool std_msgs::Bool::ConstPtr&
 #define Std_Float32 std_msgs::Float32::ConstPtr&
 
+Watchdog dog(1);
+
 //////////////////////////////////////////////////////////////////
 //			BUTTON CALLBACKS			//
 //								//
@@ -28,6 +31,7 @@ float speedCamMast = 0.0;
 //Generic Button Callback
 void genCallback(const Std_Bool msg, int ind1, int ind2){
 	if(msg->data) speedRatio[ind1]=SPEED_RATIO_VALUES[ind2];
+	dog.pet();
 }
 
 //Left Drive Joystick
@@ -53,16 +57,19 @@ void (*R_S3_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 
 
 void djL_axY_callback(const std_msgs::Float32::ConstPtr& msg){
 	speedRaw[0] = msg->data;
+	dog.pet();
 }
 
 //Right Drive Joystick
 
 void djR_axY_callback(const std_msgs::Float32::ConstPtr& msg){
 	speedRaw[1] = msg->data;
+	dog.pet();
 }
 
 void djR_camMast_callback(const std_msgs::Float32::ConstPtr& msg){
 	speedCamMast = msg->data;
+	dog.pet();
 }
 
 //Main Method
@@ -121,8 +128,13 @@ int main(int argc, char** argv){
 		wr_drive_msgs::DriveTrainCmd output;
 		
 		//Set the left and right values to be the product of respective raw speeds and speed ratios
-		output.left_value = speedRaw[0]*speedRatio[0];
-		output.right_value = speedRaw[1]*speedRatio[1];
+		if(!dog.isMad()){
+			output.left_value = speedRaw[0]*speedRatio[0];
+			output.right_value = speedRaw[1]*speedRatio[1];
+		}else{
+			output.left_value = 0;
+			output.right_value = 0;
+		}
 
 		//Publish the output message
 		driveCommand.publish(output);
