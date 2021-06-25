@@ -29,19 +29,59 @@ The rover should have roughly the following hardware subsystems:
 
 ### Flashing Ubuntu 20.04
 
-TODO: instructions on flashing ubuntu 20.04
+You'll want to start by flashing the Jetson Nano's SD card with Ubuntu 20.04 "Focal Fossa".
+Because NVIDIA only officially supports Ubuntu 18.04 on the Jetson Nano, you'll have to use a [custom third-party image built for 20.04](https://forums.developer.nvidia.com/t/xubuntu-20-04-focal-fossa-l4t-r32-3-1-custom-image-for-the-jetson-nano/121768).
+Once you've downloaded the image, you can use a tool such as [balenaEtcher](https://www.balena.io/etcher/) to flash it to the SD card.
+
+After re-inserting the SD card, you'll want to boot up the Jetson Nano and complete the first-time setup for Xubuntu, which can be done with an external monitor and keyboard.
+Make sure you set the user account's name to `wiscrobo`!
 
 ### Setting Up Python 3
 
-TODO: instructions on installing python 3 + pip + virtualenv
+You'll need Python 3 to run the ROS-based robot software, as well as a couple tools for installing dependencies.
+To install Python 3 and the `pip` package management tool, you can use the command:
+
+```sh
+$ sudo apt install python3 python3-pip
+```
+
+Then, you can use `pip` to install the `virtualenv` package:
+
+```sh
+$ python3 -m pip install virtualenv
+```
 
 ### Installing ROS
 
-TODO: instructions on installing ros
+You'll now want to install ROS Noetic itself.
+Follow the [installation instructions on the ROS wiki](http://wiki.ros.org/noetic/Installation/Ubuntu) to do this.
+It is recommended that you install the `ros-noetic-ros-base` ("bare-bones") meta-package only, as the rover doesn't necessarily need the GUI tools included in `ros-noetic-desktop`.
 
 ### Setting Up the SSH Server
 
-TODO: instructions on installing sshd
+For the base station (and any other remote machine) to interact with the rover, you'll need to install an SSH server.
+The recommended implementation is the OpenSSH server daemon `sshd`, which can be installed with the command:
+
+```sh
+$ sudo apt install openssh-server
+```
+
+Now, you'll want to modify the configuration to allow for public key authentication.
+Open the file `/etc/ssh/sshd_config` in your text editor of choice and ensure that the following line is uncommented:
+
+```ssh-config
+PubkeyAuthentication yes
+```
+
+Then, to start up the server, you can enable the SSH service with the commands:
+
+```sh
+$ sudo systemctl enable ssh
+$ sudo systemctl start ssh
+```
+
+You could now test to see if it's possible to SSH to the rover from a remote machine.
+You'll also have to configure public key authentication for any base station machines; see `setup_dev.md` for more details on this.
 
 ### Setting Up mDNS/zeroconf
 
