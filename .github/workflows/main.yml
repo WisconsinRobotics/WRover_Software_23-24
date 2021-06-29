@@ -26,13 +26,12 @@ jobs:
       - uses: actions/checkout@v2
       
       # Install package dependencies
-      - name: Install Dependencies
-        run: |
-          /bin/bash -c "sudo sh -c 'echo \"deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main\" > /etc/apt/sources.list.d/ros-latest.list'"
-          /bin/bash -c "curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -"
-          /bin/bash -c "sudo apt update"
-          /bin/bash -c "sudo apt install -y clang-tidy ros-noetic-ros-desktop"
-        
+      - name: Install ROS
+        uses: betwo/github-setup-catkin@v1.1.1
+        with:
+          ros-version: 'noetic'
+          workspace: '$GITHUB_WORKSPACE'
+          
       # Build
       - name: Build
         run: |
@@ -44,4 +43,5 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: Clang-Tidy Checks
         run: |
+          sudo apt install -y clang-tidy
           find * -type f | grep -Ev "(build|devel)" | grep -E ".*\.(cpp|h)" | xargs clang-tidy -p=./build --quiet 
