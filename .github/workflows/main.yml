@@ -31,6 +31,8 @@ jobs:
         with:
           ros-version: 'noetic'
           workspace: '$GITHUB_WORKSPACE'
+        env:
+          ACTIONS_ALLOW_UNSECURE_COMMANDS: true
           
       # Build
       - name: Build
