@@ -15,6 +15,7 @@ src/sick_scan
 src/wreadinput
 src/wready
 src/wroboclaw
+src/wrosout
 
 *.pyc
 src/arm/lib
