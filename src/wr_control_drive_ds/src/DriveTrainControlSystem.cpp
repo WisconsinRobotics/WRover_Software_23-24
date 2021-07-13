@@ -13,7 +13,7 @@ float inp_vals[2];
 void setDSPower_callback(const wr_drive_msgs::DriveTrainCmd::ConstPtr& msg){
 	// Capture each power value in the input array
 	inp_vals[0] = msg->left_value;
-	inp_vals[1] = msg->right_value;
+	inp_vals[1] = -msg->right_value; // Inversion for motor reversing.
 }
 
 // Main program
