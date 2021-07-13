@@ -35,16 +35,16 @@ void genCallback(const Std_Bool msg, int ind1, int ind2){
 }
 
 //Left Drive Joystick
-void (*L_S3_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 0, 3);};
-void (*L_S2_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 0, 2);};
-void (*L_S1_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 0, 1);};
-void (*L_S0_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 0, 0);};
+boost::function<void(const Std_Bool)>  L_S3_cb = [](const Std_Bool msg)->void{genCallback(msg, 0, 3);};
+boost::function<void(const Std_Bool)>  L_S2_cb = [](const Std_Bool msg)->void{genCallback(msg, 0, 2);};
+boost::function<void(const Std_Bool)>  L_S1_cb = [](const Std_Bool msg)->void{genCallback(msg, 0, 1);};
+boost::function<void(const Std_Bool)>  L_S0_cb = [](const Std_Bool msg)->void{genCallback(msg, 0, 0);};
 
 //Right Drive Joystick
-void (*R_S0_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 1, 0);};
-void (*R_S1_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 1, 1);};
-void (*R_S2_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 1, 2);};
-void (*R_S3_cb)(const Std_Bool) = [](const Std_Bool msg)->void{genCallback(msg, 1, 3);};
+boost::function<void(const Std_Bool)>  R_S0_cb = [](const Std_Bool msg)->void{genCallback(msg, 1, 0);};
+boost::function<void(const Std_Bool)>  R_S1_cb = [](const Std_Bool msg)->void{genCallback(msg, 1, 1);};
+boost::function<void(const Std_Bool)>  R_S2_cb = [](const Std_Bool msg)->void{genCallback(msg, 1, 2);};
+boost::function<void(const Std_Bool)>  R_S3_cb = [](const Std_Bool msg)->void{genCallback(msg, 1, 3);};
 
 //////////////////////////////////////////////////////////////////
 //		      JOYSTICK CALLBACKS		      //
