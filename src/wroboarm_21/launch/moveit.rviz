@@ -4,8 +4,9 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
+        - /Global Options1
         - /MotionPlanning1
-        - /MotionPlanning1/Planning Request1
+        - /Pose1
       Splitter Ratio: 0.7425600290298462
     Tree Height: 241
   - Class: rviz/Help
@@ -112,7 +113,7 @@ Visualization Manager:
         Robot Alpha: 0.5
         Robot Color: 150; 50; 150
         Show Robot Collision: false
-        Show Robot Visual: true
+        Show Robot Visual: false
         Show Trail: false
         State Display Time: 0.05 s
         Trail Step Size: 1
@@ -193,6 +194,22 @@ Visualization Manager:
         Show Robot Visual: true
       Value: true
       Velocity_Scaling_Factor: 0.1
+    - Alpha: 1
+      Axes Length: 0.10000000149011612
+      Axes Radius: 0.029999999329447746
+      Class: rviz/Pose
+      Color: 255; 25; 0
+      Enabled: true
+      Head Length: 0.07000000029802322
+      Head Radius: 0.05000000074505806
+      Name: Pose
+      Queue Size: 10
+      Shaft Length: 0.10000000149011612
+      Shaft Radius: 0.029999999329447746
+      Shape: Axes
+      Topic: /logic/arm_teleop/next_target
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -209,7 +226,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/XYOrbit
-      Distance: 2.996500015258789
+      Distance: 1.7158159017562866
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -217,17 +234,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 0.11356700211763382
-        Y: 0.10592000186443329
-        Z: 2.2351800055275817e-07
+        X: 0.05638057738542557
+        Y: 0.06656442582607269
+        Z: 1.6391335577736754e-07
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.4297969341278076
+      Pitch: 0.4497969150543213
       Target Frame: turntable
-      Yaw: 5.694949150085449
+      Yaw: 5.75994873046875
     Saved: ~
 Window Geometry:
   Displays:

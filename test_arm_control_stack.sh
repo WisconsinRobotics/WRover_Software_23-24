@@ -17,4 +17,5 @@ gnome-terminal -- roslaunch wroboarm_21 demo_test.launch
 #gnome-terminal -- rqt_plot /control/arm/00/setpoint /control/arm/00/feedback
 sleep 10
 gnome-terminal -- /bin/sh -c "rosrun wr_logic_teleop_arm ArmTeleopLogic; while true; do sleep 1; done"
+gnome-terminal -- roslaunch wreadinput test_xbox360.launch
 cd -
