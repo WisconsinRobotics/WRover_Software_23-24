@@ -18,7 +18,7 @@ using Std_Bool = const std_msgs::BoolConstPtr&;
 using Std_Float32 = const std_msgs::Float32ConstPtr&;
 
 std::atomic_bool actionClean {true};
-const tf2::Quaternion WORLD_OFFSET {0, sin(M_PI/4), 0, cos(M_PI/4)};
+const tf2::Quaternion WORLD_OFFSET {0, sin(M_PI/2), 0, cos(M_PI/2)};
 
 auto updateTarget(float x_pos, float y_pos, float z_pos, tf2::Quaternion orientation, ros::Publisher &pub) -> void{
     geometry_msgs::PoseStamped p {};
@@ -56,7 +56,7 @@ auto main(int argc, char** argv) -> int{
     float z_pos = HOME_Z;
 
     tf2::Quaternion orientation {0, sin(-M_PI/4), 0, cos(-M_PI/4)};
-    orientation = WORLD_OFFSET * orientation;
+    orientation = orientation;
 
     const tf2::Quaternion SPIN_X {sin(2*M_PI/1000), 0, 0, cos(2*M_PI/1000)};
     const tf2::Quaternion SPIN_Y {0, sin(2*M_PI/1000), 0, cos(2*M_PI/1000)};
@@ -108,7 +108,7 @@ auto main(int argc, char** argv) -> int{
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
             if(abs(msg->data) >= 0.5){
-                orientation *= WORLD_OFFSET.inverse() * (msg->data > 0 ? SPIN_X : SPIN_X.inverse()) * WORLD_OFFSET;
+                orientation *= (msg->data > 0 ? SPIN_Z : SPIN_Z.inverse());
                 updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
             }
         }));
@@ -117,7 +117,7 @@ auto main(int argc, char** argv) -> int{
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
             if(abs(msg->data) >= 0.5){
-                orientation *= WORLD_OFFSET.inverse() * (msg->data > 0 ? SPIN_Y : SPIN_Y.inverse()) * WORLD_OFFSET;
+                orientation *= (msg->data > 0 ? SPIN_Y : SPIN_Y.inverse());
                 updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
             }
         }));
@@ -126,7 +126,7 @@ auto main(int argc, char** argv) -> int{
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
             if(abs(msg->data) >= 0.5){
-                orientation *= WORLD_OFFSET.inverse() * (msg->data > 0 ? SPIN_Z : SPIN_Z.inverse()) * WORLD_OFFSET;
+                orientation *= (msg->data > 0 ? SPIN_X : SPIN_X.inverse());
                 updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
             }
         }));
@@ -139,7 +139,7 @@ auto main(int argc, char** argv) -> int{
         p.pose.position.x = x_pos;
         p.pose.position.y = y_pos;
         p.pose.position.z = z_pos;
-        p.pose.orientation = tf2::toMsg(WORLD_OFFSET.inverse() * orientation);
+        p.pose.orientation = tf2::toMsg(orientation);
         p.header.frame_id = "odom_combined";
         move.setPoseTarget(p);
         std::vector<geometry_msgs::Pose> waypoints {p.pose};
