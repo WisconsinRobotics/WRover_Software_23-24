@@ -150,7 +150,7 @@ add_library( HEADERS
 )
 
 add_executable(TeleopDriveTrainLogic src/TeleopDriveTrainLogic.cpp)
-target_link_libraries(TeleopDriveTrainLogic ${catkin_LIBRARIES})
+target_link_libraries(TeleopDriveTrainLogic ${catkin_LIBRARIES} HEADERS)
 add_dependencies(TeleopDriveTrainLogic ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
