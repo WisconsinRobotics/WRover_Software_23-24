@@ -130,16 +130,16 @@ include_directories(
 #   src/${PROJECT_NAME}/wr_control_drive_science.cpp
 # )
 
-add_library(testModule
-  main.cpp
-)
+# add_library(testModule
+#   main.cpp
+# )
 
-target_link_libraries(testModule ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+# target_link_libraries(testModule ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
-set_target_properties(testModule PROPERTIES
-        PREFIX ""
-        LIBRARY_OUTPUT_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_PYTHON_DESTINATION}
-        )
+# set_target_properties(testModule PROPERTIES
+#         PREFIX ""
+#         LIBRARY_OUTPUT_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_PYTHON_DESTINATION}
+#         )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
