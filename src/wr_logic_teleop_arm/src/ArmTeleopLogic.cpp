@@ -17,7 +17,7 @@
 using Std_Bool = const std_msgs::BoolConstPtr&;
 using Std_Float32 = const std_msgs::Float32ConstPtr&;
 
-std::atomic_bool actionClean {true};
+std::atomic_bool isNewPath {false};
 const tf2::Quaternion WORLD_OFFSET {0, sin(M_PI/2), 0, cos(M_PI/2)};
 
 auto updateTarget(float x_pos, float y_pos, float z_pos, tf2::Quaternion orientation, ros::Publisher &pub) -> void{
@@ -29,7 +29,7 @@ auto updateTarget(float x_pos, float y_pos, float z_pos, tf2::Quaternion orienta
     p.pose.orientation = tf2::toMsg(outOrientation);
     p.header.frame_id = "turntable";
     pub.publish(p);
-    actionClean.store(false);
+    isNewPath.store(true);
 }
 
 auto main(int argc, char** argv) -> int{
@@ -135,6 +135,12 @@ auto main(int argc, char** argv) -> int{
     // updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
 
     while(ros::ok()){
+        if(!isNewPath.load()){
+            continue;
+        }
+
+        // configure new trajectory
+        ROS_DEBUG("Hello %s", "World");
         geometry_msgs::PoseStamped p {};
         p.pose.position.x = x_pos;
         p.pose.position.y = y_pos;
@@ -144,12 +150,24 @@ auto main(int argc, char** argv) -> int{
         move.setPoseTarget(p);
         std::vector<geometry_msgs::Pose> waypoints {p.pose};
         moveit_msgs::RobotTrajectory traj;
-        double discard = move.computeCartesianPath(waypoints, 0.01, 0.0, traj);
+        
+        double discard = move.computeCartesianPath(waypoints, 0.005, 0.0, traj, false);
         move.asyncExecute(traj);
-        while(!move.getMoveGroupClient().getState().isDone() && actionClean.load()) loop.sleep();
-        if(!actionClean.load()) { 
-            move.stop();
-            actionClean.store(true);
+        isNewPath.store(false);
+
+        while(true){
+
+            if(move.getMoveGroupClient().getState().isDone()){
+                break;
+            } 
+            
+            else if(isNewPath.load()){
+                move.stop();
+                break;
+            }
+
+            loop.sleep();
+
         }
     }
 
