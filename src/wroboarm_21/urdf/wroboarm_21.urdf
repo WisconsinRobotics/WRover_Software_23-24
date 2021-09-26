@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com)
      Commit Version: 1.6.0-1-g15f4949  Build Version: 1.6.7594.29634
      For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
 <robot name="wroboarm_21">
     <link name="turntable">
-        
+
 <inertial>
             <origin xyz="-2.82541936962439E-17 6.93889390390723E-18 -4.24870678161208E-34" rpy="0 0 0" />
             <mass value="0.396806230030924" />
@@ -28,7 +28,7 @@
         </collision>
     </link>
     <link name="gearbox">
-        
+
 <inertial>
             <origin xyz="-5.70181409604587E-18 0.0380153243966357 -0.00138922050969218" rpy="0 0 0" />
             <mass value="0.341209853046385" />
@@ -55,11 +55,11 @@
         <origin xyz="0 0 0.0127" rpy="1.5708 0 0" />
         <parent link="turntable" />
         <child link="gearbox" />
-        <axis xyz="0 1 0" />	
+        <axis xyz="0 1 0" />
         <limit effort="50" velocity="1.5" lower="-3.1" upper="3.1"/>
     </joint>
     <link name="upperarm">
-        
+
 <inertial>
             <origin xyz="1.49614561175028E-17 0.157206632847804 2.77555756156289E-17" rpy="0 0 0" />
             <mass value="1.26412421587631" />
@@ -90,7 +90,7 @@
         <limit effort="50" velocity="1.5" lower="-3.1" upper="3.1"/>
     </joint>
     <link name="elbow">
-        
+
 <inertial>
             <origin xyz="7.33210423758527E-18 0.0462797200039115 -0.00991708285798099" rpy="0 0 0" />
             <mass value="0.625328404239412" />
@@ -121,7 +121,7 @@
         <limit effort="50" velocity="1.5" lower="-3.1" upper="3.1"/>
     </joint>
     <link name="forearm">
-        
+
 <inertial>
             <origin xyz="-1.32860243738577E-17 -1.90819582357449E-17 -0.113066392198771" rpy="0 0 0" />
             <mass value="0.460632401231927" />
@@ -152,7 +152,7 @@
         <limit effort="50" velocity="1.5" lower="-3.1" upper="3.1"/>
     </joint>
     <link name="wrist">
-        
+
 <inertial>
             <origin xyz="-7.1276563552947E-09 7.80625564189563E-18 -3.41498918032812E-09" rpy="0 0 0" />
             <mass value="0.0642008901362293" />
@@ -183,7 +183,7 @@
         <limit effort="50" velocity="1.5" lower="-3.1" upper="3.1"/>
     </joint>
     <link name="manipulator">
-        
+
 <inertial>
             <origin xyz="5.8113236445223E-17 1.74020910368395E-17 -0.05715" rpy="0 0 0" />
             <mass value="0.237050487139156" />
@@ -207,13 +207,13 @@
         </collision>
     </link>
     <joint name="link6_joint" type="revolute">
-        <origin xyz="0 0 0.0254" rpy="3.1416 0 1.5708" />
+        <origin xyz="0 0 0.0254" rpy="3.1416 0 0" />
         <parent link="wrist" />
         <child link="manipulator" />
-        <axis xyz="0 0 1" />
-        <limit effort="50" velocity="1.5" lower="-3.1" upper="3.1"/>
+        <axis xyz="0 1 1" />
+        <limit effort="50" velocity="1.5" lower="0" upper="1"/>
     </joint>
-    
+
 <transmission name="trans_link1_joint">
         <type>transmission_interface/SimpleTransmission</type>
         <joint name="link1_joint">
