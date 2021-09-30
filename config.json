@@ -1,0 +1,102 @@
+{
+  "buttons": {
+    "button_1": {
+      "enabled": true,
+      "trigger_service_to_invoke": "/robot_services/on_off_toggle",
+      "visualization_description": "Power"
+    },
+    "button_2": {
+      "enabled": true,
+      "trigger_service_to_invoke": "/robot_services/estop",
+      "visualization_description": "E-Stop"
+    },
+    "button_3": {
+      "enabled": true,
+      "trigger_service_to_invoke": "/robot_services/calibrate",
+      "visualization_description": "Calibrate"
+    }
+  },
+
+  "visualizations": {
+    "fast_rate_small_circular_gauge_1": {
+      "enabled": true,
+      "topic_name": "/robot_stats/battery_load",
+      "ros_message_type": "sensor_msgs/BatteryState",
+      "field_name": "current",
+      "visualization_label" : "Current",
+      "visualization_units": "Amps",
+      "mininum_value": 0,
+      "maximum_value": 200
+    },
+    "fast_rate_small_circular_gauge_2": {
+      "enabled": true,
+      "topic_name": "/robot_stats/radio",
+      "ros_message_type": "std_msgs/Float32",
+      "field_name": "",
+      "visualization_label" : "Radio Link",
+      "visualization_units": "dBm",
+      "mininum_value": 0,
+      "maximum_value": 100
+    },
+    "fast_rate_small_circular_gauge_3": {
+      "enabled": true,
+      "topic_name": "/robot_stats/cpu_load",
+      "ros_message_type": "std_msgs/Float32",
+      "field_name": "",
+      "visualization_label" : "CPU Load",
+      "visualization_units": "Average",
+      "mininum_value": 0,
+      "maximum_value": 150
+    },
+    "fast_rate_large_circular_gauge_1": {
+      "enabled": true,
+      "topic_name": "/robot_stats/battery",
+      "ros_message_type": "sensor_msgs/BatteryState",
+      "field_name": "voltage",
+      "visualization_label" : "Battery Voltage",
+      "visualization_units": "Volts",
+      "mininum_value": 0,
+      "maximum_value": 200
+    },
+    "fast_rate_large_circular_gauge_2": {
+      "enabled": true,
+      "topic_name": "/robot_stats/communication",
+      "ros_message_type": "sensor_msgs/Range",
+      "field_name": "range",
+      "visualization_label" : "Nearest Hazard",
+      "visualization_units": "Meters",
+      "mininum_value": 0,
+      "maximum_value": 100
+    },
+    "medium_rate_thick_meter_1": {
+      "enabled": true,
+      "topic_name": "/robot_stats/location",
+      "ros_message_type": "std_msgs/Float32",
+      "field_name": "",
+      "visualization_label" : "GPS Fix",
+      "visualization_units": "GPS Sats",
+      "mininum_value": 0,
+      "maximum_value": 100
+    },
+    "medium_rate_thick_meter_2": {
+      "enabled": true,
+      "topic_name": "/robot_stats/temperature",
+      "ros_message_type": "sensor_msgs/Temperature",
+      "field_name": "temperature",
+      "visualization_label" : "Motor Temp",
+      "visualization_units": "Degrees F",
+      "mininum_value": 0,
+      "maximum_value": 200
+    },
+    "medium_rate_thick_meter_3": {
+      "enabled": true,
+      "topic_name": "/robot_stats/communication_latency",
+      "ros_message_type": "std_msgs/Float32",
+      "field_name": "",
+      "visualization_label" : "Net Latency",
+      "visualization_units": "ms",
+      "mininum_value": 0,
+      "maximum_value": 100
+    }
+  }
+}
