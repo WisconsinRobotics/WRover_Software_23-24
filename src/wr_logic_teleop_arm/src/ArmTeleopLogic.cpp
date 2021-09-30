@@ -13,11 +13,13 @@
 #include <cstdint>
 #include <ros/ros.h>
 #include <moveit/move_group_interface/move_group_interface.h>
+#include <moveit_visual_tools/moveit_visual_tools.h>
+#include <thread>
 
 using Std_Bool = const std_msgs::BoolConstPtr&;
 using Std_Float32 = const std_msgs::Float32ConstPtr&;
 
-std::atomic_bool isNewPath {false};
+std::atomic_bool isNewPath { true };
 const tf2::Quaternion WORLD_OFFSET {0, sin(M_PI/2), 0, cos(M_PI/2)};
 
 auto updateTarget(float x_pos, float y_pos, float z_pos, tf2::Quaternion orientation, ros::Publisher &pub) -> void{
@@ -29,7 +31,7 @@ auto updateTarget(float x_pos, float y_pos, float z_pos, tf2::Quaternion orienta
     p.pose.orientation = tf2::toMsg(outOrientation);
     p.header.frame_id = "turntable";
     pub.publish(p);
-    isNewPath.store(true);
+    // isNewPath.store(true);
 }
 
 auto main(int argc, char** argv) -> int{
@@ -65,6 +67,14 @@ auto main(int argc, char** argv) -> int{
     moveit::planning_interface::MoveGroupInterface move("arm");
     // move.setPlannerId("RRTStar");
     move.setPlanningTime(PLANNING_TIME);
+    const moveit::core::JointModelGroup* joint_model_group = move.getCurrentState()->getJointModelGroup("arm");
+    robot_state::RobotState start_state(*move.getCurrentState());
+
+
+    namespace rvt = rviz_visual_tools;
+    moveit_visual_tools::MoveItVisualTools visual_tools("arm");
+    // visual_tools.prompt("Test");
+
     ros::Rate loop {CLOCK_RATE};
 
     ros::Publisher nextTarget = np.advertise<geometry_msgs::PoseStamped>("/logic/arm_teleop/next_target", 
@@ -131,16 +141,27 @@ auto main(int argc, char** argv) -> int{
             }
         }));
 
+    ros::Subscriber execPath = np.subscribe("/xbox_test/button/a",
+        MESSAGE_QUEUE_LENGTH,
+        static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
+            if(msg){
+                isNewPath.store(true);
+            }
+        }));
     // transform = move.getCurrentState()->getFrameTransform("odom_combined");
     // updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
 
     while(ros::ok()){
+
         if(!isNewPath.load()){
+            loop.sleep();
             continue;
         }
 
-        // configure new trajectory
-        ROS_DEBUG("Hello %s", "World");
+        // stop current path
+        move.stop();
+
+        // configure target pose
         geometry_msgs::PoseStamped p {};
         p.pose.position.x = x_pos;
         p.pose.position.y = y_pos;
@@ -150,12 +171,27 @@ auto main(int argc, char** argv) -> int{
         move.setPoseTarget(p);
         std::vector<geometry_msgs::Pose> waypoints {p.pose};
         moveit_msgs::RobotTrajectory traj;
-        
-        double discard = move.computeCartesianPath(waypoints, 0.005, 0.0, traj, false);
-        move.asyncExecute(traj);
-        isNewPath.store(false);
 
-        while(true){
+        // update start state to reflect robot position
+        move.setStartStateToCurrentState();
+
+        //plan and execute path
+        double discard = move.computeCartesianPath(waypoints, 0.005, 0.0, traj, false); //TODO async plannging
+
+
+        if(!isNewPath.load()){
+            loop.sleep();
+            continue;
+        }
+
+        move.asyncExecute(traj);
+
+        visual_tools.publishTrajectoryLine(traj, joint_model_group);
+        visual_tools.trigger();
+
+        isNewPath.store(false);
+    
+        while(ros::ok){
 
             if(move.getMoveGroupClient().getState().isDone()){
                 break;
@@ -167,8 +203,7 @@ auto main(int argc, char** argv) -> int{
             }
 
             loop.sleep();
-
-        }
+        }   
     }
 
     return 0;
