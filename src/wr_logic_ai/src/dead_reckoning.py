@@ -55,12 +55,12 @@ def get_coordinates():
         coordinate_array = [0, 0]
         report = session.next()
         if report['class'] == 'TPV':
-            if hasattr(report, 'lat'):
-                if hasattr(report, 'lon'):
+            if hasattr(report, 'lat'): ## ------------- This lines have to be separeted? Or can they be like below?
+                if hasattr(report, 'lon'): ## --------- if hasattr(report, 'lat') and hasattr(report, 'lon'):
                     coordinate_array[0] = report.lat
                     coordinate_array[1] = report.lon
                     # update previous_coordinates with new coordinates if they are not 0
-                    if (not(report.lat == 0)):
+                    if (not(report.lat == 0)): ## ----- Probably would be better to write report.lat != 0 for readability
                         previous_coordinates[0] = coordinate_array[0]
                         previous_coordinates[1] = coordinate_array[1]
         # returns previous coordinates if current coordinates are retrieved as 0
@@ -72,8 +72,8 @@ def get_coordinates():
 
 ## Retrieve heading from IMU (Returns a float angle)
 def get_heading():
-    # TODO: get actual obset from an absolute value
-    offset_from_east = 90
+    # TODO: get actual obset from an absolute value ---- Build calibration method for startup.
+    offset_from_east = 90 
     # imu returns clockwise values, we need it counterclockwise
     relative_angle = 360 - sensor.getVector(BNO055.VECTOR_EULER)[0]
     return (offset_from_east + relative_angle) % 360
