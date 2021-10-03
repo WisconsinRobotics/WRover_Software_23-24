@@ -31,7 +31,7 @@ auto updateTarget(float x_pos, float y_pos, float z_pos, tf2::Quaternion orienta
     p.pose.orientation = tf2::toMsg(outOrientation);
     p.header.frame_id = "turntable";
     pub.publish(p);
-    // isNewPath.store(true);
+    isNewPath.store(true);
 }
 
 auto main(int argc, char** argv) -> int{
@@ -70,11 +70,6 @@ auto main(int argc, char** argv) -> int{
     move.setPlanningTime(PLANNING_TIME);
     const moveit::core::JointModelGroup* joint_model_group = move.getCurrentState()->getJointModelGroup("arm");
     robot_state::RobotState start_state(*move.getCurrentState());
-
-
-    namespace rvt = rviz_visual_tools;
-    moveit_visual_tools::MoveItVisualTools visual_tools("arm");
-    // visual_tools.prompt("Test");
 
     ros::Rate loop {CLOCK_RATE};
 
@@ -146,8 +141,7 @@ auto main(int argc, char** argv) -> int{
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
             if(msg->data){
-                std::cout << "[INFO] [" << ros::Time::now() << "]: a button pressed: " << msg << std::endl;
-                isNewPath.store(true);
+                // isNewPath.store(true);
             }
         }));
     // transform = move.getCurrentState()->getFrameTransform("odom_combined");
@@ -156,16 +150,14 @@ auto main(int argc, char** argv) -> int{
     while(ros::ok()){
         std::cout << "[INFO] [" << ros::Time::now() << "]: start main loop: " << isNewPath.load() << std::endl;
 
-
         if(!isNewPath.load()){
-            std::cout << "[INFO] [" << ros::Time::now() << "]: no new path" << std::endl;
             loop.sleep();
             continue;
         }
 
-        isNewPath.store(false);
         // stop current path
-        // move.stop();
+        isNewPath.store(false);
+        move.stop();
 
         // configure target pose
         geometry_msgs::PoseStamped p {};
@@ -178,29 +170,15 @@ auto main(int argc, char** argv) -> int{
         std::vector<geometry_msgs::Pose> waypoints {p.pose};
         moveit_msgs::RobotTrajectory traj;
 
-        // update start state to reflect robot position
-        move.setStartStateToCurrentState();
-
         //plan and execute path
-        double discard = move.computeCartesianPath(waypoints, 0.005, 0.0, traj, false); //TODO async plannging
-
-        std::cout << "[INFO] [" << ros::Time::now() << "]: finished planning" << std::endl;
-
-
-        // check for new paths
-        if(isNewPath.load() || discard < MINIMUM_PATH_ACCURACY){
-            loop.sleep();
-            std::cout << "[INFO] [" << ros::Time::now() << "]: cancelling computed path" << std::endl;
-            continue;
-        }
-
-        move.asyncExecute(traj);
+        move.setStartStateToCurrentState();
+        move.asyncMove();
 
         while(ros::ok){
-            std::cout << "[INFO] [" << ros::Time::now() << "]: executing path" << std::endl;
+            std::cout << "[INFO] [" << ros::Time::now() << "]: executing path " << std::endl;
 
-            if(move.getMoveGroupClient().getState().isDone()){ //TOFIX - move group completes instantly
-                std::cout << "[INFO] [" << ros::Time::now() << "]: path finished" << std::endl;
+            if(move.getMoveGroupClient().getState().isDone()){
+                std::cout << "[INFO] [" << ros::Time::now() << "]: path finished: " << move.getMoveGroupClient().getState().getText() << std::endl;
                 break;
             } 
             
