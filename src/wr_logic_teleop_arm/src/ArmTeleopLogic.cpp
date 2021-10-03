@@ -44,6 +44,7 @@ auto main(int argc, char** argv) -> int{
     constexpr float CLOCK_RATE = 2;
     constexpr uint32_t MESSAGE_QUEUE_LENGTH = 1000; 
     constexpr float TRIGGER_PRESSED = 0.5;
+    constexpr float MINIMUM_PATH_ACCURACY = 0.0;
 
     constexpr float STEP_X = 0.001;
     constexpr float STEP_Y = 0.001;
@@ -144,7 +145,8 @@ auto main(int argc, char** argv) -> int{
     ros::Subscriber execPath = np.subscribe("/xbox_test/button/a",
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
-            if(msg){
+            if(msg->data){
+                std::cout << "[INFO] [" << ros::Time::now() << "]: a button pressed: " << msg << std::endl;
                 isNewPath.store(true);
             }
         }));
@@ -152,14 +154,18 @@ auto main(int argc, char** argv) -> int{
     // updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
 
     while(ros::ok()){
+        std::cout << "[INFO] [" << ros::Time::now() << "]: start main loop: " << isNewPath.load() << std::endl;
+
 
         if(!isNewPath.load()){
+            std::cout << "[INFO] [" << ros::Time::now() << "]: no new path" << std::endl;
             loop.sleep();
             continue;
         }
 
+        isNewPath.store(false);
         // stop current path
-        move.stop();
+        // move.stop();
 
         // configure target pose
         geometry_msgs::PoseStamped p {};
@@ -178,26 +184,28 @@ auto main(int argc, char** argv) -> int{
         //plan and execute path
         double discard = move.computeCartesianPath(waypoints, 0.005, 0.0, traj, false); //TODO async plannging
 
+        std::cout << "[INFO] [" << ros::Time::now() << "]: finished planning" << std::endl;
 
-        if(!isNewPath.load()){
+
+        // check for new paths
+        if(isNewPath.load() || discard < MINIMUM_PATH_ACCURACY){
             loop.sleep();
+            std::cout << "[INFO] [" << ros::Time::now() << "]: cancelling computed path" << std::endl;
             continue;
         }
 
         move.asyncExecute(traj);
 
-        visual_tools.publishTrajectoryLine(traj, joint_model_group);
-        visual_tools.trigger();
-
-        isNewPath.store(false);
-    
         while(ros::ok){
+            std::cout << "[INFO] [" << ros::Time::now() << "]: executing path" << std::endl;
 
-            if(move.getMoveGroupClient().getState().isDone()){
+            if(move.getMoveGroupClient().getState().isDone()){ //TOFIX - move group completes instantly
+                std::cout << "[INFO] [" << ros::Time::now() << "]: path finished" << std::endl;
                 break;
             } 
             
             else if(isNewPath.load()){
+                std::cout << "[INFO] [" << ros::Time::now() << "]: path overridden" << std::endl;
                 move.stop();
                 break;
             }
