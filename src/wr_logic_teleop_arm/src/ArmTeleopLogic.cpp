@@ -31,7 +31,7 @@ auto updateTarget(float x_pos, float y_pos, float z_pos, tf2::Quaternion orienta
     p.pose.orientation = tf2::toMsg(outOrientation);
     p.header.frame_id = "turntable";
     pub.publish(p);
-    isNewPath.store(true);
+    // isNewPath.store(true);
 }
 
 auto main(int argc, char** argv) -> int{
@@ -76,7 +76,6 @@ auto main(int argc, char** argv) -> int{
     ros::Publisher nextTarget = np.advertise<geometry_msgs::PoseStamped>("/logic/arm_teleop/next_target", 
         MESSAGE_QUEUE_LENGTH);
         
-
     ros::Subscriber yAxis = np.subscribe("/xbox_test/axis/pov_y", 
         MESSAGE_QUEUE_LENGTH, 
         static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
@@ -85,6 +84,7 @@ auto main(int argc, char** argv) -> int{
                 updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
             }
         }));
+
     ros::Subscriber xAxis = np.subscribe("/xbox_test/axis/pov_x", 
         MESSAGE_QUEUE_LENGTH, 
         static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
@@ -93,6 +93,7 @@ auto main(int argc, char** argv) -> int{
                 updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
             }
         }));
+
     ros::Subscriber zUp = np.subscribe("/xbox_test/button/shoulder_l",
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
@@ -101,6 +102,7 @@ auto main(int argc, char** argv) -> int{
                 updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
             }
         }));
+
     ros::Subscriber zDown = np.subscribe("/xbox_test/axis/trigger_left",
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
@@ -141,14 +143,14 @@ auto main(int argc, char** argv) -> int{
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
             if(msg->data){
-                // isNewPath.store(true);
+                isNewPath.store(true);
             }
         }));
+        
     // transform = move.getCurrentState()->getFrameTransform("odom_combined");
     // updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
 
     while(ros::ok()){
-        std::cout << "[INFO] [" << ros::Time::now() << "]: start main loop: " << isNewPath.load() << std::endl;
 
         if(!isNewPath.load()){
             loop.sleep();

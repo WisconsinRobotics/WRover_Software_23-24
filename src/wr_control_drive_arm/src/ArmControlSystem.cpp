@@ -15,7 +15,7 @@
 /**
  * @brief Defines space for all ArmMotor references
  */
-ArmMotor *motors[6];
+ArmMotor *motors[7];
 /**
  * @brief The Joint State Publisher for MoveIt
  */
@@ -118,6 +118,7 @@ int main(int argc, char** argv)
   motors[3] = new ArmMotor("link4_joint", 1, 1, &n);
   motors[4] = new ArmMotor("link5_joint", 2, 0, &n);
   motors[5] = new ArmMotor("link6_joint", 2, 1, &n);
+  motors[5] = new ArmMotor("link7_joint", 3, 0, &n);
 
   // Initialize the Joint State Data Publisher
   jointStatePublisher = n.advertise<sensor_msgs::JointState>("/control/arm_joint_states", 1000);
