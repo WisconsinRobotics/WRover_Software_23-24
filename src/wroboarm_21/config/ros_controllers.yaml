@@ -33,4 +33,5 @@ controller_list:
       - link3_joint
       - link4_joint
       - link5_joint
+      - link6_joint
       - link7_joint

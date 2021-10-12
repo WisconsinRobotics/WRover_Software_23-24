@@ -290,10 +290,10 @@
     </transmission>
     <transmission name="trans_link7_joint">
         <type>transmission_interface/SimpleTransmission</type>
-        <joint name="link6_joint">
+        <joint name="link7_joint">
             <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
         </joint>
-        <actuator name="link6_joint_motor">
+        <actuator name="link7_joint_motor">
             <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
             <mechanicalReduction>1</mechanicalReduction>
         </actuator>
