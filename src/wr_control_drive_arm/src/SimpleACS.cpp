@@ -19,10 +19,10 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
     int i = 0;
     ros::Rate sleeper(50);
     while(i++ < 100){
-      std::cout<<motors[0]->getEncoderCounts()<<std::endl;
-      std::cout<<motors[0]->getPower()<<std::endl;
-      std::cout<<std::endl;
-      std::this_thread::yield();
+      // std::cout<<motors[0]->getEncoderCounts()<<std::endl;
+      // std::cout<<motors[0]->getPower()<<std::endl;
+      // std::cout<<std::endl;
+      // std::this_thread::yield();
       sleeper.sleep();
     }
     as->setSucceeded();

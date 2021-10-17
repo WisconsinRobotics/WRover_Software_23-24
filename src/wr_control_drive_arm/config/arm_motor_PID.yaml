@@ -53,3 +53,12 @@ controllers:
     D: 0
     min: -1
     max: 1
+
+  - setpointTopic: "/control/arm/30/setpoint"
+    feedbackTopic: "/control/arm/30/feedback"
+    outputTopic: "/control/arm/30/output"
+    P: 30
+    I: 0
+    D: 0
+    min: -1
+    max: 1

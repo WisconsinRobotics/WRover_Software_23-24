@@ -177,7 +177,7 @@ auto main(int argc, char** argv) -> int{
         move.asyncMove();
 
         while(ros::ok){
-            std::cout << "[INFO] [" << ros::Time::now() << "]: executing path " << std::endl;
+            // std::cout << "[INFO] [" << ros::Time::now() << "]: executing path " << std::endl;
 
             if(move.getMoveGroupClient().getState().isDone()){
                 std::cout << "[INFO] [" << ros::Time::now() << "]: path finished: " << move.getMoveGroupClient().getState().getText() << std::endl;
