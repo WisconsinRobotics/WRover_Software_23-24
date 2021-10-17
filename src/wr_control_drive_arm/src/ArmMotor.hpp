@@ -167,6 +167,20 @@ class ArmMotor{
         std::string getMotorName();
 
         /**
+         * @brief Get the name of the ArmMotor
+         * 
+         * @return std::string The controller ID of the ArmMotor
+         */
+        unsigned int getControllerID();
+
+        /**
+         * @brief Get the name of the ArmMotor
+         * 
+         * @return std::string The motor ID of the ArmMotor
+         */
+        unsigned int getMotorID();
+
+        /**
          * @brief Checks if the motor is currently within a pre-specified tolerance of a target
          * 
          * @param targetCounts The target to test against

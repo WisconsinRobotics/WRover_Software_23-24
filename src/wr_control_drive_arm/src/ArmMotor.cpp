@@ -146,6 +146,14 @@ std::string ArmMotor::getMotorName(){
     return this->motorName;
 }
 
+unsigned int ArmMotor::getMotorID(){
+    return this->motorID;
+}
+
+unsigned int ArmMotor::getControllerID(){
+    return this->controllerID;
+}
+
 float ArmMotor::getPower(){
     return ((float)this->powerMsg->data)/INT16_MAX;
 }

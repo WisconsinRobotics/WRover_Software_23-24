@@ -45,18 +45,18 @@ controllers:
     min: -1
     max: 1
 
-  - setpointTopic: "/control/arm/21/setpoint"
-    feedbackTopic: "/control/arm/21/feedback"
-    outputTopic: "/control/arm/21/output"
+  - setpointTopic: "/control/arm/roll/setpoint"
+    feedbackTopic: "/control/arm/roll/feedback"
+    outputTopic: "/control/arm/roll/output"
     P: 30
     I: 0
     D: 0
     min: -1
     max: 1
 
-  - setpointTopic: "/control/arm/30/setpoint"
-    feedbackTopic: "/control/arm/30/feedback"
-    outputTopic: "/control/arm/30/output"
+  - setpointTopic: "/control/arm/pitch/setpoint"
+    feedbackTopic: "/control/arm/pitch/feedback"
+    outputTopic: "/control/arm/pitch/output"
     P: 30
     I: 0
     D: 0
