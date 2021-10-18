@@ -10,6 +10,7 @@
 #include <sensor_msgs/JointState.h>
 #include <algorithm>
 #include <csignal>
+#include <vector>
 #include "ArmMotor.hpp"
 
 /**
@@ -26,76 +27,125 @@ ros::Publisher jointStatePublisher;
 typedef actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> Server;
 
 /**
+ * @brief Converts position space to encoder space
+ * 
+ * @param positionTargets the pitch and roll positions of the differential joint
+ * @return the left and right position targets for the joint motors
+ */
+std::vector<double> getEncoderSpace(std::vector<double> positionTargets){
+	std::vector<double> encoderTargets;
+
+	// TODO: real matrix conversion, integrate joint into wroboclaw mock.py
+	encoderTargets[0] = positionTargets[0];
+	encoderTargets[1] = positionTargets[1];
+
+	return encoderTargets;
+}
+
+
+/**
+ * @brief sets a target position and pulls info from motor
+ * 
+ * @param names a vector with motor joint names
+ * @param positions a vector with positions in radians
+ * @param target the target radian value
+ * @param motor a pointer to the motor
+ * @return if the motor has reached its target
+ */
+bool configMotorTarget(std::vector<std::string> names, std::vector<double> positions, double target, ArmMotor* motor){
+	// Each motor should run to its respective target position at a fixed speed
+	// TODO: this speed should be capped/dynamic to reflect the input joint velocity parameters
+	// velMax = abs(*std::max_element(currTargetPosition.velocities.begin(), currTargetPosition.velocities.end(), [](double a, double b) {return abs(a)<abs(b);}));
+	// float currPower = 0.1 * currTargetPosition.velocities[j]/velMax;
+	// currPower = abs(velMax) <= 0.0001 ? 0.1 : currPower;
+
+	motor->runToTarget(target, 0);
+	// Push the current motor name and position data to the Joint State data tracking list
+	names.push_back(motor->getMotorName());
+	positions.push_back(motor->getRads());
+	// The position has only finished if every motor is STOPped
+	return motor->getMotorState() == MotorState::STOP;
+}
+
+/**
  * @brief Perform the given action as interpreted as moving the arm joints to specified positions
  * 
  * @param goal The goal state given
  * @param as The Action Server this is occuring on
  */
 void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server* as) {
-    // For each point in the trajectory execution sequence...
-    for(int i = 0; i < goal->trajectory.points.size(); i++){
-      // Capture the current goal for easy reference
-      trajectory_msgs::JointTrajectoryPoint currTargetPosition = goal->trajectory.points[i];
+	std::cout << "execute trajectory" << std::endl;
+	// For each point in the trajectory execution sequence...
+	for(int i = 0; i < goal->trajectory.points.size(); i++){
+		// Capture the current goal for easy reference
+		trajectory_msgs::JointTrajectoryPoint currTargetPosition = goal->trajectory.points[i];
 
-      // Track whether or not the current position is done
-      bool hasPositionFinished = false;
-      // Capture the names of the motors
-      std::vector<std::string> names;
-      // Capture the positions of the motors
-      std::vector<double> positions;
-      // Keep max loop rate at 50 Hz
-      ros::Rate loop(50);
+		// Track whether or not the current position is done
+		bool hasPositionFinished = false;
+		// Capture the names of the motors
+		std::vector<std::string> names;
+		// Capture the positions of the motors
+		std::vector<double> positions;
+		// the target space of the differential joint
+		std::vector<double> differentialPositionTargets;
+		// the target space of the differential joint
+		std::vector<double> differentialEncoderTargets;
+		// Keep max loop rate at 50 Hz
+		ros::Rate loop(50);
 
-      // While the current position is not complete yet...
-      while(!hasPositionFinished){
-        // Assume the current action is done until proven otherwise
-        hasPositionFinished = true;
-        // Create the Joint State message for the current update cycle
-        sensor_msgs::JointState js_msg;
+		// While the current position is not complete yet...
+		while(!hasPositionFinished){
+		// Assume the current action is done until proven otherwise
+		hasPositionFinished = true;
+		// Create the Joint State message for the current update cycle
+		sensor_msgs::JointState js_msg;
 
-        // Clear the list of motor names and position data
-        names.clear();
-        positions.clear();
+		// Clear the list of motor names and position data
+		names.clear();
+		positions.clear();
 
-        double velMax = 0;
-        // For each motor specified in the currTargetPosition...
-        for(int j = 0; j < currTargetPosition.positions.size(); j++){
-          // Each motor should run to its respective target position at a fixed speed
-          // TODO: this speed should be capped/dynamic to reflect the input joint velocity parameters
-          // velMax = abs(*std::max_element(currTargetPosition.velocities.begin(), currTargetPosition.velocities.end(), [](double a, double b) {return abs(a)<abs(b);}));
-          // float currPower = 0.1 * currTargetPosition.velocities[j]/velMax;
-          // currPower = abs(velMax) <= 0.0001 ? 0.1 : currPower;
-          motors[j]->runToTarget(currTargetPosition.positions[j], 0);//currPower);
-          // The position has only finished if every motor is STOPped
-          hasPositionFinished &= motors[j]->getMotorState() == MotorState::STOP;
-          // Push the current motor name and position data to the Joint State data tracking list
-          names.push_back(motors[j]->getMotorName());
-          positions.push_back(motors[j]->getRads());
-          
-          // DEBUGGING OUTPUT: Print each motor's name, radian position, encoder position, and power
-          std::cout<<motors[j]->getMotorName()<<":"<<std::setw(30-motors[j]->getMotorName().length())<<motors[j]->getRads()<<std::endl;
-          std::cout<<std::setw(30)<<motors[j]->getEncoderCounts()<<std::endl;
-          std::cout<<std::setw(30)<<motors[j]->getPower()<<std::endl;
-        }
-        // DEBUGGING OUTPUT: Print a divider line for cleanliness
-        std::cout<<velMax<<std::endl;
-        std::cout<<"-----------------------"<<std::endl;
-        // TODO: Make debugging output parameterized or pushed to the ROS output system to clean up output when desired
-        
-        // Set the name and position data for the Joint State Data message as tracked by the list of motor names and positions
-        js_msg.name = names;
-        js_msg.position = positions;
-        // Publish the Joint State message
-        jointStatePublisher.publish(js_msg);
+		double velMax = 0;
+		// For each motor specified in the currTargetPosition...
+		for(int j = 0; j < currTargetPosition.positions.size(); j++){
 
-        // Sleep until the next update cycle
-        loop.sleep();
-      }
-    }
+			hasPositionFinished &= configMotorTarget(names, positions, currTargetPosition.positions[j], motors[j]);
+			
+			// DEBUGGING OUTPUT: Print each motor's name, radian position, encoder position, and power
+			// std::cout<<motors[j]->getMotorName()<<":"<<std::setw(30-motors[j]->getMotorName().length())<<motors[j]->getRads()<<std::endl;
+			// std::cout<<std::setw(30)<<motors[j]->getEncoderCounts()<<std::endl;
+			// std::cout<<std::setw(30)<<motors[j]->getPower()<<std::endl;
+		}
 
-    //When all positions have been reached, set the current task as succeeded
-    as->setSucceeded();
+		// set differential joint positions
+		// differentialPositionTargets.push_back(currTargetPosition.positions[5]);
+		// differentialPositionTargets.push_back(currTargetPosition.positions[6]);
+		// differentialEncoderTargets = getEncoderSpace(differentialPositionTargets);
+
+		// hasPositionFinished &= configMotorTarget(names, positions, differentialEncoderTargets[5], motors[5]);
+		// hasPositionFinished &= configMotorTarget(names, positions, differentialEncoderTargets[6], motors[6]);	
+		
+		
+		// DEBUGGING OUTPUT: Print a divider line for cleanliness
+		// std::cout<<velMax<<std::endl;
+		// std::cout<<"-----------------------"<<std::endl;
+		// TODO: Make debugging output parameterized or pushed to the ROS output system to clean up output when desired
+		
+		// Set the name and position data for the Joint State Data message as tracked by the list of motor names and positions
+		js_msg.name = names;
+		js_msg.position = positions;
+		// Publish the Joint State message
+		jointStatePublisher.publish(js_msg);
+
+		// Sleep until the next update cycle
+		loop.sleep();
+		}
+	}
+
+	//When all positions have been reached, set the current task as succeeded
+	as->setSucceeded();
 }
+
+
 
 /**
  * @brief The main executable method of the node.  Starts the ROS node and the Action Server for processing Arm Control commands
@@ -106,6 +156,8 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
  */
 int main(int argc, char** argv)
 {
+	std::cout << "init ArmControlSystem" << std::endl;
+
   // Initialize the current node as ArmControlSystem
   ros::init(argc, argv, "ArmControlSystem");
   // Create the NodeHandle to the current ROS node
@@ -118,7 +170,7 @@ int main(int argc, char** argv)
   motors[3] = new ArmMotor("link4_joint", 1, 1, &n);
   motors[4] = new ArmMotor("link5_joint", 2, 0, &n);
   motors[5] = new ArmMotor("link6_joint", 2, 1, &n);
-  motors[5] = new ArmMotor("link7_joint", 3, 0, &n);
+  motors[6] = new ArmMotor("link7_joint", 3, 0, &n);
 
   // Initialize the Joint State Data Publisher
   jointStatePublisher = n.advertise<sensor_msgs::JointState>("/control/arm_joint_states", 1000);
