@@ -109,7 +109,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
           std::cout<<std::setw(30)<<motors[j]->getPower()<<std::endl;
         }
         
-		// config dynamic joint motors
+		// config differential joint motors
 		std::vector<double> motorTargets = convertJointSpacetoEncoderSpace(currTargetPosition.positions[5], currTargetPosition.positions[6]);
 		hasPositionFinished &= configMotorTarget(&names, &positions, motorTargets[0], 0, motors[5]);
 		hasPositionFinished &= configMotorTarget(&names, &positions, motorTargets[1], 0, motors[6]);
