@@ -1,0 +1,5 @@
+<!-- Launches node providing teleoperation for the drive system. -->
+<launch>
+  <include file="$(find wr_hci_hid)/launch/teleop_ds.launch"/>
+  <include file="$(find wr_logic_teleop_ds)/launch/std.launch"/>
+</launch>
