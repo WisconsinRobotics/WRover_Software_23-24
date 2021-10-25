@@ -2,7 +2,6 @@
 #include <control_msgs/FollowJointTrajectoryAction.h>
 #include <actionlib/server/simple_action_server.h>
 #include <sensor_msgs/JointState.h>
-#include <thread>
 #include "ArmMotor.hpp"
 
 ArmMotor* motors[7];
