@@ -28,7 +28,7 @@ bool msgCache[] = {false, false};
 //Define the output message
 wr_drive_msgs::DriveTrainCmd output;
 
-Watchdog dog(1);
+//Watchdog dog(1);
 
 //////////////////////////////////////////////////////////////////
 //			BUTTON CALLBACKS			//
@@ -40,7 +40,7 @@ Watchdog dog(1);
 //Generic Button Callback
 void genCallback(const Std_Bool msg, int ind1, int ind2){
 	if(msg->data) speedRatio[ind1]=SPEED_RATIO_VALUES[ind2];
-	dog.pet();
+//	dog.pet();
 }
 
 //Left Drive Joystick
@@ -73,7 +73,7 @@ void djL_axY_callback(const std_msgs::Float32::ConstPtr& msg){
 	output.left_value = msg->data*speedRatio[0];
 	msgCache[0] = true;
 	cachePublish();
-	dog.pet();
+//	dog.pet();
 }
 
 //Right Drive Joystick
@@ -83,7 +83,7 @@ void djR_axY_callback(const std_msgs::Float32::ConstPtr& msg){
 	output.right_value = msg->data*speedRatio[1];
 	msgCache[1] = true;
 	cachePublish();
-	dog.pet();
+//	dog.pet();
 }
 
 void djR_camMast_callback(const std_msgs::Float32::ConstPtr& msg){
@@ -97,7 +97,7 @@ void djR_camMast_callback(const std_msgs::Float32::ConstPtr& msg){
 	cam_cmd.turn_speed = speedCamMast;
 	camCommand.publish(cam_cmd);
 
-	dog.pet();
+//	dog.pet();
 }
 
 //////////////////////////////////////////////////////////////////
