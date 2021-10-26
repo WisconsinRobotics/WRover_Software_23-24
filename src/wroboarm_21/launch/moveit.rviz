@@ -74,6 +74,11 @@ Visualization Manager:
           Expand Link Details: false
           Expand Tree: false
           Link Tree Style: Links in Alphabetic Order
+          dummy:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
           elbow:
             Alpha: 1
             Show Axes: false
@@ -154,6 +159,11 @@ Visualization Manager:
           Expand Link Details: false
           Expand Tree: false
           Link Tree Style: Links in Alphabetic Order
+          dummy:
+            Alpha: 1
+            Show Axes: false
+            Show Trail: false
+            Value: true
           elbow:
             Alpha: 1
             Show Axes: false

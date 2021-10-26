@@ -17,9 +17,10 @@
         <joint name="link4_joint"/>
         <joint name="link5_joint"/>
         <joint name="link6_joint"/>
+        <joint name="link7_joint"/>
     </group>
     <!--END EFFECTOR: Purpose: Represent information about an end effector.-->
-    <end_effector name="hand" parent_link="turntable" group="arm"/>
+    <end_effector name="manipulator" parent_link="turntable" group="arm"/>
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
     <virtual_joint name="base" type="fixed" parent_frame="odom_combined" child_link="turntable"/>
     <!--DISABLE COLLISIONS: By default it is assumed that any link of the robot could potentially come into collision with any other link in the robot. This tag disables collision checking between a specified pair of links. -->

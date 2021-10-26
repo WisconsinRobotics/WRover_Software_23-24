@@ -5,7 +5,7 @@
 #include <thread>
 #include "ArmMotor.hpp"
 
-ArmMotor* motors[6];
+ArmMotor* motors[7];
 ros::Publisher jointStatePublisher;
 typedef actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> Server;
 
@@ -19,10 +19,10 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
     int i = 0;
     ros::Rate sleeper(50);
     while(i++ < 100){
-      std::cout<<motors[0]->getEncoderCounts()<<std::endl;
-      std::cout<<motors[0]->getPower()<<std::endl;
-      std::cout<<std::endl;
-      std::this_thread::yield();
+      // std::cout<<motors[0]->getEncoderCounts()<<std::endl;
+      // std::cout<<motors[0]->getPower()<<std::endl;
+      // std::cout<<std::endl;
+      // std::this_thread::yield();
       sleeper.sleep();
     }
     as->setSucceeded();
@@ -40,6 +40,7 @@ int main(int argc, char** argv)
   motors[3] = new ArmMotor("link4_joint", 1, 1, &n);
   motors[4] = new ArmMotor("link5_joint", 2, 0, &n);
   motors[5] = new ArmMotor("link6_joint", 2, 1, &n);
+  motors[6] = new ArmMotor("link7_joint", 3, 0, &n);
 
   jointStatePublisher = n.advertise<sensor_msgs::JointState>("/control/arm_joint_states", 1000);
   Server server(n, "/arm_controller/follow_joint_trajectory", boost::bind(&execute, _1, &server), false);
