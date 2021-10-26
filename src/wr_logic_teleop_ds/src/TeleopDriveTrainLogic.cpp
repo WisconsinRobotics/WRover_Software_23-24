@@ -15,9 +15,18 @@ float speedRaw[] = {0.0, 0.0};
 float SPEED_RATIO_VALUES[] = {0.25, 0.5, 0.75, 1.0};
 //The camera mast speed value
 float speedCamMast = 0.0;
+//Cache for msg reception: [0] is left, [1] is right
+bool msgCache[] = {false, false};
 
 #define Std_Bool std_msgs::Bool::ConstPtr&
 #define Std_Float32 std_msgs::Float32::ConstPtr&
+
+/*
+ * Drive train message
+ */
+
+//Define the output message
+wr_drive_msgs::DriveTrainCmd output;
 
 Watchdog dog(1);
 
@@ -46,6 +55,10 @@ boost::function<void(const Std_Bool)>  R_S1_cb = [](const Std_Bool msg)->void{ge
 boost::function<void(const Std_Bool)>  R_S2_cb = [](const Std_Bool msg)->void{genCallback(msg, 1, 2);};
 boost::function<void(const Std_Bool)>  R_S3_cb = [](const Std_Bool msg)->void{genCallback(msg, 1, 3);};
 
+void cachePublish();
+ros::Publisher driveCommand;
+ros::Publisher camCommand;
+
 //////////////////////////////////////////////////////////////////
 //		      JOYSTICK CALLBACKS		      //
 //							      //
@@ -56,20 +69,48 @@ boost::function<void(const Std_Bool)>  R_S3_cb = [](const Std_Bool msg)->void{ge
 //Left Drive Joystick
 
 void djL_axY_callback(const std_msgs::Float32::ConstPtr& msg){
-	speedRaw[0] = msg->data;
+	//speedRaw[0] = msg->data;
+	output.left_value = msg->data*speedRatio[0];
+	msgCache[0] = true;
+	cachePublish();
 	dog.pet();
 }
 
 //Right Drive Joystick
 
 void djR_axY_callback(const std_msgs::Float32::ConstPtr& msg){
-	speedRaw[1] = msg->data;
+	//speedRaw[1] = msg->data;
+	output.right_value = msg->data*speedRatio[1];
+	msgCache[1] = true;
+	cachePublish();
 	dog.pet();
 }
 
 void djR_camMast_callback(const std_msgs::Float32::ConstPtr& msg){
 	speedCamMast = msg->data;
+
+	/*
+	 * Camera mast message
+	 */
+
+	wr_drive_msgs::CamMastCmd cam_cmd;
+	cam_cmd.turn_speed = speedCamMast;
+	camCommand.publish(cam_cmd);
+
 	dog.pet();
+}
+
+//////////////////////////////////////////////////////////////////
+//			HELPER METHODS				//
+//////////////////////////////////////////////////////////////////
+
+void cachePublish() {
+	// if both a left and right msg have been received
+	if (msgCache[0] && msgCache[1]) {
+		driveCommand.publish(output); // publish output values
+		msgCache[0] = false; // reset the msg cache
+		msgCache[1] = false;
+	}
 }
 
 //Main Method
@@ -91,11 +132,8 @@ int main(int argc, char** argv){
 	nh.getParam("speed_step4", SPEED_RATIO_VALUES[3]);
 	
 	//Publisher for output data
-	ros::Publisher driveCommand = n.advertise<wr_drive_msgs::DriveTrainCmd>("/control/drive_system/cmd", 1000);
-	ros::Publisher camCommand = n.advertise<wr_drive_msgs::CamMastCmd>("/control/camera/cam_mast_cmd", 1000);
-	
-	//Loop Rate - 50 Hz
-	ros::Rate loop(50);
+	driveCommand = n.advertise<wr_drive_msgs::DriveTrainCmd>("/control/drive_system/cmd", 1000);
+	camCommand = n.advertise<wr_drive_msgs::CamMastCmd>("/control/camera/cam_mast_cmd", 1000);
 	
 	//Set up dummy subscribers for input data
 	ros::Subscriber s1, s2, s3, s4, s5, s6, s7, s8, sL, sR, sCamMast;
@@ -117,45 +155,6 @@ int main(int argc, char** argv){
 	//Subscriber for camera mast control
 	sCamMast = n.subscribe("/logic/drive_system/joystick_right/axis/pov_x", 1000, djR_camMast_callback);
 
-	//ROS Main loop
-	while(ros::ok()){
-	
-		/*
-		 * Drive train message
-		 */
-
-		//Define the output message
-		wr_drive_msgs::DriveTrainCmd output;
-		
-		//Set the left and right values to be the product of respective raw speeds and speed ratios
-		if(!dog.isMad()){
-			output.left_value = speedRaw[0]*speedRatio[0];
-			output.right_value = speedRaw[1]*speedRatio[1];
-		}else{
-			output.left_value = 0;
-			output.right_value = 0;
-		}
-
-		//Publish the output message
-		driveCommand.publish(output);
-
-		/*
-		 * Camera mast message
-		 */
-
-		wr_drive_msgs::CamMastCmd cam_cmd;
-		cam_cmd.turn_speed = speedCamMast;
-		camCommand.publish(cam_cmd);
-
-		//Print the message to ROS INFO for logging
-		//ROS_INFO("(%f, %f)",output.left_value, output.right_value);
-
-		//Trigger ROS Update cycle
-		ros::spinOnce();
-
-		//Sleep until next cycle
-		loop.sleep();
-	
-	}	
-
+	//ROS Update cycler
+	ros::spin();
 }
