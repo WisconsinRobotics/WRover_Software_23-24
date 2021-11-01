@@ -125,7 +125,6 @@ include_directories(
 ## Declare a C++ library
  add_library( ${PROJECT_NAME}
    src/ArmMotor.cpp
-   src/DifferentailJoint.cpp
  )
 
 ## Add cmake target dependencies of the library

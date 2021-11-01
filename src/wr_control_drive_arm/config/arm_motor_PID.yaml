@@ -1,62 +1,62 @@
 rate: 50
 controllers:
-  - setpointTopic: "/control/arm/00/setpoint"
-    feedbackTopic: "/control/arm/00/feedback"
-    outputTopic: "/control/arm/00/output"
+  - setpointTopic: "/control/arm/0/setpoint"
+    feedbackTopic: "/control/arm/0/feedback"
+    outputTopic: "/control/arm/0/output"
     P: 30
     I: 0
     D: 0
     min: -1
     max: 1
 
-  - setpointTopic: "/control/arm/01/setpoint"
-    feedbackTopic: "/control/arm/01/feedback"
-    outputTopic: "/control/arm/01/output"
+  - setpointTopic: "/control/arm/1/setpoint"
+    feedbackTopic: "/control/arm/1/feedback"
+    outputTopic: "/control/arm/1/output"
     P: 30
     I: 0
     D: 0
     min: -1
     max: 1
 
-  - setpointTopic: "/control/arm/10/setpoint"
-    feedbackTopic: "/control/arm/10/feedback"
-    outputTopic: "/control/arm/10/output"
+  - setpointTopic: "/control/arm/2/setpoint"
+    feedbackTopic: "/control/arm/2/feedback"
+    outputTopic: "/control/arm/2/output"
     P: 30
     I: 0
     D: 0
     min: -1
     max: 1
 
-  - setpointTopic: "/control/arm/11/setpoint"
-    feedbackTopic: "/control/arm/11/feedback"
-    outputTopic: "/control/arm/11/output"
+  - setpointTopic: "/control/arm/3/setpoint"
+    feedbackTopic: "/control/arm/3/feedback"
+    outputTopic: "/control/arm/3/output"
     P: 30
     I: 0
     D: 0
     min: -1
     max: 1
 
-  - setpointTopic: "/control/arm/20/setpoint"
-    feedbackTopic: "/control/arm/20/feedback"
-    outputTopic: "/control/arm/20/output"
+  - setpointTopic: "/control/arm/4/setpoint"
+    feedbackTopic: "/control/arm/4/feedback"
+    outputTopic: "/control/arm/4/output"
     P: 30
     I: 0
     D: 0
     min: -1
     max: 1
 
-  - setpointTopic: "/control/arm/roll/setpoint"
-    feedbackTopic: "/control/arm/roll/feedback"
-    outputTopic: "/control/arm/roll/output"
+  - setpointTopic: "/control/arm/5/setpoint"
+    feedbackTopic: "/control/arm/5/feedback"
+    outputTopic: "/control/arm/5/output"
     P: 30
     I: 0
     D: 0
     min: -1
     max: 1
 
-  - setpointTopic: "/control/arm/pitch/setpoint"
-    feedbackTopic: "/control/arm/pitch/feedback"
-    outputTopic: "/control/arm/pitch/output"
+  - setpointTopic: "/control/arm/6/setpoint"
+    feedbackTopic: "/control/arm/6/feedback"
+    outputTopic: "/control/arm/6/output"
     P: 30
     I: 0
     D: 0

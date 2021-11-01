@@ -41,6 +41,8 @@ int main(int argc, char** argv)
   motors[5] = new ArmMotor("link6_joint", 2, 1, &n);
   motors[6] = new ArmMotor("link7_joint", 3, 0, &n);
 
+  
+
   jointStatePublisher = n.advertise<sensor_msgs::JointState>("/control/arm_joint_states", 1000);
   Server server(n, "/arm_controller/follow_joint_trajectory", boost::bind(&execute, _1, &server), false);
 

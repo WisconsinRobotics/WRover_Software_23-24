@@ -11,12 +11,17 @@
 #include <algorithm>
 #include <csignal>
 #include <string>
-#include "ArmMotor.hpp"
+#include "SimpleJoint.cpp"
+
 
 /**
  * @brief Defines space for all ArmMotor references
  */
 ArmMotor *motors[7];
+/**
+ * @brief Defines space for all Joint references
+ */
+AbstractJoint *joints[7];
 /**
  * @brief The Joint State Publisher for MoveIt
  */
@@ -52,19 +57,19 @@ std::vector<double> convertJointSpacetoEncoderSpace(double roll, double pitch){
  * @param motor a pointer to the motor
  * @return if the motor has reached its target
  */
-bool configMotorTarget(std::vector<std::string>* names, std::vector<double>* positions, double target, float velocity, ArmMotor* motor){
+bool configJointSetpoint(AbstractJoint* joint, int motorIndex, std::vector<std::string>* names, std::vector<double>* positions, double target, float velocity){
 	// Each motor should run to its respective target position at a fixed speed
 	// TODO: this speed should be capped/dynamic to reflect the input joint velocity parameters
 	// velMax = abs(*std::max_element(currTargetPosition.velocities.begin(), currTargetPosition.velocities.end(), [](double a, double b) {return abs(a)<abs(b);}));
 	// float currPower = 0.1 * currTargetPosition.velocities[j]/velMax;
 	// currPower = abs(velMax) <= 0.0001 ? 0.1 : currPower;
 
-	motor->runToTarget(target, 0);
+	joint->configSetpoint(motorIndex, target, 0);
 	// Push the current motor name and position data to the Joint State data tracking list
-	names->push_back(motor->getMotorName());
-	positions->push_back(motor->getRads());
+	names->push_back(joint->getMotor(motorIndex)->getMotorName());
+	positions->push_back(joint->getMotor(motorIndex)->getRads());
 	// The position has only finished if every motor is STOPped
-	return motor->getMotorState() == MotorState::STOP;
+	return joint->getMotor(motorIndex)->getMotorState() == MotorState::STOP;
 }
 
 /**
@@ -100,19 +105,29 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
         positions.clear();
 
         double velMax = 0;
-        // For each motor specified in the currTargetPosition...
-        for(int j = 0; j < currTargetPosition.positions.size()-2; j++){
-          hasPositionFinished &= configMotorTarget(&names, &positions, currTargetPosition.positions[j], 0, motors[j]);
-          // DEBUGGING OUTPUT: Print each motor's name, radian position, encoder position, and power
-          std::cout<<motors[j]->getMotorName()<<":"<<std::setw(30-motors[j]->getMotorName().length())<<motors[j]->getRads()<<std::endl;
-          std::cout<<std::setw(30)<<motors[j]->getEncoderCounts()<<std::endl;
-          std::cout<<std::setw(30)<<motors[j]->getPower()<<std::endl;
+        // For each joint specified in the currTargetPosition...
+        int motorIndex = 0;
+        int jointIndex = 0;
+        AbstractJoint *joint;
+
+        for(int j = 0; j < sizeof(joints); j += sizeof(joints[jointIndex-1])){
+
+          joint = joints[jointIndex];
+
+          for(int k = 0; k < joint->getDegreesOfFreedom(); k++){
+
+            hasPositionFinished &= configJointSetpoint(joint, k, &names, &positions, currTargetPosition.positions[j], 0);
+            // DEBUGGING OUTPUT: Print each motor's name, radian position, encoder position, and power
+            std::cout<<joint->getMotor(k)->getMotorName()<<":"<<std::setw(30-motors[j]->getMotorName().length())<<motors[j]->getRads()<<std::endl;
+            std::cout<<std::setw(30)<<motors[j]->getEncoderCounts()<<std::endl;
+            std::cout<<std::setw(30)<<motors[j]->getPower()<<std::endl;
+          }
+          joint->exectute();
+          jointIndex++;
+          motorIndex += joint->getDegreesOfFreedom();
         }
         
 		// config differential joint motors
-		std::vector<double> motorTargets = convertJointSpacetoEncoderSpace(currTargetPosition.positions[5], currTargetPosition.positions[6]);
-		hasPositionFinished &= configMotorTarget(&names, &positions, motorTargets[0], 0, motors[5]);
-		hasPositionFinished &= configMotorTarget(&names, &positions, motorTargets[1], 0, motors[6]);
 
 		// DEBUGGING OUTPUT: Print a divider line for cleanliness
         std::cout<<velMax<<std::endl;
@@ -157,6 +172,22 @@ int main(int argc, char** argv)
   motors[5] = new ArmMotor("link6_joint", 2, 1, &n);
   motors[6] = new ArmMotor("link7_joint", 3, 0, &n);
 
+  // Initialize all Joints
+  joints[0] = new SimpleJoint(motors[0], &n);
+  joints[0]->configVelocityHandshake("/control/arm/0", "/control/arm/00");
+  joints[1] = new SimpleJoint(motors[1], &n);
+  joints[1]->configVelocityHandshake("/control/arm/1", "/control/arm/01");
+  joints[2] = new SimpleJoint(motors[2], &n);
+  joints[2]->configVelocityHandshake("/control/arm/2", "/control/arm/10");
+  joints[3] = new SimpleJoint(motors[3], &n);
+  joints[3]->configVelocityHandshake("/control/arm/3", "/control/arm/11");
+  joints[4] = new SimpleJoint(motors[4], &n);
+  joints[4]->configVelocityHandshake("/control/arm/4", "/control/arm/20");
+  joints[5] = new SimpleJoint(motors[5], &n);
+  joints[5]->configVelocityHandshake("/control/arm/5", "/control/arm/21");
+  joints[6] = new SimpleJoint(motors[6], &n);
+  joints[6]->configVelocityHandshake("/control/arm/6", "/control/arm/30");
+
   // Initialize the Joint State Data Publisher
   jointStatePublisher = n.advertise<sensor_msgs::JointState>("/control/arm_joint_states", 1000);
 
@@ -170,5 +201,15 @@ int main(int argc, char** argv)
   // ROS spin for communication with other nodes
   ros::spin();
   // Return 0 on exit (successful exit)
+
+  delete &motors[0];
+  delete &motors[1];
+  delete &motors[2];
+  delete &motors[3];
+  delete &motors[4];
+  delete &motors[5];
+  delete &motors[6];
+
+
   return 0;
 }
