@@ -11,74 +11,147 @@ using std::vector;
 class DifferentialJoint : public AbstractJoint {
     public:
         ~DifferentialJoint();
-        DifferentialJoint(ArmMotor* pitchMotor, ArmMotor* rollMotor, ros::NodeHandle* n);
+        DifferentialJoint(ArmMotor* leftMotor, ArmMotor* rightMotor, ros::NodeHandle* n);
 
         vector<double> getMotorPositions(vector<double> jointPositions);
         vector<double> getMotorVelocities(vector<double> jointVelocities);
         vector<double> getJointPositions(vector<double> motorPositions);
 
-        void configVelocityHandshake(std::string jointTopicName, std::string motorTopicName);
-        void handoffOutput(std_msgs::Float64);
-        void handoffFeedback(std_msgs::Float64);
+        void configVelocityHandshake(std::string pitchTopicName, std::string rollTopicName, std::string leftTopicName, std::string rightTopicName);
 
     private:
-        double linearTransformation[2][2] = {{0.5, 0.5}, {1, -1}};
+        // linear transformations works for position and velocity
+        // [0.5 0.5]   [left motor ]    [pitch]
+        // [ -1  1 ] * [right motor]  = [roll ]
+        double motorToJointMatrix[2][2] = {{0.5, 0.5}, {-1, 1}};
+        // [1 -0.5]   [pitch]    [left motor ]
+        // [1  0.5] * [roll ]  = [right motor]
+        double jointToMotorMatrix[2][2] = {{1, 0.5}, {1, -0.5}};
         
-        ros::Subscriber jointOutputSubscriber;
-        ros::Publisher motorOutputPublisher;
 
-        ros::Subscriber motorFeedbackSubscriber;
-        ros::Publisher jointFeedbackPublisher;
+
+        void handoffPitchOutput(std_msgs::Float64);
+        void handoffRollOutput(std_msgs::Float64);
+        void handOffAllOutput();
+        ros::Subscriber pitchOutputSubscriber;
+        ros::Subscriber rollOutputSubscriber;
+        ros::Publisher leftOutputPublisher;
+        ros::Publisher rightOutputPublisher;
+        float cachedPitchOutput = 0.0;
+        float cachedRollOutput = 0.0;
+        bool hasNewPitchOutput = false;
+        bool hasNewRollOutput = false;
+
+        void handoffLeftFeedback(std_msgs::Float64);
+        void handoffRightFeedback(std_msgs::Float64);
+        void handOffAllFeedback();
+        ros::Subscriber leftFeedbackSubscriber;
+        ros::Subscriber rightFeedbackSubscriber;
+        ros::Publisher pitchFeedbackPublisher;
+        ros::Publisher rollFeedbackPublisher;
+        float cachedLeftFeedback = 0.0;
+        float cachedRightFeedback = 0.0;
+        bool hasNewLeftFeedback = false;
+        bool hasNewRightFeedback = false;
+
 };
 
-DifferentialJoint::DifferentialJoint(ArmMotor* pitchMotor, ArmMotor* rollMotor, ros::NodeHandle* n) : AbstractJoint(n) {
+DifferentialJoint::DifferentialJoint(ArmMotor* leftMotor, ArmMotor* rightMotor, ros::NodeHandle* n) : AbstractJoint(n) {
     this->numMotors = 2;
-    this->motors[0] = pitchMotor;
-    this->motors[1] = rollMotor;
+    this->motors[0] = leftMotor;
+    this->motors[1] = rightMotor;
 }
 
 vector<double> DifferentialJoint::getJointPositions(vector<double> motorPositions){
-    vector<double> positions = *(new vector<double>()); // makes the red lines go away
-    double motorPosition;
+    vector<double> positions;
+    
+    double pitch = motorPositions[0] * this->motorToJointMatrix[0][0] + motorPositions[1]*this->motorToJointMatrix[0][1];
+    double roll = motorPositions[1] * this->motorToJointMatrix[1][0] + motorPositions[1]*this->motorToJointMatrix[1][1];
 
-    for(int i = 0; i < motorPositions.size(); i++){
-        positions[i] = motorPositions[0] * linearTransformation[0][i] + motorPositions[1] * linearTransformation[1][i];
-    }
+    positions[0] = pitch;
+    positions[1] = roll;
 
     return positions;
 }
 
 vector<double> DifferentialJoint::getMotorPositions(vector<double> jointPositions){
+    
     vector<double> positions;
     
-    for(int i = 0; i < jointPositions.size(); i++){
-        positions[i] = jointPositions[i];
-    }
+    double left = jointPositions[0] * this->jointToMotorMatrix[0][0] + jointPositions[1]*this->jointToMotorMatrix[0][1];
+    double right = jointPositions[1] * this->jointToMotorMatrix[1][0] + jointPositions[1]*this->jointToMotorMatrix[1][1];
+
+    positions[0] = left;
+    positions[1] = right;
 
     return positions;
 }
 
 vector<double> DifferentialJoint::getMotorVelocities(vector<double> jointPositions){
-    vector<double> setpoints;
+    return getMotorPositions(jointPositions); //deritivate of linear transformation is itself
+}
+
+void DifferentialJoint::configVelocityHandshake(std::string pitchTopicName, std::string rollTopicName, std::string leftTopicName, std::string rightTopicName){
+    this->pitchOutputSubscriber = this->n->subscribe<std_msgs::Float64>(pitchTopicName + "/output", 1000, &DifferentialJoint::handoffPitchOutput, this);
+    this->rollOutputSubscriber = this->n->subscribe<std_msgs::Float64>(rollTopicName + "/output", 1000, &DifferentialJoint::handoffRollOutput, this);
+    this->leftOutputPublisher = this->n->advertise<std_msgs::Float64>(leftTopicName + "/output", 1000);
+    this->rightOutputPublisher = this->n->advertise<std_msgs::Float64>(rightTopicName + "/output", 1000);
+    this->leftFeedbackSubscriber = this->n->subscribe<std_msgs::Float64>(leftTopicName + "/feeback", 1000, &DifferentialJoint::handoffLeftFeedback, this);
+    this->rightFeedbackSubscriber = this->n->subscribe<std_msgs::Float64>(rightTopicName + "/feeback", 1000, &DifferentialJoint::handoffRightFeedback, this);
+    this->pitchFeedbackPublisher = this->n->advertise<std_msgs::Float64>(pitchTopicName + "/feedback", 1000);
+    this->rollFeedbackPublisher = this->n->advertise<std_msgs::Float64>(rollTopicName + "/feedback", 1000);
+}
+
+void DifferentialJoint::handoffPitchOutput(const std_msgs::Float64 msg){
+    this->cachedPitchOutput = msg.data;
+    this->hasNewPitchOutput = true;
+    handOffAllOutput();
+}
+void DifferentialJoint::handoffRollOutput(const std_msgs::Float64 msg){
+    this->cachedRollOutput = msg.data;
+    this->hasNewRollOutput = true;
+    handOffAllOutput();
+}
+
+void DifferentialJoint::handOffAllOutput(){
+    if(!this->hasNewPitchOutput || !this->hasNewRollOutput){ return; }
+
+    vector<double> outputs;
+    outputs[0] = this->cachedPitchOutput;
+    outputs[1] = this->cachedRollOutput;
+    outputs = getMotorVelocities(outputs); 
+
+    leftOutputPublisher.publish(outputs[0]);
+    rightOutputPublisher.publish(outputs[1]);
+
+    this->hasNewPitchOutput = false;
+    this->hasNewRollOutput = false;
     
-    for(int i = 0; i < jointPositions.size(); i++){
-        setpoints[i] = jointVelocites[i];
-    }
-
-    return setpoints;
 }
 
-void DifferentialJoint::configVelocityHandshake(std::string jointTopicName, std::string motorTopicName){
-    this->jointOutputSubscriber = this->n->subscribe<std_msgs::Float64>(jointTopicName + "/setpoint", 1000, &DifferentialJoint::handoffOutput, this);
-    this->motorOutputPublisher = this->n->advertise<std_msgs::Float64>(motorTopicName + "/setpoint", 1000);
-    this->motorFeedbackSubscriber = this->n->subscribe<std_msgs::Float64>(jointTopicName + "/feeback", 1000, &DifferentialJoint::handoffFeedback, this);
-    this->jointFeedbackPublisher = this->n->advertise<std_msgs::Float64>(motorTopicName + "/feedback", 1000);
+void DifferentialJoint::handoffPitchOutput(const std_msgs::Float64 msg){
+    this->cachedPitchOutput = msg.data;
+    this->hasNewPitchOutput = true;
+    handOffAllOutput();
+}
+void DifferentialJoint::handoffRollOutput(const std_msgs::Float64 msg){
+    this->cachedRollOutput = msg.data;
+    this->hasNewRollOutput = true;
+    handOffAllOutput();
 }
 
-void DifferentialJoint::handoffOutput(const std_msgs::Float64 msg){
-    this->motorOutputPublisher.publish(msg);
-}
+void DifferentialJoint::handOffAllOutput(){
+    if(!this->hasNewLeftFeedback || !this->hasNewRightFeedback){ return; }
 
-void DifferentialJoint::handoffFeedback(const std_msgs::Float64 msg){
-    this->jointFeedbackPublisher.publish(msg);
+    vector<double> outputs;
+    outputs[0] = this->cachedLeftFeedback;
+    outputs[1] = this->cachedRightFeedback;
+    outputs = getMotorVelocities(outputs); 
+
+    pitchFeedbackPublisher.publish(outputs[0]);
+    rollFeedbackPublisher.publish(outputs[1]);
+
+    this->hasNewPitchOutput = false;
+    this->hasNewRollOutput = false;
+    
 }
