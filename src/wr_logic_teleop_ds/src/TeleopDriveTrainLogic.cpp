@@ -24,11 +24,8 @@ bool msgCache[] = {false, false};
 /*
  * Drive train message
  */
-
 //Define the output message
 wr_drive_msgs::DriveTrainCmd output;
-
-//Watchdog dog(1);
 
 //////////////////////////////////////////////////////////////////
 //			BUTTON CALLBACKS			//
@@ -40,7 +37,6 @@ wr_drive_msgs::DriveTrainCmd output;
 //Generic Button Callback
 void genCallback(const Std_Bool msg, int ind1, int ind2){
 	if(msg->data) speedRatio[ind1]=SPEED_RATIO_VALUES[ind2];
-//	dog.pet();
 }
 
 //Left Drive Joystick
@@ -69,21 +65,17 @@ ros::Publisher camCommand;
 //Left Drive Joystick
 
 void djL_axY_callback(const std_msgs::Float32::ConstPtr& msg){
-	//speedRaw[0] = msg->data;
 	output.left_value = msg->data*speedRatio[0];
 	msgCache[0] = true;
 	cachePublish();
-//	dog.pet();
 }
 
 //Right Drive Joystick
 
 void djR_axY_callback(const std_msgs::Float32::ConstPtr& msg){
-	//speedRaw[1] = msg->data;
 	output.right_value = msg->data*speedRatio[1];
 	msgCache[1] = true;
 	cachePublish();
-//	dog.pet();
 }
 
 void djR_camMast_callback(const std_msgs::Float32::ConstPtr& msg){
@@ -92,17 +84,14 @@ void djR_camMast_callback(const std_msgs::Float32::ConstPtr& msg){
 	/*
 	 * Camera mast message
 	 */
-
 	wr_drive_msgs::CamMastCmd cam_cmd;
 	cam_cmd.turn_speed = speedCamMast;
 	camCommand.publish(cam_cmd);
-
-//	dog.pet();
 }
 
-//////////////////////////////////////////////////////////////////
+//////////////////////////////////////////
 //			HELPER METHODS				//
-//////////////////////////////////////////////////////////////////
+//////////////////////////////////////////
 
 void cachePublish() {
 	// if both a left and right msg have been received
