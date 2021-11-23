@@ -27,15 +27,27 @@ class AbstractJoint {
         vector<std::string> jointTopicsNames;  
         vector<std::string> motorTopicsNames;  
         vector<bool> newVelocitiesVector;
+        std::string name;
 
     public:
 
-        AbstractJoint(ros::NodeHandle* n){
+        AbstractJoint(ros::NodeHandle* n, std::string name=""){
             this->n = n;
+            this->name = name;
+
+            std::cout << this->numMotors << std::endl;
+            for(int i = 0; i < 1; i++){
+
+                jointPositions.push_back(0);
+                jointVelocites.push_back(0);
+            }
         };
         ~AbstractJoint(){};
 
+        std::string getName() { return this->name; }
 
+
+        // never used, need to be defined for compiler v-table
         virtual vector<double> getMotorPositions(vector<double> jointPositions){
             return *(new vector<double>());
         }
@@ -55,14 +67,17 @@ class AbstractJoint {
         }
 
         void configSetpoint(int degreeIndex, double position, double velocity){
+            std::cout << "config setpoint: " << degreeIndex << " " << position << " " << velocity << std::endl;
+            std::cout << "capacity: " << this->jointPositions.size() << std::endl;
+
             this->jointPositions[degreeIndex] = position;
             this->jointVelocites[degreeIndex] = velocity;
         }
 
         void exectute(){
             vector<double> motorPositions = this->getMotorPositions(jointPositions);
-
             for(int i = 0; i < this->numMotors; i++){
+                std::cout << "run motor to target: " << motorPositions[i] << std::endl;
                 this->motors[i]->runToTarget(motorPositions[i], 0);
             }
         }

@@ -11,7 +11,7 @@ using std::vector;
 class DifferentialJoint : public AbstractJoint {
     public:
         ~DifferentialJoint();
-        DifferentialJoint(ArmMotor* leftMotor, ArmMotor* rightMotor, ros::NodeHandle* n);
+        DifferentialJoint(ArmMotor* leftMotor, ArmMotor* rightMotor, ros::NodeHandle* n, std::string name);
 
         vector<double> getMotorPositions(vector<double> jointPositions);
         vector<double> getMotorVelocities(vector<double> jointVelocities);
@@ -27,8 +27,6 @@ class DifferentialJoint : public AbstractJoint {
         // [1 -0.5]   [pitch]    [left motor ]
         // [1  0.5] * [roll ]  = [right motor]
         double jointToMotorMatrix[2][2] = {{1, 0.5}, {1, -0.5}};
-        
-
 
         void handoffPitchOutput(std_msgs::Float64);
         void handoffRollOutput(std_msgs::Float64);
@@ -56,7 +54,7 @@ class DifferentialJoint : public AbstractJoint {
 
 };
 
-DifferentialJoint::DifferentialJoint(ArmMotor* leftMotor, ArmMotor* rightMotor, ros::NodeHandle* n) : AbstractJoint(n) {
+DifferentialJoint::DifferentialJoint(ArmMotor* leftMotor, ArmMotor* rightMotor, ros::NodeHandle* n, std::string name="") : AbstractJoint(n, name) {
     this->numMotors = 2;
     this->motors[0] = leftMotor;
     this->motors[1] = rightMotor;

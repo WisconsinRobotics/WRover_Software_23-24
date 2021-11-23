@@ -139,6 +139,8 @@ void ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block){
 }
 
 void ArmMotor::runToTarget(double rads, float power){
+    std::cout << "run to target: " << rads << ":" << this->radToEnc(rads) << std::endl;
+    
     runToTarget(this->radToEnc(rads), power, false);
 }
 

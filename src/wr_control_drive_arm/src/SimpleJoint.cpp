@@ -11,7 +11,8 @@ using std::vector;
 class SimpleJoint : public AbstractJoint {
     public:
         ~SimpleJoint();
-        SimpleJoint(ArmMotor* motor, ros::NodeHandle* n);
+        SimpleJoint(ros::NodeHandle* n, std::string name);
+        SimpleJoint(ArmMotor* motor, ros::NodeHandle* n, std::string name);
 
         int a(){return 2;}
         int b(){return 3;}
@@ -20,6 +21,7 @@ class SimpleJoint : public AbstractJoint {
         vector<double> getMotorVelocities(vector<double> jointVelocities);
         vector<double> getJointPositions(vector<double> motorPositions);
 
+        void configMotor(ArmMotor* motor);
         void configVelocityHandshake(std::string jointTopicName, std::string motorTopicName);
         void handoffOutput(std_msgs::Float64);
         void handoffFeedback(std_msgs::Float64);
@@ -33,9 +35,9 @@ class SimpleJoint : public AbstractJoint {
         
 };
 
-SimpleJoint::SimpleJoint(ArmMotor* motor, ros::NodeHandle* n) : AbstractJoint(n) {
+SimpleJoint::SimpleJoint(ArmMotor* motor, ros::NodeHandle* n, std::string name="") : AbstractJoint(n, name) {
     this->numMotors = 1;
-    this->motors[0] = motor;
+    this->motors.push_back(motor);
 }
 
 vector<double> SimpleJoint::getJointPositions(vector<double> motorPositions){
@@ -50,9 +52,8 @@ vector<double> SimpleJoint::getJointPositions(vector<double> motorPositions){
 
 vector<double> SimpleJoint::getMotorPositions(vector<double> jointPositions){
     vector<double> positions;
-    
     for(int i = 0; i < jointPositions.size(); i++){
-        positions[i] = jointPositions[i];
+        positions.push_back(jointPositions[i]);
     }
 
     return positions;

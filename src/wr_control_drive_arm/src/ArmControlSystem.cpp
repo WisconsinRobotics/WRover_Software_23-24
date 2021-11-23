@@ -8,6 +8,7 @@
 #include <control_msgs/FollowJointTrajectoryAction.h>
 #include <actionlib/server/simple_action_server.h>
 #include <sensor_msgs/JointState.h>
+#include <std_msgs/Float64.h>
 #include <algorithm>
 #include <csignal>
 #include <string>
@@ -18,6 +19,7 @@
  * @brief Defines space for all ArmMotor references
  */
 ArmMotor *motors[7];
+
 /**
  * @brief Defines space for all Joint references
  */
@@ -57,19 +59,21 @@ std::vector<double> convertJointSpacetoEncoderSpace(double roll, double pitch){
  * @param motor a pointer to the motor
  * @return if the motor has reached its target
  */
-bool configJointSetpoint(AbstractJoint* joint, int motorIndex, std::vector<std::string>* names, std::vector<double>* positions, double target, float velocity){
+bool configJointSetpoint(AbstractJoint* joint, int degreeIndex, std::vector<std::string>& names, std::vector<double>& positions, double target, float velocity){
 	// Each motor should run to its respective target position at a fixed speed
 	// TODO: this speed should be capped/dynamic to reflect the input joint velocity parameters
 	// velMax = abs(*std::max_element(currTargetPosition.velocities.begin(), currTargetPosition.velocities.end(), [](double a, double b) {return abs(a)<abs(b);}));
 	// float currPower = 0.1 * currTargetPosition.velocities[j]/velMax;
 	// currPower = abs(velMax) <= 0.0001 ? 0.1 : currPower;
+  std::cout << "config joint setup: " << target << std::endl;
+  // std::cout << joint->getName() << ":" << motorIndex << " position: " << target;
 
-	joint->configSetpoint(motorIndex, target, 0);
+	joint->configSetpoint(degreeIndex, target, 0);
 	// Push the current motor name and position data to the Joint State data tracking list
-	names->push_back(joint->getMotor(motorIndex)->getMotorName());
-	positions->push_back(joint->getMotor(motorIndex)->getRads());
+	names.push_back(joint->getMotor(degreeIndex)->getMotorName());
+	positions.push_back(joint->getMotor(degreeIndex)->getRads());
 	// The position has only finished if every motor is STOPped
-	return joint->getMotor(motorIndex)->getMotorState() == MotorState::STOP;
+	return joint->getMotor(degreeIndex)->getMotorState() == MotorState::STOP;
 }
 
 /**
@@ -79,6 +83,7 @@ bool configJointSetpoint(AbstractJoint* joint, int motorIndex, std::vector<std::
  * @param as The Action Server this is occuring on
  */
 void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server* as) {
+  std::cout << "start exec: " << goal->trajectory.points.size() << std::endl;
     // For each point in the trajectory execution sequence...
     for(int i = 0; i < goal->trajectory.points.size(); i++){
       // Capture the current goal for easy reference
@@ -115,22 +120,23 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
           joint = joints[jointIndex];
 
           for(int k = 0; k < joint->getDegreesOfFreedom(); k++){
+            double targetPos = currTargetPosition.positions[motorIndex];
 
-            hasPositionFinished &= configJointSetpoint(joint, k, &names, &positions, currTargetPosition.positions[j], 0);
+            std::cout<< "target pos: " << motorIndex << " " << targetPos <<std::endl;
+            bool hasMotorFinished = configJointSetpoint(joint, motorIndex-jointIndex, names, positions, targetPos, 0);
+            hasPositionFinished &= hasMotorFinished;
+            motorIndex++;
             // DEBUGGING OUTPUT: Print each motor's name, radian position, encoder position, and power
-            std::cout<<joint->getMotor(k)->getMotorName()<<":"<<std::setw(30-motors[j]->getMotorName().length())<<motors[j]->getRads()<<std::endl;
-            std::cout<<std::setw(30)<<motors[j]->getEncoderCounts()<<std::endl;
-            std::cout<<std::setw(30)<<motors[j]->getPower()<<std::endl;
+            // std::cout<<joint->getMotor(k)->getMotorName()<<":"<<std::setw(30-motors[j]->getMotorName().length())<<motors[j]->getRads()<<std::endl;
+            // std::cout<<std::setw(30)<<motors[j]->getEncoderCounts()<<std::endl;
+            // std::cout<<std::setw(30)<<motors[j]->getPower()<<std::endl;
           }
           joint->exectute();
           jointIndex++;
-          motorIndex += joint->getDegreesOfFreedom();
         }
         
-		// config differential joint motors
-
-		// DEBUGGING OUTPUT: Print a divider line for cleanliness
-        std::cout<<velMax<<std::endl;
+		    // DEBUGGING OUTPUT: Print a divider line for cleanliness
+        // std::cout<<velMax<<std::endl;
         std::cout<<"-----------------------"<<std::endl;
         // TODO: Make debugging output parameterized or pushed to the ROS output system to clean up output when desired
         
@@ -158,6 +164,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
  */
 int main(int argc, char** argv)
 {
+  std::cout << "start main" << std::endl;
   // Initialize the current node as ArmControlSystem
   ros::init(argc, argv, "ArmControlSystem");
   // Create the NodeHandle to the current ROS node
@@ -171,6 +178,7 @@ int main(int argc, char** argv)
   motors[4] = new ArmMotor("link5_joint", 2, 0, &n);
   motors[5] = new ArmMotor("link6_joint", 2, 1, &n);
   motors[6] = new ArmMotor("link7_joint", 3, 0, &n);
+  std::cout << "init motors" << std::endl;
 
   // Initialize all Joints
   joints[0] = new SimpleJoint(motors[0], &n);
@@ -187,6 +195,8 @@ int main(int argc, char** argv)
   joints[5]->configVelocityHandshake("/control/arm/5", "/control/arm/21");
   joints[6] = new SimpleJoint(motors[6], &n);
   joints[6]->configVelocityHandshake("/control/arm/6", "/control/arm/30");
+  std::cout << "init joints" << std::endl;
+  
 
   // Initialize the Joint State Data Publisher
   jointStatePublisher = n.advertise<sensor_msgs::JointState>("/control/arm_joint_states", 1000);
@@ -202,13 +212,13 @@ int main(int argc, char** argv)
   ros::spin();
   // Return 0 on exit (successful exit)
 
-  delete &motors[0];
-  delete &motors[1];
-  delete &motors[2];
-  delete &motors[3];
-  delete &motors[4];
-  delete &motors[5];
-  delete &motors[6];
+  // delete &motors[0];
+  // delete &motors[1];
+  // delete &motors[2];
+  // delete &motors[3];
+  // delete &motors[4];
+  // delete &motors[5];
+  // delete &motors[6];
 
 
   return 0;
