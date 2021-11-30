@@ -13,6 +13,7 @@
 #include <csignal>
 #include <string>
 #include "SimpleJoint.cpp"
+#include "DifferentialJoint.cpp"
 
 
 /**
@@ -23,7 +24,7 @@ ArmMotor *motors[7];
 /**
  * @brief Defines space for all Joint references
  */
-AbstractJoint *joints[7];
+AbstractJoint *joints[6];
 /**
  * @brief The Joint State Publisher for MoveIt
  */
@@ -70,10 +71,10 @@ bool configJointSetpoint(AbstractJoint* joint, int degreeIndex, std::vector<std:
 
 	joint->configSetpoint(degreeIndex, target, 0);
 	// Push the current motor name and position data to the Joint State data tracking list
-	names.push_back(joint->getMotor(degreeIndex)->getMotorName());
-	positions.push_back(joint->getMotor(degreeIndex)->getRads());
+	names.push_back(joint->getMotor(degreeIndex).getMotorName());
+	positions.push_back(joint->getMotor(degreeIndex).getRads());
 	// The position has only finished if every motor is STOPped
-	return joint->getMotor(degreeIndex)->getMotorState() == MotorState::STOP;
+	return joint->getMotor(degreeIndex).getMotorState() == MotorState::STOP;
 }
 
 /**
@@ -84,75 +85,75 @@ bool configJointSetpoint(AbstractJoint* joint, int degreeIndex, std::vector<std:
  */
 void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server* as) {
   std::cout << "start exec: " << goal->trajectory.points.size() << std::endl;
-    // For each point in the trajectory execution sequence...
-    for(int i = 0; i < goal->trajectory.points.size(); i++){
-      // Capture the current goal for easy reference
-      trajectory_msgs::JointTrajectoryPoint currTargetPosition = goal->trajectory.points[i];
+  // For each point in the trajectory execution sequence...
+  for(int i = 0; i < goal->trajectory.points.size(); i++){
+    // Capture the current goal for easy reference
+    trajectory_msgs::JointTrajectoryPoint currTargetPosition = goal->trajectory.points[i];
 
-      // Track whether or not the current position is done
-      bool hasPositionFinished = false;
-      // Capture the names of the motors
-      std::vector<std::string> names;
-      // Capture the positions of the motors
-      std::vector<double> positions;
-      // Keep max loop rate at 50 Hz
-      ros::Rate loop(200);
+    // Track whether or not the current position is done
+    bool hasPositionFinished = false;
+    // Capture the names of the motors
+    std::vector<std::string> names;
+    // Capture the positions of the motors
+    std::vector<double> positions;
+    // Keep max loop rate at 50 Hz
+    ros::Rate loop(200);
 
-      // While the current position is not complete yet...
-      while(!hasPositionFinished){
-        // Assume the current action is done until proven otherwise
-        hasPositionFinished = true;
-        // Create the Joint State message for the current update cycle
-        sensor_msgs::JointState js_msg;
+    // While the current position is not complete yet...
+    while(!hasPositionFinished){
+      // Assume the current action is done until proven otherwise
+      hasPositionFinished = true;
+      // Create the Joint State message for the current update cycle
+      sensor_msgs::JointState js_msg;
 
-        // Clear the list of motor names and position data
-        names.clear();
-        positions.clear();
+      // Clear the list of motor names and position data
+      names.clear();
+      positions.clear();
 
-        double velMax = 0;
-        // For each joint specified in the currTargetPosition...
-        int motorIndex = 0;
-        int jointIndex = 0;
-        AbstractJoint *joint;
+      double velMax = 0;
+      // For each joint specified in the currTargetPosition...
+      int motorIndex = 0;
+      int jointIndex = 0;
+      AbstractJoint *joint;
 
-        for(int j = 0; j < sizeof(joints); j += sizeof(joints[jointIndex-1])){
+      for(int j = 0; j < sizeof(joints); j += sizeof(joints[jointIndex-1])){
 
-          joint = joints[jointIndex];
+        joint = joints[jointIndex];
 
-          for(int k = 0; k < joint->getDegreesOfFreedom(); k++){
-            double targetPos = currTargetPosition.positions[motorIndex];
+        for(int k = 0; k < joint->getDegreesOfFreedom(); k++){
+          double targetPos = currTargetPosition.positions[motorIndex];
 
-            std::cout<< "target pos: " << motorIndex << " " << targetPos <<std::endl;
-            bool hasMotorFinished = configJointSetpoint(joint, motorIndex-jointIndex, names, positions, targetPos, 0);
-            hasPositionFinished &= hasMotorFinished;
-            motorIndex++;
-            // DEBUGGING OUTPUT: Print each motor's name, radian position, encoder position, and power
-            // std::cout<<joint->getMotor(k)->getMotorName()<<":"<<std::setw(30-motors[j]->getMotorName().length())<<motors[j]->getRads()<<std::endl;
-            // std::cout<<std::setw(30)<<motors[j]->getEncoderCounts()<<std::endl;
-            // std::cout<<std::setw(30)<<motors[j]->getPower()<<std::endl;
-          }
-          joint->exectute();
-          jointIndex++;
+          std::cout<< "target pos: " << motorIndex << " " << targetPos <<std::endl;
+          bool hasMotorFinished = configJointSetpoint(joint, motorIndex-jointIndex, names, positions, targetPos, 0);
+          hasPositionFinished &= hasMotorFinished;
+          motorIndex++;
+          // DEBUGGING OUTPUT: Print each motor's name, radian position, encoder position, and power
+          // std::cout<<joint->getMotor(k)->getMotorName()<<":"<<std::setw(30-motors[j]->getMotorName().length())<<motors[j]->getRads()<<std::endl;
+          // std::cout<<std::setw(30)<<motors[j]->getEncoderCounts()<<std::endl;
+          // std::cout<<std::setw(30)<<motors[j]->getPower()<<std::endl;
         }
-        
-		    // DEBUGGING OUTPUT: Print a divider line for cleanliness
-        // std::cout<<velMax<<std::endl;
-        std::cout<<"-----------------------"<<std::endl;
-        // TODO: Make debugging output parameterized or pushed to the ROS output system to clean up output when desired
-        
-        // Set the name and position data for the Joint State Data message as tracked by the list of motor names and positions
-        js_msg.name = names;
-        js_msg.position = positions;
-        // Publish the Joint State message
-        jointStatePublisher.publish(js_msg);
-
-        // Sleep until the next update cycle
-        loop.sleep();
+        joint->exectute();
+        jointIndex++;
       }
-    }
+      
+      // DEBUGGING OUTPUT: Print a divider line for cleanliness
+      // std::cout<<velMax<<std::endl;
+      std::cout<<"-----------------------"<<std::endl;
+      // TODO: Make debugging output parameterized or pushed to the ROS output system to clean up output when desired
+      
+      // Set the name and position data for the Joint State Data message as tracked by the list of motor names and positions
+      js_msg.name = names;
+      js_msg.position = positions;
+      // Publish the Joint State message
+      jointStatePublisher.publish(js_msg);
 
-    //When all positions have been reached, set the current task as succeeded
-    as->setSucceeded();
+      // Sleep until the next update cycle
+      loop.sleep();
+    }
+  }
+
+  //When all positions have been reached, set the current task as succeeded
+  as->setSucceeded();
 }
 
 /**
@@ -181,20 +182,25 @@ int main(int argc, char** argv)
   std::cout << "init motors" << std::endl;
 
   // Initialize all Joints
-  joints[0] = new SimpleJoint(motors[0], &n);
+  AbstractJoint *joint;
+  joint = new SimpleJoint(*motors[0], &n);
+  joints[0] = joint;
   joints[0]->configVelocityHandshake("/control/arm/0", "/control/arm/00");
-  joints[1] = new SimpleJoint(motors[1], &n);
+  joints[1] = new SimpleJoint(*motors[1], &n);
   joints[1]->configVelocityHandshake("/control/arm/1", "/control/arm/01");
-  joints[2] = new SimpleJoint(motors[2], &n);
+  joints[2] = new SimpleJoint(&motors[2], &n);
   joints[2]->configVelocityHandshake("/control/arm/2", "/control/arm/10");
-  joints[3] = new SimpleJoint(motors[3], &n);
+  joints[3] = new SimpleJoint(&motors[3], &n);
   joints[3]->configVelocityHandshake("/control/arm/3", "/control/arm/11");
-  joints[4] = new SimpleJoint(motors[4], &n);
+  joints[4] = new SimpleJoint(&motors[4], &n);
   joints[4]->configVelocityHandshake("/control/arm/4", "/control/arm/20");
-  joints[5] = new SimpleJoint(motors[5], &n);
-  joints[5]->configVelocityHandshake("/control/arm/5", "/control/arm/21");
-  joints[6] = new SimpleJoint(motors[6], &n);
-  joints[6]->configVelocityHandshake("/control/arm/6", "/control/arm/30");
+  // joints[5] = new DifferentialJoint(motors[5], motors[6], &n);
+  // joints[4]->configVelocityHandshake("/control/arm/5/roll", "/contol/arm/5/roll");
+  // joints[4]->configVelocityHandshake("/control/arm/5/pitch", "/contol/arm/5/pitch");
+  // joints[5] = new SimpleJoint(motors[5], &n);
+  // joints[5]->configVelocityHandshake("/control/arm/5", "/control/arm/21");
+  // joints[6] = new SimpleJoint(motors[6], &n);
+  // joints[6]->configVelocityHandshake("/control/arm/6", "/control/arm/30");
   std::cout << "init joints" << std::endl;
   
 

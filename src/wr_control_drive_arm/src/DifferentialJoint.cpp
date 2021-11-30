@@ -11,7 +11,7 @@ using std::vector;
 class DifferentialJoint : public AbstractJoint {
     public:
         ~DifferentialJoint();
-        DifferentialJoint(ArmMotor* leftMotor, ArmMotor* rightMotor, ros::NodeHandle* n, std::string name);
+        DifferentialJoint(ArmMotor& leftMotor, ArmMotor* rightMotor, ros::NodeHandle* n);
 
         vector<double> getMotorPositions(vector<double> jointPositions);
         vector<double> getMotorVelocities(vector<double> jointVelocities);
@@ -54,7 +54,7 @@ class DifferentialJoint : public AbstractJoint {
 
 };
 
-DifferentialJoint::DifferentialJoint(ArmMotor* leftMotor, ArmMotor* rightMotor, ros::NodeHandle* n, std::string name="") : AbstractJoint(n, name) {
+DifferentialJoint::DifferentialJoint(ArmMotor& leftMotor, ArmMotor& rightMotor, ros::NodeHandle* n) : AbstractJoint(n) {
     this->numMotors = 2;
     this->motors[0] = leftMotor;
     this->motors[1] = rightMotor;

@@ -5,37 +5,9 @@
  * @date 2021-10-25
  */
 
-#include "AbstractJoint.hpp"
-using std::vector;
+#include "SimpleJoint.hpp"
 
-class SimpleJoint : public AbstractJoint {
-    public:
-        ~SimpleJoint();
-        SimpleJoint(ros::NodeHandle* n, std::string name);
-        SimpleJoint(ArmMotor* motor, ros::NodeHandle* n, std::string name);
-
-        int a(){return 2;}
-        int b(){return 3;}
-
-        vector<double> getMotorPositions(vector<double> jointPositions);
-        vector<double> getMotorVelocities(vector<double> jointVelocities);
-        vector<double> getJointPositions(vector<double> motorPositions);
-
-        void configMotor(ArmMotor* motor);
-        void configVelocityHandshake(std::string jointTopicName, std::string motorTopicName);
-        void handoffOutput(std_msgs::Float64);
-        void handoffFeedback(std_msgs::Float64);
-
-    private:
-        ros::Subscriber jointOutputSubscriber;
-        ros::Publisher motorOutputPublisher;
-
-        ros::Subscriber motorFeedbackSubscriber;
-        ros::Publisher jointFeedbackPublisher;
-        
-};
-
-SimpleJoint::SimpleJoint(ArmMotor* motor, ros::NodeHandle* n, std::string name="") : AbstractJoint(n, name) {
+SimpleJoint::SimpleJoint(const ArmMotor& motor, ros::NodeHandle* n) : AbstractJoint(n) {
     this->numMotors = 1;
     this->motors.push_back(motor);
 }
