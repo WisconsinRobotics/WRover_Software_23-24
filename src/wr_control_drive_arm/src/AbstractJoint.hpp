@@ -1,3 +1,6 @@
+#ifndef ABSTRACT_JOINT_GUARD
+#define ABSTRACT_JOINT_GUARD
+
 #include "ArmMotor.hpp"
 using std::vector;
 
@@ -36,3 +39,5 @@ class AbstractJoint {
 
         // virtual void configVelocityHandshake(std::string, std::string) = 0;
 };
+
+#endif
