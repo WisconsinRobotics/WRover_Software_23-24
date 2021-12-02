@@ -43,7 +43,7 @@ def fork_cmd(args: List[str], cwd: str, fatal_errors: bool = True, relay_io: boo
     exit_code = subprocess.Popen(args, cwd=cwd, stdout=stdout, stderr=stderr).wait()
     if fatal_errors and exit_code != 0:
         print(f'\n{COL_FATAL}FATAL: Command exited with {exit_code}: {" ".join(args)}')
-        print('Working dir: {cwd}{COL_CLEAR}')
+        print(f'Working dir: {cwd}{COL_CLEAR}')
         sys.exit(1)
 
 def print_section(text: str):
@@ -223,9 +223,12 @@ class PreconditionSourced(Precondition):
     def check(self, manifest: Config, dependencies: List[Dependency], root_dir: str, args: List[str]):
         env_var_ros = os.environ.get('ROS_PACKAGE_PATH')
         if not (env_var_ros and f'{root_dir}/src' in env_var_ros):
+            print(env_var_ros)
+            print(root_dir)
             raise ValueError('Correct ROS source path not found! Have you sourced your workspace?')
         env_var_venv = os.environ.get('VIRTUAL_ENV')
         if not (env_var_venv and f'{root_dir}/venv' in env_var_venv):
+            print(env_var_venv)
             raise ValueError('Venv not found! Have you activated the venv?')
 
 # build actions
@@ -341,7 +344,7 @@ class BuildActionBuild(BuildAction):
 class BuildActionClean(BuildAction):
     def dispatch(self, manifest: Config, dependencies: List[Dependency], root_dir: str, args: List[str]):
         for dependency in dependencies:
-            print_section('Cleaning {dependency.name}')
+            print_section(f'Cleaning {dependency.name}')
             print_subsec('Purging local repo...')
             shutil.rmtree(dependency.get_repo_dir(root_dir), ignore_errors=True)
 

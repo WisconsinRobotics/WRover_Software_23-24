@@ -1,0 +1,4 @@
+<!-- Launches a friendly user interface for getting the robot up and running. -->
+<launch>
+  <node name="launcher_ui" pkg="rqt_gui" type="rqt_gui" args="-l -f -ht -s wr_entry_point" required="true" output="screen"/>
+</launch>

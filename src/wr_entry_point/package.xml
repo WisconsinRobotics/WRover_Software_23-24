@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>wr_control_drive_arm</name>
+  <name>wr_entry_point</name>
   <version>0.0.0</version>
-  <description>Control systems subsystem package that drives the arm and manipulator.</description>
+  <description>Launch files and associated data for starting up the robot and its various subsystems.</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/wr_control_drive_arm</url> -->
+  <!-- <url type="website">http://wiki.ros.org/wr_entry_point</url> -->
 
 
   <!-- Author tags are optional, multiple are allowed, one per tag -->
@@ -49,17 +49,16 @@
   <!-- Use doc_depend for packages you need only for building documentation: -->
   <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>roscpp</build_depend>
   <build_depend>rospy</build_depend>
-  <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
-  <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>
-
+  <build_export_depend>rqt_gui</build_export_depend>
+  <exec_depend>rqt_gui</exec_depend>
+  <build_export_depend>rqt_gui_py</build_export_depend>
+  <exec_depend>rqt_gui_py</exec_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
-    <!-- Other tools can request additional information be placed here -->
-
+    <rqt_gui plugin="${prefix}/rqt_plugin.xml"/>
   </export>
 </package>
