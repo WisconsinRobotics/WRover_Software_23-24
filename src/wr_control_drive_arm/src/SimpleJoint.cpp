@@ -1,5 +1,7 @@
+#ifndef SIMPLE_JOINT_GUARD
+#define SIMPLE_JOINT_GUARD
 /**
- * @file AbstractJoint.hpp
+ * @file AbstractJoint.cpp
  * @author Nichols Underwood
  * @brief ablskjlfkejfs
  * @date 2021-10-25
@@ -7,7 +9,7 @@
 
 #include "SimpleJoint.hpp"
 
-SimpleJoint::SimpleJoint(const ArmMotor& motor, ros::NodeHandle* n) : AbstractJoint(n) {
+SimpleJoint::SimpleJoint(ArmMotor* motor, ros::NodeHandle *n) : AbstractJoint(n) {
     this->numMotors = 1;
     this->motors.push_back(motor);
 }
@@ -41,13 +43,6 @@ vector<double> SimpleJoint::getMotorVelocities(vector<double> jointPositions){
     return setpoints;
 }
 
-void SimpleJoint::configVelocityHandshake(std::string jointTopicName, std::string motorTopicName){
-    this->jointOutputSubscriber = this->n->subscribe<std_msgs::Float64>(jointTopicName + "/output", 1000, &SimpleJoint::handoffOutput, this);
-    this->motorOutputPublisher = this->n->advertise<std_msgs::Float64>(motorTopicName + "/output", 1000);
-    this->motorFeedbackSubscriber = this->n->subscribe<std_msgs::Float64>(jointTopicName + "/feeback", 1000, &SimpleJoint::handoffFeedback, this);
-    this->jointFeedbackPublisher = this->n->advertise<std_msgs::Float64>(motorTopicName + "/feedback", 1000);
-}
-
 void SimpleJoint::handoffOutput(const std_msgs::Float64 msg){
     this->motorOutputPublisher.publish(msg);
 }
@@ -55,3 +50,4 @@ void SimpleJoint::handoffOutput(const std_msgs::Float64 msg){
 void SimpleJoint::handoffFeedback(const std_msgs::Float64 msg){
     this->jointFeedbackPublisher.publish(msg);
 }
+#endif

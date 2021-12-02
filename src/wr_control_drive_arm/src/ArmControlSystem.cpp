@@ -12,8 +12,8 @@
 #include <algorithm>
 #include <csignal>
 #include <string>
-#include "SimpleJoint.cpp"
-#include "DifferentialJoint.cpp"
+#include "SimpleJoint.hpp"
+#include "DifferentialJoint.hpp"
 
 
 /**
@@ -71,10 +71,10 @@ bool configJointSetpoint(AbstractJoint* joint, int degreeIndex, std::vector<std:
 
 	joint->configSetpoint(degreeIndex, target, 0);
 	// Push the current motor name and position data to the Joint State data tracking list
-	names.push_back(joint->getMotor(degreeIndex).getMotorName());
-	positions.push_back(joint->getMotor(degreeIndex).getRads());
+	names.push_back(joint->getMotor(degreeIndex)->getMotorName());
+	positions.push_back(joint->getMotor(degreeIndex)->getRads());
 	// The position has only finished if every motor is STOPped
-	return joint->getMotor(degreeIndex).getMotorState() == MotorState::STOP;
+	return joint->getMotor(degreeIndex)->getMotorState() == MotorState::STOP;
 }
 
 /**
@@ -182,21 +182,14 @@ int main(int argc, char** argv)
   std::cout << "init motors" << std::endl;
 
   // Initialize all Joints
-  AbstractJoint *joint;
-  joint = new SimpleJoint(*motors[0], &n);
-  joints[0] = joint;
-  joints[0]->configVelocityHandshake("/control/arm/0", "/control/arm/00");
-  joints[1] = new SimpleJoint(*motors[1], &n);
-  joints[1]->configVelocityHandshake("/control/arm/1", "/control/arm/01");
-  joints[2] = new SimpleJoint(&motors[2], &n);
-  joints[2]->configVelocityHandshake("/control/arm/2", "/control/arm/10");
-  joints[3] = new SimpleJoint(&motors[3], &n);
-  joints[3]->configVelocityHandshake("/control/arm/3", "/control/arm/11");
-  joints[4] = new SimpleJoint(&motors[4], &n);
-  joints[4]->configVelocityHandshake("/control/arm/4", "/control/arm/20");
-  // joints[5] = new DifferentialJoint(motors[5], motors[6], &n);
-  // joints[4]->configVelocityHandshake("/control/arm/5/roll", "/contol/arm/5/roll");
-  // joints[4]->configVelocityHandshake("/control/arm/5/pitch", "/contol/arm/5/pitch");
+  joints[0] = new SimpleJoint(motors[0], &n);
+  joints[1] = new SimpleJoint(motors[1], &n);
+  joints[2] = new SimpleJoint(motors[2], &n);
+  joints[3] = new SimpleJoint(motors[3], &n);
+  joints[4] = new SimpleJoint(motors[4], &n);
+  DifferentialJoint* temp = new DifferentialJoint(motors[5], motors[6], &n);
+  temp->configVelocityHandshake("/control/arm/5/roll", "/control/arm/5/pitch", "/control/arm/21/", "/control/arm/30/");
+  joints[5] = temp;
   // joints[5] = new SimpleJoint(motors[5], &n);
   // joints[5]->configVelocityHandshake("/control/arm/5", "/control/arm/21");
   // joints[6] = new SimpleJoint(motors[6], &n);

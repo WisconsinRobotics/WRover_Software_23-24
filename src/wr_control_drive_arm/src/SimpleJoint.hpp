@@ -4,7 +4,7 @@ using std::vector;
 class SimpleJoint : public AbstractJoint {
     public:
         ~SimpleJoint();
-        SimpleJoint(ArmMotor& motor, ros::NodeHandle* n) : AbstractJoint(n) {};
+        SimpleJoint(ArmMotor* motor, ros::NodeHandle* n);
 
         int a(){return 2;}
         int b(){return 3;}
