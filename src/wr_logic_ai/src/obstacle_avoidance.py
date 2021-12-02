@@ -29,7 +29,7 @@ target_sector = target_angle / SECTOR_COUNT
 rospy.init_node('nav_autonomous', anonymous=False)
 
 ## Publisher
-drive_pub = rospy.Publisher('/control/drive_train_cmd', DriveTrainCmd, queue_size=1)
+drive_pub = rospy.Publisher('/control/drive_system/cmd', DriveTrainCmd, queue_size=1)
 
 # Start the tasks managed to drive autonomously
 def initialize() -> None:
@@ -84,7 +84,7 @@ def update_navigation(data) -> None:
         speed_factor = 1 if speed_factor > 1 else speed_factor
         
         # Get the DriveTrainCmd relating to the heading of the robot and the resulting best navigation angle
-        msg = angle_calc.piecewise_linear(data.heading, result) # TODO: Double check parameters
+        msg = angle_calc.piecewise_linear(data.heading, result) # TODO: Double check parameters -- heading??
         # Scale the resultant DriveTrainCmd by the speed multiplier
         msg.left_value *= speed_factor
         msg.right_value *= speed_factor
