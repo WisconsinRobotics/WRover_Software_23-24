@@ -1,0 +1,4 @@
+<!--Launches the logic for Freefal's AI. It is probably incomplete, please check -->
+<launch>
+  <node pkg="wr_logic_ai" name="obstacle_avoidance" type="obstacle_avoidance.py"/>
+</launch>

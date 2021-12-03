@@ -1,0 +1,11 @@
+<!-- Launches the full robot system, configured for the URC extreme retrieval and delivery mission. -->
+<launch>
+
+  <include file="$(find wr_hsi_roboclaw)/launch/roboclaw_freefall.launch"/>
+  
+  <include file="$(find wr_control_drive_ds)/launch/freefall.launch"/>
+  
+  <include file="$(find sick_scan)/launch/sick_tim_7xx.launch"/>
+  
+  <include file="$(find wr_logic_ai)/launch/freefall.launch"/>
+</launch>
