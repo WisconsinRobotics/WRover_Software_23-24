@@ -2,13 +2,14 @@
 
 import json
 import rospy
+import os
 from threading import Thread
 from BNO055 import BNO055
-from ai.msg import NavigationMsg
+from wr_logic_ai.msg import NavigationMsg
 import gps
 
 ## Constants to vary
-f = 100      # Hz | Rate at which pose messages are published
+f = 100     # Hz | Rate at which pose messages are published
 
 ## INIT Objects
 # Initialize node
@@ -38,10 +39,13 @@ session = gps.gps("localhost", "2947")
 session.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
 # Create array for storing previous location
 previous_coordinates = [0, 0]
+# Space for current coordinates
+current_coordinates = {'lat': 0, 'long': 0}
 
 ## User should provide the current desired goal coordinates
 def get_target_coordinates():
-    file_name = '/home/wiscrobo/workspace/WRover20_Software/src/ai/src/coordinates.txt'
+    dirname = os.path.dirname(__file__)
+    file_name = os.path.join(dirname, 'coordinates.json')
     coordinates = open(file_name, 'r').read()
     c_json = json.loads(coordinates)
     return c_json
@@ -80,6 +84,7 @@ def get_heading():
 
 ## Publishes pose data continuously when called
 def talker():
+    global current_coordinates
     while not rospy.is_shutdown():
         ## Build nav_data msg to send
         #Target coords

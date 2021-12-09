@@ -37,11 +37,17 @@ def initialize() -> None:
     rospy.Subscriber('/scan', LaserScan, update_navigation)
     ## Subscribe to location data
     rospy.Subscriber('/nav_data', NavigationMsg, set_target_angle)
+    rospy.Subscriber('/nav_data', NavigationMsg, update_heading)
 
     ## Asynchronously update the target navigation
     th = threading.Thread(target=update_target_sector)
     th.daemon = True
     th.start()
+
+HEADING = None
+def update_heading(data) -> None:
+    global HEADING
+    HEADING = data.heading
 
 ## Calculate the planar target angle
 def set_target_angle(data) -> None:
@@ -50,7 +56,7 @@ def set_target_angle(data) -> None:
     imu = AngleCalculations(data.cur_lat, data.cur_long, data.tar_lat, data.tar_long)
     target_angle = imu.get_angle()
     ## Debug Out the target angle
-    print('Target angle: ' + str(target_angle))
+    #print('Target angle: ' + str(target_angle))
 
 # TODO: consider wheter to directly call from callback
 # or every 2 seconds, depends on the computational cost
@@ -65,7 +71,7 @@ def update_target_sector() -> None:
 t = 0
 # Update the robot's navigation and drive it towards the target angle
 def update_navigation(data) -> None:
-    global t
+    global t, HEADING
     data_avg = sum(cur_range for cur_range in data.ranges) / len(data.ranges)
     # TODO: data threshold might depend of lidar model, double check
     if data_avg >= 0.5:
@@ -80,19 +86,19 @@ def update_navigation(data) -> None:
             smoothing_constant = rospy.get_param("smoothing_constant", 3))
 
         # Get the speed multiplier of the current runtime for the obstacle_avoidance
-        speed_factor = rospy.get_param("speed_factor", 0.4) # 0.2 dos not work
+        speed_factor = rospy.get_param("speed_factor", 0.8) # 0.2 dos not work
         # Set the bounds of the speed multiplier
         speed_factor = 0 if speed_factor < 0 else speed_factor
         speed_factor = 1 if speed_factor > 1 else speed_factor
         
         # Get the DriveTrainCmd relating to the heading of the robot and the resulting best navigation angle
-        msg = angle_calc.piecewise_linear(t, result) # TODO: Double check parameters -- heading??
-        print(str(t))
-        t += 0.001
+        msg = angle_calc.piecewise_linear(HEADING if HEADING else 0, result) # TODO: Double check parameters -- heading??
+        print(str(result))
+        t += 2
         if t > 90:
             t = -90
         # Scale the resultant DriveTrainCmd by the speed multiplier
-        msg.left_value *= -1*speed_factor # Left and right value were inverted, -1 "fixes"
+        msg.left_value *= speed_factor # Right value was inverted, -1 "fixes"
         msg.right_value *= -1*speed_factor
         # Publish the DriveTrainCmd to the topic
         drive_pub.publish(msg)

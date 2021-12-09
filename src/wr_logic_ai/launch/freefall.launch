@@ -1,4 +1,9 @@
 <!--Launches the logic for Freefal's AI. It is probably incomplete, please check -->
 <launch>
+<<<<<<< Updated upstream
   <node pkg="wr_logic_ai" name="obstacle_avoidance" type="obstacle_avoidance.py"/>
+=======
+  <node pkg="wr_logic_ai" name="obstacle_avoidance" type="obstacle_avoidance.py" output="screen"/>
+  <node pkg="wr_logic_ai" name="dead_reckoning" type="dead_reckoning.py"/>
+>>>>>>> Stashed changes
 </launch>
