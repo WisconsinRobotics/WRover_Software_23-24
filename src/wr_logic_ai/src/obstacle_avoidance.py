@@ -68,13 +68,14 @@ def update_target_sector() -> None:
         # map angle to sector
         target_sector = target_angle / SECTOR_ANGLE
 
-t = 0
+# t = 0
 # Update the robot's navigation and drive it towards the target angle
 def update_navigation(data) -> None:
-    global t, HEADING
+    global HEADING # , t
     data_avg = sum(cur_range for cur_range in data.ranges) / len(data.ranges)
+    print(str(data_avg))
     # TODO: data threshold might depend of lidar model, double check
-    if data_avg >= 0.5:
+    if data_avg >= 0.5: # data_avg is above 0.5 almost always, but result stays the same (?)
         # Gets best possible angle, considering obstacles
         result = get_navigation_angle(
             target_sector,
@@ -84,19 +85,18 @@ def update_navigation(data) -> None:
             VISION_ANGLE,
             data,
             smoothing_constant = rospy.get_param("smoothing_constant", 3))
+        print(str(result))
 
         # Get the speed multiplier of the current runtime for the obstacle_avoidance
-        speed_factor = rospy.get_param("speed_factor", 0.8) # 0.2 dos not work
+        speed_factor = rospy.get_param("speed_factor", 0.3) # 0.2 dos not work
         # Set the bounds of the speed multiplier
         speed_factor = 0 if speed_factor < 0 else speed_factor
         speed_factor = 1 if speed_factor > 1 else speed_factor
-        
         # Get the DriveTrainCmd relating to the heading of the robot and the resulting best navigation angle
         msg = angle_calc.piecewise_linear(HEADING if HEADING else 0, result) # TODO: Double check parameters -- heading??
-        print(str(result))
-        t += 2
-        if t > 90:
-            t = -90
+#        t += 2
+#        if t > 90: # t for debugging purposes
+#            t = -90
         # Scale the resultant DriveTrainCmd by the speed multiplier
         msg.left_value *= speed_factor # Right value was inverted, -1 "fixes"
         msg.right_value *= -1*speed_factor

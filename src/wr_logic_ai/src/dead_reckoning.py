@@ -71,7 +71,8 @@ def get_coordinates():
         if coordinate_array[0] == 0:
             current_coordinates = {'lat': previous_coordinates[0], 'long': previous_coordinates[1]}
         # returns current coordinates if they are not retrieved as 0
-        current_coordinates = {'lat': coordinate_array[0], 'long': coordinate_array[1]}
+#        current_coordinates = {'lat': coordinate_array[0], 'long': coordinate_array[1]}
+        current_coordinates = {'lat':43.0727, 'long': -89.412}
         print("updated coordinates: {}".format(current_coordinates))
 
 ## Retrieve heading from IMU (Returns a float angle)
