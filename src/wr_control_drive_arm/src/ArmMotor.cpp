@@ -48,6 +48,10 @@ void ArmMotor::redirectPowerOutput(const Std_Float64 msg){
     this->setPower(msg->data);
 }
 
+void ArmMotor::storeStallStatus(const bool msg) {
+    this->stallRead = msg;
+}
+
 /// controllerID is constrained between [0,3]
 /// motorID is constrained between [0,1]
 ArmMotor::ArmMotor(std::string motorName, unsigned int controllerID, unsigned int motorID, ros::NodeHandle* n){
@@ -72,6 +76,7 @@ ArmMotor::ArmMotor(std::string motorName, unsigned int controllerID, unsigned in
     this->targetPub = n->advertise<std_msgs::Float64>(controlString + "/setpoint", 1000);
     this->feedbackPub = n->advertise<std_msgs::Float64>(controlString + "/feedback", 1000);
     this->outputRead = n->subscribe(controlString + "/output", 1000, &ArmMotor::redirectPowerOutput, this);
+    this->stallRead = n->subscribe("placeholder name", 1000, &ArmMotor::storeStallStatus, this);
 }
 
 uint32_t ArmMotor::getEncoderCounts(){
@@ -116,7 +121,13 @@ void ArmMotor::setPower(float power){
     this->currState = power == 0.f ? MotorState::STOP : MotorState::MOVING;
 }
 
-void ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block){
+bool ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block){
+    // Checks for stall
+    if (this->isStall) {
+        this->setPower(0.0f);
+        this->currState = MotorState::STOP;
+        return false;
+    }
     // If we are not at our target...
     if(!this->hasReachedTarget(targetCounts)){
         // Set the power in the correct direction and continue running to the target
@@ -136,6 +147,7 @@ void ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block){
         this->setPower(0.f);
         this->currState = MotorState::STOP;
     }
+    return true;
 }
 
 void ArmMotor::runToTarget(double rads, float power){

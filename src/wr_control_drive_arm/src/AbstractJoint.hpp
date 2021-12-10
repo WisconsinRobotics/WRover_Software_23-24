@@ -32,7 +32,7 @@ class AbstractJoint {
 
         void configSetpoint(int degreeIndex, double position, double velocity);
 
-        void exectute();
+        bool exectute();
 
         // virtual void configVelocityHandshake(std::string, std::string) = 0;
 };

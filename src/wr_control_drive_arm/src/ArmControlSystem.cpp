@@ -132,7 +132,9 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
           // std::cout<<std::setw(30)<<motors[j]->getEncoderCounts()<<std::endl;
           // std::cout<<std::setw(30)<<motors[j]->getPower()<<std::endl;
         }
-        joint->exectute();
+        if (!joint->exectute()) {
+          //as->shutdown();
+        }
         jointIndex++;
       }
       
