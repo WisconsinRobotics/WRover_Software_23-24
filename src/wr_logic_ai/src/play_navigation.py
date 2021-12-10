@@ -18,12 +18,12 @@ def read_data():
     bag = rosbag.Bag(FILE_NAME)
     for topic, msg, t in bag.read_messages(topics=[topic_name]):
         msg_list_backwards.append(msg)
-        print(type(msg))
+       # print(type(msg))
        # drive_pub.publish(msg)
         rate.sleep()
-#    for i in range(len(msg_list_backwards)-1, 0, -1):
-#        drive_pub.publish(msg_list_backwards[i])
-#        rate.sleep()
+    for i in range(len(msg_list_backwards)-1, 0, -1): 
+        drive_pub.publish(msg_list_backwards[i]) # Error here, it expects float32 but it gets Drive
+        rate.sleep()
  
 def signal_handler(sig, frame):
     print('Script stopped by user')
