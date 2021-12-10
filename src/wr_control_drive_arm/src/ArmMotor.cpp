@@ -49,7 +49,7 @@ void ArmMotor::redirectPowerOutput(const Std_Float64 msg){
 }
 
 void ArmMotor::storeStallStatus(const bool msg) {
-    this->stallRead = msg;
+    this->isStall = msg;
 }
 
 /// controllerID is constrained between [0,3]

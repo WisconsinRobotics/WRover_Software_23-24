@@ -94,7 +94,7 @@ class ArmMotor{
          * 
          * @param msg The stall status of the current motor
          */
-        void storeStallStatus(const bool& msg);
+        void storeStallStatus(const bool msg);
 
         /**
          * @brief Performs Euclidean correct modulus between two inputs of the same type
@@ -138,17 +138,17 @@ class ArmMotor{
          * @param targetCounts The target encoder value for the motor
          * @param power The power to move the motor at (Bounded between [-1, 1])
          * @param block Specifies whether or not this action should block until it is complete
+         * @return True if the motor had stalled, and false otherwise
          */
-        void runToTarget(uint32_t targetCounts, float power, bool block);
+        bool runToTarget(uint32_t targetCounts, float power, bool block);
 
         /**
          * @brief Sends the motor to run to a specified position at a given power
          * 
          * @param rads The position to send the motor to (specified in radians)
          * @param power The power to move the motor at (Bounded between [-1, 1])
-         * @return True if the motor had stalled, and false otherwise
          */
-        bool runToTarget(double rads, float power);
+        void runToTarget(double rads, float power);
 
         /**
          * @brief Get the current state of the ArmMotor
@@ -177,6 +177,21 @@ class ArmMotor{
          * @return std::string The name of the ArmMotor
          */
         std::string getMotorName();
+
+         /**
+         * @brief Get the name of the ArmMotor
+         * 
+         * @return std::string The controller ID of the ArmMotor
+         */
+        unsigned int getControllerID();
+
+        /**
+         * @brief Get the name of the ArmMotor
+         * 
+         * @return std::string The motor ID of the ArmMotor
+         */
+        unsigned int getMotorID();
+
 
         /**
          * @brief Checks if the motor is currently within a pre-specified tolerance of a target
