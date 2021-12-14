@@ -133,7 +133,9 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
           // std::cout<<std::setw(30)<<motors[j]->getPower()<<std::endl;
         }
         if (!joint->exectute()) {
-          //as->setAborted();
+          as->setAborted();
+          return;
+          // TODO: hand control back to driver
         }
         jointIndex++;
       }

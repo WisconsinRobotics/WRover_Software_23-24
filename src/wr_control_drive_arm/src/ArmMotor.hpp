@@ -9,6 +9,7 @@
 #include "std_msgs/UInt32.h"
 #include "std_msgs/Int16.h"
 #include "std_msgs/Float64.h"
+#include "std_msgs/Bool.h"
 #include "math.h"
 #include <string>
 
@@ -54,9 +55,9 @@ class ArmMotor{
         ros::Publisher speedPub;
         /// A pointer to the most recent power message sent
         std_msgs::Int16 *powerMsg;
-        // If the motor is stalling or not
+        /// If the motor is stalling or not
         bool isStall;
-        // The ROS Subscriber that reads stall status data
+        /// The ROS Subscriber that reads stall status data
         ros::Subscriber stallRead;
 
         /**
@@ -94,7 +95,7 @@ class ArmMotor{
          * 
          * @param msg The stall status of the current motor
          */
-        void storeStallStatus(const bool msg);
+        void storeStallStatus(const std_msgs::Bool::ConstPtr& msg);
 
         /**
          * @brief Performs Euclidean correct modulus between two inputs of the same type
@@ -147,8 +148,9 @@ class ArmMotor{
          * 
          * @param rads The position to send the motor to (specified in radians)
          * @param power The power to move the motor at (Bounded between [-1, 1])
+         * @return True if the motor had stalled, and false otherwise
          */
-        void runToTarget(double rads, float power);
+        bool runToTarget(double rads, float power);
 
         /**
          * @brief Get the current state of the ArmMotor

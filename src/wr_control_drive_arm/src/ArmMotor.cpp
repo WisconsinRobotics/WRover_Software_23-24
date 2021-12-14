@@ -9,6 +9,7 @@
 /// Allow for referencing the UInt32 message type easier
 #define Std_UInt32 std_msgs::UInt32::ConstPtr&
 #define Std_Float64 std_msgs::Float64::ConstPtr&
+#define Std_Bool std_msgs::Bool::ConstPtr&
 
 /// The current COUNTS_PER_ROTATION is UINT32_MAX
 uint32_t const ArmMotor::COUNTS_PER_ROTATION = UINT32_MAX;
@@ -48,8 +49,8 @@ void ArmMotor::redirectPowerOutput(const Std_Float64 msg){
     this->setPower(msg->data);
 }
 
-void ArmMotor::storeStallStatus(const bool msg) {
-    this->isStall = msg;
+void ArmMotor::storeStallStatus(const Std_Bool msg) {
+    this->isStall = msg->data;
 }
 
 /// controllerID is constrained between [0,3]
@@ -150,10 +151,10 @@ bool ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block){
     return true;
 }
 
-void ArmMotor::runToTarget(double rads, float power){
+bool ArmMotor::runToTarget(double rads, float power){
     std::cout << "run to target: " << rads << ":" << this->radToEnc(rads) << std::endl;
     
-    runToTarget(this->radToEnc(rads), power, false);
+    return runToTarget(this->radToEnc(rads), power, false);
 }
 
 std::string ArmMotor::getMotorName(){
