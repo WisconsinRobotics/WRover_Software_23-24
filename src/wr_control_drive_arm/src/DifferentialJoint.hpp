@@ -5,9 +5,9 @@ class DifferentialJoint : public AbstractJoint {
         ~DifferentialJoint();
         DifferentialJoint(ArmMotor *leftMotor, ArmMotor *rightMotor, ros::NodeHandle *n);
 
-        vector<double> getMotorPositions(vector<double> jointPositions);
-        vector<double> getMotorVelocities(vector<double> jointVelocities);
-        vector<double> getJointPositions(vector<double> motorPositions);
+        void getMotorPositions(vector<double> &jointPositions, vector<double> &target);
+        void getMotorVelocities(vector<double> &jointVelocities, vector<double> &target);
+        void getJointPositions(vector<double> &motorPositions, vector<double> &target);
 
         void configVelocityHandshake(std::string pitchTopicName, std::string rollTopicName, std::string leftTopicName, std::string rightTopicName);
 

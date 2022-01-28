@@ -6,41 +6,43 @@
  */
 
 #include "DifferentialJoint.hpp"
+#include <memory>
 using std::vector;
 
-DifferentialJoint::DifferentialJoint(ArmMotor* leftMotor, ArmMotor* rightMotor, ros::NodeHandle* n) : AbstractJoint(n) {
-    this->numMotors = 2;
-    this->motors[0] = leftMotor;
-    this->motors[1] = rightMotor;
+DifferentialJoint::DifferentialJoint(ArmMotor* leftMotor, ArmMotor* rightMotor, ros::NodeHandle* n) : AbstractJoint(n, 2) {
+    this->motors.push_back(leftMotor);
+    this->motors.push_back(rightMotor);
 }
 
-vector<double> DifferentialJoint::getJointPositions(vector<double> motorPositions){
-    vector<double> positions;
+void DifferentialJoint::getJointPositions(vector<double> &motorPositions, vector<double> &target){
+    // vector<double> positions;
+    // target->reserve(2);
     
     double pitch = motorPositions[0] * this->motorToJointMatrix[0][0] + motorPositions[1]*this->motorToJointMatrix[0][1];
     double roll = motorPositions[1] * this->motorToJointMatrix[1][0] + motorPositions[1]*this->motorToJointMatrix[1][1];
 
-    positions[0] = pitch;
-    positions[1] = roll;
+    target.push_back(pitch);
+    target.push_back(roll);
 
-    return positions;
+    // return positions;
 }
 
-vector<double> DifferentialJoint::getMotorPositions(vector<double> jointPositions){
+void DifferentialJoint::getMotorPositions(vector<double> &jointPositions, vector<double> &target){
     
-    vector<double> positions;
-    
+    // std::unique_ptr<vector<double>> positions = std::make_unique<vector<double>>(2);
+    // target->reserve(2);
+
     double left = jointPositions[0] * this->jointToMotorMatrix[0][0] + jointPositions[1]*this->jointToMotorMatrix[0][1];
     double right = jointPositions[1] * this->jointToMotorMatrix[1][0] + jointPositions[1]*this->jointToMotorMatrix[1][1];
 
-    positions[0] = left;
-    positions[1] = right;
+    target.push_back(left);
+    target.push_back(right);
 
-    return positions;
+    // return std::move(positions);
 }
 
-vector<double> DifferentialJoint::getMotorVelocities(vector<double> jointPositions){
-    return getMotorPositions(jointPositions); //deritivate of linear transformation is itself
+void DifferentialJoint::getMotorVelocities(vector<double> &jointPositions, vector<double> &target){
+    return getMotorPositions(jointPositions, target); //deritivate of linear transformation is itself
 }
 
 void DifferentialJoint::configVelocityHandshake(std::string pitchTopicName, std::string rollTopicName, std::string leftTopicName, std::string rightTopicName){
@@ -71,7 +73,7 @@ void DifferentialJoint::handOffAllOutput(){
     vector<double> outputs;
     outputs[0] = this->cachedPitchOutput;
     outputs[1] = this->cachedRollOutput;
-    outputs = getMotorVelocities(outputs); 
+    getMotorVelocities(outputs, outputs); 
 
     std_msgs::Float64 msg1 = std_msgs::Float64();
     std_msgs::Float64 msg2 = std_msgs::Float64();
@@ -105,7 +107,7 @@ void DifferentialJoint::handOffAllFeedback(){
     vector<double> outputs;
     outputs[0] = this->cachedLeftFeedback;
     outputs[1] = this->cachedRightFeedback;
-    outputs = getMotorVelocities(outputs); 
+    getMotorVelocities(outputs, outputs); 
 
     std_msgs::Float64 msg1 = std_msgs::Float64();
     std_msgs::Float64 msg2 = std_msgs::Float64();

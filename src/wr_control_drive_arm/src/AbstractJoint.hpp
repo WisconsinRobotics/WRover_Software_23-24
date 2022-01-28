@@ -21,13 +21,13 @@ class AbstractJoint {
 
     public:
 
-        AbstractJoint(ros::NodeHandle* n);
+        AbstractJoint(ros::NodeHandle* n, int numMotors);
         ~AbstractJoint(){};
 
         // never used, need to be defined for compiler v-table
-        virtual vector<double> getMotorPositions(vector<double> jointPositions) = 0;
-        virtual vector<double> getMotorVelocities(vector<double> joinVelocities) = 0;
-        virtual vector<double> getJointPositions(vector<double> motorPositions) = 0;
+        virtual void getMotorPositions(vector<double> &jointPositions, vector<double> &target) = 0;
+        virtual void getMotorVelocities(vector<double> &joinVelocities, vector<double> &target) = 0;
+        virtual void getJointPositions(vector<double> &motorPositions, vector<double> &target) = 0;
 
         int getDegreesOfFreedom();
         

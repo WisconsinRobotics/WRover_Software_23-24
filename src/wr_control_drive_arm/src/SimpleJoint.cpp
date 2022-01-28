@@ -9,38 +9,34 @@
 
 #include "SimpleJoint.hpp"
 
-SimpleJoint::SimpleJoint(ArmMotor* motor, ros::NodeHandle *n) : AbstractJoint(n) {
-    this->numMotors = 1;
+SimpleJoint::SimpleJoint(ArmMotor* motor, ros::NodeHandle *n) : AbstractJoint(n, 1) {
     this->motors.push_back(motor);
 }
 
-vector<double> SimpleJoint::getJointPositions(vector<double> motorPositions){
-    vector<double> positions = *(new vector<double>()); // makes the red lines go away
+void SimpleJoint::getJointPositions(vector<double> &motorPositions, vector<double> &target){
+    // vector<double> positions = *(new vector<double>()); // makes the red lines go away
     
-    for(int i = 0; i < motorPositions.size(); i++){
-        positions[i] = motorPositions[i];
-    }
+    // target->reserve(1);
+    target.push_back(motorPositions[0]);
 
-    return positions;
+    // return positions;
 }
 
-vector<double> SimpleJoint::getMotorPositions(vector<double> jointPositions){
-    vector<double> positions;
-    for(int i = 0; i < jointPositions.size(); i++){
-        positions.push_back(jointPositions[i]);
-    }
-
-    return positions;
+void SimpleJoint::getMotorPositions(vector<double> &jointPositions, vector<double> &target){
+  
+    target.reserve(1);
+    std::cout << target.size() << std::endl;
+    double position = jointPositions[0];
+    target.push_back(position);
+    // return positions;
 }
 
-vector<double> SimpleJoint::getMotorVelocities(vector<double> jointPositions){
-    vector<double> setpoints;
+void SimpleJoint::getMotorVelocities(vector<double> &jointPositions, vector<double> &target){
     
-    for(int i = 0; i < jointPositions.size(); i++){
-        setpoints[i] = jointVelocites[i];
-    }
+    // target->reserve(1);
+    target.push_back(jointPositions[0]);
 
-    return setpoints;
+    // return setpoints;
 }
 
 void SimpleJoint::handoffOutput(const std_msgs::Float64 msg){

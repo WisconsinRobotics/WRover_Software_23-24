@@ -9,9 +9,9 @@ class SimpleJoint : public AbstractJoint {
         int a(){return 2;}
         int b(){return 3;}
 
-        vector<double> getMotorPositions(vector<double> jointPositions);
-        vector<double> getMotorVelocities(vector<double> jointVelocities);
-        vector<double> getJointPositions(vector<double> motorPositions);
+        void getMotorPositions(vector<double> &jointPositions, vector<double> &target);
+        void getMotorVelocities(vector<double> &ointVelocities, vector<double> &target);
+        void getJointPositions(vector<double> &motorPositions, vector<double> &target);
 
         void configMotor(ArmMotor* motor);
         void configVelocityHandshake(std::string jointTopicName, std::string motorTopicName);

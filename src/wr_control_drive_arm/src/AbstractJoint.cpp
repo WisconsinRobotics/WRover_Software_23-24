@@ -6,15 +6,14 @@
  */
 #include "AbstractJoint.hpp"
 
-AbstractJoint::AbstractJoint(ros::NodeHandle* n){
+AbstractJoint::AbstractJoint(ros::NodeHandle* n, int numMotors){
     this->n = n;
+    this->numMotors = numMotors;
 
-    std::cout << this->numMotors << std::endl;
-    for(int i = 0; i < 1; i++){
+    jointPositions.reserve(numMotors);
+    jointVelocites.reserve(numMotors);
 
-        jointPositions.push_back(0);
-        jointVelocites.push_back(0);
-    }
+    std::cout << "init with motors: " << this->numMotors << std::endl;
 }
 
 int AbstractJoint::getDegreesOfFreedom(){
@@ -27,14 +26,17 @@ ArmMotor* AbstractJoint::getMotor(int motorIndex){
 
 void AbstractJoint::configSetpoint(int degreeIndex, double position, double velocity){
     std::cout << "config setpoint: " << degreeIndex << " " << position << " " << velocity << std::endl;
-    std::cout << "capacity: " << this->jointPositions.size() << std::endl;
 
     this->jointPositions[degreeIndex] = position;
     this->jointVelocites[degreeIndex] = velocity;
 }
 
 void AbstractJoint::exectute(){
-    vector<double> motorPositions = this->getMotorPositions(jointPositions);
+    std::cout << "exectue" << std::endl;
+    vector<double> motorPositions = vector<double>();
+    this->getMotorPositions(jointPositions, motorPositions);
+    std::cout << motorPositions.size() << std::endl;
+
     for(int i = 0; i < this->numMotors; i++){
         std::cout << "run motor to target: " << motorPositions[i] << std::endl;
         this->motors[i]->runToTarget(motorPositions[i], 0);

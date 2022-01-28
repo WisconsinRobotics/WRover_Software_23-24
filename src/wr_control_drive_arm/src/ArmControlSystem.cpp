@@ -66,7 +66,7 @@ bool configJointSetpoint(AbstractJoint* joint, int degreeIndex, std::vector<std:
 	// velMax = abs(*std::max_element(currTargetPosition.velocities.begin(), currTargetPosition.velocities.end(), [](double a, double b) {return abs(a)<abs(b);}));
 	// float currPower = 0.1 * currTargetPosition.velocities[j]/velMax;
 	// currPower = abs(velMax) <= 0.0001 ? 0.1 : currPower;
-  std::cout << "config joint setup: " << target << std::endl;
+  std::cout << "config joint setup: " << degreeIndex << " " << target << std::endl;
   // std::cout << joint->getName() << ":" << motorIndex << " position: " << target;
 
 	joint->configSetpoint(degreeIndex, target, 0);
