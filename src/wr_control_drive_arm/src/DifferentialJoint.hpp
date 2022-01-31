@@ -15,10 +15,12 @@ class DifferentialJoint : public AbstractJoint {
         // linear transformations works for position and velocity
         // [0.5 0.5]   [left motor ]    [pitch]
         // [ -1  1 ] * [right motor]  = [roll ]
-        double motorToJointMatrix[2][2] = {{0.5, 0.5}, {-1, 1}};
+        // double motorToJointMatrix[2][2] = {{0.5, 0.5}, {-1, 1}};
+        double motorToJointMatrix[2][2] = {{1, 0}, {0, 1}};
         // [1 -0.5]   [pitch]    [left motor ]
         // [1  0.5] * [roll ]  = [right motor]
-        double jointToMotorMatrix[2][2] = {{1, 0.5}, {1, -0.5}};
+        // double jointToMotorMatrix[2][2] = {{1, 0.5}, {1, -0.5}};
+        double jointToMotorMatrix[2][2] = {{1, 0}, {0, 1.0}};
 
         void handoffPitchOutput(std_msgs::Float64);
         void handoffRollOutput(std_msgs::Float64);
