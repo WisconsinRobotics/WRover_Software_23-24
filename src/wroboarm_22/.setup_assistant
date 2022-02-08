@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: wroboarm_22
+    relative_path: urdf/wroboarm_22.urdf
+    xacro_args: ""
+  SRDF:
+    relative_path: config/wroboarm_22.srdf
+  CONFIG:
+    author_name: Nicholas Underwood
+    author_email: ndunderwood@wisc.edu
+    generated_timestamp: 1643850775

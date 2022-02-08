@@ -19,12 +19,12 @@
 /**
  * @brief Defines space for all ArmMotor references
  */
-ArmMotor *motors[7];
+ArmMotor *motors[6];
 
 /**
  * @brief Defines space for all Joint references
  */
-AbstractJoint *joints[6];
+AbstractJoint *joints[5];
 /**
  * @brief The Joint State Publisher for MoveIt
  */
@@ -120,18 +120,18 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
 
         joint = joints[jointIndex];
 
-        for(int k = 0; k < joint->getDegreesOfFreedom(); k++){
-          double targetPos = currTargetPosition.positions[motorIndex];
+        // for(int k = 0; k < joint->getDegreesOfFreedom(); k++){
+        //   double targetPos = currTargetPosition.positions[motorIndex];
 
-          std::cout<< "target pos: " << motorIndex << " " << targetPos <<std::endl;
-          bool hasMotorFinished = configJointSetpoint(joint, motorIndex-jointIndex, names, positions, targetPos, 0);
-          hasPositionFinished &= hasMotorFinished;
-          motorIndex++;
+        //   std::cout<< "target pos: " << motorIndex << " " << targetPos <<std::endl;
+        //   bool hasMotorFinished = configJointSetpoint(joint, motorIndex-jointIndex, names, positions, targetPos, 0);
+        //   hasPositionFinished &= hasMotorFinished;
+        //   motorIndex++;
           // DEBUGGING OUTPUT: Print each motor's name, radian position, encoder position, and power
           // std::cout<<joint->getMotor(k)->getMotorName()<<":"<<std::setw(30-motors[j]->getMotorName().length())<<motors[j]->getRads()<<std::endl;
           // std::cout<<std::setw(30)<<motors[j]->getEncoderCounts()<<std::endl;
           // std::cout<<std::setw(30)<<motors[j]->getPower()<<std::endl;
-        }
+        // }
         joint->exectute();
         jointIndex++;
       }
@@ -172,13 +172,12 @@ int main(int argc, char** argv)
   ros::NodeHandle n;
 
   // Initialize all motors with their MoveIt name, WRoboclaw initialization, and reference to the current node
-  motors[0] = new ArmMotor("link1_joint", 0, 0, &n);
-  motors[1] = new ArmMotor("link2_joint", 0, 1, &n);
-  motors[2] = new ArmMotor("link3_joint", 1, 0, &n);
-  motors[3] = new ArmMotor("link4_joint", 1, 1, &n);
-  motors[4] = new ArmMotor("link5_joint", 2, 0, &n);
-  motors[5] = new ArmMotor("link6_joint", 2, 1, &n);
-  motors[6] = new ArmMotor("link7_joint", 3, 0, &n);
+  motors[0] = new ArmMotor("turntable", 0, 0, &n);
+  motors[1] = new ArmMotor("shoulder", 0, 1, &n);
+  motors[2] = new ArmMotor("elbow", 1, 0, &n);
+  motors[3] = new ArmMotor("forearm_roll", 1, 1, &n);
+  motors[4] = new ArmMotor("wrist_pitch", 2, 0, &n);
+  motors[5] = new ArmMotor("wrist_roll", 2, 1, &n);
   std::cout << "init motors" << std::endl;
 
   // Initialize all Joints
@@ -187,14 +186,11 @@ int main(int argc, char** argv)
   joints[2] = new SimpleJoint(motors[2], &n);
   joints[3] = new SimpleJoint(motors[3], &n);
   joints[4] = new SimpleJoint(motors[4], &n);
-  DifferentialJoint* temp = new DifferentialJoint(motors[5], motors[6], &n);
-  temp->configVelocityHandshake("/control/arm/5/roll", "/control/arm/5/pitch", "/control/arm/21/", "/control/arm/30/");
-  joints[5] = temp;
-  // joints[5] = new SimpleJoint(motors[5], &n);
-  // joints[5]->configVelocityHandshake("/control/arm/5", "/control/arm/21");
-  // joints[6] = new SimpleJoint(motors[6], &n);
-  // joints[6]->configVelocityHandshake("/control/arm/6", "/control/arm/30");
+  joints[5] = new SimpleJoint(motors[5], &n);
+  // DifferentialJoint* temp = new DifferentialJoint(motors[4], motors[], &n);
+  // temp->configVelocityHandshake("/control/arm/5/roll", "/control/arm/5/pitch", "/control/arm/21/", "/control/arm/30/");
   std::cout << "init joints" << std::endl;
+  // joints[5] = temp;
   
 
   // Initialize the Joint State Data Publisher

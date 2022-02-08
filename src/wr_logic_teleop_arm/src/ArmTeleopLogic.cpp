@@ -29,7 +29,7 @@ auto updateTarget(float x_pos, float y_pos, float z_pos, tf2::Quaternion orienta
     p.pose.position.z = z_pos;
     auto outOrientation = /* tf2::Quaternion(0,sin(M_PI/4), 0, cos(M_PI/4)) * */ orientation;
     p.pose.orientation = tf2::toMsg(outOrientation);
-    p.header.frame_id = "turntable";
+    p.header.frame_id = "base_link";
     pub.publish(p);
     // isNewPath.store(true);
 }
@@ -70,10 +70,16 @@ auto main(int argc, char** argv) -> int{
     move.setPlanningTime(PLANNING_TIME);
     const moveit::core::JointModelGroup* joint_model_group = move.getCurrentState()->getJointModelGroup("arm");
     robot_state::RobotState start_state(*move.getCurrentState());
+    moveit_visual_tools::MoveItVisualTools visual_tools("arm");
+    std::cout << "interface handle: " << move.getNodeHandle().getNamespace() << std::endl;
+
 
     ros::Rate loop {CLOCK_RATE};
 
     ros::Publisher nextTarget = np.advertise<geometry_msgs::PoseStamped>("/logic/arm_teleop/next_target", 
+        MESSAGE_QUEUE_LENGTH);
+    
+    ros::Publisher trajectoryPub = np.advertise<visualization_msgs::MarkerArray>("/logic/arm_teleop/trajectory", 
         MESSAGE_QUEUE_LENGTH);
         
     ros::Subscriber yAxis = np.subscribe("/xbox_test/axis/pov_y", 
@@ -148,6 +154,19 @@ auto main(int argc, char** argv) -> int{
         }));
         
     // transform = move.getCurrentState()->getFrameTransform("odom_combined");
+    geometry_msgs::PoseStamped endEffectorPose = move.getCurrentPose();
+    x_pos = endEffectorPose.pose.position.x;
+    y_pos = endEffectorPose.pose.position.x;
+    z_pos = endEffectorPose.pose.position.x;
+    x_pos = endEffectorPose.pose.position.x;
+
+    orientation = tf2::Quaternion(
+        endEffectorPose.pose.orientation.x,
+        endEffectorPose.pose.orientation.y,
+        endEffectorPose.pose.orientation.z,
+        endEffectorPose.pose.orientation.w
+    );
+
     // updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
 
     while(ros::ok()){
@@ -168,12 +187,23 @@ auto main(int argc, char** argv) -> int{
         p.pose.position.z = z_pos;
         p.pose.orientation = tf2::toMsg(orientation);
         p.header.frame_id = "odom_combined";
+
         move.setPoseTarget(p);
+        move.setStartStateToCurrentState();
+
+        moveit::planning_interface::MoveGroupInterface::Plan plan;
+        bool success = (move.plan(plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
+        std::cout << "[INFO] [" << ros::Time::now() << "]: New target planned: " << success << std::endl;
+
         std::vector<geometry_msgs::Pose> waypoints {p.pose};
         moveit_msgs::RobotTrajectory traj;
 
+        visual_tools.publishAxisLabeled(p.pose, "pose1");
+        visual_tools.publishTrajectoryLine(plan.trajectory_, joint_model_group);
+        visual_tools.trigger();
+
+
         //plan and execute path
-        move.setStartStateToCurrentState();
         move.asyncMove();
 
         while(ros::ok){
