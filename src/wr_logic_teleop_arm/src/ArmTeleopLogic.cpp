@@ -50,9 +50,9 @@ auto main(int argc, char** argv) -> int{
     constexpr float STEP_Y = 0.001;
     constexpr float STEP_Z = 0.001;
 
-    constexpr float HOME_X = 0.25;
-    constexpr float HOME_Y = 0;
-    constexpr float HOME_Z = 0.25;
+    constexpr float HOME_X = 0.7;
+    constexpr float HOME_Y = 0.2;
+    constexpr float HOME_Z = 0;
 
     float x_pos = HOME_X;
     float y_pos = HOME_Y;
@@ -167,11 +167,12 @@ auto main(int argc, char** argv) -> int{
         endEffectorPose.pose.orientation.w
     );
 
-    // updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+    updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
 
     while(ros::ok()){
 
         if(!isNewPath.load()){
+            // updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
             loop.sleep();
             continue;
         }
@@ -191,22 +192,11 @@ auto main(int argc, char** argv) -> int{
         move.setPoseTarget(p);
         move.setStartStateToCurrentState();
 
-        moveit::planning_interface::MoveGroupInterface::Plan plan;
-        bool success = (move.plan(plan) == moveit::planning_interface::MoveItErrorCode::SUCCESS);
-        std::cout << "[INFO] [" << ros::Time::now() << "]: New target planned: " << success << std::endl;
-
-        std::vector<geometry_msgs::Pose> waypoints {p.pose};
-        moveit_msgs::RobotTrajectory traj;
-
-        visual_tools.publishAxisLabeled(p.pose, "pose1");
-        visual_tools.publishTrajectoryLine(plan.trajectory_, joint_model_group);
-        visual_tools.trigger();
-
-
         //plan and execute path
         move.asyncMove();
 
         while(ros::ok){
+            // updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
             // std::cout << "[INFO] [" << ros::Time::now() << "]: executing path " << std::endl;
 
             if(move.getMoveGroupClient().getState().isDone()){
