@@ -31,7 +31,7 @@ auto updateTarget(float x_pos, float y_pos, float z_pos, tf2::Quaternion orienta
     p.pose.orientation = tf2::toMsg(outOrientation);
     p.header.frame_id = "base_link";
     pub.publish(p);
-    // isNewPath.store(true);
+    isNewPath.store(true);
 }
 
 auto main(int argc, char** argv) -> int{
@@ -46,9 +46,9 @@ auto main(int argc, char** argv) -> int{
     constexpr float TRIGGER_PRESSED = 0.5;
     constexpr float MINIMUM_PATH_ACCURACY = 0.0;
 
-    constexpr float STEP_X = 0.001;
-    constexpr float STEP_Y = 0.001;
-    constexpr float STEP_Z = 0.001;
+    constexpr float STEP_X = 0.003;
+    constexpr float STEP_Y = 0.003;
+    constexpr float STEP_Z = 0.003;
 
     constexpr float HOME_X = 0.7;
     constexpr float HOME_Y = 0.2;

@@ -9,22 +9,22 @@ default_acceleration_scaling_factor: 1.0
 # Joint limits can be turned off with [has_velocity_limits, has_acceleration_limits]
 joint_limits:
   elbow:
-    max_position: 0.74533
-    min_position: -2.26893
+    max_position: 0.436
+    min_position: -2.5307
     has_velocity_limits: false
     max_velocity: 0
     has_acceleration_limits: false
     max_acceleration: 0
   forearm_roll:
-    max_position: 3.1
-    min_position: -3.1
+    max_position: 1.57
+    min_position: -1.57
     has_velocity_limits: false
     max_velocity: 0
     has_acceleration_limits: false
     max_acceleration: 0
   shoulder:
-    max_position: 0.78539
-    min_position: -0.349
+    max_position: 2.2689
+    min_position: -0.87266
     has_velocity_limits: false
     max_velocity: 0
     has_acceleration_limits: false
@@ -37,15 +37,15 @@ joint_limits:
     has_acceleration_limits: false
     max_acceleration: 0
   wrist_pitch:
-    max_position: 3.1
-    min_position: -3.1
+    max_position: 1.57
+    min_position: -1.57
     has_velocity_limits: false
     max_velocity: 0
     has_acceleration_limits: false
     max_acceleration: 0
   wrist_roll:
-    max_position: 3.1
-    min_position: -3.1
+    max_position: 1.57
+    min_position: -1.57
     has_velocity_limits: false
     max_velocity: 0
     has_acceleration_limits: false
