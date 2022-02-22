@@ -123,9 +123,14 @@ void ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block){
         std_msgs::Float64 setpointMsg;
         setpointMsg.data = ArmMotor::encToRad(targetCounts);
         this->targetPub.publish(setpointMsg);
+
+        // long int direction = targetCounts - this->getEncoderCounts();
+        // power = abs(power) * (corrMod(direction, ((long int)ArmMotor::COUNTS_PER_ROTATION)) < corrMod(-direction, ((long int)ArmMotor::COUNTS_PER_ROTATION)) ? 1 : -1);
+        // this->setPower(power);
+
         this->currState = MotorState::RUN_TO_TARGET;
     // Otherwise, stop the motor
-    }else{
+    } else {
         this->setPower(0.f);
         this->currState = MotorState::STOP;
     }

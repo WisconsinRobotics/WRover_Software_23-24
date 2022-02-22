@@ -31,7 +31,6 @@ auto updateTarget(float x_pos, float y_pos, float z_pos, tf2::Quaternion orienta
     p.pose.orientation = tf2::toMsg(outOrientation);
     p.header.frame_id = "base_link";
     pub.publish(p);
-    isNewPath.store(true);
 }
 
 auto main(int argc, char** argv) -> int{
@@ -44,16 +43,21 @@ auto main(int argc, char** argv) -> int{
     constexpr float CLOCK_RATE = 2;
     constexpr uint32_t MESSAGE_QUEUE_LENGTH = 1000; 
     constexpr float TRIGGER_PRESSED = 0.5;
+    constexpr float JOYSTICK_DEADBAND = 0.1;
     constexpr float MINIMUM_PATH_ACCURACY = 0.0;
 
     constexpr float STEP_X = 0.003;
     constexpr float STEP_Y = 0.003;
     constexpr float STEP_Z = 0.003;
 
-    constexpr float HOME_X = 0.7;
-    constexpr float HOME_Y = 0.2;
-    constexpr float HOME_Z = 0;
+    constexpr float HOME_X = -0.7;
+    constexpr float HOME_Y = 0.0;
+    constexpr float HOME_Z = 0.2;
 
+
+    float accel = 1.0;
+    float deaccel = 1.0;
+    float step_mult = 1.0;
     float x_pos = HOME_X;
     float y_pos = HOME_Y;
     float z_pos = HOME_Z;
@@ -81,98 +85,149 @@ auto main(int argc, char** argv) -> int{
     
     ros::Publisher trajectoryPub = np.advertise<visualization_msgs::MarkerArray>("/logic/arm_teleop/trajectory", 
         MESSAGE_QUEUE_LENGTH);
-        
-    ros::Subscriber yAxis = np.subscribe("/xbox_test/axis/pov_y", 
+    
+
+    // y axis
+    ros::Subscriber yAxis = np.subscribe("/xbox_test/axis/stick_left_y", 
         MESSAGE_QUEUE_LENGTH, 
         static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
-            if(msg->data != 0){
-                y_pos += static_cast<bool>(msg->data) ? msg->data > 0 ? STEP_Y : -STEP_Y : 0;
+            if(abs(msg->data) >= JOYSTICK_DEADBAND){
+                y_pos += msg->data * STEP_Y;
                 updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+                isNewPath.store(true);
+
             }
         }));
 
-    ros::Subscriber xAxis = np.subscribe("/xbox_test/axis/pov_x", 
+    // x axis
+    ros::Subscriber xAxis = np.subscribe("/xbox_test/axis/stick_left_x", 
         MESSAGE_QUEUE_LENGTH, 
         static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
-            if(msg->data != 0){
-                x_pos += static_cast<bool>(msg->data) ? msg->data > 0 ? STEP_X : -STEP_X : 0;
+            if(abs(msg->data) >= JOYSTICK_DEADBAND){
+                x_pos += msg->data * STEP_X;
                 updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+                isNewPath.store(true);
+                
             }
         }));
 
+    // y up
     ros::Subscriber zUp = np.subscribe("/xbox_test/button/shoulder_l",
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
             if(msg->data){
-                z_pos += msg->data ? STEP_Z : 0;
+                z_pos += STEP_Y * step_mult;
                 updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+                isNewPath.store(true);
+
             }
         }));
 
-    ros::Subscriber zDown = np.subscribe("/xbox_test/axis/trigger_left",
+    // y down
+    ros::Subscriber zDown = np.subscribe("/xbox_test/button/shoulder_r",
         MESSAGE_QUEUE_LENGTH,
-        static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
-            if(msg->data >= TRIGGER_PRESSED){
-                z_pos += msg->data >= TRIGGER_PRESSED ? -STEP_Z : 0;
+        static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
+            if(msg->data){
+                z_pos -= STEP_Y * step_mult;
                 updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+                isNewPath.store(true);
+
             }
         }));
     
-    ros::Subscriber roll = np.subscribe("/xbox_test/axis/stick_left_x",
+    //roll counter clockwise
+    ros::Subscriber rollUp = np.subscribe("/xbox_test/button/y",
         MESSAGE_QUEUE_LENGTH,
-        static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
-            if(abs(msg->data) >= 0.5){
-                orientation *= (msg->data > 0 ? SPIN_Z : SPIN_Z.inverse());
+        static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
+            if(msg->data){
+                orientation *= SPIN_Z * step_mult;
                 updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+                isNewPath.store(true);
+
             }
         }));
 
-    ros::Subscriber pitch = np.subscribe("/xbox_test/axis/stick_left_y",
+    // roll clockwise
+    ros::Subscriber rollDown = np.subscribe("/xbox_test/button/a",
+        MESSAGE_QUEUE_LENGTH,
+        static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
+            if(msg->data){
+                orientation *= SPIN_Z.inverse();
+                updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+                isNewPath.store(true);
+
+            }
+        }));
+
+    // pitch
+    ros::Subscriber pitch = np.subscribe("/xbox_test/axis/stick_right_y",
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
             if(abs(msg->data) >= 0.5){
                 orientation *= (msg->data > 0 ? SPIN_Y : SPIN_Y.inverse());
                 updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+                isNewPath.store(true);
+
             }
         }));
 
+    // yaw
     ros::Subscriber yaw = np.subscribe("/xbox_test/axis/stick_right_x",
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
             if(abs(msg->data) >= 0.5){
                 orientation *= (msg->data > 0 ? SPIN_X : SPIN_X.inverse());
                 updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+                isNewPath.store(true);
+
             }
         }));
 
-    ros::Subscriber execPath = np.subscribe("/xbox_test/button/a",
+    ros::Subscriber speedUp = np.subscribe("/xbox_test/axis/trigger_right",
+        MESSAGE_QUEUE_LENGTH,
+        static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
+        accel = msg->data;
+        step_mult = std::pow(10,accel-deaccel);
+    }));
+
+    ros::Subscriber speedDown = np.subscribe("/xbox_test/axis/trigger_right",
+        MESSAGE_QUEUE_LENGTH,
+        static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
+        deaccel = msg->data;
+        step_mult = std::pow(10,accel-deaccel);
+    }));
+
+    // override path execution
+    ros::Subscriber execPath = np.subscribe("/xbox_test/button/x",
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
             if(msg->data){
                 isNewPath.store(true);
             }
         }));
-        
-    // transform = move.getCurrentState()->getFrameTransform("odom_combined");
-    geometry_msgs::PoseStamped endEffectorPose = move.getCurrentPose();
-    x_pos = endEffectorPose.pose.position.x;
-    y_pos = endEffectorPose.pose.position.x;
-    z_pos = endEffectorPose.pose.position.x;
-    x_pos = endEffectorPose.pose.position.x;
 
-    orientation = tf2::Quaternion(
-        endEffectorPose.pose.orientation.x,
-        endEffectorPose.pose.orientation.y,
-        endEffectorPose.pose.orientation.z,
-        endEffectorPose.pose.orientation.w
-    );
+    // reset target/cancel path
+    ros::Subscriber resetPose = np.subscribe("/xbox_test/button/start",
+        MESSAGE_QUEUE_LENGTH,
+        static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
+            if(msg->data){
 
-    updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+                geometry_msgs::Pose pose = move.getCurrentPose().pose;
+                x_pos = pose.position.x;
+                y_pos = pose.position.y;
+                z_pos = pose.position.z;
+                tf2::convert(pose.orientation, orientation);
+                updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+
+                isNewPath.store(true); //override path
+            }
+        }));
+
 
     while(ros::ok()){
 
+        updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
         if(!isNewPath.load()){
-            // updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
             loop.sleep();
             continue;
         }
@@ -196,7 +251,7 @@ auto main(int argc, char** argv) -> int{
         move.asyncMove();
 
         while(ros::ok){
-            // updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+            updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
             // std::cout << "[INFO] [" << ros::Time::now() << "]: executing path " << std::endl;
 
             if(move.getMoveGroupClient().getState().isDone()){

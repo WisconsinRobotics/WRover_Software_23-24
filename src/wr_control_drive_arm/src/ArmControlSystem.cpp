@@ -20,7 +20,8 @@
 /**
  * @brief Defines space for all ArmMotor references
  */
-ArmMotor *motors[6];
+const int numMotors = 6;
+ArmMotor *motors[numMotors];
 
 /**
  * @brief Defines space for all Joint references
@@ -91,10 +92,10 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
       for(int j = 0; j < currTargetPosition.positions.size(); j++){
         // Each motor should run to its respective target position at a fixed speed
         // TODO: this speed should be capped/dynamic to reflect the input joint velocity parameters
-        // velMax = abs(*std::max_element(currTargetPosition.velocities.begin(), currTargetPosition.velocities.end(), [](double a, double b) {return abs(a)<abs(b);}));
-        // float currPower = 0.1 * currTargetPosition.velocities[j]/velMax;
-        // currPower = abs(velMax) <= 0.0001 ? 0.1 : currPower;
-        motors[j]->runToTarget(currTargetPosition.positions[j], 0);//currPower);
+        velMax = abs(*std::max_element(currTargetPosition.velocities.begin(), currTargetPosition.velocities.end(), [](double a, double b) {return abs(a)<abs(b);}));
+        float currPower = 0.1 * currTargetPosition.velocities[j]/velMax;
+        currPower = abs(velMax) <= 0.0001 ? 0.1 : currPower;
+        motors[j]->runToTarget(currTargetPosition.positions[j], currPower);
         // The position has only finished if every motor is STOPped
         hasPositionFinished &= motors[j]->getMotorState() == MotorState::STOP;
         // Push the current motor name and position data to the Joint State data tracking list
@@ -123,6 +124,11 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
   }
 
   //When all positions have been reached, set the current task as succeeded
+
+  for(int i = 0; i < numMotors; i++){
+    motors[i]->setPower(0.f);
+  }
+  
   as->setSucceeded();
 }
 
