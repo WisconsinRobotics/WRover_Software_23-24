@@ -11,6 +11,7 @@ while [ $COUNT -ne 0 ]; do
 done
 rm ./out.temp;
 export WROVER_LOCAL=true
+export WROVER_HW=MOCK
 gnome-terminal -- roslaunch wr_entry_point test_arm.launch
 gnome-terminal -- roslaunch wr_control_drive_arm std.launch
 gnome-terminal -- roslaunch wroboarm_22 demo_test.launch
@@ -18,5 +19,4 @@ gnome-terminal -- roslaunch wroboarm_22 demo_test.launch
 sleep 5
 # gnome-terminal -- /bin/sh -c "rosrun wr_logic_teleop_arm ArmTeleopLogic; while true; do sleep 1; done"
 gnome-terminal -- /bin/sh -c "rosrun wr_logic_teleop_arm ArmTeleopLogic;"
-gnome-terminal -- roslaunch wreadinput test_xbox360.launch
 cd -
