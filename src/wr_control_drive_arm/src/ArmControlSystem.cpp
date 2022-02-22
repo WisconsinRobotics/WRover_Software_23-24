@@ -145,7 +145,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
         joint->exectute();
         jointIndex++;
       }
-      
+
       // DEBUGGING OUTPUT: Print a divider line for cleanliness
       std::cout<<velMax<<std::endl;
       std::cout<<"-----------------------"<<std::endl;
@@ -201,11 +201,10 @@ int main(int argc, char** argv)
   joints[2] = new SimpleJoint(motors[2], &n);
   joints[3] = new SimpleJoint(motors[3], &n);
   joints[4] = new SimpleJoint(motors[4], &n);
-  joints[5] = new SimpleJoint(motors[5], &n);
-  // DifferentialJoint* temp = new DifferentialJoint(motors[4], motors[], &n);
-  // temp->configVelocityHandshake("/control/arm/5/roll", "/control/arm/5/pitch", "/control/arm/21/", "/control/arm/30/");
+  DifferentialJoint* temp = new DifferentialJoint(motors[4], motors[5], &n);
+  temp->configVelocityHandshake("/control/arm/5/roll", "/control/arm/5/pitch", "/control/arm/20/", "/control/arm/21/");
   std::cout << "init joints" << std::endl;
-  // joints[5] = temp;
+  joints[5] = temp;
   
 
   // Initialize the Joint State Data Publisher
