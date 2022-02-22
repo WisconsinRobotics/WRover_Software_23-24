@@ -1,0 +1,12 @@
+<library path="src">
+  <class name="Launcher UI" type="wr_entry_point.launcher_ui.LauncherUI" base_class_type="rqt_gui_py::Plugin">
+    <description>A friendly user interface for launching the robot system.</description>
+    <qtgui>
+      <group>
+        <label>Wisconsin Robotics</label>
+      </group>
+      <label>Launcher UI</label>
+      <icon type="theme">start-here</icon>
+    </qtgui>
+  </class>
+</library>

@@ -1,8 +1,13 @@
+<!-- Launches the drive system teleoperation logic node. -->
 <launch>
-	<node pkg="wr_logic_teleop_ds" type="TeleopDriveTrainLogic" name="wr_logic_teleop_ds">
-		<param name="speed_step1" value="0.25"/>
-		<param name="speed_step2" value="0.5"/>
-		<param name="speed_step3" value="0.75"/>
-		<param name="speed_step4" value="1.0"/>
-	</node>
+	<group ns="logic">
+    <group ns="drive_system">
+      <node name="logic_teleop" pkg="wr_logic_teleop_ds" type="TeleopDriveTrainLogic" machine="wrover">
+				<param name="speed_step1" value="0.25"/>
+				<param name="speed_step2" value="0.5"/>
+				<param name="speed_step3" value="0.75"/>
+				<param name="speed_step4" value="1.0"/>
+			</node>
+    </group>
+  </group>
 </launch>

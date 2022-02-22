@@ -1,0 +1,14 @@
+<!-- Test robot configuration that runs only the arm and manipulator. -->
+<launch>
+  <env name="WROVER_MODE" value="TEST"/>
+
+  <include file="$(find wr_entry_point)/launch/comp/comp_init.launch"/>
+  
+  <include file="$(find wr_entry_point)/launch/comp/comp_roboclaw.launch">
+    <arg name="use_encoders" value="true"/>
+  </include>
+  
+  <include file="$(find wr_entry_point)/launch/comp/comp_ui.launch"/>
+  
+  <include file="$(find wr_entry_point)/launch/comp/comp_arm.launch"/>
+</launch>

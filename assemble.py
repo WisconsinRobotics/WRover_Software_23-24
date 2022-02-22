@@ -43,7 +43,7 @@ def fork_cmd(args: List[str], cwd: str, fatal_errors: bool = True, relay_io: boo
     exit_code = subprocess.Popen(args, cwd=cwd, stdout=stdout, stderr=stderr).wait()
     if fatal_errors and exit_code != 0:
         print(f'\n{COL_FATAL}FATAL: Command exited with {exit_code}: {" ".join(args)}')
-        print('Working dir: {cwd}{COL_CLEAR}')
+        print(f'Working dir: {cwd}{COL_CLEAR}')
         sys.exit(1)
 
 def print_section(text: str):
@@ -344,7 +344,7 @@ class BuildActionBuild(BuildAction):
 class BuildActionClean(BuildAction):
     def dispatch(self, manifest: Config, dependencies: List[Dependency], root_dir: str, args: List[str]):
         for dependency in dependencies:
-            print_section('Cleaning {dependency.name}')
+            print_section(f'Cleaning {dependency.name}')
             print_subsec('Purging local repo...')
             shutil.rmtree(dependency.get_repo_dir(root_dir), ignore_errors=True)
 
