@@ -98,11 +98,11 @@ def main():
                     wrist_spd_a = -1
                     wrist_spd_b = -1
                 elif pov_y.data > 0:
-                    wrist_spd_a = -1
-                    wrist_spd_b = 1
-                elif pov_y.data < 0:
                     wrist_spd_a = 1
                     wrist_spd_b = -1
+                elif pov_y.data < 0:
+                    wrist_spd_a = -1
+                    wrist_spd_b = 1
                 pub_wrist_a.publish(Int16(24576 * wrist_spd_a))
                 pub_wrist_b.publish(Int16(-24576 * wrist_spd_b))
 
