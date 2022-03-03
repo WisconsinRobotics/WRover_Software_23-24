@@ -16,7 +16,7 @@ float SPEED_RATIO_VALUES[] = {0.25, 0.5, 0.75, 1.0};
 //The camera mast speed value
 float speedCamMast = 0.0;
 // Deadband range, centered at 0
-float deadband = 0.1;
+float deadband = 0.0;
 
 #define Std_Bool std_msgs::Bool::ConstPtr&
 #define Std_Float32 std_msgs::Float32::ConstPtr&
@@ -92,6 +92,9 @@ int main(int argc, char** argv){
 	nh.getParam("speed_step3", SPEED_RATIO_VALUES[2]);
 	nh.getParam("speed_step4", SPEED_RATIO_VALUES[3]);
 	
+	//Get Deadband Level
+	nh.getParam("deadband", deadband);
+
 	//Publisher for output data
 	ros::Publisher driveCommand = n.advertise<wr_drive_msgs::DriveTrainCmd>("/control/drive_system/cmd", 1000);
 	ros::Publisher camCommand = n.advertise<wr_drive_msgs::CamMastCmd>("/control/camera/cam_mast_cmd", 1000);
