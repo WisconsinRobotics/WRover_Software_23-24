@@ -15,6 +15,8 @@ float speedRaw[] = {0.0, 0.0};
 float SPEED_RATIO_VALUES[] = {0.25, 0.5, 0.75, 1.0};
 //The camera mast speed value
 float speedCamMast = 0.0;
+// Deadband range, centered at 0
+float deadband = 0.1;
 
 #define Std_Bool std_msgs::Bool::ConstPtr&
 #define Std_Float32 std_msgs::Float32::ConstPtr&
@@ -129,8 +131,8 @@ int main(int argc, char** argv){
 		
 		//Set the left and right values to be the product of respective raw speeds and speed ratios
 		if(!dog.isMad()){
-			output.left_value = speedRaw[0]*speedRatio[0];
-			output.right_value = speedRaw[1]*speedRatio[1];
+			output.left_value = (abs(speedRaw[0]) < deadband ? 0 : speedRaw[0])*speedRatio[0];
+			output.right_value = (abs(speedRaw[1]) < deadband ? 0 : speedRaw[1])*speedRatio[1];
 		}else{
 			output.left_value = 0;
 			output.right_value = 0;
