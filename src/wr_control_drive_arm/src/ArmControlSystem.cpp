@@ -9,6 +9,7 @@
 #include <actionlib/server/simple_action_server.h>
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/Float64.h>
+#include <std_msgs/Empty.h>
 #include <algorithm>
 #include <csignal>
 #include <string>
@@ -136,6 +137,8 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
           as->setAborted();
           return;
           // TODO: hand control back to driver
+          // standard service empty stdsrvs empty
+          // go into spin loop
         }
         jointIndex++;
       }

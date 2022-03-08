@@ -77,7 +77,7 @@ ArmMotor::ArmMotor(std::string motorName, unsigned int controllerID, unsigned in
     this->targetPub = n->advertise<std_msgs::Float64>(controlString + "/setpoint", 1000);
     this->feedbackPub = n->advertise<std_msgs::Float64>(controlString + "/feedback", 1000);
     this->outputRead = n->subscribe(controlString + "/output", 1000, &ArmMotor::redirectPowerOutput, this);
-    this->stallRead = n->subscribe("placeholder name", 1000, &ArmMotor::storeStallStatus, this);
+    this->stallRead = n->subscribe(tpString + "/curr/over_lim/" + (motorID == 0 ? "left" : "right"), 1000, &ArmMotor::storeStallStatus, this);
 }
 
 uint32_t ArmMotor::getEncoderCounts(){
@@ -125,10 +125,15 @@ void ArmMotor::setPower(float power){
 bool ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block){
     // Checks for stall
     if (this->isStall) {
-        this->setPower(0.0f);
-        this->currState = MotorState::STOP;
-        return false;
+        if ((ros::Time::now() - begin).toSec() >= 0.5) {
+            this->setPower(0.0f);
+            this->currState = MotorState::STOP;
+            return false;
+        }
+    } else {
+        begin = ros::Time::now();
     }
+    
     // If we are not at our target...
     if(!this->hasReachedTarget(targetCounts)){
         // Set the power in the correct direction and continue running to the target

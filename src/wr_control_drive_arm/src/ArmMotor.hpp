@@ -56,9 +56,11 @@ class ArmMotor{
         /// A pointer to the most recent power message sent
         std_msgs::Int16 *powerMsg;
         /// If the motor is stalling or not
-        bool isStall;
+        volatile bool isStall;
         /// The ROS Subscriber that reads stall status data
         ros::Subscriber stallRead;
+        /// The time when the motor began stalling
+        ros::Time begin;
 
         /**
          * @brief A static conversion from radians to encoder counts
