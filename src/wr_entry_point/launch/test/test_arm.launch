@@ -11,4 +11,8 @@
   <include file="$(find wr_entry_point)/launch/comp/comp_ui.launch"/>
   
   <include file="$(find wr_entry_point)/launch/comp/comp_arm.launch"/>
+  
+  <include file="$(find wroboarm_22)/launch/demo_test.launch" if="$(eval env('WROVER_HW') == 'MOCK')"/>
+
+  <node name="arm_driver" pkg="wr_logic_teleop_arm" type="ArmTeleopLogic" />
 </launch>

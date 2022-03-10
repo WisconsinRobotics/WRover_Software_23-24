@@ -88,7 +88,7 @@ auto main(int argc, char** argv) -> int{
     
 
     // y axis
-    ros::Subscriber yAxis = np.subscribe("/xbox_test/axis/stick_left_y", 
+    ros::Subscriber yAxis = np.subscribe("/hci/arm/gamepad/axis/stick_left_y", 
         MESSAGE_QUEUE_LENGTH, 
         static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
             if(abs(msg->data) >= JOYSTICK_DEADBAND){
@@ -100,7 +100,7 @@ auto main(int argc, char** argv) -> int{
         }));
 
     // x axis
-    ros::Subscriber xAxis = np.subscribe("/xbox_test/axis/stick_left_x", 
+    ros::Subscriber xAxis = np.subscribe("/hci/arm/gamepad/axis/stick_left_x", 
         MESSAGE_QUEUE_LENGTH, 
         static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
             if(abs(msg->data) >= JOYSTICK_DEADBAND){
@@ -112,7 +112,7 @@ auto main(int argc, char** argv) -> int{
         }));
 
     // y up
-    ros::Subscriber zUp = np.subscribe("/xbox_test/button/shoulder_l",
+    ros::Subscriber zUp = np.subscribe("/hci/arm/gamepad/button/shoulder_l",
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
             if(msg->data){
@@ -124,7 +124,7 @@ auto main(int argc, char** argv) -> int{
         }));
 
     // y down
-    ros::Subscriber zDown = np.subscribe("/xbox_test/button/shoulder_r",
+    ros::Subscriber zDown = np.subscribe("/hci/arm/gamepad/button/shoulder_r",
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
             if(msg->data){
@@ -136,7 +136,7 @@ auto main(int argc, char** argv) -> int{
         }));
     
     //roll counter clockwise
-    ros::Subscriber rollUp = np.subscribe("/xbox_test/button/y",
+    ros::Subscriber rollUp = np.subscribe("/hci/arm/gamepad/button/y",
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
             if(msg->data){
@@ -148,7 +148,7 @@ auto main(int argc, char** argv) -> int{
         }));
 
     // roll clockwise
-    ros::Subscriber rollDown = np.subscribe("/xbox_test/button/a",
+    ros::Subscriber rollDown = np.subscribe("/hci/arm/gamepad/button/a",
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
             if(msg->data){
@@ -160,7 +160,7 @@ auto main(int argc, char** argv) -> int{
         }));
 
     // pitch
-    ros::Subscriber pitch = np.subscribe("/xbox_test/axis/stick_right_y",
+    ros::Subscriber pitch = np.subscribe("/hci/arm/gamepad/axis/stick_right_y",
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
             if(abs(msg->data) >= 0.5){
@@ -172,7 +172,7 @@ auto main(int argc, char** argv) -> int{
         }));
 
     // yaw
-    ros::Subscriber yaw = np.subscribe("/xbox_test/axis/stick_right_x",
+    ros::Subscriber yaw = np.subscribe("/hci/arm/gamepad/axis/stick_right_x",
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
             if(abs(msg->data) >= 0.5){
@@ -183,14 +183,14 @@ auto main(int argc, char** argv) -> int{
             }
         }));
 
-    ros::Subscriber speedUp = np.subscribe("/xbox_test/axis/trigger_right",
+    ros::Subscriber speedUp = np.subscribe("/hci/arm/gamepad/axis/trigger_right",
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
         accel = msg->data;
         step_mult = std::pow(10,accel-deaccel);
     }));
 
-    ros::Subscriber speedDown = np.subscribe("/xbox_test/axis/trigger_right",
+    ros::Subscriber speedDown = np.subscribe("/hci/arm/gamepad/axis/trigger_right",
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
         deaccel = msg->data;
@@ -198,7 +198,7 @@ auto main(int argc, char** argv) -> int{
     }));
 
     // override path execution
-    ros::Subscriber execPath = np.subscribe("/xbox_test/button/x",
+    ros::Subscriber execPath = np.subscribe("/hci/arm/gamepad/button/x",
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
             if(msg->data){
@@ -207,7 +207,7 @@ auto main(int argc, char** argv) -> int{
         }));
 
     // reset target/cancel path
-    ros::Subscriber resetPose = np.subscribe("/xbox_test/button/start",
+    ros::Subscriber resetPose = np.subscribe("/hci/arm/gamepad/button/start",
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
             if(msg->data){

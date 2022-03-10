@@ -13,10 +13,4 @@ rm ./out.temp;
 export WROVER_LOCAL=true
 export WROVER_HW=MOCK
 gnome-terminal -- roslaunch wr_entry_point test_arm.launch
-gnome-terminal -- roslaunch wr_control_drive_arm std.launch
-gnome-terminal -- roslaunch wroboarm_22 demo_test.launch
-# gnome-terminal -- rqt_plot /control/arm/00/setpoint /control/arm/00/feedback /control/arm/01/setpoint /control/arm/01/feedback /control/arm/10/setpoint /control/arm/10/feedback
-sleep 5
-# gnome-terminal -- /bin/sh -c "rosrun wr_logic_teleop_arm ArmTeleopLogic; while true; do sleep 1; done"
-gnome-terminal -- /bin/sh -c "rosrun wr_logic_teleop_arm ArmTeleopLogic;"
-cd -
+
