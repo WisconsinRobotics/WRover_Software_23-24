@@ -69,15 +69,6 @@ ArmMotor::ArmMotor(
     std::string tpString = ((std::string)"/hsi/roboclaw/aux") + std::to_string(controllerID);
     std::string controlString = "/control/arm/" + std::to_string(controllerID) + std::to_string(motorID);
 
-    if(controllerID == 0 && motorID == 0){
-        std::cout << "radToEnc(0) = 0 = " << radToEnc(0) << std::endl;
-        std::cout << "radToEnc(pi) = 1024 = " << radToEnc(M_PI) << std::endl;
-        std::cout << "radToEnc(2pi) = 2048 = " << radToEnc(-M_PI) << std::endl;
-        std::cout << "encToRad(0) = 0 = " << encToRad(1024) << std::endl;
-        std::cout << "encToRad(1024) = 1.57 = " << encToRad(2048) << std::endl;
-        std::cout << "encToRad(2048) = 3.1415 = " << encToRad(0) << std::endl;
-    }
-
     // Create the appropriate encoder-reading and speed-publishing subscribers and advertisers, respectfully
     this->encRead = n->subscribe(tpString + "/enc/" + (motorID == 0 ? "left" : "right"), 1000, &ArmMotor::storeEncoderVals, this);
     this->speedPub = n->advertise<std_msgs::Int16>(tpString + "/cmd/" + (motorID == 0 ? "left" : "right"), 1000);
