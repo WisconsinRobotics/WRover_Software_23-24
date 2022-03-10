@@ -29,9 +29,11 @@ enum class MotorState{
 class ArmMotor{
     private:
         /// The number of encoder counts per rotation
-        static uint32_t const COUNTS_PER_ROTATION;
+        uint32_t const COUNTS_PER_ROTATION;
         /// The upper and lower bounds of encoder rotation for absolute encoders (index 0 is lower, index 1 is upper)
-        static uint32_t const ENCODER_BOUNDS[2];
+        uint32_t const ENCODER_BOUNDS[2];
+        /// zero position of motor
+        uint32_t const ENCODER_OFFSET;
         /// The current state of the motor
         MotorState currState;
         /// The joint name of the current motor
@@ -61,7 +63,7 @@ class ArmMotor{
          * @param rad The input number of radians
          * @return uint32_t The corresponding encoder count bounded by ENCODER_BOUNDS
          */
-        static uint32_t radToEnc(double rad);
+        uint32_t radToEnc(double rad);
 
         /**
          * @brief A static conversion from encoder counts to radians
@@ -69,7 +71,7 @@ class ArmMotor{
          * @param enc The input number of encoder counts
          * @return double The corresponding radian measure
          */
-        static double encToRad(uint32_t enc);
+        double encToRad(uint32_t enc);
 
         /**
          * @brief Subscriber callback for encRead, captures the encoder value of the current motor
@@ -104,7 +106,7 @@ class ArmMotor{
          * @param motorID The motor ID within its WRoboclaw controller
          * @param n A NodeHandle reference to the constructing Node
          */
-        ArmMotor(std::string motorName, unsigned int controllerID, unsigned int motorID, ros::NodeHandle* n);
+        ArmMotor(std::string motorName, unsigned int controllerID, unsigned int motorID, uint32_t countsPerRotation, uint32_t offset, ros::NodeHandle* n);
 
         /**
          * @brief Gets the encoder value of the motor

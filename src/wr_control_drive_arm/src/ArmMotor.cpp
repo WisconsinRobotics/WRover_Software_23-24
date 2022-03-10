@@ -10,11 +10,6 @@
 #define Std_UInt32 std_msgs::UInt32::ConstPtr&
 #define Std_Float64 std_msgs::Float64::ConstPtr&
 
-/// The current COUNTS_PER_ROTATION is UINT32_MAX
-uint32_t const ArmMotor::COUNTS_PER_ROTATION = UINT32_MAX;
-/// The current encoders are absolute, and so can only perform one rotation
-uint32_t const ArmMotor::ENCODER_BOUNDS[2] = {0, ArmMotor::COUNTS_PER_ROTATION};
-
 template<class T> T ArmMotor::corrMod(T i, T j){
     // Stem i%j by j, which in modular arithmetic is the same as adding 0.
     return fmod(fmod(i,j)+j,j);
@@ -22,11 +17,11 @@ template<class T> T ArmMotor::corrMod(T i, T j){
 
 /// Currently consistent with the rad->enc equation as specified <a target="_blank" href="https://www.desmos.com/calculator/nwxtenccc6">here</a>.
 uint32_t ArmMotor::radToEnc(double rads){
-    return ArmMotor::COUNTS_PER_ROTATION*ArmMotor::corrMod(rads,2 * M_PI)/(2 * M_PI);
+    return this->COUNTS_PER_ROTATION * ArmMotor::corrMod(rads,2 * M_PI)/(2 * M_PI) + this->ENCODER_OFFSET;
 }
 
 double ArmMotor::encToRad(uint32_t enc){
-    return ArmMotor::corrMod(enc / ((float)ArmMotor::COUNTS_PER_ROTATION) * 2 * M_PI + M_PI, 2 * M_PI) - M_PI;
+    return ArmMotor::corrMod((enc - this->ENCODER_OFFSET) / ((float) this->COUNTS_PER_ROTATION) * 2 * M_PI + M_PI, 2 * M_PI) - M_PI;
 }
 
 /// Currently consistent with the enc->rad equation as specified <a target="_blank" href="https://www.desmos.com/calculator/nwxtenccc6">here</a>.
@@ -48,9 +43,17 @@ void ArmMotor::redirectPowerOutput(const Std_Float64 msg){
     this->setPower(msg->data);
 }
 
+
 /// controllerID is constrained between [0,3]
 /// motorID is constrained between [0,1]
-ArmMotor::ArmMotor(std::string motorName, unsigned int controllerID, unsigned int motorID, ros::NodeHandle* n){
+ArmMotor::ArmMotor(
+    std::string motorName,
+    unsigned int controllerID,
+    unsigned int motorID,
+    uint32_t countsPerRotation,
+    uint32_t offset,
+    ros::NodeHandle* n
+) : COUNTS_PER_ROTATION{countsPerRotation}, ENCODER_BOUNDS({0, countsPerRotation}), ENCODER_OFFSET{offset} {
     // Check validity of WRoboclaw and motor IDs
     if(controllerID > 3) throw ((std::string)"Controller ID ") + std::to_string(controllerID) + "is only valid on [0,3]";
     if(motorID > 1) throw ((std::string)"Motor ID ") + std::to_string(motorID) + "is only valid on [0,1]";
@@ -125,7 +128,7 @@ void ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block){
         this->targetPub.publish(setpointMsg);
 
         // long int direction = targetCounts - this->getEncoderCounts();
-        // power = abs(power) * (corrMod(direction, ((long int)ArmMotor::COUNTS_PER_ROTATION)) < corrMod(-direction, ((long int)ArmMotor::COUNTS_PER_ROTATION)) ? 1 : -1);
+        // power = abs(power) * (corrMod(direction, ((long int)this->COUNTS_PER_ROTATION)) < corrMod(-direction, ((long int)this->COUNTS_PER_ROTATION)) ? 1 : -1);
         // this->setPower(power);
 
         this->currState = MotorState::RUN_TO_TARGET;
