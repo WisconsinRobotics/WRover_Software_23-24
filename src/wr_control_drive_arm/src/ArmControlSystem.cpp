@@ -68,7 +68,6 @@ bool configJointSetpoint(AbstractJoint* joint, int degreeIndex, std::vector<std:
 	// float currPower = 0.1 * currTargetPosition.velocities[j]/velMax;
 	// currPower = abs(velMax) <= 0.0001 ? 0.1 : currPower;
   std::cout << "config joint setup: " << degreeIndex << " " << target << std::endl;
-  // std::cout << joint->getName() << ":" << motorIndex << " position: " << target;
 
 	joint->configSetpoint(degreeIndex, target, 0);
 	// Push the current motor name and position data to the Joint State data tracking list
@@ -88,7 +87,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
   std::cout << "start exec: " << goal->trajectory.points.size() << std::endl;
   // For each point in the trajectory execution sequence...
   for(int i = 0; i < goal->trajectory.points.size(); i++){
-    std::cout << "PID to trajectory point " << i << "/" <<  goal->trajectory.points.size();
+    std::cout << "PID to trajectory point " << i << "/" <<  goal->trajectory.points.size() << std::endl;
     // Capture the current goal for easy reference
     trajectory_msgs::JointTrajectoryPoint currTargetPosition = goal->trajectory.points[i];
 
@@ -133,7 +132,6 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
           float currPower = 0.1 * currTargetPosition.velocities[j]/velMax;
 
 
-          std::cout<< "target pos: " << motorIndex << " " << targetPos <<std::endl;
           bool hasMotorFinished = configJointSetpoint(joint, motorIndex-jointIndex, names, positions, targetPos, currPower);
           hasPositionFinished &= hasMotorFinished;
           motorIndex++;
@@ -147,7 +145,6 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
       }
 
       // DEBUGGING OUTPUT: Print a divider line for cleanliness
-      std::cout<<velMax<<std::endl;
       std::cout<<"-----------------------"<<std::endl;
       // TODO: Make debugging output parameterized or pushed to the ROS output system to clean up output when desired
       
@@ -187,12 +184,12 @@ int main(int argc, char** argv)
   ros::NodeHandle n;
 
   // Initialize all motors with their MoveIt name, WRoboclaw initialization, and reference to the current node
-  motors[0] = new ArmMotor("elbow", 1, 0, 255, 127, &n);
-  motors[1] = new ArmMotor("forearm_roll", 1, 1, 255, 127, &n);
-  motors[2] = new ArmMotor("shoulder", 0, 1, 255, 127, &n);
-  motors[3] = new ArmMotor("turntable", 0, 0, 255, 127, &n);
-  motors[4] = new ArmMotor("wrist_pitch", 2, 0, 255, 127, &n);
-  motors[5] = new ArmMotor("wrist_roll", 2, 1, 255, 127, &n);
+  motors[0] = new ArmMotor("elbow", 1, 0, 2048, 0, &n);
+  motors[1] = new ArmMotor("forearm_roll", 1, 1, 2048, 0, &n);
+  motors[2] = new ArmMotor("shoulder", 0, 1, 2048, 0, &n);
+  motors[3] = new ArmMotor("turntable", 0, 0, 2048, 0, &n);
+  motors[4] = new ArmMotor("wrist_pitch", 2, 0, 2048, 0, &n);
+  motors[5] = new ArmMotor("wrist_roll", 2, 1, 2048, 0, &n);
   std::cout << "init motors" << std::endl;
 
   // Initialize all Joints
