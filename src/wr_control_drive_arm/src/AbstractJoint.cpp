@@ -1,5 +1,3 @@
-#ifndef ABSTRACT_JOINT_GUARD
-#define ABSTRACT_JOINT_GUARD
 /**
  * @file AbstractJoint.cpp
  * @author Nichols Underwood
@@ -43,4 +41,3 @@ bool AbstractJoint::exectute(){
     }
     return true;
 }
-#endif

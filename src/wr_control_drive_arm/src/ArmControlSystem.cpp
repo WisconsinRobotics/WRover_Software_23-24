@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <csignal>
 #include <string>
+#include <std_srvs/Trigger.h>
 #include "SimpleJoint.hpp"
 #include "DifferentialJoint.hpp"
 
@@ -34,6 +35,8 @@ ros::Publisher jointStatePublisher;
  * @brief Simplify the SimpleActionServer reference name
  */
 typedef actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> Server;
+
+std::atomic_bool IKEnabled{true};
 
 /**
  * @brief converts a roll and pitch to joint motor positions
@@ -135,6 +138,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
         }
         if (!joint->exectute()) {
           as->setAborted();
+          
           return;
           // TODO: hand control back to driver
           // standard service empty stdsrvs empty
@@ -194,9 +198,12 @@ int main(int argc, char** argv)
   joints[2] = new SimpleJoint(motors[2], &n);
   joints[3] = new SimpleJoint(motors[3], &n);
   joints[4] = new SimpleJoint(motors[4], &n);
-  DifferentialJoint* temp = new DifferentialJoint(motors[5], motors[6], &n);
-  temp->configVelocityHandshake("/control/arm/5/roll", "/control/arm/5/pitch", "/control/arm/21/", "/control/arm/30/");
-  joints[5] = temp;
+  // TODO:  Next three lines break the build
+  // TODO:  Use vector::at() to set/get variables in the DifferentialJoint class
+  
+  // DifferentialJoint* temp = new DifferentialJoint(motors[5], motors[6], &n);
+  // temp->configVelocityHandshake("/control/arm/5/roll", "/control/arm/5/pitch", "/control/arm/21/", "/control/arm/30/");
+  // joints[5] = temp;
   // joints[5] = new SimpleJoint(motors[5], &n);
   // joints[5]->configVelocityHandshake("/control/arm/5", "/control/arm/21");
   // joints[6] = new SimpleJoint(motors[6], &n);
@@ -213,6 +220,16 @@ int main(int argc, char** argv)
   server.start();
 
   // signal(SIGINT, [](int signal)->void{ros::shutdown(); exit(1);});
+
+  ros::ServiceServer enableServiceServer = n.advertiseService("start_IK", 
+    static_cast<boost::function<bool(std_srvs::Trigger::Request&, std_srvs::Trigger::Response&)>>(
+      [](std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res)->bool{
+        IKEnabled = true;
+        res.message = "Arm IK Enabled";
+        res.success = true;
+        return true;
+      }
+    ));
 
   // ROS spin for communication with other nodes
   ros::spin();
