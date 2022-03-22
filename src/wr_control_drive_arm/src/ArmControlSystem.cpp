@@ -25,7 +25,8 @@ ArmMotor *motors[numMotors];
 /**
  * @brief Defines space for all Joint references
  */
-AbstractJoint *joints[5];
+const int numJoints = 5;
+AbstractJoint *joints[numJoints];
 /**
  * @brief The Joint State Publisher for MoveIt
  */
@@ -61,18 +62,14 @@ std::vector<double> convertJointSpacetoEncoderSpace(double roll, double pitch){
  * @param motor a pointer to the motor
  * @return if the motor has reached its target
  */
-bool configJointSetpoint(AbstractJoint* joint, int degreeIndex, std::vector<std::string>& names, std::vector<double>& positions, double target, float velocity){
+bool configJointSetpoint(AbstractJoint* joint, int degreeIndex, double target, float velocity){
 	// Each motor should run to its respective target position at a fixed speed
 	// TODO: this speed should be capped/dynamic to reflect the input joint velocity parameters
 	// velMax = abs(*std::max_element(currTargetPosition.velocities.begin(), currTargetPosition.velocities.end(), [](double a, double b) {return abs(a)<abs(b);}));
 	// float currPower = 0.1 * currTargetPosition.velocities[j]/velMax;
 	// currPower = abs(velMax) <= 0.0001 ? 0.1 : currPower;
   std::cout << "config joint setup: " << degreeIndex << " " << target << std::endl;
-
 	joint->configSetpoint(degreeIndex, target, 0);
-	// Push the current motor name and position data to the Joint State data tracking list
-	names.push_back(joint->getMotor(degreeIndex)->getMotorName());
-	positions.push_back(joint->getMotor(degreeIndex)->getRads());
 	// The position has only finished if every motor is STOPped
 	return joint->getMotor(degreeIndex)->getMotorState() == MotorState::STOP;
 }
@@ -85,7 +82,77 @@ bool configJointSetpoint(AbstractJoint* joint, int degreeIndex, std::vector<std:
  */
 void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server* as) {
   std::cout << "start exec: " << goal->trajectory.points.size() << std::endl;
+  // For each point in the trajectory execution sequence...
+  for(int i = 0; i < goal->trajectory.points.size(); i++){
+    std::cout << "PID to trajectory point " << i << "/" <<  goal->trajectory.points.size() << std::endl;
+    // Capture the current goal for easy reference
+    trajectory_msgs::JointTrajectoryPoint currTargetPosition = goal->trajectory.points[i];
+
+    // Track whether or not the current position is done
+    bool hasPositionFinished = false;
+    // Keep max loop rate at 50 Hz
+    ros::Rate loop(200);
+
+    // While the current position is not complete yet...
+    while(!hasPositionFinished){
+      // Assume the current action is done until proven otherwise
+      hasPositionFinished = true;
+      // Create the Joint State message for the current update cycle
+      double velMax = abs(*std::max_element(
+        currTargetPosition.velocities.begin(),
+        currTargetPosition.velocities.end(),
+        [](double a, double b) { return abs(a)<abs(b); }
+      ));
+      int motorIndex = 0;
+      int jointIndex = 0;
+      AbstractJoint *joint;
+      // For each joint specified in the currTargetPosition...
+
+      for(int j = 0; j < sizeof(joints); j += sizeof(joints[jointIndex-1])){
+
+        joint = joints[jointIndex];
+
+        for(int k = 0; k < joint->getDegreesOfFreedom(); k++){
+        // Each motor should run to its respective target position at a fixed speed
+        // TODO: this speed should be capped/dynamic to reflect the input joint velocity parameters
+          double targetPos = currTargetPosition.positions[motorIndex];
+          float currPower = 0.1 * currTargetPosition.velocities[j]/velMax;
+
+          bool hasMotorFinished = configJointSetpoint(joint, motorIndex-jointIndex, targetPos, currPower);
+          hasPositionFinished &= hasMotorFinished;
+          motorIndex++;
+          // DEBUGGING OUTPUT: Print each motor's name, radian position, encoder position, and power
+          // std::cout<<joint->getMotor(k)->getMotorName()<<":"<<std::setw(30-motors[j]->getMotorName().length())<<motors[j]->getRads()<<std::endl;
+          // std::cout<<std::setw(30)<<motors[j]->getEncoderCounts()<<std::endl;
+          // std::cout<<std::setw(30)<<motors[j]->getPower()<<std::endl;
+        }
+        joint->exectute();
+        jointIndex++;
+      }
+
+      // DEBUGGING OUTPUT: Print a divider line for cleanliness
+      std::cout<<"-----------------------"<<std::endl;
+      // TODO: Make debugging output parameterized or pushed to the ROS output system to clean up output when desired
+
+      // Sleep until the next update cycle
+      loop.sleep();
+    }
+  }
+
+  //When all positions have been reached, set the current task as succeeded
+
+  for(int i = 0; i < numMotors; i++){
+    motors[i]->setPower(0.f);
+  }
   
+  as->setSucceeded();
+}
+
+/**
+ * @brief publishes the arm's position
+ */
+void publish() {
+
   std::vector<std::string> names;
   std::vector<double> positions;
   sensor_msgs::JointState js_msg;
@@ -96,9 +163,12 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
   while(ros::ok){
 
     for(int i = 0; i < numMotors; i++){
+
       names.push_back(motors[i]->getMotorName());
       positions.push_back(motors[i]->getRads());
     }
+    
+    positions[4] = positions[5] + positions[4]/2;
 
     js_msg.name = names;
     js_msg.position = positions;
@@ -110,9 +180,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
 
     jointStatePublisher.publish(js_msg);
 
-  }
-  
-  as->setSucceeded();
+  } 
 }
 
 /**
@@ -159,20 +227,12 @@ int main(int argc, char** argv)
   // Start the Action Server
   server.start();
 
+  ros::Timer timer = n.createTimer(ros::Duration(1.0 / 50.0), std::bind(&publish));
+
   // signal(SIGINT, [](int signal)->void{ros::shutdown(); exit(1);});
 
   // ROS spin for communication with other nodes
   ros::spin();
   // Return 0 on exit (successful exit)
-
-  // delete &motors[0];
-  // delete &motors[1];
-  // delete &motors[2];
-  // delete &motors[3];
-  // delete &motors[4];
-  // delete &motors[5];
-  // delete &motors[6];
-
-
   return 0;
 }
