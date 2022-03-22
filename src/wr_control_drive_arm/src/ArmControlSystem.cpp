@@ -85,84 +85,31 @@ bool configJointSetpoint(AbstractJoint* joint, int degreeIndex, std::vector<std:
  */
 void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server* as) {
   std::cout << "start exec: " << goal->trajectory.points.size() << std::endl;
-  // For each point in the trajectory execution sequence...
-  for(int i = 0; i < goal->trajectory.points.size(); i++){
-    std::cout << "PID to trajectory point " << i << "/" <<  goal->trajectory.points.size() << std::endl;
-    // Capture the current goal for easy reference
-    trajectory_msgs::JointTrajectoryPoint currTargetPosition = goal->trajectory.points[i];
+  
+  std::vector<std::string> names;
+  std::vector<double> positions;
+  sensor_msgs::JointState js_msg;
 
-    // Track whether or not the current position is done
-    bool hasPositionFinished = false;
-    // Capture the names of the motors
-    std::vector<std::string> names;
-    // Capture the positions of the motors
-    std::vector<double> positions;
-    // Keep max loop rate at 50 Hz
-    ros::Rate loop(200);
+  // Keep max loop rate at 50 Hz
+  ros::Rate loop(200);
 
-    // While the current position is not complete yet...
-    while(!hasPositionFinished){
-      // Assume the current action is done until proven otherwise
-      hasPositionFinished = true;
-      // Create the Joint State message for the current update cycle
-      sensor_msgs::JointState js_msg;
+  while(ros::ok){
 
-      // Clear the list of motor names and position data
-      names.clear();
-      positions.clear();
-
-      double velMax = abs(*std::max_element(
-        currTargetPosition.velocities.begin(),
-        currTargetPosition.velocities.end(),
-        [](double a, double b) { return abs(a)<abs(b); }
-      ));
-      int motorIndex = 0;
-      int jointIndex = 0;
-      AbstractJoint *joint;
-      // For each joint specified in the currTargetPosition...
-
-      for(int j = 0; j < sizeof(joints); j += sizeof(joints[jointIndex-1])){
-
-        joint = joints[jointIndex];
-
-        for(int k = 0; k < joint->getDegreesOfFreedom(); k++){
-        // Each motor should run to its respective target position at a fixed speed
-        // TODO: this speed should be capped/dynamic to reflect the input joint velocity parameters
-          double targetPos = currTargetPosition.positions[motorIndex];
-          float currPower = 0.1 * currTargetPosition.velocities[j]/velMax;
-
-
-          bool hasMotorFinished = configJointSetpoint(joint, motorIndex-jointIndex, names, positions, targetPos, currPower);
-          hasPositionFinished &= hasMotorFinished;
-          motorIndex++;
-          // DEBUGGING OUTPUT: Print each motor's name, radian position, encoder position, and power
-          // std::cout<<joint->getMotor(k)->getMotorName()<<":"<<std::setw(30-motors[j]->getMotorName().length())<<motors[j]->getRads()<<std::endl;
-          // std::cout<<std::setw(30)<<motors[j]->getEncoderCounts()<<std::endl;
-          // std::cout<<std::setw(30)<<motors[j]->getPower()<<std::endl;
-        }
-        joint->exectute();
-        jointIndex++;
-      }
-
-      // DEBUGGING OUTPUT: Print a divider line for cleanliness
-      std::cout<<"-----------------------"<<std::endl;
-      // TODO: Make debugging output parameterized or pushed to the ROS output system to clean up output when desired
-      
-      // Set the name and position data for the Joint State Data message as tracked by the list of motor names and positions
-      js_msg.name = names;
-      js_msg.position = positions;
-      // Publish the Joint State message
-      jointStatePublisher.publish(js_msg);
-
-      // Sleep until the next update cycle
-      loop.sleep();
+    for(int i = 0; i < numMotors; i++){
+      names.push_back(motors[i]->getMotorName());
+      positions.push_back(motors[i]->getRads());
     }
-  }
 
-  //When all positions have been reached, set the current task as succeeded
+    js_msg.name = names;
+    js_msg.position = positions;
+    // Publish the Joint State message
+    jointStatePublisher.publish(js_msg);
 
-  for(int i = 0; i < numMotors; i++){
-    motors[i]->setPower(0.f);
+    // Sleep until the next update cycle
+    loop.sleep();
+
+    jointStatePublisher.publish(js_msg);
+
   }
   
   as->setSucceeded();
