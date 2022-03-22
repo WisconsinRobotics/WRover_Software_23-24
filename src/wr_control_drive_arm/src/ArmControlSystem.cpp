@@ -16,7 +16,7 @@
 #include <std_srvs/Trigger.h>
 #include "SimpleJoint.hpp"
 #include "DifferentialJoint.hpp"
-
+#include "ros/console.h"
 
 /**
  * @brief Defines space for all ArmMotor references
@@ -35,8 +35,18 @@ ros::Publisher jointStatePublisher;
  * @brief Simplify the SimpleActionServer reference name
  */
 typedef actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> Server;
-
+/**
+ * @brief The service server for enabling IK
+ */
+ros::ServiceServer enableServiceServer;
+/**
+ * @brief The status of IK program
+ */
 std::atomic_bool IKEnabled{true};
+/**
+ * @brief The service client for disabling IK
+ */
+ros::ServiceClient enableServiceClient;
 
 /**
  * @brief converts a roll and pitch to joint motor positions
@@ -88,6 +98,12 @@ bool configJointSetpoint(AbstractJoint* joint, int degreeIndex, std::vector<std:
  * @param as The Action Server this is occuring on
  */
 void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server* as) {
+  if (!IKEnabled) {
+    as->setAborted();
+    ROS_WARN("IK is disabled");
+    return;
+  }
+
   std::cout << "start exec: " << goal->trajectory.points.size() << std::endl;
   // For each point in the trajectory execution sequence...
   for(int i = 0; i < goal->trajectory.points.size(); i++){
@@ -137,8 +153,13 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
           // std::cout<<std::setw(30)<<motors[j]->getPower()<<std::endl;
         }
         if (!joint->exectute()) {
-          as->setAborted();
-          
+          IKEnabled = false;
+          std_srvs::Trigger srv;
+          if (enableServiceClient.call(srv)) {
+            ROS_WARN((std::string{"PLACEHOLDER_NAME: "} + srv.response.message).data());
+          } else {
+            ROS_WARN("Error: failed to call service PLACEHOLDER_NAME");
+          }
           return;
           // TODO: hand control back to driver
           // standard service empty stdsrvs empty
@@ -210,7 +231,6 @@ int main(int argc, char** argv)
   // joints[6]->configVelocityHandshake("/control/arm/6", "/control/arm/30");
   std::cout << "init joints" << std::endl;
   
-
   // Initialize the Joint State Data Publisher
   jointStatePublisher = n.advertise<sensor_msgs::JointState>("/control/arm_joint_states", 1000);
 
@@ -221,7 +241,7 @@ int main(int argc, char** argv)
 
   // signal(SIGINT, [](int signal)->void{ros::shutdown(); exit(1);});
 
-  ros::ServiceServer enableServiceServer = n.advertiseService("start_IK", 
+  enableServiceServer = n.advertiseService("start_IK", 
     static_cast<boost::function<bool(std_srvs::Trigger::Request&, std_srvs::Trigger::Response&)>>(
       [](std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res)->bool{
         IKEnabled = true;
@@ -230,6 +250,8 @@ int main(int argc, char** argv)
         return true;
       }
     ));
+
+  enableServiceClient = n.serviceClient<std_srvs::Trigger>("PLACEHOLDER_NAME");
 
   // ROS spin for communication with other nodes
   ros::spin();
