@@ -53,7 +53,7 @@ ArmMotor::ArmMotor(
     uint32_t countsPerRotation,
     uint32_t offset,
     ros::NodeHandle* n
-) : COUNTS_PER_ROTATION{countsPerRotation}, ENCODER_BOUNDS({0, countsPerRotation}), ENCODER_OFFSET{offset} {
+) : COUNTS_PER_ROTATION{countsPerRotation}, ENCODER_BOUNDS{0, countsPerRotation}, ENCODER_OFFSET{offset} {
     // Check validity of WRoboclaw and motor IDs
     if(controllerID > 3) throw ((std::string)"Controller ID ") + std::to_string(controllerID) + "is only valid on [0,3]";
     if(motorID > 1) throw ((std::string)"Motor ID ") + std::to_string(motorID) + "is only valid on [0,1]";

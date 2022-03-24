@@ -151,36 +151,22 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
 /**
  * @brief publishes the arm's position
  */
-void publish() {
-
+void publish(const ros::TimerEvent &event){
   std::vector<std::string> names;
   std::vector<double> positions;
   sensor_msgs::JointState js_msg;
 
-  // Keep max loop rate at 50 Hz
-  ros::Rate loop(200);
+  for (int i = 0; i < numMotors; i++){
+    names.push_back(motors[i]->getMotorName());
+    positions.push_back(motors[i]->getRads());
+  }
 
-  while(ros::ok){
+  positions[4] = positions[5] + positions[4] / 2;
 
-    for(int i = 0; i < numMotors; i++){
-
-      names.push_back(motors[i]->getMotorName());
-      positions.push_back(motors[i]->getRads());
-    }
-    
-    positions[4] = positions[5] + positions[4]/2;
-
-    js_msg.name = names;
-    js_msg.position = positions;
-    // Publish the Joint State message
-    jointStatePublisher.publish(js_msg);
-
-    // Sleep until the next update cycle
-    loop.sleep();
-
-    jointStatePublisher.publish(js_msg);
-
-  } 
+  js_msg.name = names;
+  js_msg.position = positions;
+  // Publish the Joint State message
+  jointStatePublisher.publish(js_msg);
 }
 
 /**
@@ -228,7 +214,7 @@ int main(int argc, char** argv)
   server.start();
   std::cout << "server started" << std::endl;
 
-  ros::Timer timer = n.createTimer(ros::Duration(1.0 / 50.0), std::bind(&publish));
+  ros::Timer timer = n.createTimer(ros::Duration(1.0 / 50.0), publish);
 
   // signal(SIGINT, [](int signal)->void{ros::shutdown(); exit(1);});
   std::cout << "entering ROS spin..." << std::endl;
