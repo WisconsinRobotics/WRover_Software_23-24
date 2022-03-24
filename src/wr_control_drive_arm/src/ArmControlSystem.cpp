@@ -226,11 +226,12 @@ int main(int argc, char** argv)
   Server server(n, "/arm_controller/follow_joint_trajectory", boost::bind(&execute, _1, &server), false);
   // Start the Action Server
   server.start();
+  std::cout << "server started" << std::endl;
 
   ros::Timer timer = n.createTimer(ros::Duration(1.0 / 50.0), std::bind(&publish));
 
   // signal(SIGINT, [](int signal)->void{ros::shutdown(); exit(1);});
-
+  std::cout << "entering ROS spin..." << std::endl;
   // ROS spin for communication with other nodes
   ros::spin();
   // Return 0 on exit (successful exit)
