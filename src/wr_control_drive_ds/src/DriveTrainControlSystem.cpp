@@ -11,7 +11,6 @@ using namespace std;
 std::array<float, 2> inp_vals{0.0, 0.0};
 
 constexpr std::uint32_t MESSAGE_CACHE_SIZE = 10;
-constexpr float CONTROL_LOOP_RATE = 50.0;
 
 // Main program
 int main(int argc, char** argv){
