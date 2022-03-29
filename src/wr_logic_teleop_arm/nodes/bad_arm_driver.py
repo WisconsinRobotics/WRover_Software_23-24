@@ -82,9 +82,9 @@ def main():
                 if bumper_l.data:
                     if bumper_r.data:
                         pub_forearm.publish(Int16(0))
-                    pub_forearm.publish(Int16(-16384))
-                elif bumper_r.data:
                     pub_forearm.publish(Int16(16384))
+                elif bumper_r.data:
+                    pub_forearm.publish(Int16(-16384))
                 else:
                     pub_forearm.publish(Int16(0))
             
@@ -93,15 +93,15 @@ def main():
                 wrist_spd_b = 0
                 if pov_x.data > 0:
                     wrist_spd_a = 1
-                    wrist_spd_b = -1
+                    wrist_spd_b = 1
                 elif pov_x.data < 0:
                     wrist_spd_a = -1
-                    wrist_spd_b = 1
+                    wrist_spd_b = -1
                 elif pov_y.data > 0:
-                    wrist_spd_a = -1
+                    wrist_spd_a = 1
                     wrist_spd_b = -1
                 elif pov_y.data < 0:
-                    wrist_spd_a = 1
+                    wrist_spd_a = -1
                     wrist_spd_b = 1
                 pub_wrist_a.publish(Int16(24576 * wrist_spd_a))
                 pub_wrist_b.publish(Int16(-24576 * wrist_spd_b))
