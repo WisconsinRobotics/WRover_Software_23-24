@@ -30,7 +30,7 @@ int main(int argc, char** argv){
 		[&outTopic](const wr_drive_msgs::DriveTrainCmd::ConstPtr& msg){
 			wroboclaw::Int16Pair outMsg;
 			outMsg.left = static_cast<std::int16_t>(msg->left_value * INT16_MAX);
-			outMsg.right = static_cast<std::uint16_t>(-msg->right_value * INT16_MAX);
+			outMsg.right = static_cast<std::int16_t>(-msg->right_value * INT16_MAX);
 			outTopic.publish(outMsg);
 		}
 	));
