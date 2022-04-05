@@ -90,12 +90,11 @@ class ArmMotor{
         /**
          * @brief Performs Euclidean correct modulus between two inputs of the same type
          * 
-         * @tparam T Some type on which addition and comparisons occur
          * @param i The dividend of the modulus
          * @param j The divisor of the modulus
-         * @return T The Euclidean-correct remainder bounded on [0, j)
+         * @return double The Euclidean-correct remainder bounded on [0, j)
          */
-        template<class T> static T corrMod(T i, T j);
+        static double corrMod(double i, double j);
 
     public:
         /**

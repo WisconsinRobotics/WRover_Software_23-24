@@ -10,9 +10,9 @@
 #define Std_UInt32 std_msgs::UInt32::ConstPtr&
 #define Std_Float64 std_msgs::Float64::ConstPtr&
 
-template<class T> T ArmMotor::corrMod(T i, T j){
+double ArmMotor::corrMod(double i, double j){
     // Stem i%j by j, which in modular arithmetic is the same as adding 0.
-    return fmod(fmod(i,j)+j,j);
+    return std::fmod(std::fmod(std::abs(j)*i/j,std::abs(j))+j,std::abs(j));
 }
 
 /// Currently consistent with the rad->enc equation as specified <a target="_blank" href="https://www.desmos.com/calculator/nwxtenccc6">here</a>.
