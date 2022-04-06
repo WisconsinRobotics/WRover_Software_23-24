@@ -21,7 +21,7 @@ uint32_t ArmMotor::radToEnc(double rads) const {
 }
 
 double ArmMotor::encToRad(uint32_t enc) const {
-    return ArmMotor::corrMod((enc - this->ENCODER_OFFSET) / ((float) this->COUNTS_PER_ROTATION) * 2 * M_PI + M_PI, 2 * M_PI) - M_PI;
+    return ArmMotor::corrMod(static_cast<double>(enc - this->ENCODER_OFFSET) / static_cast<double>(this->COUNTS_PER_ROTATION) * 2 * M_PI + M_PI, 2 * M_PI) - M_PI;
 }
 
 /// Currently consistent with the enc->rad equation as specified <a target="_blank" href="https://www.desmos.com/calculator/nwxtenccc6">here</a>.
@@ -60,7 +60,7 @@ ArmMotor::ArmMotor(
     controllerID{controllerID}, 
     motorID{motorID}, 
     currState{MotorState::STOP},
-    powerMsg{} { //NOLINT (cppcoreguidelines-pro-type-member-init)
+    encoderVal{} {
     
     // Check validity of WRoboclaw and motor IDs
     if(controllerID > 3) throw ((std::string)"Controller ID ") + std::to_string(controllerID) + "is only valid on [0,3]";
@@ -100,7 +100,7 @@ bool ArmMotor::hasReachedTarget(uint32_t targetCounts, uint32_t tolerance) const
 
 /// Current tolerance is &pm;0.1 degree w.r.t. the current number of counts per rotation
 bool ArmMotor::hasReachedTarget(uint32_t targetCounts) const {
-    return ArmMotor::hasReachedTarget(targetCounts, ArmMotor::TOLERANCE_RATIO * std::abs(this->COUNTS_PER_ROTATION));
+    return ArmMotor::hasReachedTarget(targetCounts, ArmMotor::TOLERANCE_RATIO * static_cast<double>(std::abs(this->COUNTS_PER_ROTATION)));
 }
 
 MotorState ArmMotor::getMotorState() const {
@@ -116,7 +116,7 @@ void ArmMotor::setPower(float power){
     this->powerMsg.data = power * INT16_MAX;
     this->speedPub.publish(this->powerMsg);
     // Update the cur.nt motor state based on the power command input
-    this->currState = power == 0.f ? MotorState::STOP : MotorState::MOVING;
+    this->currState = power == 0.F ? MotorState::STOP : MotorState::MOVING;
 }
 
 void ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block){
@@ -134,14 +134,14 @@ void ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block){
         this->currState = MotorState::RUN_TO_TARGET;
     // Otherwise, stop the motor
     } else {
-        this->setPower(0.f);
+        this->setPower(0.F);
         this->currState = MotorState::STOP;
     }
     // If this is a blocking call...
     if(block){
         // Wait until the motor has reached the target, then stop
         while(!this->hasReachedTarget(targetCounts));
-        this->setPower(0.f);
+        this->setPower(0.F);
         this->currState = MotorState::STOP;
     }
 }
