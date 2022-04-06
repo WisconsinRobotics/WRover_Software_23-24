@@ -4,6 +4,7 @@
  * @brief The exeutable file to run the Arm Control Action Server
  * @date 2021-04-05
  */
+#include "XmlRpcValue.h"
 #include "ros/ros.h"
 #include <control_msgs/FollowJointTrajectoryAction.h>
 #include <actionlib/server/simple_action_server.h>
@@ -15,6 +16,7 @@
 #include "SimpleJoint.hpp"
 #include "DifferentialJoint.hpp"
 
+using XmlRpc::XmlRpcValue;
 
 /**
  * @brief Defines space for all ArmMotor references
@@ -183,14 +185,18 @@ int main(int argc, char** argv)
   ros::init(argc, argv, "ArmControlSystem");
   // Create the NodeHandle to the current ROS node
   ros::NodeHandle n;
+  ros::NodeHandle pn{"~"};
+
+  XmlRpcValue encParams;
+  pn.getParam("encoder_parameters", encParams);
 
   // Initialize all motors with their MoveIt name, WRoboclaw initialization, and reference to the current node
-  motors[0] = new ArmMotor("elbow", 1, 0, -2048, 736, n);
-  motors[1] = new ArmMotor("forearm_roll", 1, 1, 2048, 0, n);
-  motors[2] = new ArmMotor("shoulder", 0, 1, -6144, 1038, n);
-  motors[3] = new ArmMotor("turntable", 0, 0, 2048, 1111, n);
-  motors[4] = new ArmMotor("wrist_pitch", 2, 0, 2048, 350, n);
-  motors[5] = new ArmMotor("wrist_roll", 2, 1, 2048, 6, n);
+  motors[0] = new ArmMotor("elbow", 1, 0, static_cast<int>(encParams[0]["counts_per_rotation"]), static_cast<int>(encParams[0]["offset"]), n);
+  motors[1] = new ArmMotor("forearm_roll", 1, 1, static_cast<int>(encParams[1]["counts_per_rotation"]), static_cast<int>(encParams[1]["offset"]), n);
+  motors[2] = new ArmMotor("shoulder", 0, 1, static_cast<int>(encParams[2]["counts_per_rotation"]), static_cast<int>(encParams[2]["offset"]), n);
+  motors[3] = new ArmMotor("turntable", 0, 0, static_cast<int>(encParams[3]["counts_per_rotation"]), static_cast<int>(encParams[3]["offset"]), n);
+  motors[4] = new ArmMotor("wrist_pitch", 2, 0, static_cast<int>(encParams[4]["counts_per_rotation"]), static_cast<int>(encParams[4]["offset"]), n);
+  motors[5] = new ArmMotor("wrist_roll", 2, 1, static_cast<int>(encParams[5]["counts_per_rotation"]), static_cast<int>(encParams[5]["offset"]), n);
   std::cout << "init motors" << std::endl;
 
   // Initialize all Joints

@@ -60,7 +60,7 @@ ArmMotor::ArmMotor(
     controllerID{controllerID}, 
     motorID{motorID}, 
     currState{MotorState::STOP},
-    encoderVal{} {
+    encoderVal{static_cast<uint32_t>(offset)} {
     
     // Check validity of WRoboclaw and motor IDs
     if(controllerID > 3) throw ((std::string)"Controller ID ") + std::to_string(controllerID) + "is only valid on [0,3]";
