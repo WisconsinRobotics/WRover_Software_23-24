@@ -185,12 +185,12 @@ int main(int argc, char** argv)
   ros::NodeHandle n;
 
   // Initialize all motors with their MoveIt name, WRoboclaw initialization, and reference to the current node
-  motors[0] = new ArmMotor("elbow", 1, 0, 2048, 0, n);
+  motors[0] = new ArmMotor("elbow", 1, 0, -2048, 736, n);
   motors[1] = new ArmMotor("forearm_roll", 1, 1, 2048, 0, n);
-  motors[2] = new ArmMotor("shoulder", 0, 1, 2048, 0, n);
-  motors[3] = new ArmMotor("turntable", 0, 0, 2048, 0, n);
-  motors[4] = new ArmMotor("wrist_pitch", 2, 0, 2048, 0, n);
-  motors[5] = new ArmMotor("wrist_roll", 2, 1, 2048, 0, n);
+  motors[2] = new ArmMotor("shoulder", 0, 1, -6144, 1038, n);
+  motors[3] = new ArmMotor("turntable", 0, 0, 2048, 1111, n);
+  motors[4] = new ArmMotor("wrist_pitch", 2, 0, 2048, 350, n);
+  motors[5] = new ArmMotor("wrist_roll", 2, 1, 2048, 6, n);
   std::cout << "init motors" << std::endl;
 
   // Initialize all Joints
