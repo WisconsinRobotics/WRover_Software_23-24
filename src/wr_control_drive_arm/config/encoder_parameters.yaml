@@ -7,7 +7,7 @@ encoder_parameters:
     offset: 0
 # shoulder
   - counts_per_rotation: -6144
-    offset: 1038
+    offset: 460
 # turntable
   - counts_per_rotation: 2048
     offset: 1111
@@ -16,4 +16,4 @@ encoder_parameters:
     offset: 350
 # wrist_roll
   - counts_per_rotation: 2048
-    offset: 6
+    offset: 1023
