@@ -1,0 +1,4 @@
+<!-- Launches nodes that provide spatial awareness via the on-board GPS and IMU. -->
+<launch>
+  <!-- TODO: proprioception -->
+</launch>

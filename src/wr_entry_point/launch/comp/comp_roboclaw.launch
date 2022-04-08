@@ -1,0 +1,8 @@
+<!-- Launches the hardware interface nodes for the roboclaws. -->
+<!-- Doesn't include any logic for actually running the drive system, such as a teleop controller or an AI system. -->
+<launch>
+  <arg name="use_encoders" default="false"/>
+
+  <include file="$(find wr_hsi_roboclaw)/launch/roboclaw_real.launch" pass_all_args="true" if="$(eval env('WROVER_HW') == 'REAL')"/>
+  <include file="$(find wr_hsi_roboclaw)/launch/roboclaw_mock.launch" pass_all_args="true" if="$(eval env('WROVER_HW') == 'MOCK')"/>
+</launch>
