@@ -142,9 +142,6 @@ include_directories(
 add_executable(ArmControlSystem src/ArmControlSystem.cpp)
 target_link_libraries(ArmControlSystem ${catkin_LIBRARIES} ${PROJECT_NAME})
 
-add_executable(SimpleACS src/SimpleACS.cpp)
-target_link_libraries(SimpleACS ${catkin_LIBRARIES} ${PROJECT_NAME})
-
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use

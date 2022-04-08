@@ -25,7 +25,6 @@ void SimpleJoint::getJointPositions(vector<double> &motorPositions, vector<doubl
 void SimpleJoint::getMotorPositions(vector<double> &jointPositions, vector<double> &target){
   
     target.reserve(1);
-    std::cout << target.size() << std::endl;
     double position = jointPositions[0];
     target.push_back(position);
     // return positions;
