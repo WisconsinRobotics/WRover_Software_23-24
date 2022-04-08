@@ -1,4 +1,5 @@
 <launch>
-	<include file="$(find wr_entry_point)/launch/comp/init.launch"/>
+	<include file="$(find wr_hci_hid)/launch/teleop_arm.launch"/>
+
 	<include file="$(find wr_hsi_roboclaw)/launch/roboclaw_mock.launch"/>
 </launch>

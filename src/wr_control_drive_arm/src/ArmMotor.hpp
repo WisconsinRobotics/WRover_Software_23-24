@@ -29,10 +29,16 @@ enum class MotorState{
  */
 class ArmMotor{
     private:
+        /// Tolerance ratio w.r.t the counts per rotation for encoder run-to-position motion
+        static constexpr double TOLERANCE_RATIO = 0.1/360;
+        /// Size of ROS Topic message caches
+        static constexpr uint32_t MESSAGE_CACHE_SIZE = 10;
         /// The number of encoder counts per rotation
-        static uint32_t const COUNTS_PER_ROTATION;
+        int64_t const COUNTS_PER_ROTATION;
         /// The upper and lower bounds of encoder rotation for absolute encoders (index 0 is lower, index 1 is upper)
-        static uint32_t const ENCODER_BOUNDS[2];
+        std::array<int64_t const, 2> const ENCODER_BOUNDS;
+        /// zero position of motor
+        int64_t const ENCODER_OFFSET;
         /// The current state of the motor
         MotorState currState;
         /// The joint name of the current motor
@@ -53,8 +59,8 @@ class ArmMotor{
         ros::Subscriber outputRead;
         /// The ROS Publisher that publishes motor speed commands
         ros::Publisher speedPub;
-        /// A pointer to the most recent power message sent
-        std_msgs::Int16 *powerMsg;
+        /// The most recent power message sent
+        std_msgs::Int16 powerMsg;
         /// If the motor is stalling or not
         volatile bool isStall;
         /// The ROS Subscriber that reads stall status data
@@ -68,7 +74,7 @@ class ArmMotor{
          * @param rad The input number of radians
          * @return uint32_t The corresponding encoder count bounded by ENCODER_BOUNDS
          */
-        static uint32_t radToEnc(double rad);
+        uint32_t radToEnc(double rad) const;
 
         /**
          * @brief A static conversion from encoder counts to radians
@@ -76,7 +82,7 @@ class ArmMotor{
          * @param enc The input number of encoder counts
          * @return double The corresponding radian measure
          */
-        static double encToRad(uint32_t enc);
+        double encToRad(uint32_t enc) const;
 
         /**
          * @brief Subscriber callback for encRead, captures the encoder value of the current motor
@@ -102,12 +108,11 @@ class ArmMotor{
         /**
          * @brief Performs Euclidean correct modulus between two inputs of the same type
          * 
-         * @tparam T Some type on which addition and comparisons occur
          * @param i The dividend of the modulus
          * @param j The divisor of the modulus
-         * @return T The Euclidean-correct remainder bounded on [0, j)
+         * @return double The Euclidean-correct remainder bounded on [0, j)
          */
-        template<class T> static T corrMod(T i, T j);
+        static double corrMod(double i, double j);
 
     public:
         /**
@@ -118,14 +123,14 @@ class ArmMotor{
          * @param motorID The motor ID within its WRoboclaw controller
          * @param n A NodeHandle reference to the constructing Node
          */
-        ArmMotor(std::string motorName, unsigned int controllerID, unsigned int motorID, ros::NodeHandle* n);
+        ArmMotor(const std::string &motorName, unsigned int controllerID, unsigned int motorID, int64_t countsPerRotation, int64_t offset, ros::NodeHandle &n);
 
         /**
          * @brief Gets the encoder value of the motor
          * 
          * @return uint32_t The current encoder value of the motor
          */
-        uint32_t getEncoderCounts();
+        uint32_t getEncoderCounts() const;
 
         /**
          * @brief Sends the motor to run to a target encoder value at a given power without blocking
@@ -159,7 +164,7 @@ class ArmMotor{
          * 
          * @return MotorState The current state of the ArmMotor
          */
-        MotorState getMotorState();
+        MotorState getMotorState() const;
 
         /**
          * @brief Set the motor power
@@ -171,30 +176,30 @@ class ArmMotor{
         /**
          * @brief Get the radian measure of the current motor
          * 
-         * @return float The radian measure of the current motor's position
+         * @return double The radian measure of the current motor's position
          */
-        float getRads();
+        double getRads() const;
 
         /**
          * @brief Get the name of the ArmMotor
          * 
          * @return std::string The name of the ArmMotor
          */
-        std::string getMotorName();
+        std::string getMotorName() const;
 
          /**
          * @brief Get the name of the ArmMotor
          * 
          * @return std::string The controller ID of the ArmMotor
          */
-        unsigned int getControllerID();
+        unsigned int getControllerID() const;
 
         /**
          * @brief Get the name of the ArmMotor
          * 
          * @return std::string The motor ID of the ArmMotor
          */
-        unsigned int getMotorID();
+        unsigned int getMotorID() const;
 
 
         /**
@@ -204,7 +209,7 @@ class ArmMotor{
          * @return true The motor was within the target tolerance
          * @return false The motor was outside of the target tolerance
          */
-        bool hasReachedTarget(uint32_t targetCounts);
+        bool hasReachedTarget(uint32_t targetCounts) const;
 
         /**
          * @brief Checks if the motor is currently within a given tolerance of a target
@@ -214,6 +219,12 @@ class ArmMotor{
          * @return true The motor was within the target tolerance
          * @return false The motor was outside the target tolerance
          */
-        bool hasReachedTarget(uint32_t targetCounts, uint32_t tolerance);
-        float getPower();
+        bool hasReachedTarget(uint32_t targetCounts, uint32_t tolerance) const;
+
+        /**
+         * @brief Get the most recently set motor power
+         * 
+         * @return float Last motor power setting
+         */
+        float getPower() const;
 };

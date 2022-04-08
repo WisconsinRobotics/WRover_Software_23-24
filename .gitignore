@@ -24,6 +24,8 @@ src/wresponsecontrol
 src/drive/lib
 src/manager/lib
 src/science/lib
+src/arm/lib
+
 
 *.pyc
 src/arm/lib
