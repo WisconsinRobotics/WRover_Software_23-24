@@ -1,0 +1,15 @@
+<!-- Launches the HID nodes for drive system teleoperation via a pair of Logitech Extreme 3D Pro joysticks configured for tank drive. -->
+<launch>
+  <group ns="hci">
+    <group ns="drive_system">
+      <node name="teleop_joystick_left" pkg="wreadinput" type="input_logx3dpro.py" machine="base_station">
+        <param name="name" value="Teleop Drive: Left Joystick"/>
+        <param name="namespace" value="/logic/drive_system/joystick_left"/>
+      </node>
+      <node name="teleop_joystick_right" pkg="wreadinput" type="input_logx3dpro.py" machine="base_station">
+        <param name="name" value="Teleop Drive: Right Joystick"/>
+        <param name="namespace" value="/logic/drive_system/joystick_right"/>
+      </node>
+    </group>
+  </group>
+</launch>
