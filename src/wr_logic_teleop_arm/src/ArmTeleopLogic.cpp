@@ -75,7 +75,6 @@ auto main(int argc, char** argv) -> int{
     const moveit::core::JointModelGroup* joint_model_group = move.getCurrentState()->getJointModelGroup("arm");
     robot_state::RobotState start_state(*move.getCurrentState());
     moveit_visual_tools::MoveItVisualTools visual_tools("arm");
-    std::cout << "interface handle: " << move.getNodeHandle().getNamespace() << std::endl;
 
 
     ros::Rate loop {CLOCK_RATE};
@@ -252,7 +251,6 @@ auto main(int argc, char** argv) -> int{
 
         while(ros::ok){
             updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
-            // std::cout << "[INFO] [" << ros::Time::now() << "]: executing path " << std::endl;
 
             if(move.getMoveGroupClient().getState().isDone()){
                 std::cout << "[INFO] [" << ros::Time::now() << "]: path finished: " << move.getMoveGroupClient().getState().getText() << std::endl;
