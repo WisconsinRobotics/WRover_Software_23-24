@@ -29,5 +29,7 @@ src/arm/lib
 
 *.pyc
 src/arm/lib
+
+# potential clang excludes
 compile_commands.json
 .cache
