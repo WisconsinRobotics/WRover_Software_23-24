@@ -165,7 +165,7 @@ class BuildApt(Build):
         self.pkg_name = pkg_name
 
     def execute(self, root_dir: str, dep_dir: str, args: List[str]):
-        if not BuildApt.install_list:
+        if not hasattr(BuildApt,'install_list'):
             print_subsec('Caching dpkg install list...')
             BuildApt.install_list = set()
             with open('/var/lib/dpkg/status') as dpkg_status:

@@ -12,6 +12,10 @@ find_package(catkin REQUIRED COMPONENTS
   rospy
 )
 
+
+find_package(Boost REQUIRED COMPONENTS python)
+find_package(PythonLibs 2.7 REQUIRED)
+
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -117,12 +121,25 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
+  ${PYTHON_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/wr_control_drive_science.cpp
 # )
+
+# add_library(testModule
+#   main.cpp
+# )
+
+# target_link_libraries(testModule ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
+# set_target_properties(testModule PROPERTIES
+#         PREFIX ""
+#         LIBRARY_OUTPUT_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_PYTHON_DESTINATION}
+#         )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries

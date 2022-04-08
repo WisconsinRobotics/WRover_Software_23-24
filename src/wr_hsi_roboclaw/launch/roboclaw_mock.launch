@@ -1,6 +1,6 @@
 <!-- Launches a mock hardware interface for testing the drive system. -->
 <launch>
-  <arg name="use_encoders" default="false"/>
+  <arg name="use_encoders" default="true"/>
 
   <group ns="hsi">
     <group ns="roboclaw">

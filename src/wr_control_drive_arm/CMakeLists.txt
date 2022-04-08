@@ -124,8 +124,10 @@ include_directories(
 
 ## Declare a C++ library
  add_library( ${PROJECT_NAME}
-   src/ArmControlSystem.cpp
    src/ArmMotor.cpp
+   src/AbstractJoint.cpp
+   src/DifferentialJoint.cpp
+   src/SimpleJoint.cpp
  )
 
 ## Add cmake target dependencies of the library

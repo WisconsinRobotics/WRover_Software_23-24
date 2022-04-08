@@ -20,6 +20,20 @@
       "build": {
         "provider": "pip"
       }
+    },
+    {
+      "name": "wresponsecontrol",
+      "repo": "ssh://git@github.com/WisconsinRobotics/wresponsecontrol.git",
+      "build": {
+        "provider": "noop"
+      }
+    },
+    {
+      "name": "moveit",
+      "build": {
+        "package": "ros-noetic-moveit",
+        "provider": "apt"
+      }
     }
   ]
 }

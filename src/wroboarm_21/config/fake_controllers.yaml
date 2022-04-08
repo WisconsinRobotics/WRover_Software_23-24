@@ -7,6 +7,7 @@ controller_list:
       - link4_joint
       - link5_joint
       - link6_joint
+      - link7_joint
 initial:  # Define initial robot poses.
   - group: arm
 #    pose: home
