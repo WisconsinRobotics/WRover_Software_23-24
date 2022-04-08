@@ -29,9 +29,8 @@ auto updateTarget(float x_pos, float y_pos, float z_pos, tf2::Quaternion orienta
     p.pose.position.z = z_pos;
     auto outOrientation = /* tf2::Quaternion(0,sin(M_PI/4), 0, cos(M_PI/4)) * */ orientation;
     p.pose.orientation = tf2::toMsg(outOrientation);
-    p.header.frame_id = "turntable";
+    p.header.frame_id = "base_link";
     pub.publish(p);
-    // isNewPath.store(true);
 }
 
 auto main(int argc, char** argv) -> int{
@@ -44,16 +43,21 @@ auto main(int argc, char** argv) -> int{
     constexpr float CLOCK_RATE = 2;
     constexpr uint32_t MESSAGE_QUEUE_LENGTH = 1000; 
     constexpr float TRIGGER_PRESSED = 0.5;
+    constexpr float JOYSTICK_DEADBAND = 0.1;
     constexpr float MINIMUM_PATH_ACCURACY = 0.0;
 
-    constexpr float STEP_X = 0.001;
-    constexpr float STEP_Y = 0.001;
-    constexpr float STEP_Z = 0.001;
+    constexpr float STEP_X = 0.003;
+    constexpr float STEP_Y = 0.003;
+    constexpr float STEP_Z = 0.003;
 
-    constexpr float HOME_X = 0.25;
-    constexpr float HOME_Y = 0;
-    constexpr float HOME_Z = 0.25;
+    constexpr float HOME_X = -0.7;
+    constexpr float HOME_Y = 0.0;
+    constexpr float HOME_Z = 0.2;
 
+
+    float accel = 1.0;
+    float deaccel = 1.0;
+    float step_mult = 1.0;
     float x_pos = HOME_X;
     float y_pos = HOME_Y;
     float z_pos = HOME_Z;
@@ -70,88 +74,158 @@ auto main(int argc, char** argv) -> int{
     move.setPlanningTime(PLANNING_TIME);
     const moveit::core::JointModelGroup* joint_model_group = move.getCurrentState()->getJointModelGroup("arm");
     robot_state::RobotState start_state(*move.getCurrentState());
+    moveit_visual_tools::MoveItVisualTools visual_tools("arm");
+
 
     ros::Rate loop {CLOCK_RATE};
 
     ros::Publisher nextTarget = np.advertise<geometry_msgs::PoseStamped>("/logic/arm_teleop/next_target", 
         MESSAGE_QUEUE_LENGTH);
-        
-    ros::Subscriber yAxis = np.subscribe("/xbox_test/axis/pov_y", 
+    
+    ros::Publisher trajectoryPub = np.advertise<visualization_msgs::MarkerArray>("/logic/arm_teleop/trajectory", 
+        MESSAGE_QUEUE_LENGTH);
+    
+
+    // y axis
+    ros::Subscriber yAxis = np.subscribe("/hci/arm/gamepad/axis/stick_left_y", 
         MESSAGE_QUEUE_LENGTH, 
         static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
-            if(msg->data != 0){
-                y_pos += static_cast<bool>(msg->data) ? msg->data > 0 ? STEP_Y : -STEP_Y : 0;
+            if(abs(msg->data) >= JOYSTICK_DEADBAND){
+                y_pos += msg->data * STEP_Y;
                 updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+                isNewPath.store(true);
+
             }
         }));
 
-    ros::Subscriber xAxis = np.subscribe("/xbox_test/axis/pov_x", 
+    // x axis
+    ros::Subscriber xAxis = np.subscribe("/hci/arm/gamepad/axis/stick_left_x", 
         MESSAGE_QUEUE_LENGTH, 
         static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
-            if(msg->data != 0){
-                x_pos += static_cast<bool>(msg->data) ? msg->data > 0 ? STEP_X : -STEP_X : 0;
+            if(abs(msg->data) >= JOYSTICK_DEADBAND){
+                x_pos += msg->data * STEP_X;
                 updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+                isNewPath.store(true);
+                
             }
         }));
 
-    ros::Subscriber zUp = np.subscribe("/xbox_test/button/shoulder_l",
+    // y up
+    ros::Subscriber zUp = np.subscribe("/hci/arm/gamepad/button/shoulder_l",
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
             if(msg->data){
-                z_pos += msg->data ? STEP_Z : 0;
+                z_pos += STEP_Y * step_mult;
                 updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+                isNewPath.store(true);
+
             }
         }));
 
-    ros::Subscriber zDown = np.subscribe("/xbox_test/axis/trigger_left",
+    // y down
+    ros::Subscriber zDown = np.subscribe("/hci/arm/gamepad/button/shoulder_r",
         MESSAGE_QUEUE_LENGTH,
-        static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
-            if(msg->data >= TRIGGER_PRESSED){
-                z_pos += msg->data >= TRIGGER_PRESSED ? -STEP_Z : 0;
+        static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
+            if(msg->data){
+                z_pos -= STEP_Y * step_mult;
                 updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+                isNewPath.store(true);
+
             }
         }));
     
-    ros::Subscriber roll = np.subscribe("/xbox_test/axis/stick_left_x",
+    //roll counter clockwise
+    ros::Subscriber rollUp = np.subscribe("/hci/arm/gamepad/button/y",
         MESSAGE_QUEUE_LENGTH,
-        static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
-            if(abs(msg->data) >= 0.5){
-                orientation *= (msg->data > 0 ? SPIN_Z : SPIN_Z.inverse());
+        static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
+            if(msg->data){
+                orientation *= SPIN_Z * step_mult;
                 updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+                isNewPath.store(true);
+
             }
         }));
 
-    ros::Subscriber pitch = np.subscribe("/xbox_test/axis/stick_left_y",
+    // roll clockwise
+    ros::Subscriber rollDown = np.subscribe("/hci/arm/gamepad/button/a",
+        MESSAGE_QUEUE_LENGTH,
+        static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
+            if(msg->data){
+                orientation *= SPIN_Z.inverse();
+                updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+                isNewPath.store(true);
+
+            }
+        }));
+
+    // pitch
+    ros::Subscriber pitch = np.subscribe("/hci/arm/gamepad/axis/stick_right_y",
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
             if(abs(msg->data) >= 0.5){
                 orientation *= (msg->data > 0 ? SPIN_Y : SPIN_Y.inverse());
                 updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+                isNewPath.store(true);
+
             }
         }));
 
-    ros::Subscriber yaw = np.subscribe("/xbox_test/axis/stick_right_x",
+    // yaw
+    ros::Subscriber yaw = np.subscribe("/hci/arm/gamepad/axis/stick_right_x",
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
             if(abs(msg->data) >= 0.5){
                 orientation *= (msg->data > 0 ? SPIN_X : SPIN_X.inverse());
                 updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+                isNewPath.store(true);
+
             }
         }));
 
-    ros::Subscriber execPath = np.subscribe("/xbox_test/button/a",
+    ros::Subscriber speedUp = np.subscribe("/hci/arm/gamepad/axis/trigger_right",
+        MESSAGE_QUEUE_LENGTH,
+        static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
+        accel = msg->data;
+        step_mult = std::pow(10,accel-deaccel);
+    }));
+
+    ros::Subscriber speedDown = np.subscribe("/hci/arm/gamepad/axis/trigger_right",
+        MESSAGE_QUEUE_LENGTH,
+        static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
+        deaccel = msg->data;
+        step_mult = std::pow(10,accel-deaccel);
+    }));
+
+    // override path execution
+    ros::Subscriber execPath = np.subscribe("/hci/arm/gamepad/button/x",
         MESSAGE_QUEUE_LENGTH,
         static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
             if(msg->data){
                 isNewPath.store(true);
             }
         }));
-        
-    // transform = move.getCurrentState()->getFrameTransform("odom_combined");
-    // updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+
+    // reset target/cancel path
+    ros::Subscriber resetPose = np.subscribe("/hci/arm/gamepad/button/start",
+        MESSAGE_QUEUE_LENGTH,
+        static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
+            if(msg->data){
+
+                geometry_msgs::Pose pose = move.getCurrentPose().pose;
+                x_pos = pose.position.x;
+                y_pos = pose.position.y;
+                z_pos = pose.position.z;
+                tf2::convert(pose.orientation, orientation);
+                updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+
+                isNewPath.store(true); //override path
+            }
+        }));
+
 
     while(ros::ok()){
 
+        updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
         if(!isNewPath.load()){
             loop.sleep();
             continue;
@@ -168,16 +242,15 @@ auto main(int argc, char** argv) -> int{
         p.pose.position.z = z_pos;
         p.pose.orientation = tf2::toMsg(orientation);
         p.header.frame_id = "odom_combined";
+
         move.setPoseTarget(p);
-        std::vector<geometry_msgs::Pose> waypoints {p.pose};
-        moveit_msgs::RobotTrajectory traj;
+        move.setStartStateToCurrentState();
 
         //plan and execute path
-        move.setStartStateToCurrentState();
         move.asyncMove();
 
         while(ros::ok){
-            // std::cout << "[INFO] [" << ros::Time::now() << "]: executing path " << std::endl;
+            updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
 
             if(move.getMoveGroupClient().getState().isDone()){
                 std::cout << "[INFO] [" << ros::Time::now() << "]: path finished: " << move.getMoveGroupClient().getState().getText() << std::endl;

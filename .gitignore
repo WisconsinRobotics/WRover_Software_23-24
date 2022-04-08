@@ -17,17 +17,15 @@ src/sick_scan
 src/wreadinput
 src/wready
 src/wroboclaw
+src/wrosout
 src/wresponsecontrol
 
 # external lib destination dirs
 src/drive/lib
 src/manager/lib
 src/science/lib
-
-*.pyc
 src/arm/lib
-compile_commands.json
-src/wrosout
+
 
 *.pyc
 src/arm/lib
@@ -35,4 +33,3 @@ src/arm/lib
 # potential clang excludes
 compile_commands.json
 .cache
->>>>>>> origin

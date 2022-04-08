@@ -125,6 +125,9 @@ include_directories(
 ## Declare a C++ library
  add_library( ${PROJECT_NAME}
    src/ArmMotor.cpp
+   src/AbstractJoint.cpp
+   src/DifferentialJoint.cpp
+   src/SimpleJoint.cpp
  )
 
 ## Add cmake target dependencies of the library
@@ -138,9 +141,6 @@ include_directories(
 # add_executable(${PROJECT_NAME}_node src/wr_control_drive_arm_node.cpp)
 add_executable(ArmControlSystem src/ArmControlSystem.cpp)
 target_link_libraries(ArmControlSystem ${catkin_LIBRARIES} ${PROJECT_NAME})
-
-add_executable(SimpleACS src/SimpleACS.cpp)
-target_link_libraries(SimpleACS ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
