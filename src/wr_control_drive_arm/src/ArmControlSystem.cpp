@@ -10,11 +10,14 @@
 #include <actionlib/server/simple_action_server.h>
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/Float64.h>
+#include <std_msgs/Empty.h>
 #include <algorithm>
 #include <csignal>
 #include <string>
+#include <std_srvs/Trigger.h>
 #include "SimpleJoint.hpp"
 #include "DifferentialJoint.hpp"
+#include "ros/console.h"
 
 using XmlRpc::XmlRpcValue;
 
@@ -37,6 +40,18 @@ ros::Publisher jointStatePublisher;
  * @brief Simplify the SimpleActionServer reference name
  */
 typedef actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> Server;
+/**
+ * @brief The service server for enabling IK
+ */
+ros::ServiceServer enableServiceServer;
+/**
+ * @brief The status of IK program
+ */
+std::atomic_bool IKEnabled{true};
+/**
+ * @brief The service client for disabling IK
+ */
+ros::ServiceClient enableServiceClient;
 
 /**
  * @brief converts a roll and pitch to joint motor positions
@@ -83,6 +98,12 @@ bool configJointSetpoint(AbstractJoint* joint, int degreeIndex, double target, f
  * @param as The Action Server this is occuring on
  */
 void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server* as) {
+  if (!IKEnabled) {
+    as->setAborted();
+    ROS_WARN("IK is disabled");
+    return;
+  }
+
   std::cout << "start exec: " << goal->trajectory.points.size() << std::endl;
   // For each point in the trajectory execution sequence...
   for(int i = 0; i < goal->trajectory.points.size(); i++){
@@ -128,7 +149,19 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
           // std::cout<<std::setw(30)<<motors[j]->getEncoderCounts()<<std::endl;
           // std::cout<<std::setw(30)<<motors[j]->getPower()<<std::endl;
         }
-        joint->exectute();
+        if (!joint->exectute()) {
+          IKEnabled = false;
+          std_srvs::Trigger srv;
+          if (enableServiceClient.call(srv)) {
+            ROS_WARN((std::string{"PLACEHOLDER_NAME: "} + srv.response.message).data());
+          } else {
+            ROS_WARN("Error: failed to call service PLACEHOLDER_NAME");
+          }
+          return;
+          // TODO: hand control back to driver
+          // standard service empty stdsrvs empty
+          // go into spin loop
+        }
         jointIndex++;
       }
 
@@ -207,10 +240,10 @@ int main(int argc, char** argv)
   joints[4] = new SimpleJoint(motors[4], &n);
   DifferentialJoint* temp = new DifferentialJoint(motors[4], motors[5], &n);
   temp->configVelocityHandshake("/control/arm/5/roll", "/control/arm/5/pitch", "/control/arm/20/", "/control/arm/21/");
+
   std::cout << "init joints" << std::endl;
   joints[5] = temp;
   
-
   // Initialize the Joint State Data Publisher
   jointStatePublisher = n.advertise<sensor_msgs::JointState>("/control/arm_joint_states", 1000);
 
@@ -222,7 +255,18 @@ int main(int argc, char** argv)
 
   ros::Timer timer = n.createTimer(ros::Duration(1.0 / 50.0), publish);
 
-  // signal(SIGINT, [](int signal)->void{ros::shutdown(); exit(1);});
+  enableServiceServer = n.advertiseService("start_IK", 
+    static_cast<boost::function<bool(std_srvs::Trigger::Request&, std_srvs::Trigger::Response&)>>(
+      [](std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res)->bool{
+        IKEnabled = true;
+        res.message = "Arm IK Enabled";
+        res.success = true;
+        return true;
+      }
+    ));
+
+  enableServiceClient = n.serviceClient<std_srvs::Trigger>("PLACEHOLDER_NAME");
+  
   std::cout << "entering ROS spin..." << std::endl;
   // ROS spin for communication with other nodes
   ros::spin();

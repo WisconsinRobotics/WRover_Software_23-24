@@ -9,6 +9,7 @@
 #include "std_msgs/UInt32.h"
 #include "std_msgs/Int16.h"
 #include "std_msgs/Float64.h"
+#include "std_msgs/Bool.h"
 #include "math.h"
 #include <string>
 
@@ -60,6 +61,12 @@ class ArmMotor{
         ros::Publisher speedPub;
         /// The most recent power message sent
         std_msgs::Int16 powerMsg;
+        /// If the motor is stalling or not
+        volatile bool isStall;
+        /// The ROS Subscriber that reads stall status data
+        ros::Subscriber stallRead;
+        /// The time when the motor began stalling
+        ros::Time begin;
 
         /**
          * @brief A static conversion from radians to encoder counts
@@ -90,6 +97,13 @@ class ArmMotor{
          * @param msg The PID output as captured by outputRead
          */
         void redirectPowerOutput(const std_msgs::Float64::ConstPtr& msg);
+
+        /**
+         * @brief Subscriber callback for stallRead, captures the stall status of the current motor
+         * 
+         * @param msg The stall status of the current motor
+         */
+        void storeStallStatus(const std_msgs::Bool::ConstPtr& msg);
 
         /**
          * @brief Performs Euclidean correct modulus between two inputs of the same type
@@ -132,16 +146,18 @@ class ArmMotor{
          * @param targetCounts The target encoder value for the motor
          * @param power The power to move the motor at (Bounded between [-1, 1])
          * @param block Specifies whether or not this action should block until it is complete
+         * @return True if the motor had stalled, and false otherwise
          */
-        void runToTarget(uint32_t targetCounts, float power, bool block);
+        bool runToTarget(uint32_t targetCounts, float power, bool block);
 
         /**
          * @brief Sends the motor to run to a specified position at a given power
          * 
          * @param rads The position to send the motor to (specified in radians)
          * @param power The power to move the motor at (Bounded between [-1, 1])
+         * @return True if the motor had stalled, and false otherwise
          */
-        void runToTarget(double rads, float power);
+        bool runToTarget(double rads, float power);
 
         /**
          * @brief Get the current state of the ArmMotor
@@ -171,7 +187,7 @@ class ArmMotor{
          */
         std::string getMotorName() const;
 
-        /**
+         /**
          * @brief Get the name of the ArmMotor
          * 
          * @return std::string The controller ID of the ArmMotor
@@ -184,6 +200,7 @@ class ArmMotor{
          * @return std::string The motor ID of the ArmMotor
          */
         unsigned int getMotorID() const;
+
 
         /**
          * @brief Checks if the motor is currently within a pre-specified tolerance of a target

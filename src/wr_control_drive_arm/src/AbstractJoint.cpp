@@ -29,11 +29,11 @@ void AbstractJoint::configSetpoint(int degreeIndex, double position, double velo
     this->jointVelocites[degreeIndex] = velocity;
 }
 
-void AbstractJoint::exectute(){
-    vector<double> motorPositions = vector<double>();
-    this->getMotorPositions(jointPositions, motorPositions);
 
+bool AbstractJoint::exectute(){
+    vector<double> motorPositions = this->getMotorPositions(jointPositions);
     for(int i = 0; i < this->numMotors; i++){
-        this->motors[i]->runToTarget(motorPositions[i], 0);
+        if (!this->motors[i]->runToTarget(motorPositions[i], 0)) return false;
     }
+    return true;
 }

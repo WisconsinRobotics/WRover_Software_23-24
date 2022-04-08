@@ -9,6 +9,7 @@
 /// Allow for referencing the UInt32 message type easier
 typedef std_msgs::UInt32::ConstPtr Std_UInt32;
 typedef std_msgs::Float64::ConstPtr Std_Float64;
+#define Std_Bool std_msgs::Bool::ConstPtr&
 
 double ArmMotor::corrMod(double i, double j){
     // Stem i%j by j, which in modular arithmetic is the same as adding 0.
@@ -43,6 +44,9 @@ void ArmMotor::redirectPowerOutput(const Std_Float64 &msg){
     this->setPower(msg->data);
 }
 
+void ArmMotor::storeStallStatus(const Std_Bool msg) {
+    this->isStall = msg->data;
+}
 
 /// controllerID is constrained between [0,3]
 /// motorID is constrained between [0,1]
@@ -76,6 +80,7 @@ ArmMotor::ArmMotor(
     this->targetPub = n.advertise<std_msgs::Float64>(controlString + "/setpoint", ArmMotor::MESSAGE_CACHE_SIZE);
     this->feedbackPub = n.advertise<std_msgs::Float64>(controlString + "/feedback", ArmMotor::MESSAGE_CACHE_SIZE);
     this->outputRead = n.subscribe(controlString + "/output", ArmMotor::MESSAGE_CACHE_SIZE, &ArmMotor::redirectPowerOutput, this);
+    this->stallRead = n.subscribe(tpString + "/curr/over_lim/" + (motorID == 0 ? "left" : "right"), ArmMotor::MESSAGE_CACHE_SIZE, &ArmMotor::storeStallStatus, this);
 }
 
 uint32_t ArmMotor::getEncoderCounts() const{
@@ -119,7 +124,18 @@ void ArmMotor::setPower(float power){
     this->currState = power == 0.F ? MotorState::STOP : MotorState::MOVING;
 }
 
-void ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block){
+bool ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block){
+    // Checks for stall
+    if (this->isStall) {
+        if ((ros::Time::now() - begin).toSec() >= 0.5) {
+            this->setPower(0.0f);
+            this->currState = MotorState::STOP;
+            return false;
+        }
+    } else {
+        begin = ros::Time::now();
+    }
+    
     // If we are not at our target...
     if(!this->hasReachedTarget(targetCounts)){
         // Set the power in the correct direction and continue running to the target
@@ -144,12 +160,13 @@ void ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block){
         this->setPower(0.F);
         this->currState = MotorState::STOP;
     }
+    return true;
 }
 
-void ArmMotor::runToTarget(double rads, float power){
+bool ArmMotor::runToTarget(double rads, float power){
     std::cout << "run to target: " << rads << ":" << this->radToEnc(rads) << std::endl;
     
-    runToTarget(this->radToEnc(rads), power, false);
+    return runToTarget(this->radToEnc(rads), power, false);
 }
 
 std::string ArmMotor::getMotorName() const {

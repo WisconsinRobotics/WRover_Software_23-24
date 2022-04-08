@@ -5,7 +5,6 @@
   <env name="WROVER_MODE" value="TEST"/>
   <env name="WROVER_HW" value="REAL"/>
 
-
   <include file="$(find wr_entry_point)/launch/comp/comp_init.launch"/>
   
   <include file="$(find wr_entry_point)/launch/comp/comp_roboclaw.launch">
