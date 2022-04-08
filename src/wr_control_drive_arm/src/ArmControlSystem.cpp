@@ -154,7 +154,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
           IKEnabled = false;
           std_srvs::Trigger srv;
           if (enableServiceClient.call(srv)) {
-            ROS_WARN((std::string{"PLACEHOLDER_NAME: "} + srv.response.message).data());
+            ROS_WARN("%s", (std::string{"PLACEHOLDER_NAME: "} + srv.response.message).data());
           } else {
             ROS_WARN("Error: failed to call service PLACEHOLDER_NAME");
           }
