@@ -23,7 +23,7 @@
     },
     {
       "name": "wresponsecontrol",
-      "repo": "https://github.com/WisconsinRobotics/wresponsecontrol.git",
+      "repo": "ssh://git@github.com/WisconsinRobotics/wresponsecontrol.git",
       "build": {
         "provider": "noop"
       }
