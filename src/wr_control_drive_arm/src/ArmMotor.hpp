@@ -228,3 +228,4 @@ class ArmMotor{
          */
         float getPower() const;
 };
+
