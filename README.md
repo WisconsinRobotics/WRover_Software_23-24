@@ -1,30 +1,43 @@
 # Wisconsin Robotics -- 2021 Software System
 
-## Prerequisites
+## Setting Up the Software System
 
-You should have the following installed beforehand:
-
-* ROS Noetic (preferrably on Ubuntu 20.04; it is recommended, but not necessarily required, to dual-boot for this)
-* Python 3.8.x+ with pip and virtualenv
-
-## Setting Up the Workspace
-
-This repository consists of the ROS catkin workspace for the WRover software system.
-You'll want to clone the repo to wherever you wish to store your workspaces.
-Once you have a local copy, you'll want to open a terminal in the workspace.
-For initial setup, do the following:
-
-```sh
-$ . setup.sh          # set up the workspace environment
-$ ./assemble.py init  # initialize the catkin workspace + venv
-$ ./assemble.py build # build dependencies
-```
-
-Every time you want to work in the workspace, you'll have to run `source setup.sh` again to set up your shell with the workspace environment. Alternatively, you can do this automatically in your `.bashrc` if you don't anticipate working in any other ROS workspaces.
+To set up the software system on a base station or dev machine, see [`/docs/setup_dev.md`](docs/setup_dev.md).
+To set up the software system on a rover, see [`docs/setup_rover.md`](docs/setup_rover.md).
 
 ## Booting the Full Robot System
 
-*(TODO)*
+To launch the rover, you'll first want to start the base station radio and ensure that both the rover and base station are connected to it.
+Then, you can start the launcher UI on the base station, which is opened with the command:
+
+```sh
+$ ./launch.sh
+```
+
+You should see a small window that looks like this:
+
+![](docs/launcher_ui.png)
+
+From here, you can select a launch configuration from the drop-down box and press the "Launch!" button to launch the robot system.
+To shut down the rover system, you can simply send an interrupt to the terminal window using `Ctrl`+`C`.
+
+Alternatively, you can directly launch a full-system launch file from the `wr_entry_point` package.
+There are the `auto_nav.launch`, `eq_service.launch`, `erdm.launch` and `science.launch` files, each of which configures the robot system for a specific URC task.
+Additionally, several test configurations are available in launch files prefixed by `test_`, each of which allows for testing one robot subsystem in isolation.
+
+To use these launch files, you'll first need to start `roscore` on the rover.
+You'll also need to set certain environment variables which are described in the `README.md` document in the `wr_entry_point` package.
+These env vars provide information about the environment of the launch to the robot system.
+An example of a successful launch on real rover hardware might be:
+
+```sh
+$ ssh wiscrobo@wrover-nano.local '~/catkin_ws/WRover21_Software/env.sh roscore'
+$ export ROS_MASTER_URI='http://wrover-nano.local:11311'
+$ export ROS_IP='192.168.1.111'
+$ export WROVER_LOCAL=false
+$ export WROVER_HW=REAL
+$ roslaunch wr_entry_point erdm.launch
+```
 
 ## Documentation
 

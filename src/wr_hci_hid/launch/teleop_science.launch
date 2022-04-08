@@ -1,0 +1,11 @@
+<!-- Launches the HID nodes for teleoperation of the science assembly via an Xbox 360 controller. -->
+<launch>
+  <group ns="hci">
+    <group ns="science">
+      <node name="teleop_input" pkg="wreadinput" type="input_xbox360.py" machine="base_station">
+        <param name="name" value="Science Drive"/>
+        <param name="namespace" value="/hci/science/gamepad"/>
+      </node>
+    </group>
+  </group>
+</launch>

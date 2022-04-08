@@ -52,11 +52,13 @@
   <build_depend>rospy</build_depend>
   <build_export_depend>rospy</build_export_depend>
   <exec_depend>rospy</exec_depend>
-
+  <build_export_depend>rqt_gui</build_export_depend>
+  <exec_depend>rqt_gui</exec_depend>
+  <build_export_depend>rqt_gui_py</build_export_depend>
+  <exec_depend>rqt_gui_py</exec_depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
-    <!-- Other tools can request additional information be placed here -->
-
+    <rqt_gui plugin="${prefix}/rqt_plugin.xml"/>
   </export>
 </package>

@@ -6,20 +6,18 @@ devel/
 /venv/
 
 # ide
-/.vscode/
+/.vscode/*
+# except recommended extensions
+!/.vscode/extensions.json
 
 # fetched external libs
 # NOTE: these may be removed in the future, tbd
-src/BadgerCommandLibrary
 src/InertialSenseSDK
-src/JoystickLibrary
-src/combinatory_processing
-src/combinatory_input
-src/roswell
 src/sick_scan
 src/wreadinput
 src/wready
 src/wroboclaw
+src/wrosout
 src/wresponsecontrol
 
 # external lib destination dirs
@@ -29,4 +27,7 @@ src/science/lib
 
 *.pyc
 src/arm/lib
+
+# potential clang excludes
 compile_commands.json
+.cache

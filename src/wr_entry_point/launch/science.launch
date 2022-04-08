@@ -2,16 +2,16 @@
 <launch>
   <env name="WROVER_MODE" value="SCIENCE"/>
 
-  <include file="$(find wr_entry_point)/launch/comp/init.launch"/>
+  <include file="$(find wr_entry_point)/launch/comp/comp_init.launch"/>
   
-  <include file="$(find wr_entry_point)/launch/comp/proprioception.launch"/>
+  <include file="$(find wr_entry_point)/launch/comp/comp_proprioception.launch"/>
 
-  <include file="$(find wr_entry_point)/launch/comp/roboclaw.launch"/>
+  <include file="$(find wr_entry_point)/launch/comp/comp_roboclaw.launch"/>
   
-  <include file="$(find wr_entry_point)/launch/comp/ds_control.launch"/>
-  <include file="$(find wr_entry_point)/launch/comp/ds_teleop.launch"/>
+  <include file="$(find wr_entry_point)/launch/comp/comp_ds_control.launch"/>
+  <include file="$(find wr_entry_point)/launch/comp/comp_ds_teleop.launch"/>
   
-  <include file="$(find wr_entry_point)/launch/comp/ui.launch"/>
+  <include file="$(find wr_entry_point)/launch/comp/comp_ui.launch"/>
   
-  <!-- TODO: science assembly control system -->
+  <include file="$(find wr_entry_point)/launch/comp/comp_science.launch"/>
 </launch>

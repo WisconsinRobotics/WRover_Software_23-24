@@ -1,0 +1,7 @@
+<!-- Launches the nodes that provide operator control over the arm and manipulator. -->
+<launch>
+  <include file="$(find wr_hci_hid)/launch/teleop_science.launch"/>
+  <!-- TODO: science logic -->
+  <!-- TODO: science control systems -->
+  <!-- TODO: science drivers -->
+</launch>

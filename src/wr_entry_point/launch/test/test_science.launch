@@ -1,0 +1,12 @@
+<!-- Test robot configuration that runs only the science assembly. -->
+<launch>
+  <env name="WROVER_MODE" value="TEST"/>
+
+  <include file="$(find wr_entry_point)/launch/comp/comp_init.launch"/>
+
+  <include file="$(find wr_entry_point)/launch/comp/comp_roboclaw.launch"/>
+  
+  <include file="$(find wr_entry_point)/launch/comp/comp_ui.launch"/>
+  
+  <include file="$(find wr_entry_point)/launch/comp/comp_science.launch"/>
+</launch>
