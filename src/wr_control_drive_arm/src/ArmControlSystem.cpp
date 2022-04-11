@@ -15,6 +15,8 @@
 #include <algorithm>
 #include <csignal>
 #include <string>
+#include <array>
+#include <memory>
 #include <std_srvs/Trigger.h>
 #include "SimpleJoint.hpp"
 #include "DifferentialJoint.hpp"
@@ -23,16 +25,23 @@
 using XmlRpc::XmlRpcValue;
 
 /**
+ * @brief Refresh rate of ros::Rate
+ */
+const float CLOCK_RATE = 2;
+
+/**
  * @brief Defines space for all ArmMotor references
  */
 const int numMotors = 6;
-ArmMotor *motors[numMotors];
+std::array<std::unique_ptr<ArmMotor>, numMotors> motors;
+// ArmMotor *motors[numMotors];
 
 /**
  * @brief Defines space for all Joint references
  */
 const int numJoints = 5;
-AbstractJoint *joints[numJoints];
+std::array<std::unique_ptr<AbstractJoint>, numJoints> joints;
+// AbstractJoint *joints[numJoints];
 /**
  * @brief The Joint State Publisher for MoveIt
  */
@@ -115,7 +124,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
     // Track whether or not the current position is done
     bool hasPositionFinished = false;
     // Keep max loop rate at 50 Hz
-    ros::Rate loop(200);
+    ros::Rate loop(CLOCK_RATE);
 
     // While the current position is not complete yet...
     while(!hasPositionFinished){
@@ -132,6 +141,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
       AbstractJoint *joint;
       // For each joint specified in the currTargetPosition...
 
+      // TODO: revise later
       for(int j = 0; j < sizeof(joints); j += sizeof(joints[jointIndex-1])){
 
         joint = joints[jointIndex];
@@ -178,7 +188,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
   //When all positions have been reached, set the current task as succeeded
 
   for(int i = 0; i < numMotors; i++){
-    motors[i]->setPower(0.f);
+    motors.at(i)->setPower(0.0F);
   }
   
   as->setSucceeded();
@@ -193,8 +203,8 @@ void publish(const ros::TimerEvent &event){
   sensor_msgs::JointState js_msg;
 
   for (int i = 0; i < numMotors; i++){
-    names.push_back(motors[i]->getMotorName());
-    positions.push_back(motors[i]->getRads());
+    names.push_back(motors.at(i)->getMotorName());
+    positions.push_back(motors.at(i)->getRads());
   }
 
   positions[4] = positions[5] + positions[4] / 2;
@@ -225,7 +235,7 @@ int main(int argc, char** argv)
   pn.getParam("encoder_parameters", encParams);
 
   // Initialize all motors with their MoveIt name, WRoboclaw initialization, and reference to the current node
-  motors[0] = new ArmMotor("elbow", 1, 0, static_cast<int>(encParams[0]["counts_per_rotation"]), static_cast<int>(encParams[0]["offset"]), n);
+  motors.at(0) = new ArmMotor("elbow", 1, 0, static_cast<int>(encParams[0]["counts_per_rotation"]), static_cast<int>(encParams[0]["offset"]), n);
   motors[1] = new ArmMotor("forearm_roll", 1, 1, static_cast<int>(encParams[1]["counts_per_rotation"]), static_cast<int>(encParams[1]["offset"]), n);
   motors[2] = new ArmMotor("shoulder", 0, 1, static_cast<int>(encParams[2]["counts_per_rotation"]), static_cast<int>(encParams[2]["offset"]), n);
   motors[3] = new ArmMotor("turntable", 0, 0, static_cast<int>(encParams[3]["counts_per_rotation"]), static_cast<int>(encParams[3]["offset"]), n);
@@ -234,7 +244,7 @@ int main(int argc, char** argv)
   std::cout << "init motors" << std::endl;
 
   // Initialize all Joints
-  joints[0] = new SimpleJoint(motors[0], &n);
+  joints.at(0) = new SimpleJoint(motors[0], &n);
   joints[1] = new SimpleJoint(motors[1], &n);
   joints[2] = new SimpleJoint(motors[2], &n);
   joints[3] = new SimpleJoint(motors[3], &n);
