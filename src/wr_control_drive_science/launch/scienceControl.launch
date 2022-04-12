@@ -1,5 +1,0 @@
-<launch>
-    <node name="Science Teleop Control" pkg="wr_control_drive_science" type="WRScienceControl" output="screen">
-        <rosparam file="$(find wrover_software)/wr_control_drive_science/config/scienceControl.yaml"/>
-    </node>
-</launch>

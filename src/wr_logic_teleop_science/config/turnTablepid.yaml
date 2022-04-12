@@ -1,8 +1,8 @@
 rate: 50
 controllers:
-  - setpointTopic: "testSetpointTopic0"
-    feedbackTopic: "testFeedbackTopic0"
-    outputTopic: "testOutputTopic0"
+  - setpointTopic: "/logic/science/turnTable"
+    feedback: "pid/turnTable"
+    outputTopic: "pid/turnTablePow"
     P: 0
     I: 0
     D: 0

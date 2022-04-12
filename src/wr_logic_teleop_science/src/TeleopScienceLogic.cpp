@@ -1,16 +1,23 @@
 #include "ros/ros.h"
 #include "std_msgs/Float32.h"
 #include "std_msgs/Bool.h"
+#include "std_msgs/UInt32.h"
+#include <array>
 
 constexpr std::uint32_t MESSAGE_CACHE_SIZE = 10;
+constexpr std::uint32_t TURNTABLE_POSITIONS = 4;
 
 int main(int argc, char** argv) {
     ros::init(argc, argv, "Science Teleop Logic");
 
     ros::NodeHandle n;
-    
+    std::array<uint32_t, TURNTABLE_POSITIONS> x;
+    bool canListenL = true;
+    bool canListenR = true;
+    int setpoint = 0;
+     
     auto screwLiftMsg = n.advertise<std_msgs::Float32>("/logic/science/screwLift", MESSAGE_CACHE_SIZE);
-    auto turnTableMsg = n.advertise<std_msgs::Float32>("/logic/science/turnTableL", MESSAGE_CACHE_SIZE);
+    auto turnTableMsg = n.advertise<std_msgs::UInt32>("/logic/science/turnTable", MESSAGE_CACHE_SIZE);
     auto linearActuatorMsg = n.advertise<std_msgs::Float32>("/logic/science/linearActuactor", MESSAGE_CACHE_SIZE);
     auto clawMsg = n.advertise<std_msgs::Float32>("/logic/science/claw", MESSAGE_CACHE_SIZE);
 
@@ -21,17 +28,33 @@ int main(int argc, char** argv) {
                 }
     ));
     auto turnTableControlL = n.subscribe("/hci/science/gamepad/axis/shoulder_l", MESSAGE_CACHE_SIZE,
-            static_cast<boost::function<void(const std_msgs::Float32::ConstPtr&)>>(
-                [&turnTableMsg](std_msgs::Bool::ConstPtr& msg) {
-                    turnTableMsg.publish(msg);
+            static_cast<boost::function<void(const std_msgs::Bool::ConstPtr&)>>(
+                [&turnTableMsg, &x, &canListenL, &setpoint](std_msgs::Bool::ConstPtr& msg) {
+                    if(msg->data) {
+                        if(canListenL) {
+                            setpoint = (setpoint + TURNTABLE_POSITIONS - 1) % TURNTABLE_POSITIONS;
+                            turnTableMsg.publish(x.at(setpoint));
+                            canListenL = false;
+                        }
+                    } else {
+                    canListenL = true;
+                    }
                 }
     ));
     auto turnTableControlR = n.subscribe("/hci/science/gamepad/axis/shoulder_r", MESSAGE_CACHE_SIZE,
-            static_cast<boost::function<void(const std_msgs::Float32::ConstPtr&)>>(
-                [&turnTableMsg](std_msgs::Bool::ConstPtr& msg) {
-                    turnTableMsg.publish(msg);
+            static_cast<boost::function<void(const std_msgs::Bool::ConstPtr&)>>(
+                [&turnTableMsg, &x, &canListenR, &setpoint](std_msgs::Bool::ConstPtr& msg) {
+                    if(msg->data) {
+                        if(canListenR) {
+                            setpoint = (setpoint + TURNTABLE_POSITIONS + 1) % TURNTABLE_POSITIONS;
+                            turnTableMsg.publish(x.at(setpoint));
+                            canListenR = false;
+                        }
+                    } else {
+                    canListenR = true;
+                    }
                 }
-    ));
+    )); 
     auto linearActuactorControl = n.subscribe("hci/science/gamepad/axis/stick_left_y", MESSAGE_CACHE_SIZE,
             static_cast<boost::function<void(const std_msgs::Float32::ConstPtr&)>>(
                 [&linearActuatorMsg](std_msgs::Float32::ConstPtr& msg) {
