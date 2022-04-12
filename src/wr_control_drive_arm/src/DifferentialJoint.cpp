@@ -26,21 +26,21 @@ DifferentialJoint::DifferentialJoint(std::unique_ptr<ArmMotor> leftMotor, std::u
     this->rollFeedbackPublisher = n.advertise<std_msgs::Float64>(rollTopicName + "/feedback", MESSAGE_CACHE_SIZE);
 }
 
-void DifferentialJoint::getJointPositions(vector<double> &motorPositions, vector<double> &target){
+void DifferentialJoint::getJointPositions(const vector<double> &motorPositions, vector<double> &target){
     // vector<double> positions;
     // target->reserve(2);
     
     double pitch = motorPositions.at(0) * MOTOR_TO_JOINT_MATRIX.at(0).at(0) + motorPositions.at(1) * MOTOR_TO_JOINT_MATRIX.at(0).at(1);
     double roll = motorPositions.at(0) * MOTOR_TO_JOINT_MATRIX.at(1).at(0) + motorPositions.at(1) * MOTOR_TO_JOINT_MATRIX.at(1).at(1);
 
-    //TODO: Why not return a new vector?  Wouldn't this constant resizing be more inefficient than just making/returning a new vector via copy ellision
+    //TODO: Why not return a new vector?  Wouldn't this constant resizing be more inefficient than just making/returning a new vector via copy ellision?
     target.push_back(pitch);
     target.push_back(roll);
 
     // return positions;
 }
 
-void DifferentialJoint::getMotorPositions(vector<double> &jointPositions, vector<double> &target){
+void DifferentialJoint::getMotorPositions(const vector<double> &jointPositions, vector<double> &target){
     
     // std::unique_ptr<vector<double>> positions = std::make_unique<vector<double>>(2);
     // target->reserve(2);
@@ -55,7 +55,7 @@ void DifferentialJoint::getMotorPositions(vector<double> &jointPositions, vector
     // return std::move(positions);
 }
 
-void DifferentialJoint::getMotorVelocities(vector<double> &jointPositions, vector<double> &target){
+void DifferentialJoint::getMotorVelocities(const vector<double> &jointPositions, vector<double> &target){
     return getMotorPositions(jointPositions, target); //deritivate of linear transformation is itself
 }
 
@@ -70,6 +70,7 @@ void DifferentialJoint::handoffRollOutput(const std_msgs::Float64::ConstPtr &msg
     handOffAllOutput();
 }
 
+// TODO: Do these ouputs need to be synced?  We're just referring to the motors individually, maybe we can transform and send the data right away
 void DifferentialJoint::handOffAllOutput(){
     if(!this->hasNewPitchOutput || !this->hasNewRollOutput){ return; }
 
