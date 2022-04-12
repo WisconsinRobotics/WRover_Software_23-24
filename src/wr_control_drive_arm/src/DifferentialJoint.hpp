@@ -2,16 +2,17 @@
 
 class DifferentialJoint : public AbstractJoint {
     public:
-        ~DifferentialJoint();
-        DifferentialJoint(std::unique_ptr<ArmMotor> leftMotor, std::unique_ptr<ArmMotor> rightMotor, ros::NodeHandle &n);
+        DifferentialJoint(std::unique_ptr<ArmMotor> leftMotor, std::unique_ptr<ArmMotor> rightMotor, ros::NodeHandle &n,
+                          const std::string &pitchTopicName, const std::string &rollTopicName,
+                          const std::string &leftTopicName, const std::string &rightTopicName);
 
         void getMotorPositions(vector<double> &jointPositions, vector<double> &target);
         void getMotorVelocities(vector<double> &jointVelocities, vector<double> &target);
         void getJointPositions(vector<double> &motorPositions, vector<double> &target);
 
-        void configVelocityHandshake(std::string pitchTopicName, std::string rollTopicName, std::string leftTopicName, std::string rightTopicName);
-
     private:
+        static constexpr uint32_t DEGREES_OF_FREEDOM = 2;
+        static constexpr uint32_t MESSAGE_CACHE_SIZE = 10;
         // linear transformations works for position and velocity
         // [0.5 0.5]   [left motor ]    [pitch]
         // [ -1  1 ] * [right motor]  = [roll ]
