@@ -1,0 +1,14 @@
+{
+    "clang-tidy.checks": [
+        "bugprone-*",
+        "performance-*",
+        "readability-*",
+        "modernize-*",
+        "hicpp-*",
+        "cppcoreguidelines-*",
+        "clang-analyzer-*",
+        "-readability-braces-around-statements",
+        "-hicpp-braces-around-statements",
+        "-cppcoreguidelines-non-private-member-variables-in-classes"
+    ]
+}
