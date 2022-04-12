@@ -9,7 +9,9 @@
 /// Allow for referencing the UInt32 message type easier
 typedef std_msgs::UInt32::ConstPtr Std_UInt32;
 typedef std_msgs::Float64::ConstPtr Std_Float64;
-#define Std_Bool std_msgs::Bool::ConstPtr&
+typedef std_msgs::Bool::ConstPtr Std_Bool;
+
+constexpr float STALL_THRESHOLD_TIME = 0.5;
 
 double ArmMotor::corrMod(double i, double j){
     // Stem i%j by j, which in modular arithmetic is the same as adding 0.
@@ -44,8 +46,8 @@ void ArmMotor::redirectPowerOutput(const Std_Float64 &msg){
     this->setPower(msg->data);
 }
 
-void ArmMotor::storeStallStatus(const Std_Bool msg) {
-    this->isStall = msg->data;
+void ArmMotor::storeStallStatus(const Std_Bool &msg) {
+    this->isStall = static_cast<bool>(msg->data);
 }
 
 /// controllerID is constrained between [0,3]
@@ -127,8 +129,8 @@ void ArmMotor::setPower(float power){
 bool ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block){
     // Checks for stall
     if (this->isStall) {
-        if ((ros::Time::now() - begin).toSec() >= 0.5) {
-            this->setPower(0.0f);
+        if ((ros::Time::now() - begin).toSec() >= STALL_THRESHOLD_TIME) {
+            this->setPower(0.0F);
             this->currState = MotorState::STOP;
             return false;
         }

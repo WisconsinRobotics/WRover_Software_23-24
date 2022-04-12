@@ -62,7 +62,7 @@ class ArmMotor{
         /// The most recent power message sent
         std_msgs::Int16 powerMsg;
         /// If the motor is stalling or not
-        volatile bool isStall;
+        volatile bool isStall = false;
         /// The ROS Subscriber that reads stall status data
         ros::Subscriber stallRead;
         /// The time when the motor began stalling
