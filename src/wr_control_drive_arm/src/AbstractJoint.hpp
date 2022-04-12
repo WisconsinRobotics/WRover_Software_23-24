@@ -7,12 +7,12 @@ using std::vector;
 class AbstractJoint {
 public:
     struct MotorHandler{
-        const std::unique_ptr<ArmMotor> motor;
+        std::unique_ptr<ArmMotor> motor;
         double position;
         double velocity;
         std::string jointTopicName;
         std::string motorTopicName;
-        bool newVelocities;
+        bool newVelocity;
     };
 
     AbstractJoint(ros::NodeHandle &n, int numMotors);
@@ -22,13 +22,13 @@ public:
     virtual void getMotorVelocities(vector<double> &joinVelocities, vector<double> &target) = 0;
     virtual void getJointPositions(vector<double> &motorPositions, vector<double> &target) = 0;
 
-    unsigned int getDegreesOfFreedom() const;
+    auto getDegreesOfFreedom() const -> unsigned int;
     
-    const std::unique_ptr<ArmMotor>& getMotor(int motorIndex) const;
+    auto getMotor(int motorIndex) const -> const std::unique_ptr<ArmMotor>&;
 
     void configSetpoint(int degreeIndex, double position, double velocity);
 
-    bool exectute();
+    auto exectute() -> bool;
 
 protected:
     vector<MotorHandler> motors;

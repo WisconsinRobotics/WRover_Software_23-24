@@ -9,9 +9,9 @@
 #include <memory>
 using std::vector;
 
-DifferentialJoint::DifferentialJoint(ArmMotor* leftMotor, ArmMotor* rightMotor, ros::NodeHandle* n) : AbstractJoint(n, 2) {
-    this->motors.push_back(leftMotor);
-    this->motors.push_back(rightMotor);
+DifferentialJoint::DifferentialJoint(std::unique_ptr<ArmMotor> leftMotor, std::unique_ptr<ArmMotor> rightMotor, ros::NodeHandle &n) : AbstractJoint(n, 2) {
+    this->motors.at(0) = {std::move(leftMotor), 0, 0, "", "", false};
+    this->motors.at(1) = {std::move(rightMotor), 0, 0, "", "", false};
 }
 
 void DifferentialJoint::getJointPositions(vector<double> &motorPositions, vector<double> &target){

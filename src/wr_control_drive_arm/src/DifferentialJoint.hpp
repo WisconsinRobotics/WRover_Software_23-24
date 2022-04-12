@@ -3,7 +3,7 @@
 class DifferentialJoint : public AbstractJoint {
     public:
         ~DifferentialJoint();
-        DifferentialJoint(ArmMotor *leftMotor, ArmMotor *rightMotor, ros::NodeHandle *n);
+        DifferentialJoint(std::unique_ptr<ArmMotor> leftMotor, std::unique_ptr<ArmMotor> rightMotor, ros::NodeHandle &n);
 
         void getMotorPositions(vector<double> &jointPositions, vector<double> &target);
         void getMotorVelocities(vector<double> &jointVelocities, vector<double> &target);

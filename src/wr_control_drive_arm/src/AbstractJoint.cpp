@@ -10,11 +10,11 @@ AbstractJoint::AbstractJoint(ros::NodeHandle &n, int numMotors){
     this->motors.resize(numMotors);
 }
 
-unsigned int AbstractJoint::getDegreesOfFreedom() const{
+auto AbstractJoint::getDegreesOfFreedom() const -> unsigned int{
     return this->motors.size();
 }
 
-const std::unique_ptr<ArmMotor>& AbstractJoint::getMotor(int motorIndex) const{
+auto AbstractJoint::getMotor(int motorIndex) const -> const std::unique_ptr<ArmMotor>&{
     return this->motors.at(motorIndex).motor;
 }
 
@@ -25,7 +25,7 @@ void AbstractJoint::configSetpoint(int degreeIndex, double position, double velo
 }
 
 
-bool AbstractJoint::exectute(){
+auto AbstractJoint::exectute() -> bool{
     for(auto &motorHandle : motors){
         if (!motorHandle.motor->runToTarget(motorHandle.position, 0)) 
             return false;
