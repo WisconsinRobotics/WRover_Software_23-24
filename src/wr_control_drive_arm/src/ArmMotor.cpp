@@ -53,7 +53,7 @@ void ArmMotor::storeStallStatus(const Std_Bool &msg) {
 /// controllerID is constrained between [0,3]
 /// motorID is constrained between [0,1]
 ArmMotor::ArmMotor(
-    const std::string &motorName,
+    const std::string &motor_name,
     unsigned int controllerID,
     unsigned int motorID,
     int64_t countsPerRotation,
@@ -62,7 +62,7 @@ ArmMotor::ArmMotor(
 ) : COUNTS_PER_ROTATION{countsPerRotation}, 
     ENCODER_BOUNDS{0, std::abs(countsPerRotation)}, 
     ENCODER_OFFSET{offset}, 
-    motorName{motorName}, 
+    motorName{motor_name}, 
     controllerID{controllerID}, 
     motorID{motorID}, 
     currState{MotorState::STOP},
