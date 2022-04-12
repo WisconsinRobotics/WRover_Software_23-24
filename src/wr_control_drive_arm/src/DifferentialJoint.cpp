@@ -46,7 +46,7 @@ void DifferentialJoint::getMotorPositions(const vector<double> &jointPositions, 
     // target->reserve(2);
 
     double left = jointPositions.at(0) * JOINT_TO_MOTOR_MATRIX.at(0).at(0) + jointPositions.at(1) * JOINT_TO_MOTOR_MATRIX.at(0).at(1);
-    double right = jointPositions.at(0) * JOINT_TO_MOTOR_MATRIX.at(1).at(0) + jointPositions.at(1)* JOINT_TO_MOTOR_MATRIX.at(1).at(1);
+    double right = jointPositions.at(0) * JOINT_TO_MOTOR_MATRIX.at(1).at(0) + jointPositions.at(1) * JOINT_TO_MOTOR_MATRIX.at(1).at(1);
 
     // TODO: See line 36
     target.push_back(left);
