@@ -1,5 +1,3 @@
-#ifndef SIMPLE_JOINT_GUARD
-#define SIMPLE_JOINT_GUARD
 /**
  * @file AbstractJoint.cpp
  * @author Nichols Underwood
@@ -9,11 +7,11 @@
 
 #include "SimpleJoint.hpp"
 
-SimpleJoint::SimpleJoint(ArmMotor* motor, ros::NodeHandle *n) : AbstractJoint(n, 1) {
-    this->motors.push_back(motor);
+SimpleJoint::SimpleJoint(std::unique_ptr<ArmMotor> motor, ros::NodeHandle &n) : AbstractJoint(n, 1) {
+    this->motors.at(0) = MotorHandler{std::move(motor), 0, 0, "", "", false};
 }
 
-void SimpleJoint::getJointPositions(vector<double> &motorPositions, vector<double> &target){
+void SimpleJoint::getJointPositions(const vector<double> &motorPositions, vector<double> &target){
     // vector<double> positions = *(new vector<double>()); // makes the red lines go away
     
     // target->reserve(1);
@@ -22,7 +20,7 @@ void SimpleJoint::getJointPositions(vector<double> &motorPositions, vector<doubl
     // return positions;
 }
 
-void SimpleJoint::getMotorPositions(vector<double> &jointPositions, vector<double> &target){
+void SimpleJoint::getMotorPositions(const vector<double> &jointPositions, vector<double> &target){
   
     target.reserve(1);
     double position = jointPositions[0];
@@ -30,19 +28,10 @@ void SimpleJoint::getMotorPositions(vector<double> &jointPositions, vector<doubl
     // return positions;
 }
 
-void SimpleJoint::getMotorVelocities(vector<double> &jointPositions, vector<double> &target){
+void SimpleJoint::getMotorVelocities(const vector<double> &jointPositions, vector<double> &target){
     
     // target->reserve(1);
     target.push_back(jointPositions[0]);
 
     // return setpoints;
 }
-
-void SimpleJoint::handoffOutput(const std_msgs::Float64 msg){
-    this->motorOutputPublisher.publish(msg);
-}
-
-void SimpleJoint::handoffFeedback(const std_msgs::Float64 msg){
-    this->jointFeedbackPublisher.publish(msg);
-}
-#endif
