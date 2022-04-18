@@ -11,27 +11,14 @@ SimpleJoint::SimpleJoint(std::unique_ptr<ArmMotor> motor, ros::NodeHandle &n) : 
     this->motors.at(0) = MotorHandler{std::move(motor), 0, 0, "", "", false};
 }
 
-void SimpleJoint::getJointPositions(const vector<double> &motorPositions, vector<double> &target){
-    // vector<double> positions = *(new vector<double>()); // makes the red lines go away
-    
-    // target->reserve(1);
-    target.push_back(motorPositions[0]);
-
-    // return positions;
+auto SimpleJoint::getMotorPositions(const vector<double> &jointPositions) -> vector<double> {
+    return {jointPositions[0]};
 }
 
-void SimpleJoint::getMotorPositions(const vector<double> &jointPositions, vector<double> &target){
-  
-    target.reserve(1);
-    double position = jointPositions[0];
-    target.push_back(position);
-    // return positions;
+auto SimpleJoint::getMotorVelocities(const vector<double> &jointVelocities) -> vector<double> {
+    return {jointVelocities[0]};
 }
 
-void SimpleJoint::getMotorVelocities(const vector<double> &jointPositions, vector<double> &target){
-    
-    // target->reserve(1);
-    target.push_back(jointPositions[0]);
-
-    // return setpoints;
+auto SimpleJoint::getJointPositions(const vector<double> &jointPositions) -> vector<double> {
+    return {jointPositions[0]};
 }
