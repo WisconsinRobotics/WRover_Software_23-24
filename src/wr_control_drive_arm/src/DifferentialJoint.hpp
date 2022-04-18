@@ -6,9 +6,9 @@ class DifferentialJoint : public AbstractJoint {
                           const std::string &pitchTopicName, const std::string &rollTopicName,
                           const std::string &leftTopicName, const std::string &rightTopicName);
 
-        void getMotorPositions(const vector<double> &jointPositions, vector<double> &target) override;
-        void getMotorVelocities(const vector<double> &jointVelocities, vector<double> &target) override;
-        void getJointPositions(const vector<double> &motorPositions, vector<double> &target) override;
+        auto getMotorPositions(const vector<double> &jointPositions) -> vector<double> override;
+        auto getMotorVelocities(const vector<double> &jointVelocities) -> vector<double> override;
+        auto getJointPositions(const vector<double> &motorPositions) -> vector<double> override;
 
     private:
         static constexpr uint32_t DEGREES_OF_FREEDOM = 2;

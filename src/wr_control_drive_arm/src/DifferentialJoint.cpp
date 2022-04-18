@@ -26,7 +26,7 @@ DifferentialJoint::DifferentialJoint(std::unique_ptr<ArmMotor> leftMotor, std::u
     this->rollFeedbackPublisher = n.advertise<std_msgs::Float64>(rollTopicName + "/feedback", MESSAGE_CACHE_SIZE);
 }
 
-void DifferentialJoint::getJointPositions(const vector<double> &motorPositions, vector<double> &target){
+auto DifferentialJoint::getJointPositions(const vector<double> &motorPositions) -> vector<double>{
     // vector<double> positions;
     // target->reserve(2);
     
@@ -34,13 +34,12 @@ void DifferentialJoint::getJointPositions(const vector<double> &motorPositions, 
     double roll = motorPositions.at(0) * MOTOR_TO_JOINT_MATRIX.at(1).at(0) + motorPositions.at(1) * MOTOR_TO_JOINT_MATRIX.at(1).at(1);
 
     //TODO: Why not return a new vector?  Wouldn't this constant resizing be more inefficient than just making/returning a new vector via copy ellision?
-    target.push_back(pitch);
-    target.push_back(roll);
+    return {pitch, roll};
 
     // return positions;
 }
 
-void DifferentialJoint::getMotorPositions(const vector<double> &jointPositions, vector<double> &target){
+auto DifferentialJoint::getMotorPositions(const vector<double> &jointPositions) -> vector<double>{
     
     // std::unique_ptr<vector<double>> positions = std::make_unique<vector<double>>(2);
     // target->reserve(2);
@@ -48,15 +47,13 @@ void DifferentialJoint::getMotorPositions(const vector<double> &jointPositions, 
     double left = jointPositions.at(0) * JOINT_TO_MOTOR_MATRIX.at(0).at(0) + jointPositions.at(1) * JOINT_TO_MOTOR_MATRIX.at(0).at(1);
     double right = jointPositions.at(0) * JOINT_TO_MOTOR_MATRIX.at(1).at(0) + jointPositions.at(1) * JOINT_TO_MOTOR_MATRIX.at(1).at(1);
 
-    // TODO: See line 36
-    target.push_back(left);
-    target.push_back(right);
+    return {left, right};
 
     // return std::move(positions);
 }
 
-void DifferentialJoint::getMotorVelocities(const vector<double> &jointPositions, vector<double> &target){
-    return getMotorPositions(jointPositions, target); //deritivate of linear transformation is itself
+auto DifferentialJoint::getMotorVelocities(const vector<double> &jointPositions) -> vector<double>{
+    return getMotorPositions(jointPositions); //deritivate of linear transformation is itself
 }
 
 void DifferentialJoint::handoffPitchOutput(const std_msgs::Float64::ConstPtr &msg){
@@ -79,7 +76,7 @@ void DifferentialJoint::handOffAllOutput(){
     outputs.at(0) = this->cachedPitchOutput;
     outputs.at(1) = this->cachedRollOutput;
     //TODO: Still confused as to the purpose of this family of functions
-    getMotorVelocities(outputs, outputs); 
+    outputs = getMotorVelocities(outputs); 
 
     std_msgs::Float64 msg1;
     std_msgs::Float64 msg2;
@@ -113,7 +110,7 @@ void DifferentialJoint::handOffAllFeedback(){
     vector<double> outputs;
     outputs.at(0) = this->cachedLeftFeedback;
     outputs.at(1) = this->cachedRightFeedback;
-    getMotorVelocities(outputs, outputs); 
+    outputs = getMotorVelocities(outputs); 
 
     std_msgs::Float64 msg1;
     std_msgs::Float64 msg2;
