@@ -18,9 +18,9 @@ public:
     AbstractJoint(ros::NodeHandle &n, int numMotors);
 
     // never used, need to be defined for compiler v-table
-    virtual vector<double> getMotorPositions(const vector<double> &jointPositions) = 0;
-    virtual vector<double> getMotorVelocities(const vector<double> &joinVelocities) = 0;
-    virtual vector<double> getJointPositions(const vector<double> &motorPositions) = 0;
+    virtual auto getMotorPositions(const vector<double> &jointPositions) -> vector<double> = 0;
+    virtual auto getMotorVelocities(const vector<double> &joinVelocities) -> vector<double> = 0;
+    virtual auto getJointPositions(const vector<double> &motorPositions) -> vector<double> = 0;
 
     auto getDegreesOfFreedom() const -> unsigned int;
     
