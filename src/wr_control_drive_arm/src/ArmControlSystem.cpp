@@ -78,27 +78,6 @@ std::atomic_bool IKEnabled{true};
 ros::ServiceClient enableServiceClient;
 
 /**
- * @brief sets a target position and pulls info from motor
- * 
- * @param names a vector with motor joint names
- * @param positions a vector with positions in radians
- * @param target the target radian value
- * @param motor a pointer to the motor
- * @return if the motor has reached its target
- */
-auto configJointSetpoint(const std::unique_ptr<AbstractJoint> &joint, int degreeIndex, double target, float velocity) -> bool{
-	// Each motor should run to its respective target position at a fixed speed
-	// TODO: this speed should be capped/dynamic to reflect the input joint velocity parameters
-	// velMax = abs(*std::max_element(currTargetPosition.velocities.begin(), currTargetPosition.velocities.end(), [](double a, double b) {return abs(a)<abs(b);}));
-	// float currPower = 0.1 * currTargetPosition.velocities[j]/velMax;
-	// currPower = abs(velMax) <= 0.0001 ? 0.1 : currPower;
-  std::cout << "config joint setup: " << degreeIndex << " " << target << std::endl;
-	joint->configSetpoint(degreeIndex, target, 0);
-	// The position has only finished if every motor is STOPped
-	return joint->getMotor(degreeIndex)->getMotorState() == MotorState::STOP;
-}
-
-/**
  * @brief Perform the given action as interpreted as moving the arm joints to specified positions
  * 
  * @param goal The goal state given
@@ -186,7 +165,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
 /**
  * @brief publishes the arm's position
  */
-void publish(const ros::TimerEvent &event){
+void publishJointStates(const ros::TimerEvent &event){
   std::vector<std::string> names;
   std::vector<double> positions;
   sensor_msgs::JointState js_msg;
@@ -253,7 +232,7 @@ auto main(int argc, char** argv) ->int
   server.start();
   std::cout << "server started" << std::endl;
 
-  ros::Timer timer = n.createTimer(ros::Duration(TIMER_CALLBACK_DURATION), publish);
+  ros::Timer timer = n.createTimer(ros::Duration(TIMER_CALLBACK_DURATION), publishJointStates);
 
   enableServiceServer = n.advertiseService("start_IK", 
     static_cast<boost::function<bool(std_srvs::Trigger::Request&, std_srvs::Trigger::Response&)>>(
