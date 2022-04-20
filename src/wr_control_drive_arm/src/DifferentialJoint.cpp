@@ -9,6 +9,9 @@
 #include <memory>
 using std::vector;
 
+constexpr std::array<std::array<double, 2>, 2> DifferentialJoint::MOTOR_TO_JOINT_MATRIX;
+constexpr std::array<std::array<double, 2>, 2> DifferentialJoint::JOINT_TO_MOTOR_MATRIX;
+
 DifferentialJoint::DifferentialJoint(std::unique_ptr<ArmMotor> leftMotor, std::unique_ptr<ArmMotor> rightMotor, ros::NodeHandle &n,
                                      const std::string &pitchTopicName, const std::string &rollTopicName,
                                      const std::string &leftTopicName, const std::string &rightTopicName) 
