@@ -34,6 +34,13 @@
         "package": "ros-noetic-moveit",
         "provider": "apt"
       }
+    },
+    {
+      "name": "moveit-visual-tools",
+      "build": {
+        "package": "ros-noetic-moveit-visual-tools",
+        "provider": "apt"
+      }
     }
   ]
 }
