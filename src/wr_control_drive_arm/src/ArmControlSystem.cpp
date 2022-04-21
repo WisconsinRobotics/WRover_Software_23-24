@@ -177,7 +177,10 @@ void publishJointStates(const ros::TimerEvent &event){
     }
   }
 
-  positions[4] = positions[5] + positions[4] / 2;
+  const auto left = positions.at(4);
+  const auto right = positions.at(5);
+  positions[4] = left + right / 2;
+  positions[5] = left - right;
 
   js_msg.name = names;
   js_msg.position = positions;
