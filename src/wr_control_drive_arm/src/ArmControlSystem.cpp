@@ -32,6 +32,7 @@ constexpr float CLOCK_RATE = 50;
 constexpr double IK_WARN_RATE = 1.0/2;
 
 constexpr double JOINT_SAFETY_MAX_SPEED = 0.3;
+constexpr double JOINT_SAFETY_HOLD_SPEED = 0.15;
 
 /**
  * @brief Nessage cache size of publisher
@@ -107,9 +108,10 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
     int currItr = 0;
     for(const auto &joint : joints){
       for(int i = 0; i < joint->getDegreesOfFreedom(); i++){
-        joint->configSetpoint(i, currTargetPosition.positions[currItr], JOINT_SAFETY_MAX_SPEED*currTargetPosition.velocities[currItr]/VELOCITY_MAX);
+        joint->configSetpoint(i, currTargetPosition.positions[currItr], VELOCITY_MAX == 0.F ? JOINT_SAFETY_HOLD_SPEED : JOINT_SAFETY_MAX_SPEED*currTargetPosition.velocities[currItr]/VELOCITY_MAX);
         currItr++;
       }
+      joint->exectute();
     }
 
     // While the current position is not complete yet...
@@ -152,12 +154,6 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
   }
 
   //When all positions have been reached, set the current task as succeeded
-
-  for(const auto &joint : joints){
-    for(int i = 0; i < joint->getDegreesOfFreedom(); i++){
-      joint->getMotor(i)->setPower(0.F);
-    }
-  }
   
   as->setSucceeded();
 }

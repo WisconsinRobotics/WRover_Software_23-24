@@ -43,7 +43,7 @@ void ArmMotor::storeEncoderVals(const Std_UInt32 &msg){
 
 void ArmMotor::redirectPowerOutput(const Std_Float64 &msg){
     // Set the speed to be the contained data
-    this->setPower(msg->data);
+    if(this->getMotorState() == MotorState::RUN_TO_TARGET) this->setPower(static_cast<float>(msg->data) * this->maxPower, MotorState::RUN_TO_TARGET);
 }
 
 void ArmMotor::storeStallStatus(const Std_Bool &msg) {
@@ -66,6 +66,8 @@ ArmMotor::ArmMotor(
     controllerID{controllerID}, 
     motorID{motorID}, 
     currState{MotorState::STOP},
+    power{0.F},
+    maxPower{0.F},
     encoderVal{static_cast<uint32_t>(offset)} {
     
     // Check validity of WRoboclaw and motor IDs
@@ -114,16 +116,21 @@ auto ArmMotor::getMotorState() const -> MotorState{
     return this->currState;
 }
 
-/// This method auto-publishes the speed command to the WRoboclaws
 void ArmMotor::setPower(float power){
+    this->setPower(power, power == 0.F ? MotorState::STOP : MotorState::MOVING);
+}
+
+/// This method auto-publishes the speed command to the WRoboclaws
+void ArmMotor::setPower(float power, MotorState state){
     // Check the bounds of the parameter
     if(abs(power) > 1) throw std::invalid_argument{std::string{"Power "} + std::to_string(power) + " is not on the interval [-1, 1]"};
 
     // Set up and send the speed message
+    this->power = power;
     this->powerMsg.data = power * INT16_MAX;
     this->speedPub.publish(this->powerMsg);
     // Update the cur.nt motor state based on the power command input
-    this->currState = power == 0.F ? MotorState::STOP : MotorState::MOVING;
+    this->currState = state;
 }
 
 auto ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block) -> bool{
@@ -137,10 +144,11 @@ auto ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block) -> bo
     } else {
         begin = ros::Time::now();
     }
-    
+    this->maxPower = power;
     // If we are not at our target...
     if(!this->hasReachedTarget(targetCounts)){
         // Set the power in the correct direction and continue running to the target
+        this->currState = MotorState::RUN_TO_TARGET;
         std_msgs::Float64 setpointMsg;
         setpointMsg.data = ArmMotor::encToRad(targetCounts);
         this->targetPub.publish(setpointMsg);
@@ -149,18 +157,15 @@ auto ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block) -> bo
         // power = abs(power) * (corrMod(direction, ((long int)this->COUNTS_PER_ROTATION)) < corrMod(-direction, ((long int)this->COUNTS_PER_ROTATION)) ? 1 : -1);
         // this->setPower(power);
 
-        this->currState = MotorState::RUN_TO_TARGET;
     // Otherwise, stop the motor
     } else {
-        this->setPower(0.F);
-        this->currState = MotorState::STOP;
+        this->setPower(0.F, MotorState::RUN_TO_TARGET);
     }
     // If this is a blocking call...
     if(block){
         // Wait until the motor has reached the target, then stop
         while(!this->hasReachedTarget(targetCounts));
-        this->setPower(0.F);
-        this->currState = MotorState::STOP;
+        this->setPower(0.F, MotorState::RUN_TO_TARGET);
     }
     return true;
 }
@@ -184,5 +189,5 @@ auto ArmMotor::getControllerID() const -> unsigned int{
 }
 
 auto ArmMotor::getPower() const -> float{
-    return ((float)this->powerMsg.data)/INT16_MAX;
+    return this->power;
 }

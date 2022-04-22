@@ -42,7 +42,7 @@ class ArmMotor{
         /// zero position of motor
         int64_t const ENCODER_OFFSET;
         /// The current state of the motor
-        MotorState currState;
+        std::atomic<MotorState> currState;
         /// The joint name of the current motor
         std::string motorName;
         /// The ID of the WRoboclaw controller
@@ -69,6 +69,10 @@ class ArmMotor{
         ros::Subscriber stallRead;
         /// The time when the motor began stalling
         ros::Time begin;
+        /// Motor power
+        float power;
+        /// Maximum absolute motor power in RUN_TO_POSITION mode.
+        std::atomic<float> maxPower;
 
         /**
          * @brief A static conversion from radians to encoder counts
@@ -106,6 +110,8 @@ class ArmMotor{
          * @param msg The stall status of the current motor
          */
         void storeStallStatus(const std_msgs::Bool::ConstPtr& msg);
+
+        void setPower(float power, MotorState state);
 
         /**
          * @brief Performs Euclidean correct modulus between two inputs of the same type

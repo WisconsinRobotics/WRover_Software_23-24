@@ -30,6 +30,8 @@ public:
 
     auto exectute() -> bool;
 
+    void stopJoint();
+
 protected:
     vector<MotorHandler> motors;
 };

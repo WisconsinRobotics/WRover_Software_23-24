@@ -27,8 +27,14 @@ void AbstractJoint::configSetpoint(int degreeIndex, double position, double velo
 
 auto AbstractJoint::exectute() -> bool{
     for(auto &motorHandle : motors){
-        if (!motorHandle.motor->runToTarget(motorHandle.position, 0)) 
+        if (!motorHandle.motor->runToTarget(motorHandle.position, motorHandle.velocity)); 
             return false;
     }
     return true;
+}
+
+void AbstractJoint::stopJoint(){
+    for(auto &motorHandle : motors){
+        motorHandle.motor->setPower(0.F);
+    }
 }
