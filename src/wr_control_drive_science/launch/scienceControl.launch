@@ -1,0 +1,4 @@
+<launch>
+    <node name="Science Control" pkg="wr_control_drive_science" type="WRScienceControl" output="screen">
+    </node>
+</launch>

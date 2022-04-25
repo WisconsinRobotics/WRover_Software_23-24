@@ -104,7 +104,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES wr_control_drive_science
-#  CATKIN_DEPENDS roscpp rospy
+   CATKIN_DEPENDS roscpp rospy
 #  DEPENDS system_lib
 )
 
@@ -132,7 +132,9 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/wr_control_drive_science_node.cpp)
+add_executable(ScienceControl src/wr_control_drive_science_node.cpp)
+target_link_libraries(ScienceControl ${catkin_LIBRARIES})
+add_dependencies(ScienceControl ${catkin_EXPORTED_TARGETS})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the

@@ -5,13 +5,14 @@
 #include <array>
 
 constexpr std::uint32_t MESSAGE_CACHE_SIZE = 10;
-constexpr std::uint32_t TURNTABLE_POSITIONS = 4;
 
 int main(int argc, char** argv) {
     ros::init(argc, argv, "Science Teleop Logic");
 
     ros::NodeHandle n;
-    std::array<uint32_t, TURNTABLE_POSITIONS> x;
+    ros::NodeHandle np{"~"};
+    std::vector<int> turnTablePositions;
+    np.getParam("turnTablePositions", turnTablePositions);
     bool canListenL = true;
     bool canListenR = true;
     int setpoint = 0;
@@ -29,11 +30,11 @@ int main(int argc, char** argv) {
     ));
     auto turnTableControlL = n.subscribe("/hci/science/gamepad/axis/shoulder_l", MESSAGE_CACHE_SIZE,
             static_cast<boost::function<void(const std_msgs::Bool::ConstPtr&)>>(
-                [&turnTableMsg, &x, &canListenL, &setpoint](std_msgs::Bool::ConstPtr& msg) {
+                [&turnTableMsg, &turnTablePositions, &canListenL, &setpoint](std_msgs::Bool::ConstPtr& msg) {
                     if(msg->data) {
                         if(canListenL) {
-                            setpoint = (setpoint + TURNTABLE_POSITIONS - 1) % TURNTABLE_POSITIONS;
-                            turnTableMsg.publish(x.at(setpoint));
+                            setpoint = (setpoint + turnTablePositions.size() - 1) % turnTablePositions.size();
+                            turnTableMsg.publish(turnTablePositions.at(setpoint));
                             canListenL = false;
                         }
                     } else {
@@ -43,11 +44,11 @@ int main(int argc, char** argv) {
     ));
     auto turnTableControlR = n.subscribe("/hci/science/gamepad/axis/shoulder_r", MESSAGE_CACHE_SIZE,
             static_cast<boost::function<void(const std_msgs::Bool::ConstPtr&)>>(
-                [&turnTableMsg, &x, &canListenR, &setpoint](std_msgs::Bool::ConstPtr& msg) {
+                [&turnTableMsg, &turnTablePositions, &canListenR, &setpoint](std_msgs::Bool::ConstPtr& msg) {
                     if(msg->data) {
                         if(canListenR) {
-                            setpoint = (setpoint + TURNTABLE_POSITIONS + 1) % TURNTABLE_POSITIONS;
-                            turnTableMsg.publish(x.at(setpoint));
+                            setpoint = (setpoint + turnTablePositions.size() + 1) % turnTablePositions.size();
+                            turnTableMsg.publish(turnTablePositions.at(setpoint));
                             canListenR = false;
                         }
                     } else {
