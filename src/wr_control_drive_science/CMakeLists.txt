@@ -132,7 +132,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(ScienceControl TeleopScienceControl.cpp)
+add_executable(ScienceControl src/TeleopScienceControl.cpp)
 target_link_libraries(ScienceControl ${catkin_LIBRARIES})
 add_dependencies(ScienceControl ${catkin_EXPORTED_TARGETS})
 
