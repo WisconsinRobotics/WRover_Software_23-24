@@ -34,7 +34,9 @@ int main(int argc, char** argv) {
                     if(msg->data) {
                         if(canListenL) {
                             setpoint = (setpoint + turnTablePositions.size() - 1) % turnTablePositions.size();
-                            turnTableMsg.publish(turnTablePositions.at(setpoint));
+                            std_msgs::UInt32 x;
+                            x.data = turnTablePositions.at(setpoint);
+                            turnTableMsg.publish(x);
                             canListenL = false;
                         }
                     } else {
@@ -48,7 +50,9 @@ int main(int argc, char** argv) {
                     if(msg->data) {
                         if(canListenR) {
                             setpoint = (setpoint + turnTablePositions.size() + 1) % turnTablePositions.size();
-                            turnTableMsg.publish(turnTablePositions.at(setpoint));
+                            std_msgs::UInt32 x;
+                            x.data = turnTablePositions.at(setpoint);
+                            turnTableMsg.publish(x);
                             canListenR = false;
                         }
                     } else {
