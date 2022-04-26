@@ -19,21 +19,21 @@ int main(int argc, char** argv) {
 
     ros::Subscriber encoderSub = n.subscribe("/hsi/roboclaw/aux0/enc/right", MESSAGE_CACHE_SIZE,
             static_cast<boost::function<void(const std_msgs::UInt32::ConstPtr&)>>(
-                [&turnTableEncoder](std_msgs::UInt32::ConstPtr& msg) {
+                [&turnTableEncoder](const std_msgs::UInt32::ConstPtr& msg) {
                     _Float64 ans = msg->data;
                     turnTableEncoder.publish(ans);
                 }
     ));
     ros::Subscriber screwLiftSub = n.subscribe("logic/science/screwLift", MESSAGE_CACHE_SIZE,
             static_cast<boost::function<void(const std_msgs::Float32::ConstPtr&)>>(
-                [&screwLiftPow](std_msgs::Float32::ConstPtr& msg) {
+                [&screwLiftPow](const std_msgs::Float32::ConstPtr& msg) {
                     int16_t ans = msg->data * INT16_MAX;
                     screwLiftPow.publish(ans);
                 }
     ));
     ros::Subscriber turnTableSub = n.subscribe("pid/turnTablePow", MESSAGE_CACHE_SIZE,
             static_cast<boost::function<void(const std_msgs::Float64::ConstPtr&)>>(
-                [&turnTablePow](std_msgs::Float64::ConstPtr& msg) {
+                [&turnTablePow](const std_msgs::Float64::ConstPtr& msg) {
                     int16_t ans = msg->data * INT16_MAX;
                     turnTablePow.publish(ans);
                 }
@@ -41,14 +41,14 @@ int main(int argc, char** argv) {
             
     ros::Subscriber linearActuatorSub = n.subscribe("logic/science/linearActuator", MESSAGE_CACHE_SIZE,
             static_cast<boost::function<void(const std_msgs::Float32::ConstPtr&)>>(
-                [&linearActuatorPow](std_msgs::Float32::ConstPtr& msg) {
+                [&linearActuatorPow](const std_msgs::Float32::ConstPtr& msg) {
                     int16_t ans = msg->data * INT16_MAX;
                     linearActuatorPow.publish(ans);
                 }
     ));
     ros::Subscriber clawSub = n.subscribe("logic/science/claw", MESSAGE_CACHE_SIZE,
             static_cast<boost::function<void(const std_msgs::Float32::ConstPtr&)>>(
-                [&clawPow](std_msgs::Float32::ConstPtr& msg) {
+                [&clawPow](const std_msgs::Float32::ConstPtr& msg) {
                     int16_t ans = msg->data * INT16_MAX;
                     clawPow.publish(ans);
                 }

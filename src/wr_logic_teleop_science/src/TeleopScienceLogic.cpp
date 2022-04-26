@@ -24,13 +24,13 @@ int main(int argc, char** argv) {
 
     auto screwLiftControl = n.subscribe("/hci/science/gamepad/axis/pov_y", MESSAGE_CACHE_SIZE,
             static_cast<boost::function<void(const std_msgs::Float32::ConstPtr&)>>(
-                [&screwLiftMsg](std_msgs::Float32::ConstPtr& msg) {
+                [&screwLiftMsg](const std_msgs::Float32::ConstPtr& msg) {
                     screwLiftMsg.publish(msg);
                 }
     ));
     auto turnTableControlL = n.subscribe("/hci/science/gamepad/axis/shoulder_l", MESSAGE_CACHE_SIZE,
             static_cast<boost::function<void(const std_msgs::Bool::ConstPtr&)>>(
-                [&turnTableMsg, &turnTablePositions, &canListenL, &setpoint](std_msgs::Bool::ConstPtr& msg) {
+                [&turnTableMsg, &turnTablePositions, &canListenL, &setpoint](const std_msgs::Bool::ConstPtr& msg) {
                     if(msg->data) {
                         if(canListenL) {
                             setpoint = (setpoint + turnTablePositions.size() - 1) % turnTablePositions.size();
@@ -46,7 +46,7 @@ int main(int argc, char** argv) {
     ));
     auto turnTableControlR = n.subscribe("/hci/science/gamepad/axis/shoulder_r", MESSAGE_CACHE_SIZE,
             static_cast<boost::function<void(const std_msgs::Bool::ConstPtr&)>>(
-                [&turnTableMsg, &turnTablePositions, &canListenR, &setpoint](std_msgs::Bool::ConstPtr& msg) {
+                [&turnTableMsg, &turnTablePositions, &canListenR, &setpoint](const std_msgs::Bool::ConstPtr& msg) {
                     if(msg->data) {
                         if(canListenR) {
                             setpoint = (setpoint + turnTablePositions.size() + 1) % turnTablePositions.size();
@@ -62,13 +62,13 @@ int main(int argc, char** argv) {
     )); 
     auto linearActuactorControl = n.subscribe("hci/science/gamepad/axis/stick_left_y", MESSAGE_CACHE_SIZE,
             static_cast<boost::function<void(const std_msgs::Float32::ConstPtr&)>>(
-                [&linearActuatorMsg](std_msgs::Float32::ConstPtr& msg) {
+                [&linearActuatorMsg](const std_msgs::Float32::ConstPtr& msg) {
                     linearActuatorMsg.publish(msg);
                 }
     ));
     auto clawControl = n.subscribe("hci/science/gamepad/axis/stick_right_y", MESSAGE_CACHE_SIZE,
             static_cast<boost::function<void(const std_msgs::Float32::ConstPtr&)>>(
-                [&clawMsg](std_msgs::Float32::ConstPtr& msg) {
+                [&clawMsg](const std_msgs::Float32::ConstPtr& msg) {
                     clawMsg.publish(msg);
                 }
     ));
