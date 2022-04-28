@@ -19,7 +19,7 @@ int main(int argc, char** argv) {
      
     auto screwLiftMsg = n.advertise<std_msgs::Float32>("/logic/science/screwLift", MESSAGE_CACHE_SIZE);
     auto turnTableMsg = n.advertise<std_msgs::UInt32>("/logic/science/turnTable", MESSAGE_CACHE_SIZE);
-    auto linearActuatorMsg = n.advertise<std_msgs::Float32>("/logic/science/linearActuactor", MESSAGE_CACHE_SIZE);
+    auto linearActuatorMsg = n.advertise<std_msgs::Float32>("/logic/science/linearActuator", MESSAGE_CACHE_SIZE);
     auto clawMsg = n.advertise<std_msgs::Float32>("/logic/science/claw", MESSAGE_CACHE_SIZE);
 
     auto screwLiftControl = n.subscribe("/hci/science/gamepad/axis/pov_y", MESSAGE_CACHE_SIZE,
@@ -60,7 +60,7 @@ int main(int argc, char** argv) {
                     }
                 }
     )); 
-    auto linearActuactorControl = n.subscribe("hci/science/gamepad/axis/stick_left_y", MESSAGE_CACHE_SIZE,
+    auto linearActuatorControl = n.subscribe("hci/science/gamepad/axis/stick_left_y", MESSAGE_CACHE_SIZE,
             static_cast<boost::function<void(const std_msgs::Float32::ConstPtr&)>>(
                 [&linearActuatorMsg](const std_msgs::Float32::ConstPtr& msg) {
                     linearActuatorMsg.publish(msg);
