@@ -45,13 +45,6 @@ constexpr std::uint32_t MESSAGE_CACHE_SIZE = 1000;
 constexpr float TIMER_CALLBACK_DURATION = 1.0 / 50.0;
 
 /**
- * @brief Defines space for all ArmMotor references
- */
-// constexpr int NUM_MOTORS = 6;
-// std::array<std::unique_ptr<ArmMotor>, NUM_MOTORS> motors;
-// ArmMotor *motors[numMotors];
-
-/**
  * @brief Defines space for all Joint references
  */
 constexpr int NUM_JOINTS = 5;
@@ -173,11 +166,6 @@ void publishJointStates(const ros::TimerEvent &event){
     }
   }
 
-  // const auto left = positions.at(4);
-  // const auto roll = positions.at(5);
-  // positions[4] = left + roll / 4;
-  // positions[5] = left + right;
-
   js_msg.name = names;
   js_msg.position = positions;
   // Publish the Joint State message
@@ -204,7 +192,6 @@ auto main(int argc, char** argv) ->int
   pn.getParam("encoder_parameters", encParams);
 
   // Initialize all motors with their MoveIt name, WRoboclaw initialization, and reference to the current node
-  // TODO: fix
   auto elbow = std::make_unique<ArmMotor>("elbow", 1, 0, static_cast<int>(encParams[0]["counts_per_rotation"]), static_cast<int>(encParams[0]["offset"]), n);
   auto forearmRoll = std::make_unique<ArmMotor>("forearm_roll", 1, 1, static_cast<int>(encParams[1]["counts_per_rotation"]), static_cast<int>(encParams[1]["offset"]), n);
   auto shoulder = std::make_unique<ArmMotor>("shoulder", 0, 1, static_cast<int>(encParams[2]["counts_per_rotation"]), static_cast<int>(encParams[2]["offset"]), n);
@@ -214,7 +201,6 @@ auto main(int argc, char** argv) ->int
   std::cout << "init motors" << std::endl;
 
   // Initialize all Joints
-  // TODO: fix
   joints.at(0) = std::make_unique<SimpleJoint>(std::move(elbow), n);
   joints.at(1) =std::make_unique<SimpleJoint>(std::move(forearmRoll), n);
   joints.at(2) = std::make_unique<SimpleJoint>(std::move(shoulder), n);
