@@ -1,7 +1,7 @@
 /**
- * @file AbstractJoint.cpp
+ * @file SimpleJoint.cpp
  * @author Nichols Underwood
- * @brief ablskjlfkejfs
+ * @brief Implementation of the SimpleJoint class
  * @date 2021-10-25
  */
 

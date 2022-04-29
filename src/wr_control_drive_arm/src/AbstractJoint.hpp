@@ -1,3 +1,10 @@
+/**
+ * @file AbstractJoint.hpp
+ * @author Nichols Underwood
+ * @brief Header file of the AbstractJoint class
+ * @date 2021-10-25
+ */
+
 #ifndef ABSTRACT_JOINT_GUARD
 #define ABSTRACT_JOINT_GUARD
 

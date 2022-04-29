@@ -1,3 +1,10 @@
+/**
+ * @file DifferentialJoint.hpp
+ * @author Nichols Underwood
+ * @brief Header file of the DifferentialJoint class
+ * @date 2021-10-25
+ */
+
 #include "AbstractJoint.hpp"
 
 class DifferentialJoint : public AbstractJoint {

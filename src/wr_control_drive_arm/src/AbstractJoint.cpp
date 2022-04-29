@@ -1,9 +1,10 @@
 /**
  * @file AbstractJoint.cpp
  * @author Nichols Underwood
- * @brief ablskjlfkejfs
+ * @brief Implementation of the AbstractJoint class
  * @date 2021-10-25
  */
+ 
 #include "AbstractJoint.hpp"
 
 AbstractJoint::AbstractJoint(ros::NodeHandle &n, int numMotors){

@@ -1,9 +1,10 @@
 /**
  * @file ArmMotor.hpp
  * @author Ben Nowotny
- * @brief ablskjlfkejfs
+ * @brief Header file of the ArmMotor class
  * @date 2021-04-05
  */
+ 
 #include <iostream>
 #include "ros/ros.h"
 #include "std_msgs/UInt32.h"

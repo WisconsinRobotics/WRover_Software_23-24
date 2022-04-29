@@ -1,3 +1,10 @@
+/**
+ * @file SimpleJoint.hpp
+ * @author Nichols Underwood
+ * @brief Header file of the SimpleJoint class
+ * @date 2021-10-25
+ */
+
 #include "AbstractJoint.hpp"
 
 using std::vector;

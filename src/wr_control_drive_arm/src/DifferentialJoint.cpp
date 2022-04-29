@@ -1,7 +1,7 @@
 /**
- * @file AbstractJoint.hpp
- * @author Nichols Underwood
- * @brief ablskjlfkejfs
+ * @file DifferentialJoint.cpp
+ * @author Nicholas Underwood
+ * @brief Header file of the DifferentialJoint class
  * @date 2021-10-25
  */
 
