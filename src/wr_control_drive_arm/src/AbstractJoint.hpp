@@ -1,3 +1,10 @@
+/**
+ * @file AbstractJoint.hpp
+ * @author Nichols Underwood
+ * @brief Header file of the AbstractJoint class
+ * @date 2021-10-25
+ */
+
 #ifndef ABSTRACT_JOINT_GUARD
 #define ABSTRACT_JOINT_GUARD
 
@@ -5,39 +12,35 @@
 using std::vector;
 
 class AbstractJoint {
+public:
+    struct MotorHandler{
+        std::unique_ptr<ArmMotor> motor;
+        double position;
+        double velocity;
+        std::string jointTopicName;
+        std::string motorTopicName;
+        bool newVelocity;
+    };
 
+    AbstractJoint(ros::NodeHandle &n, int numMotors);
 
-    protected:
-        ros::NodeHandle* n;
-        unsigned int numMotors;
-        vector<ArmMotor*> motors;
+    // never used, need to be defined for compiler v-table
+    virtual auto getMotorPositions(const vector<double> &jointPositions) -> vector<double> = 0;
+    virtual auto getMotorVelocities(const vector<double> &joinVelocities) -> vector<double> = 0;
+    virtual auto getJointPositions(const vector<double> &motorPositions) -> vector<double> = 0;
 
-        vector<double> jointPositions;   
-        vector<double> jointVelocites;
+    auto getDegreesOfFreedom() const -> unsigned int;
+    
+    auto getMotor(int motorIndex) const -> const std::unique_ptr<ArmMotor>&;
 
-        vector<std::string> jointTopicsNames;  
-        vector<std::string> motorTopicsNames;  
-        vector<bool> newVelocitiesVector;
+    void configSetpoint(int degreeIndex, double position, double velocity);
 
-    public:
+    auto exectute() -> bool;
 
-        AbstractJoint(ros::NodeHandle* n, int numMotors);
-        ~AbstractJoint(){};
+    void stopJoint();
 
-        // never used, need to be defined for compiler v-table
-        virtual void getMotorPositions(vector<double> &jointPositions, vector<double> &target) = 0;
-        virtual void getMotorVelocities(vector<double> &joinVelocities, vector<double> &target) = 0;
-        virtual void getJointPositions(vector<double> &motorPositions, vector<double> &target) = 0;
-
-        int getDegreesOfFreedom();
-        
-        ArmMotor* getMotor(int motorIndex);
-
-        void configSetpoint(int degreeIndex, double position, double velocity);
-
-        bool exectute();
-
-        // virtual void configVelocityHandshake(std::string, std::string) = 0;
+protected:
+    vector<MotorHandler> motors;
 };
 
 #endif

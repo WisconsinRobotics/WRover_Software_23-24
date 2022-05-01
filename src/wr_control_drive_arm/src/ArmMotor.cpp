@@ -5,28 +5,30 @@
  * @date 2021-04-05
  */
 #include "ArmMotor.hpp"
+#include <stdexcept>
+#include <sstream>
 
 /// Allow for referencing the UInt32 message type easier
-typedef std_msgs::UInt32::ConstPtr Std_UInt32;
-typedef std_msgs::Float64::ConstPtr Std_Float64;
-#define Std_Bool std_msgs::Bool::ConstPtr&
+using Std_UInt32 = std_msgs::UInt32::ConstPtr;
+using Std_Float64 = std_msgs::Float64::ConstPtr;
+using Std_Bool = std_msgs::Bool::ConstPtr;
 
-double ArmMotor::corrMod(double i, double j){
+auto ArmMotor::corrMod(double i, double j) -> double{
     // Stem i%j by j, which in modular arithmetic is the same as adding 0.
     return std::fmod(std::fmod(std::abs(j)*i/j,std::abs(j))+j,std::abs(j));
 }
 
 /// Currently consistent with the rad->enc equation as specified <a target="_blank" href="https://www.desmos.com/calculator/nwxtenccc6">here</a>.
-uint32_t ArmMotor::radToEnc(double rads) const {
+auto ArmMotor::radToEnc(double rads) const -> uint32_t{
     return this->COUNTS_PER_ROTATION * ArmMotor::corrMod(rads, 2 * M_PI)/(2 * M_PI) + this->ENCODER_OFFSET;
 }
 
-double ArmMotor::encToRad(uint32_t enc) const {
+auto ArmMotor::encToRad(uint32_t enc) const -> double{
     return ArmMotor::corrMod(static_cast<double>(enc - this->ENCODER_OFFSET) / static_cast<double>(this->COUNTS_PER_ROTATION) * 2 * M_PI + M_PI, 2 * M_PI) - M_PI;
 }
 
 /// Currently consistent with the enc->rad equation as specified <a target="_blank" href="https://www.desmos.com/calculator/nwxtenccc6">here</a>.
-double ArmMotor::getRads() const{
+auto ArmMotor::getRads() const -> double{
     return ArmMotor::encToRad(this->getEncoderCounts());
 }
 
@@ -41,17 +43,17 @@ void ArmMotor::storeEncoderVals(const Std_UInt32 &msg){
 
 void ArmMotor::redirectPowerOutput(const Std_Float64 &msg){
     // Set the speed to be the contained data
-    this->setPower(msg->data);
+    if(this->getMotorState() == MotorState::RUN_TO_TARGET) this->setPower(static_cast<float>(msg->data) * this->maxPower, MotorState::RUN_TO_TARGET);
 }
 
-void ArmMotor::storeStallStatus(const Std_Bool msg) {
-    this->isStall = msg->data;
+void ArmMotor::storeStallStatus(const Std_Bool &msg) {
+    this->isStall = static_cast<bool>(msg->data);
 }
 
 /// controllerID is constrained between [0,3]
 /// motorID is constrained between [0,1]
 ArmMotor::ArmMotor(
-    const std::string &motorName,
+    std::string motor_name,
     unsigned int controllerID,
     unsigned int motorID,
     int64_t countsPerRotation,
@@ -60,18 +62,20 @@ ArmMotor::ArmMotor(
 ) : COUNTS_PER_ROTATION{countsPerRotation}, 
     ENCODER_BOUNDS{0, std::abs(countsPerRotation)}, 
     ENCODER_OFFSET{offset}, 
-    motorName{motorName}, 
+    motorName{std::move(motor_name)}, 
     controllerID{controllerID}, 
     motorID{motorID}, 
     currState{MotorState::STOP},
+    power{0.F},
+    maxPower{0.F},
     encoderVal{static_cast<uint32_t>(offset)} {
     
     // Check validity of WRoboclaw and motor IDs
-    if(controllerID > 3) throw ((std::string)"Controller ID ") + std::to_string(controllerID) + "is only valid on [0,3]";
-    if(motorID > 1) throw ((std::string)"Motor ID ") + std::to_string(motorID) + "is only valid on [0,1]";
+    if(controllerID > 3) throw std::invalid_argument{std::string{"Controller ID "} + std::to_string(controllerID) + "is only valid on [0,3]"};
+    if(motorID > 1) throw std::invalid_argument{std::string{"Motor ID "} + std::to_string(motorID) + " is only valid on [0,1]"};
 
     // Create the topic string prefix for WRoboclaw controllers
-    std::string tpString = ((std::string)"/hsi/roboclaw/aux") + std::to_string(controllerID);
+    std::string tpString = std::string{"/hsi/roboclaw/aux"} + std::to_string(controllerID);
     std::string controlString = "/control/arm/" + std::to_string(controllerID) + std::to_string(motorID);
 
     // Create the appropriate encoder-reading and speed-publishing subscribers and advertisers, respectfully
@@ -83,7 +87,7 @@ ArmMotor::ArmMotor(
     this->stallRead = n.subscribe(tpString + "/curr/over_lim/" + (motorID == 0 ? "left" : "right"), ArmMotor::MESSAGE_CACHE_SIZE, &ArmMotor::storeStallStatus, this);
 }
 
-uint32_t ArmMotor::getEncoderCounts() const{
+auto ArmMotor::getEncoderCounts() const -> uint32_t{
     return this->encoderVal;
 }
 
@@ -92,7 +96,7 @@ void ArmMotor::runToTarget(uint32_t targetCounts, float power){
     this->runToTarget(targetCounts, power, false);
 }
 
-bool ArmMotor::hasReachedTarget(uint32_t targetCounts, uint32_t tolerance) const {
+auto ArmMotor::hasReachedTarget(uint32_t targetCounts, uint32_t tolerance) const -> bool{
     // Compute the upper and lower bounds in the finite encoder space
     uint32_t lBound = ArmMotor::corrMod(static_cast<double>(targetCounts - tolerance), static_cast<double>(ArmMotor::ENCODER_BOUNDS[1]));
     uint32_t uBound = ArmMotor::corrMod(static_cast<double>(targetCounts + tolerance), static_cast<double>(ArmMotor::ENCODER_BOUNDS[1]));
@@ -104,41 +108,47 @@ bool ArmMotor::hasReachedTarget(uint32_t targetCounts, uint32_t tolerance) const
 }
 
 /// Current tolerance is &pm;0.1 degree w.r.t. the current number of counts per rotation
-bool ArmMotor::hasReachedTarget(uint32_t targetCounts) const {
+auto ArmMotor::hasReachedTarget(uint32_t targetCounts) const -> bool{
     return ArmMotor::hasReachedTarget(targetCounts, ArmMotor::TOLERANCE_RATIO * static_cast<double>(std::abs(this->COUNTS_PER_ROTATION)));
 }
 
-MotorState ArmMotor::getMotorState() const {
+auto ArmMotor::getMotorState() const -> MotorState{
     return this->currState;
 }
 
-/// This method auto-publishes the speed command to the WRoboclaws
 void ArmMotor::setPower(float power){
+    this->setPower(power, power == 0.F ? MotorState::STOP : MotorState::MOVING);
+}
+
+/// This method auto-publishes the speed command to the WRoboclaws
+void ArmMotor::setPower(float power, MotorState state){
     // Check the bounds of the parameter
-    if(abs(power) > 1) throw ((std::string)"Power ") + std::to_string(power) + " is not on the interval [-1, 1]";
+    if(abs(power) > 1) throw std::invalid_argument{std::string{"Power "} + std::to_string(power) + " is not on the interval [-1, 1]"};
 
     // Set up and send the speed message
+    this->power = power;
     this->powerMsg.data = power * INT16_MAX;
     this->speedPub.publish(this->powerMsg);
     // Update the cur.nt motor state based on the power command input
-    this->currState = power == 0.F ? MotorState::STOP : MotorState::MOVING;
+    this->currState = state;
 }
 
-bool ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block){
+auto ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block) -> bool{
     // Checks for stall
     if (this->isStall) {
-        if ((ros::Time::now() - begin).toSec() >= 0.5) {
-            this->setPower(0.0f);
+        if ((ros::Time::now() - begin).toSec() >= STALL_THRESHOLD_TIME) {
+            this->setPower(0.0F);
             this->currState = MotorState::STOP;
             return false;
         }
     } else {
         begin = ros::Time::now();
     }
-    
+    this->maxPower = power;
     // If we are not at our target...
     if(!this->hasReachedTarget(targetCounts)){
         // Set the power in the correct direction and continue running to the target
+        this->currState = MotorState::RUN_TO_TARGET;
         std_msgs::Float64 setpointMsg;
         setpointMsg.data = ArmMotor::encToRad(targetCounts);
         this->targetPub.publish(setpointMsg);
@@ -147,40 +157,37 @@ bool ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block){
         // power = abs(power) * (corrMod(direction, ((long int)this->COUNTS_PER_ROTATION)) < corrMod(-direction, ((long int)this->COUNTS_PER_ROTATION)) ? 1 : -1);
         // this->setPower(power);
 
-        this->currState = MotorState::RUN_TO_TARGET;
     // Otherwise, stop the motor
     } else {
-        this->setPower(0.F);
-        this->currState = MotorState::STOP;
+        this->setPower(0.F, MotorState::RUN_TO_TARGET);
     }
     // If this is a blocking call...
     if(block){
         // Wait until the motor has reached the target, then stop
         while(!this->hasReachedTarget(targetCounts));
-        this->setPower(0.F);
-        this->currState = MotorState::STOP;
+        this->setPower(0.F, MotorState::RUN_TO_TARGET);
     }
     return true;
 }
 
-bool ArmMotor::runToTarget(double rads, float power){
+auto ArmMotor::runToTarget(double rads, float power) -> bool{
     std::cout << "run to target: " << rads << ":" << this->radToEnc(rads) << std::endl;
     
     return runToTarget(this->radToEnc(rads), power, false);
 }
 
-std::string ArmMotor::getMotorName() const {
+auto ArmMotor::getMotorName() const -> std::string{
     return this->motorName;
 }
 
-unsigned int ArmMotor::getMotorID() const {
+auto ArmMotor::getMotorID() const -> unsigned int{
     return this->motorID;
 }
 
-unsigned int ArmMotor::getControllerID() const {
+auto ArmMotor::getControllerID() const -> unsigned int{
     return this->controllerID;
 }
 
-float ArmMotor::getPower() const {
-    return ((float)this->powerMsg.data)/INT16_MAX;
+auto ArmMotor::getPower() const -> float{
+    return this->power;
 }

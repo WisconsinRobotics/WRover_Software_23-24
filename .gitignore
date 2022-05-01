@@ -9,6 +9,7 @@ devel/
 /.vscode/*
 # except recommended extensions
 !/.vscode/extensions.json
+!/.vscode/settings.json
 
 # fetched external libs
 # NOTE: these may be removed in the future, tbd

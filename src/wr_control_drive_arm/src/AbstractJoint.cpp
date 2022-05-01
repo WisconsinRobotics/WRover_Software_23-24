@@ -1,40 +1,41 @@
 /**
  * @file AbstractJoint.cpp
  * @author Nichols Underwood
- * @brief ablskjlfkejfs
+ * @brief Implementation of the AbstractJoint class
  * @date 2021-10-25
  */
+ 
 #include "AbstractJoint.hpp"
 
-AbstractJoint::AbstractJoint(ros::NodeHandle* n, int numMotors){
-    this->n = n;
-    this->numMotors = numMotors;
-
-    jointPositions.reserve(numMotors);
-    jointVelocites.reserve(numMotors);
-
+AbstractJoint::AbstractJoint(ros::NodeHandle &n, int numMotors){
+    this->motors.resize(numMotors);
 }
 
-int AbstractJoint::getDegreesOfFreedom(){
-    return this->numMotors;
+auto AbstractJoint::getDegreesOfFreedom() const -> unsigned int{
+    return this->motors.size();
 }
 
-ArmMotor* AbstractJoint::getMotor(int motorIndex){
-    return this->motors[motorIndex];
+auto AbstractJoint::getMotor(int motorIndex) const -> const std::unique_ptr<ArmMotor>&{
+    return this->motors.at(motorIndex).motor;
 }
 
 void AbstractJoint::configSetpoint(int degreeIndex, double position, double velocity){
 
-    this->jointPositions[degreeIndex] = position;
-    this->jointVelocites[degreeIndex] = velocity;
+    this->motors.at(degreeIndex).position = position;
+    this->motors.at(degreeIndex).velocity = velocity;
 }
 
 
-bool AbstractJoint::exectute(){
-    vector<double> motorPositions;
-    this->getMotorPositions(jointPositions, motorPositions);
-    for(int i = 0; i < this->numMotors; i++){
-        if (!this->motors[i]->runToTarget(motorPositions[i], 0)) return false;
+auto AbstractJoint::exectute() -> bool{
+    for(auto &motorHandle : motors){
+        if (!motorHandle.motor->runToTarget(motorHandle.position, motorHandle.velocity)); 
+            return false;
     }
     return true;
+}
+
+void AbstractJoint::stopJoint(){
+    for(auto &motorHandle : motors){
+        motorHandle.motor->setPower(0.F);
+    }
 }

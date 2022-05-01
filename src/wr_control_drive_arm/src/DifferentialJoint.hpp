@@ -1,29 +1,37 @@
+/**
+ * @file DifferentialJoint.hpp
+ * @author Nichols Underwood
+ * @brief Header file of the DifferentialJoint class
+ * @date 2021-10-25
+ */
+
 #include "AbstractJoint.hpp"
 
 class DifferentialJoint : public AbstractJoint {
     public:
-        ~DifferentialJoint();
-        DifferentialJoint(ArmMotor *leftMotor, ArmMotor *rightMotor, ros::NodeHandle *n);
+        DifferentialJoint(std::unique_ptr<ArmMotor> leftMotor, std::unique_ptr<ArmMotor> rightMotor, ros::NodeHandle &n,
+                          const std::string &pitchTopicName, const std::string &rollTopicName,
+                          const std::string &leftTopicName, const std::string &rightTopicName);
 
-        void getMotorPositions(vector<double> &jointPositions, vector<double> &target);
-        void getMotorVelocities(vector<double> &jointVelocities, vector<double> &target);
-        void getJointPositions(vector<double> &motorPositions, vector<double> &target);
-
-        void configVelocityHandshake(std::string pitchTopicName, std::string rollTopicName, std::string leftTopicName, std::string rightTopicName);
+        auto getMotorPositions(const vector<double> &jointPositions) -> vector<double> override;
+        auto getMotorVelocities(const vector<double> &jointVelocities) -> vector<double> override;
+        auto getJointPositions(const vector<double> &motorPositions) -> vector<double> override;
 
     private:
+        static constexpr uint32_t DEGREES_OF_FREEDOM = 2;
+        static constexpr uint32_t MESSAGE_CACHE_SIZE = 10;
         // linear transformations works for position and velocity
         // [0.5 0.5]   [left motor ]    [pitch]
         // [ -1  1 ] * [right motor]  = [roll ]
         // double motorToJointMatrix[2][2] = {{0.5, 0.5}, {-1, 1}};
-        double motorToJointMatrix[2][2] = {{1, 0}, {0, 1}};
+        static constexpr std::array<std::array<double, 2>, 2> MOTOR_TO_JOINT_MATRIX{{{1, 0}, {0, 1}}};
         // [1 -0.5]   [pitch]    [left motor ]
         // [1  0.5] * [roll ]  = [right motor]
         // double jointToMotorMatrix[2][2] = {{1, 0.5}, {1, -0.5}};
-        double jointToMotorMatrix[2][2] = {{1, 0}, {0, 1.0}};
+        static constexpr std::array<std::array<double, 2>, 2> JOINT_TO_MOTOR_MATRIX{{{1, 0}, {0, 1}}};
 
-        void handoffPitchOutput(std_msgs::Float64);
-        void handoffRollOutput(std_msgs::Float64);
+        void handoffPitchOutput(const std_msgs::Float64::ConstPtr&);
+        void handoffRollOutput(const std_msgs::Float64::ConstPtr&);
         void handOffAllOutput();
         ros::Subscriber pitchOutputSubscriber;
         ros::Subscriber rollOutputSubscriber;
@@ -34,8 +42,8 @@ class DifferentialJoint : public AbstractJoint {
         bool hasNewPitchOutput = false;
         bool hasNewRollOutput = false;
 
-        void handoffLeftFeedback(std_msgs::Float64);
-        void handoffRightFeedback(std_msgs::Float64);
+        void handoffLeftFeedback(const std_msgs::Float64::ConstPtr&);
+        void handoffRightFeedback(const std_msgs::Float64::ConstPtr&);
         void handOffAllFeedback();
         ros::Subscriber leftFeedbackSubscriber;
         ros::Subscriber rightFeedbackSubscriber;

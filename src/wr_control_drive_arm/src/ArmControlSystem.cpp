@@ -15,6 +15,8 @@
 #include <algorithm>
 #include <csignal>
 #include <string>
+#include <array>
+#include <memory>
 #include <std_srvs/Trigger.h>
 #include "SimpleJoint.hpp"
 #include "DifferentialJoint.hpp"
@@ -23,16 +25,31 @@
 using XmlRpc::XmlRpcValue;
 
 /**
- * @brief Defines space for all ArmMotor references
+ * @brief Refresh rate of ros::Rate
  */
-const int numMotors = 6;
-ArmMotor *motors[numMotors];
+constexpr float CLOCK_RATE = 50;
+
+constexpr double IK_WARN_RATE = 1.0/2;
+
+constexpr double JOINT_SAFETY_MAX_SPEED = 0.3;
+constexpr double JOINT_SAFETY_HOLD_SPEED = 0.15;
+
+/**
+ * @brief Nessage cache size of publisher
+ */
+constexpr std::uint32_t MESSAGE_CACHE_SIZE = 1000; 
+
+/**
+ * @brief Period between timer callback
+ */
+constexpr float TIMER_CALLBACK_DURATION = 1.0 / 50.0;
 
 /**
  * @brief Defines space for all Joint references
  */
-const int numJoints = 5;
-AbstractJoint *joints[numJoints];
+constexpr int NUM_JOINTS = 5;
+std::array<std::unique_ptr<AbstractJoint>, NUM_JOINTS> joints;
+// AbstractJoint *joints[numJoints];
 /**
  * @brief The Joint State Publisher for MoveIt
  */
@@ -55,44 +72,6 @@ std::atomic_bool IKEnabled{true};
 ros::ServiceClient enableServiceClient;
 
 /**
- * @brief converts a roll and pitch to joint motor positions
- * 
- * @param roll the roll of the joint in radians
- * @param pitch the pitch of the joint in radians
- * @return a 2D vector with motor positions in radians
- */
-std::vector<double> convertJointSpacetoEncoderSpace(double roll, double pitch){
-	std::vector<double> encoderSpace(2);
-
-	//TODO: add matrix transformation, implement joint in mock.py
-	encoderSpace[0] = roll;
-	encoderSpace[1] = pitch;
-
-	return encoderSpace;
-}
-
-/**
- * @brief sets a target position and pulls info from motor
- * 
- * @param names a vector with motor joint names
- * @param positions a vector with positions in radians
- * @param target the target radian value
- * @param motor a pointer to the motor
- * @return if the motor has reached its target
- */
-bool configJointSetpoint(AbstractJoint* joint, int degreeIndex, double target, float velocity){
-	// Each motor should run to its respective target position at a fixed speed
-	// TODO: this speed should be capped/dynamic to reflect the input joint velocity parameters
-	// velMax = abs(*std::max_element(currTargetPosition.velocities.begin(), currTargetPosition.velocities.end(), [](double a, double b) {return abs(a)<abs(b);}));
-	// float currPower = 0.1 * currTargetPosition.velocities[j]/velMax;
-	// currPower = abs(velMax) <= 0.0001 ? 0.1 : currPower;
-  std::cout << "config joint setup: " << degreeIndex << " " << target << std::endl;
-	joint->configSetpoint(degreeIndex, target, 0);
-	// The position has only finished if every motor is STOPped
-	return joint->getMotor(degreeIndex)->getMotorState() == MotorState::STOP;
-}
-
-/**
  * @brief Perform the given action as interpreted as moving the arm joints to specified positions
  * 
  * @param goal The goal state given
@@ -101,50 +80,46 @@ bool configJointSetpoint(AbstractJoint* joint, int degreeIndex, double target, f
 void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server* as) {
   if (!IKEnabled) {
     as->setAborted();
-    ROS_WARN("IK is disabled");
+    ROS_WARN_THROTTLE(IK_WARN_RATE, "IK is disabled"); // NOLINT(hicpp-no-array-decay,hicpp,hicpp-vararg,cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
     return;
   }
 
   std::cout << "start exec: " << goal->trajectory.points.size() << std::endl;
   // For each point in the trajectory execution sequence...
-  for(int i = 0; i < goal->trajectory.points.size(); i++){
-    std::cout << "PID to trajectory point " << i << "/" <<  goal->trajectory.points.size() << std::endl;
-    // Capture the current goal for easy reference
-    trajectory_msgs::JointTrajectoryPoint currTargetPosition = goal->trajectory.points[i];
-
+  for(const auto &currTargetPosition : goal->trajectory.points){
     // Track whether or not the current position is done
     bool hasPositionFinished = false;
     // Keep max loop rate at 50 Hz
-    ros::Rate loop(200);
+    ros::Rate loop{CLOCK_RATE};
+
+    const double VELOCITY_MAX = abs(*std::max_element(
+        currTargetPosition.velocities.begin(),
+        currTargetPosition.velocities.end(),
+        [](double a, double b) -> bool{ return abs(a)<abs(b); }
+      ));
+
+    int currItr = 0;
+    for(const auto &joint : joints){
+      for(int i = 0; i < joint->getDegreesOfFreedom(); i++){
+        joint->configSetpoint(i, currTargetPosition.positions[currItr], VELOCITY_MAX == 0.F ? JOINT_SAFETY_HOLD_SPEED : JOINT_SAFETY_MAX_SPEED*currTargetPosition.velocities[currItr]/VELOCITY_MAX);
+        currItr++;
+      }
+      joint->exectute();
+    }
 
     // While the current position is not complete yet...
     while(!hasPositionFinished){
       // Assume the current action is done until proven otherwise
       hasPositionFinished = true;
       // Create the Joint State message for the current update cycle
-      double velMax = abs(*std::max_element(
-        currTargetPosition.velocities.begin(),
-        currTargetPosition.velocities.end(),
-        [](double a, double b) { return abs(a)<abs(b); }
-      ));
-      int motorIndex = 0;
-      int jointIndex = 0;
-      AbstractJoint *joint;
+
       // For each joint specified in the currTargetPosition...
-
-      for(int j = 0; j < sizeof(joints); j += sizeof(joints[jointIndex-1])){
-
-        joint = joints[jointIndex];
+      for(const auto &joint : joints){
 
         for(int k = 0; k < joint->getDegreesOfFreedom(); k++){
         // Each motor should run to its respective target position at a fixed speed
         // TODO: this speed should be capped/dynamic to reflect the input joint velocity parameters
-          double targetPos = currTargetPosition.positions[motorIndex];
-          float currPower = 0.1 * currTargetPosition.velocities[j]/velMax;
-
-          bool hasMotorFinished = configJointSetpoint(joint, motorIndex-jointIndex, targetPos, currPower);
-          hasPositionFinished &= hasMotorFinished;
-          motorIndex++;
+          hasPositionFinished &= joint->getMotor(k)->getMotorState() == MotorState::STOP;
           // DEBUGGING OUTPUT: Print each motor's name, radian position, encoder position, and power
           // std::cout<<joint->getMotor(k)->getMotorName()<<":"<<std::setw(30-motors[j]->getMotorName().length())<<motors[j]->getRads()<<std::endl;
           // std::cout<<std::setw(30)<<motors[j]->getEncoderCounts()<<std::endl;
@@ -154,16 +129,12 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
           IKEnabled = false;
           std_srvs::Trigger srv;
           if (enableServiceClient.call(srv)) {
-            ROS_WARN("%s", (std::string{"PLACEHOLDER_NAME: "} + srv.response.message).data());
+            ROS_WARN("%s", (std::string{"PLACEHOLDER_NAME: "} + srv.response.message).data()); // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
           } else {
-            ROS_WARN("Error: failed to call service PLACEHOLDER_NAME");
+            ROS_WARN("Error: failed to call service PLACEHOLDER_NAME"); // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
           }
           return;
-          // TODO: hand control back to driver
-          // standard service empty stdsrvs empty
-          // go into spin loop
         }
-        jointIndex++;
       }
 
       // DEBUGGING OUTPUT: Print a divider line for cleanliness
@@ -176,10 +147,6 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
   }
 
   //When all positions have been reached, set the current task as succeeded
-
-  for(int i = 0; i < numMotors; i++){
-    motors[i]->setPower(0.f);
-  }
   
   as->setSucceeded();
 }
@@ -187,17 +154,17 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
 /**
  * @brief publishes the arm's position
  */
-void publish(const ros::TimerEvent &event){
+void publishJointStates(const ros::TimerEvent &event){
   std::vector<std::string> names;
   std::vector<double> positions;
   sensor_msgs::JointState js_msg;
 
-  for (int i = 0; i < numMotors; i++){
-    names.push_back(motors[i]->getMotorName());
-    positions.push_back(motors[i]->getRads());
+  for(const auto &joint : joints){
+    for(int i = 0; i < joint->getDegreesOfFreedom(); i++){
+      names.push_back(joint->getMotor(i)->getMotorName());
+      positions.push_back(joint->getMotor(i)->getRads());
+    }
   }
-
-  positions[4] = positions[5] + positions[4] / 2;
 
   js_msg.name = names;
   js_msg.position = positions;
@@ -212,7 +179,7 @@ void publish(const ros::TimerEvent &event){
  * @param argv The given program arguments
  * @return int The status code on exiting the program
  */
-int main(int argc, char** argv)
+auto main(int argc, char** argv) ->int
 {
   std::cout << "start main" << std::endl;
   // Initialize the current node as ArmControlSystem
@@ -225,28 +192,24 @@ int main(int argc, char** argv)
   pn.getParam("encoder_parameters", encParams);
 
   // Initialize all motors with their MoveIt name, WRoboclaw initialization, and reference to the current node
-  motors[0] = new ArmMotor("elbow", 1, 0, static_cast<int>(encParams[0]["counts_per_rotation"]), static_cast<int>(encParams[0]["offset"]), n);
-  motors[1] = new ArmMotor("forearm_roll", 1, 1, static_cast<int>(encParams[1]["counts_per_rotation"]), static_cast<int>(encParams[1]["offset"]), n);
-  motors[2] = new ArmMotor("shoulder", 0, 1, static_cast<int>(encParams[2]["counts_per_rotation"]), static_cast<int>(encParams[2]["offset"]), n);
-  motors[3] = new ArmMotor("turntable", 0, 0, static_cast<int>(encParams[3]["counts_per_rotation"]), static_cast<int>(encParams[3]["offset"]), n);
-  motors[4] = new ArmMotor("wrist_pitch", 2, 0, static_cast<int>(encParams[4]["counts_per_rotation"]), static_cast<int>(encParams[4]["offset"]), n);
-  motors[5] = new ArmMotor("wrist_roll", 2, 1, static_cast<int>(encParams[5]["counts_per_rotation"]), static_cast<int>(encParams[5]["offset"]), n);
+  auto elbow = std::make_unique<ArmMotor>("elbow", 1, 0, static_cast<int>(encParams[0]["counts_per_rotation"]), static_cast<int>(encParams[0]["offset"]), n);
+  auto forearmRoll = std::make_unique<ArmMotor>("forearm_roll", 1, 1, static_cast<int>(encParams[1]["counts_per_rotation"]), static_cast<int>(encParams[1]["offset"]), n);
+  auto shoulder = std::make_unique<ArmMotor>("shoulder", 0, 1, static_cast<int>(encParams[2]["counts_per_rotation"]), static_cast<int>(encParams[2]["offset"]), n);
+  auto turntable = std::make_unique<ArmMotor>("turntable", 0, 0, static_cast<int>(encParams[3]["counts_per_rotation"]), static_cast<int>(encParams[3]["offset"]), n);
+  auto wristLeft = std::make_unique<ArmMotor>("wrist_pitch", 2, 0, static_cast<int>(encParams[4]["counts_per_rotation"]), static_cast<int>(encParams[4]["offset"]), n);
+  auto wristRight = std::make_unique<ArmMotor>("wrist_roll", 2, 1, static_cast<int>(encParams[5]["counts_per_rotation"]), static_cast<int>(encParams[5]["offset"]), n);
   std::cout << "init motors" << std::endl;
 
   // Initialize all Joints
-  joints[0] = new SimpleJoint(motors[0], &n);
-  joints[1] = new SimpleJoint(motors[1], &n);
-  joints[2] = new SimpleJoint(motors[2], &n);
-  joints[3] = new SimpleJoint(motors[3], &n);
-  joints[4] = new SimpleJoint(motors[4], &n);
-  DifferentialJoint* temp = new DifferentialJoint(motors[4], motors[5], &n);
-  temp->configVelocityHandshake("/control/arm/5/roll", "/control/arm/5/pitch", "/control/arm/20/", "/control/arm/21/");
-
+  joints.at(0) = std::make_unique<SimpleJoint>(std::move(elbow), n);
+  joints.at(1) =std::make_unique<SimpleJoint>(std::move(forearmRoll), n);
+  joints.at(2) = std::make_unique<SimpleJoint>(std::move(shoulder), n);
+  joints.at(3) = std::make_unique<SimpleJoint>(std::move(turntable), n);
+  joints.at(4) = std::make_unique<DifferentialJoint>(std::move(wristLeft), std::move(wristRight), n, "/control/arm/5/pitch", "/control/arm/5/roll", "/control/arm/20/", "/control/arm/21/");
   std::cout << "init joints" << std::endl;
-  joints[5] = temp;
   
   // Initialize the Joint State Data Publisher
-  jointStatePublisher = n.advertise<sensor_msgs::JointState>("/control/arm_joint_states", 1000);
+  jointStatePublisher = n.advertise<sensor_msgs::JointState>("/control/arm_joint_states", MESSAGE_CACHE_SIZE);
 
   // Initialize the Action Server
   Server server(n, "/arm_controller/follow_joint_trajectory", boost::bind(&execute, _1, &server), false);
@@ -254,14 +217,14 @@ int main(int argc, char** argv)
   server.start();
   std::cout << "server started" << std::endl;
 
-  ros::Timer timer = n.createTimer(ros::Duration(1.0 / 50.0), publish);
+  ros::Timer timer = n.createTimer(ros::Duration(TIMER_CALLBACK_DURATION), publishJointStates);
 
   enableServiceServer = n.advertiseService("start_IK", 
     static_cast<boost::function<bool(std_srvs::Trigger::Request&, std_srvs::Trigger::Response&)>>(
       [](std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res)->bool{
         IKEnabled = true;
         res.message = "Arm IK Enabled";
-        res.success = true;
+        res.success = static_cast<unsigned char>(true);
         return true;
       }
     ));
