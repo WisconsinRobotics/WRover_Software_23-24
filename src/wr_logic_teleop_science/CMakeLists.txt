@@ -10,6 +10,7 @@ project(wr_logic_teleop_science)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
+  wresponsecontrol
 )
 
 ## System dependencies are found with CMake's conventions
@@ -104,7 +105,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES wr_logic_teleop_science
-  CATKIN_DEPENDS roscpp rospy
+  CATKIN_DEPENDS roscpp rospy wresponsecontrol
 #  DEPENDS system_lib
 )
 

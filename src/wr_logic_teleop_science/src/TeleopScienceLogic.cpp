@@ -2,6 +2,7 @@
 #include "std_msgs/Float32.h"
 #include "std_msgs/Bool.h"
 #include "std_msgs/UInt32.h"
+#include "std_msgs/Float64.h"
 #include <array>
 
 constexpr std::uint32_t MESSAGE_CACHE_SIZE = 10;
@@ -11,14 +12,14 @@ int main(int argc, char** argv) {
 
     ros::NodeHandle n;
     ros::NodeHandle np{"~"};
-    std::vector<int> turnTablePositions;
+    std::vector<double> turnTablePositions;
     np.getParam("turnTablePositions", turnTablePositions);
     bool canListenL = true;
     bool canListenR = true;
     int setpoint = 0;
      
     auto screwLiftMsg = n.advertise<std_msgs::Float32>("/logic/science/screwLift", MESSAGE_CACHE_SIZE);
-    auto turnTableMsg = n.advertise<std_msgs::UInt32>("/logic/science/turnTable", MESSAGE_CACHE_SIZE);
+    auto turnTableMsg = n.advertise<std_msgs::Float64>("/logic/science/turnTable", MESSAGE_CACHE_SIZE);
     auto linearActuatorMsg = n.advertise<std_msgs::Float32>("/logic/science/linearActuator", MESSAGE_CACHE_SIZE);
     auto clawMsg = n.advertise<std_msgs::Float32>("/logic/science/claw", MESSAGE_CACHE_SIZE);
 
@@ -34,7 +35,7 @@ int main(int argc, char** argv) {
                     if(msg->data) {
                         if(canListenL) {
                             setpoint = (setpoint + turnTablePositions.size() - 1) % turnTablePositions.size();
-                            std_msgs::UInt32 x;
+                            std_msgs::Float64 x;
                             x.data = turnTablePositions.at(setpoint);
                             turnTableMsg.publish(x);
                             canListenL = false;
@@ -50,7 +51,7 @@ int main(int argc, char** argv) {
                     if(msg->data) {
                         if(canListenR) {
                             setpoint = (setpoint + turnTablePositions.size() + 1) % turnTablePositions.size();
-                            std_msgs::UInt32 x;
+                            std_msgs::Float64 x;
                             x.data = turnTablePositions.at(setpoint);
                             turnTableMsg.publish(x);
                             canListenR = false;

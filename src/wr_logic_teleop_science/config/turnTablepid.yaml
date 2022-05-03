@@ -1,7 +1,7 @@
 rate: 50
 controllers:
   - setpointTopic: "/logic/science/turnTable"
-    feedback: "pid/turnTable"
+    feedbackTopic: "pid/turnTable"
     outputTopic: "pid/turnTablePow"
     P: 0
     I: 0

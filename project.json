@@ -20,6 +20,13 @@
       "build": {
         "provider": "pip"
       }
+    },
+    {
+      "name": "wresponsecontrol",
+      "repo": "ssh://git@github.com/WisconsinRobotics/wresponsecontrol.git",
+      "build": {
+        "provider": "noop"
+      }
     }
   ]
 }
