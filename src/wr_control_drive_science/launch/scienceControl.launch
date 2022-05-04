@@ -1,4 +1,5 @@
 <launch>
     <node name="ScienceControl" pkg="wr_control_drive_science" type="ScienceControl" output="screen">
+        <rosparam file="$(find wr_control_drive_science)/config/scienceControl.yaml"/>
     </node>
 </launch>

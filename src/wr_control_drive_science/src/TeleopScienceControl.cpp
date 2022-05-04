@@ -4,14 +4,93 @@
 #include "std_msgs/UInt32.h"
 #include "std_msgs/Float64.h"
 #include "std_msgs/Int16.h"
+#include "ros/timer.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <termios.h>
+#include <string.h>
 
 constexpr std::uint32_t MESSAGE_CACHE_SIZE = 10;
+
+ros::Publisher moistureSensor1;
+ros::Publisher moistureSensor2;
+ros::Publisher moistureSensor3;
+int baudRate;
+std::string file;
+int fd;
+
+void moistureCallback(const ros::TimerEvent &) {
+    float buf[3];
+    /* Flush anything already in the serial buffer */
+    tcflush(fd, TCIFLUSH);
+    /* read up to 128 bytes from the fd */
+    int n = read(fd, buf, 3*sizeof(float));
+    std_msgs::Float32 temp;
+    temp.data = buf[0];
+    moistureSensor1.publish(temp);
+    temp.data = buf[1];
+    moistureSensor1.publish(temp);
+    temp.data = buf[2];
+    moistureSensor1.publish(temp);
+}
 
 int main(int argc, char** argv) {
     ros::init(argc, argv, "Science Teleop Control");
 
     ros::NodeHandle n;
-
+    ros::NodeHandle nh{"~"};
+    nh.getParam("fileLoc", file);
+    nh.getParam("baudRate", baudRate);
+    fd = open(file.c_str(), O_RDWR | O_NOCTTY);
+    ROS_ASSERT_MSG(fd != -1, "File %s does not exist", file.c_str());
+    usleep(3500000);
+    /* Set up the control structure */
+    struct termios toptions;
+ 
+    /* Get currently set options for the tty */
+    tcgetattr(fd, &toptions);
+    
+    /* Set custom options */
+    
+    cfsetispeed(&toptions, baudRate);
+    cfsetospeed(&toptions, baudRate);
+    /* 8 bits, no parity, no stop bits */
+    toptions.c_cflag &= ~PARENB;
+    toptions.c_cflag &= ~CSTOPB;
+    toptions.c_cflag &= ~CSIZE;
+    toptions.c_cflag |= CS8;
+    /* no hardware flow control */
+    toptions.c_cflag &= ~CRTSCTS;
+    /* enable receiver, ignore status lines */
+    toptions.c_cflag |= CREAD | CLOCAL;
+    /* disable input/output flow control, disable restart chars */
+    toptions.c_iflag &= ~(IXON | IXOFF | IXANY);
+    /* disable canonical input, disable echo,
+    disable visually erase chars,
+    disable terminal-generated signals */
+    toptions.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
+    /* disable output processing */
+    toptions.c_oflag &= ~OPOST;
+    
+    /* wait for 12 characters to come in before read returns */
+    /* WARNING! THIS CAUSES THE read() TO BLOCK UNTIL ALL */
+    /* CHARACTERS HAVE COME IN! */
+    toptions.c_cc[VMIN] = 12;
+    /* no minimum time to wait before read returns */
+    toptions.c_cc[VTIME] = 0;
+    
+    /* commit the options */
+    tcsetattr(fd, TCSANOW, &toptions);
+    
+    /* Wait for the Arduino to reset */
+    usleep(1000*1000);
+    moistureSensor1 = n.advertise<std_msgs::Float32>("control/science/moisture1", MESSAGE_CACHE_SIZE);
+    moistureSensor2 = n.advertise<std_msgs::Float32>("control/science/moisture2", MESSAGE_CACHE_SIZE);
+    moistureSensor3 = n.advertise<std_msgs::Float32>("control/science/moisture3", MESSAGE_CACHE_SIZE);
+    
+    ros::Timer timer = n.createTimer(ros::Duration(5), moistureCallback);
+ 
     ros::Publisher screwLiftPow = n.advertise<std_msgs::Int16>("/hsi/roboclaw/aux0/cmd/left", MESSAGE_CACHE_SIZE);
     ros::Publisher turnTablePow = n.advertise<std_msgs::Int16>("/hsi/roboclaw/aux0/cmd/right", MESSAGE_CACHE_SIZE);
     ros::Publisher linearActuatorPow = n.advertise<std_msgs::Int16>("/hsi/roboclaw/aux1/cmd/left", MESSAGE_CACHE_SIZE);
