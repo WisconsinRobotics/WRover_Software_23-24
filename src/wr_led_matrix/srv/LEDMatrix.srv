@@ -1,0 +1,5 @@
+#request fields
+uint8 RED
+uint8 GREEN
+uint8 BLUE
+---
