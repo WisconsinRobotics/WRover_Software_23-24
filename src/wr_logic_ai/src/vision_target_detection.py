@@ -35,9 +35,15 @@ def main():
     rospy.init_node('vision_target_detection', anonymous=True)
     rate = rospy.Rate(10)
 
+    stream_url = rospy.get_param('~video_stream')
+
     rospy.Subscriber(target_id_topic, UInt16, target_id_callback)
-    
-    cap = cv.VideoCapture(0)
+
+    if stream_url != None or stream_url != '':
+        cap = cv.VideoCapture(stream_url)
+    else:
+        cap = cv.VideoCapture(0)
+
     camera_info.publish(cap.get(cv.CAP_PROP_FRAME_WIDTH), cap.get(cv.CAP_PROP_FRAME_HEIGHT))
 
     if not cap.isOpened():

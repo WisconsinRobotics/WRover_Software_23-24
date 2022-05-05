@@ -1,4 +1,7 @@
 <launch>
-    <node name="vision_target_detection" pkg="wr_logic_ai" type="vision_target_detection.py" />
+    <arg name="video_stream" default=""/>
+    <node name="vision_target_detection" pkg="wr_logic_ai" type="vision_target_detection.py">
+        <param name="video_stream" type="str" value="$(arg video_stream)" />
+    </node>
     <node name="vision_navigation" pkg="wr_logic_ai" type="vision_navigation.py" />
 </launch>

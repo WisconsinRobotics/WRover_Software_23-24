@@ -32,11 +32,11 @@ def target_callback(data):
             # TODO logic for driving through gate (ids 4 and 5)
             x_offset = CAMERA_WIDTH/2 - data.x_center
             turn_speed = TURN_kP * x_offset
-            left_speed = max(DRIVE_SPEED, DRIVE_SPEED - turn_speed)
-            right_speed = max(DRIVE_SPEED, DRIVE_SPEED + turn_speed)
+            left_speed = min(max(DRIVE_SPEED, DRIVE_SPEED - turn_speed), 1)
+            right_speed = min(max(DRIVE_SPEED, DRIVE_SPEED + turn_speed), 1)
             rospy.loginfo("left speed: %f, right speed: %f", left_speed, right_speed)
             drivetrain_pub.publish(left_speed, right_speed)
-    print("I heard", str(data))
+    rospy.loginfo(str(data))
 
 
 def drive(left, right):
