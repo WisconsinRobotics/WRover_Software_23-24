@@ -1,0 +1,4 @@
+<launch>
+    <node name="vision_target_detection" pkg="wr_logic_ai" type="vision_target_detection.py" />
+    <node name="vision_navigation" pkg="wr_logic_ai" type="vision_navigation.py" />
+</launch>

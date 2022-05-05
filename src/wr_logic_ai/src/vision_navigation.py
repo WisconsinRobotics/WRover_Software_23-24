@@ -8,7 +8,7 @@ from wr_drive_msgs.msg import DriveTrainCmd
 CAMERA_WIDTH = 1280
 TARGET_IN_1M_AREA = 40000
 DRIVE_SPEED = 0.1
-TURN_kP = 0.001
+TURN_kP = 0.0001
 
 drivetrain_topic = '/control/drive_system/cmd'
 target_topic = '/wr_logic_ai/shortrange_ai/vision_target_data'
