@@ -18,11 +18,12 @@ def draw_markers(img):
     imgRejected = img.copy()
     (corners, ids, rejected) = detect_markers(img)
     cv.aruco.drawDetectedMarkers(imgDetected, corners, ids)
-    cv.aruco.drawDetectedMarkers(imgRejected, rejected, borderColor=(100, 0, 240))
+    cv.aruco.drawDetectedMarkers(
+        imgRejected, rejected, borderColor=(100, 0, 240))
     return (imgDetected, imgRejected)
 
 
 def set_params(params):
     if params.getNode('adaptiveThreshConstant') != None:
-        ARUCO_PARAMS.adaptiveThreshConstant = float(params.getNode('adaptiveThreshConstant'))
-
+        ARUCO_PARAMS.adaptiveThreshConstant = float(
+            params.getNode('adaptiveThreshConstant'))
