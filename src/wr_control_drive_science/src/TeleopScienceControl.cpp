@@ -12,27 +12,24 @@
 #include <string.h>
 
 constexpr std::uint32_t MESSAGE_CACHE_SIZE = 10;
+constexpr int SAMPLES_PER_READING = 3;
 
 ros::Publisher moistureSensor1;
-ros::Publisher moistureSensor2;
-ros::Publisher moistureSensor3;
 int baudRate;
 std::string file;
 int fd;
 
 void moistureCallback(const ros::TimerEvent &) {
-    float buf[3];
+    float buf[SAMPLES_PER_READING];
     /* Flush anything already in the serial buffer */
     tcflush(fd, TCIFLUSH);
     /* read up to 128 bytes from the fd */
-    int n = read(fd, buf, 3*sizeof(float));
+    int n = read(fd, buf, SAMPLES_PER_READING*sizeof(float));
     std_msgs::Float32 temp;
-    temp.data = buf[0];
-    moistureSensor1.publish(temp);
-    temp.data = buf[1];
-    moistureSensor1.publish(temp);
-    temp.data = buf[2];
-    moistureSensor1.publish(temp);
+    for(int i = 0; i < SAMPLES_PER_READING; i++) {
+        temp.data = buf[i];
+        moistureSensor1.publish(temp);
+    }
 }
 
 int main(int argc, char** argv) {
@@ -44,15 +41,15 @@ int main(int argc, char** argv) {
     nh.getParam("baudRate", baudRate);
     fd = open(file.c_str(), O_RDWR | O_NOCTTY);
     ROS_ASSERT_MSG(fd != -1, "File %s does not exist", file.c_str());
-    usleep(3500000);
     /* Set up the control structure */
     struct termios toptions;
  
     /* Get currently set options for the tty */
     tcgetattr(fd, &toptions);
-    
+
+
+ 
     /* Set custom options */
-    
     cfsetispeed(&toptions, baudRate);
     cfsetospeed(&toptions, baudRate);
     /* 8 bits, no parity, no stop bits */
@@ -72,22 +69,17 @@ int main(int argc, char** argv) {
     toptions.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
     /* disable output processing */
     toptions.c_oflag &= ~OPOST;
-    
     /* wait for 12 characters to come in before read returns */
     /* WARNING! THIS CAUSES THE read() TO BLOCK UNTIL ALL */
     /* CHARACTERS HAVE COME IN! */
     toptions.c_cc[VMIN] = 12;
     /* no minimum time to wait before read returns */
     toptions.c_cc[VTIME] = 0;
-    
+    /* avoid hangup */
+    toptions.c_cflag &= ~HUPCL;
     /* commit the options */
     tcsetattr(fd, TCSANOW, &toptions);
-    
-    /* Wait for the Arduino to reset */
-    usleep(1000*1000);
     moistureSensor1 = n.advertise<std_msgs::Float32>("control/science/moisture1", MESSAGE_CACHE_SIZE);
-    moistureSensor2 = n.advertise<std_msgs::Float32>("control/science/moisture2", MESSAGE_CACHE_SIZE);
-    moistureSensor3 = n.advertise<std_msgs::Float32>("control/science/moisture3", MESSAGE_CACHE_SIZE);
     
     ros::Timer timer = n.createTimer(ros::Duration(5), moistureCallback);
  

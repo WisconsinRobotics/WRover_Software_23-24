@@ -1,2 +1,2 @@
-fileLoc: "placeholder"
+fileLoc: "placeholder" # this should be a /dev/ttyUSB file for inital setup
 baudRate: 9600

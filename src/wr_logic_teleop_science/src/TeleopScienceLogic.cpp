@@ -32,14 +32,12 @@ int main(int argc, char** argv) {
     auto turnTableControlL = n.subscribe("/hci/science/gamepad/axis/shoulder_l", MESSAGE_CACHE_SIZE,
             static_cast<boost::function<void(const std_msgs::Bool::ConstPtr&)>>(
                 [&turnTableMsg, &turnTablePositions, &canListenL, &setpoint](const std_msgs::Bool::ConstPtr& msg) {
-                    if(msg->data) {
-                        if(canListenL) {
-                            setpoint = (setpoint + turnTablePositions.size() - 1) % turnTablePositions.size();
-                            std_msgs::Float64 x;
-                            x.data = turnTablePositions.at(setpoint);
-                            turnTableMsg.publish(x);
-                            canListenL = false;
-                        }
+                    if(msg->data && canListenL) {
+                        setpoint = (setpoint + turnTablePositions.size() - 1) % turnTablePositions.size();
+                        std_msgs::Float64 x;
+                        x.data = turnTablePositions.at(setpoint);
+                        turnTableMsg.publish(x);
+                        canListenL = false;
                     } else {
                     canListenL = true;
                     }
@@ -48,14 +46,12 @@ int main(int argc, char** argv) {
     auto turnTableControlR = n.subscribe("/hci/science/gamepad/axis/shoulder_r", MESSAGE_CACHE_SIZE,
             static_cast<boost::function<void(const std_msgs::Bool::ConstPtr&)>>(
                 [&turnTableMsg, &turnTablePositions, &canListenR, &setpoint](const std_msgs::Bool::ConstPtr& msg) {
-                    if(msg->data) {
-                        if(canListenR) {
-                            setpoint = (setpoint + turnTablePositions.size() + 1) % turnTablePositions.size();
-                            std_msgs::Float64 x;
-                            x.data = turnTablePositions.at(setpoint);
-                            turnTableMsg.publish(x);
-                            canListenR = false;
-                        }
+                    if(msg->data && canListenR) {
+                        setpoint = (setpoint + turnTablePositions.size() + 1) % turnTablePositions.size();
+                        std_msgs::Float64 x;
+                        x.data = turnTablePositions.at(setpoint);
+                        turnTableMsg.publish(x);
+                        canListenR = false;
                     } else {
                     canListenR = true;
                     }
