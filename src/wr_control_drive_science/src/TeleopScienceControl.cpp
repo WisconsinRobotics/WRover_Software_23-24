@@ -15,10 +15,10 @@ constexpr std::uint32_t MESSAGE_CACHE_SIZE = 10;
 constexpr int SAMPLES_PER_READING = 3;
 constexpr float TIMER_CALLBACK_DURATION = 5;
 
-ros::Publisher moistureSensor1;
 int baudRate;
 std::string file;
 int fd;
+std::array<ros::Publisher, SAMPLES_PER_READING> sensorPublishers;
 
 void moistureCallback(const ros::TimerEvent &timerEvent) {
     std::array<float, SAMPLES_PER_READING> buf;
@@ -31,7 +31,7 @@ void moistureCallback(const ros::TimerEvent &timerEvent) {
     std_msgs::Float32 temp;
     for(int i = 0; i < SAMPLES_PER_READING; i++) {
         temp.data = buf[i];
-        moistureSensor1.publish(temp);
+        sensorPublishers[i].publish(temp);
     }
 }
 
@@ -90,7 +90,9 @@ auto main(int argc, char** argv) -> int {
     toptions.c_cflag &= ~HUPCL;
     /* commit the options */
     tcsetattr(fd, TCSANOW, &toptions);
-    moistureSensor1 = n.advertise<std_msgs::Float32>("control/science/moisture1", MESSAGE_CACHE_SIZE);
+    for(int i = 0; i < SAMPLES_PER_READING; i++) {
+        sensorPublishers[i] = n.advertise<std_msgs::Float32>("control/science/moisture" + std::to_string(i), MESSAGE_CACHE_SIZE);
+    }
     
     ros::Timer timer = n.createTimer(ros::Duration(TIMER_CALLBACK_DURATION), moistureCallback);
  
