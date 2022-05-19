@@ -7,7 +7,7 @@
 
 constexpr std::uint32_t MESSAGE_CACHE_SIZE = 10;
 
-int main(int argc, char** argv) {
+auto main(int argc, char** argv) -> int {
     ros::init(argc, argv, "Science Teleop Logic");
 
     ros::NodeHandle n;
@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
     np.getParam("turnTablePositions", turnTablePositions);
     bool canListenL = true;
     bool canListenR = true;
-    int setpoint = 0;
+    unsigned long setpoint = 0;
      
     auto screwLiftMsg = n.advertise<std_msgs::Float32>("/logic/science/screwLift", MESSAGE_CACHE_SIZE);
     auto turnTableMsg = n.advertise<std_msgs::Float64>("/logic/science/turnTable", MESSAGE_CACHE_SIZE);
