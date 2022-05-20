@@ -14,6 +14,7 @@
 constexpr std::uint32_t MESSAGE_CACHE_SIZE = 10;
 constexpr int SAMPLES_PER_READING = 3;
 constexpr float TIMER_CALLBACK_DURATION = 5;
+constexpr int NUM_CHARS_READ = 12;
 
 int baudRate;
 std::string file;
@@ -83,7 +84,7 @@ auto main(int argc, char** argv) -> int {
     /* wait for 12 characters to come in before read returns */
     /* WARNING! THIS CAUSES THE read() TO BLOCK UNTIL ALL */
     /* CHARACTERS HAVE COME IN! */
-    toptions.c_cc[VMIN] = 12; 
+    toptions.c_cc[VMIN] = NUM_CHARS_READ; 
     /* no minimum time to wait before read returns */
     toptions.c_cc[VTIME] = 0;
     /* avoid hangup */
@@ -91,7 +92,7 @@ auto main(int argc, char** argv) -> int {
     /* commit the options */
     tcsetattr(fd, TCSANOW, &toptions);
     for(int i = 0; i < SAMPLES_PER_READING; i++) {
-        sensorPublishers[i] = n.advertise<std_msgs::Float32>("control/science/moisture" + std::to_string(i), MESSAGE_CACHE_SIZE);
+        sensorPublishers[i] = n.advertise<std_msgs::Float32>(&"control/science/moisture" [ std::to_string(i)], MESSAGE_CACHE_SIZE);
     }
     
     ros::Timer timer = n.createTimer(ros::Duration(TIMER_CALLBACK_DURATION), moistureCallback);
