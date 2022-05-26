@@ -14,72 +14,151 @@
 constexpr std::uint32_t MESSAGE_CACHE_SIZE = 10;
 constexpr int SAMPLES_PER_READING = 3;
 constexpr float TIMER_CALLBACK_DURATION = 5;
-constexpr int NUM_CHARS_READ = 12;
+constexpr int NUM_CHARS_READ = SAMPLES_PER_READING*sizeof(float);
 
-int baudRate;
-std::string file;
-int fd;
+//NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
+int fileHandle;
+//NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 std::array<ros::Publisher, SAMPLES_PER_READING> sensorPublishers;
 
 void moistureCallback(const ros::TimerEvent &timerEvent) {
-    std::array<float, SAMPLES_PER_READING> buf;
+    std::array<float, SAMPLES_PER_READING> buf{};
     /* Flush anything already in the serial buffer */
-    tcflush(fd, TCIFLUSH);
+    tcflush(fileHandle, TCIFLUSH);
     /* read up to 128 bytes from the fd */
-    int readStatus = read(fd, buf.data(), SAMPLES_PER_READING*sizeof(float));
+    long readStatus = read(fileHandle, buf.data(), NUM_CHARS_READ);
     //NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg, hicpp-no-array-decay, hicpp-no-assembler, hicpp-vararg)
     ROS_ASSERT_MSG(readStatus != -1, "Read failed");
     std_msgs::Float32 temp;
     for(int i = 0; i < SAMPLES_PER_READING; i++) {
-        temp.data = buf[i];
-        sensorPublishers[i].publish(temp);
+        temp.data = buf.at(i);
+        sensorPublishers.at(i).publish(temp);
     }
 }
+
+void setupFileHandle(const std::string& fileName, int baud);
 
 auto main(int argc, char** argv) -> int {
     ros::init(argc, argv, "Science Teleop Control");
 
-    ros::NodeHandle n;
-    ros::NodeHandle nh{"~"};
-    nh.getParam("fileLoc", file);
-    nh.getParam("baudRate", baudRate);
+    ros::NodeHandle node;
+    ros::NodeHandle privateNode{"~"};
+    std::string file{};
+    int baudRate = 0;
+    privateNode.getParam("fileLoc", file);
+    privateNode.getParam("baudRate", baudRate);
+    
+    setupFileHandle(file, baudRate);
+
+    for(int i = 0; i < SAMPLES_PER_READING; i++) {
+        using namespace std::string_literals;
+        sensorPublishers.at(i) = node.advertise<std_msgs::Float32>("control/science/moisture"s + std::to_string(i), MESSAGE_CACHE_SIZE);
+    }
+    
+    ros::Timer timer = node.createTimer(ros::Duration(TIMER_CALLBACK_DURATION), moistureCallback);
+ 
+    ros::Publisher screwLiftPow = node.advertise<std_msgs::Int16>("/hsi/roboclaw/aux0/cmd/left", MESSAGE_CACHE_SIZE);
+    ros::Publisher turnTablePow = node.advertise<std_msgs::Int16>("/hsi/roboclaw/aux0/cmd/right", MESSAGE_CACHE_SIZE);
+    ros::Publisher linearActuatorPow = node.advertise<std_msgs::Int16>("/hsi/roboclaw/aux1/cmd/left", MESSAGE_CACHE_SIZE);
+    ros::Publisher clawPow = node.advertise<std_msgs::Int16>("/hsi/roboclaw/aux1/cmd/right", MESSAGE_CACHE_SIZE);
+    ros::Publisher turnTableEncoder = node.advertise<std_msgs::Float64>("pid/turnTable", MESSAGE_CACHE_SIZE);
+
+    ros::Subscriber encoderSub = node.subscribe("/hsi/roboclaw/aux0/enc/right", MESSAGE_CACHE_SIZE,
+            static_cast<boost::function<void(const std_msgs::UInt32::ConstPtr&)>>(
+                [&turnTableEncoder](const std_msgs::UInt32::ConstPtr& msg) {
+                    std_msgs::Float64 out;
+                    out.data = msg->data;
+                    turnTableEncoder.publish(out);
+                }
+    ));
+    ros::Subscriber screwLiftSub = node.subscribe("logic/science/screwLift", MESSAGE_CACHE_SIZE,
+            static_cast<boost::function<void(const std_msgs::Float32::ConstPtr&)>>(
+                [&screwLiftPow](const std_msgs::Float32::ConstPtr& msg) {
+                    std_msgs::Int16 out;
+                    out.data = static_cast<short>(msg->data * INT16_MAX);
+                    screwLiftPow.publish(out);
+                }
+    ));
+    ros::Subscriber turnTableSub = node.subscribe("pid/turnTablePow", MESSAGE_CACHE_SIZE,
+            static_cast<boost::function<void(const std_msgs::Float64::ConstPtr&)>>(
+                [&turnTablePow](const std_msgs::Float64::ConstPtr& msg) {
+                    std_msgs::Int16 out;
+                    out.data = static_cast<short>(msg->data * INT16_MAX);
+                    turnTablePow.publish(out);
+                }
+            )); 
+            
+    ros::Subscriber linearActuatorSub = node.subscribe("logic/science/linearActuator", MESSAGE_CACHE_SIZE,
+            static_cast<boost::function<void(const std_msgs::Float32::ConstPtr&)>>(
+                [&linearActuatorPow](const std_msgs::Float32::ConstPtr& msg) {
+                    std_msgs::Int16 out;
+                    out.data = static_cast<short>(msg->data * INT16_MAX);
+                    linearActuatorPow.publish(out);
+                }
+    ));
+    ros::Subscriber clawSub = node.subscribe("logic/science/claw", MESSAGE_CACHE_SIZE,
+            static_cast<boost::function<void(const std_msgs::Float32::ConstPtr&)>>(
+                [&clawPow](const std_msgs::Float32::ConstPtr& msg) {
+                    std_msgs::Int16 out;
+                    out.data = static_cast<short>(msg->data * INT16_MAX);
+                    clawPow.publish(out);
+                }
+    ));
+
+    ros::spin();
+}
+
+template<typename T>
+constexpr void setFlag(T& ref, unsigned int value){
+    ref |= value;
+}
+
+template<typename T>
+constexpr void unsetFlag(T& ref, unsigned int value){
+    ref &= ~value;
+}
+
+void setupFileHandle(const std::string& fileName, int baud){
     //NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg, hicpp-vararg, hicpp-signed-bitwise)
-    fd = open(file.c_str(), O_RDWR | O_NOCTTY);
+    fileHandle = open(fileName.c_str(), O_RDWR | O_NOCTTY);
     //NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg, hicpp-no-array-decay, hicpp-no-assembler, hicpp-vararg)
-    ROS_ASSERT_MSG(fd != -1, "File %s does not exist", file.c_str());
+    ROS_ASSERT_MSG(fileHandle != -1, "File %s does not exist", fileName.c_str());
     /* Set up the control structure */
-    struct termios toptions;
+    termios toptions{};
  
     /* Get currently set options for the tty */
-    tcgetattr(fd, &toptions);
-
-
+    tcgetattr(fileHandle, &toptions);
  
     /* Set custom options */
-    cfsetispeed(&toptions, baudRate);
-    cfsetospeed(&toptions, baudRate);
+    cfsetispeed(&toptions, baud);
     /* 8 bits, no parity, no stop bits */
-    toptions.c_cflag &= ~PARENB; //NOLINT(hicpp-signed-bitwise)
-    toptions.c_cflag &= ~CSTOPB; //NOLINT(hicpp-signed-bitwise)
-    toptions.c_cflag &= ~CSIZE; //NOLINT(hicpp-signed-bitwise)
-    toptions.c_cflag |= CS8; //NOLINT(hicpp-signed-bitwise)
+    unsetFlag(toptions.c_cflag, PARENB);
+    unsetFlag(toptions.c_cflag, CSTOPB);
+    unsetFlag(toptions.c_cflag, CSIZE);
+    setFlag(toptions.c_cflag, CS8);
 
     /* no hardware flow control */
-    toptions.c_cflag &= ~CRTSCTS;
+    unsetFlag(toptions.c_cflag, CRTSCTS);
 
     /* enable receiver, ignore status lines */
-    toptions.c_cflag |= CREAD | CLOCAL; //NOLINT(hicpp-signed-bitwise)
+    setFlag(toptions.c_cflag, CREAD);
+    setFlag(toptions.c_cflag, CLOCAL);
 
     /* disable input/output flow control, disable restart chars */
-    toptions.c_iflag &= ~(IXON | IXOFF | IXANY); //NOLINT(hicpp-signed-bitwise)
+    unsetFlag(toptions.c_iflag, IXON);
+    unsetFlag(toptions.c_iflag, IXOFF);
+    unsetFlag(toptions.c_iflag, IXANY);
 
     /* disable canonical input, disable echo,
     disable visually erase chars,
     disable terminal-generated signals */
-    toptions.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG); //NOLINT(hicpp-signed-bitwise)
+    unsetFlag(toptions.c_lflag, ICANON);
+    unsetFlag(toptions.c_lflag, ECHO);
+    unsetFlag(toptions.c_lflag, ECHOE);
+    unsetFlag(toptions.c_lflag, ISIG);
 
     /* disable output processing */
-    toptions.c_oflag &= ~OPOST; //NOLINT(hicpp-signed-bitwise)
+    unsetFlag(toptions.c_oflag, OPOST);
     
     /* wait for 12 characters to come in before read returns */
     /* WARNING! THIS CAUSES THE read() TO BLOCK UNTIL ALL */
@@ -88,63 +167,7 @@ auto main(int argc, char** argv) -> int {
     /* no minimum time to wait before read returns */
     toptions.c_cc[VTIME] = 0;
     /* avoid hangup */
-    toptions.c_cflag &= ~HUPCL;
+    unsetFlag(toptions.c_cflag, HUPCL);
     /* commit the options */
-    tcsetattr(fd, TCSANOW, &toptions);
-    for(int i = 0; i < SAMPLES_PER_READING; i++) {
-        sensorPublishers[i] = n.advertise<std_msgs::Float32>(&"control/science/moisture" [ std::to_string(i)], MESSAGE_CACHE_SIZE);
-    }
-    
-    ros::Timer timer = n.createTimer(ros::Duration(TIMER_CALLBACK_DURATION), moistureCallback);
- 
-    ros::Publisher screwLiftPow = n.advertise<std_msgs::Int16>("/hsi/roboclaw/aux0/cmd/left", MESSAGE_CACHE_SIZE);
-    ros::Publisher turnTablePow = n.advertise<std_msgs::Int16>("/hsi/roboclaw/aux0/cmd/right", MESSAGE_CACHE_SIZE);
-    ros::Publisher linearActuatorPow = n.advertise<std_msgs::Int16>("/hsi/roboclaw/aux1/cmd/left", MESSAGE_CACHE_SIZE);
-    ros::Publisher clawPow = n.advertise<std_msgs::Int16>("/hsi/roboclaw/aux1/cmd/right", MESSAGE_CACHE_SIZE);
-    ros::Publisher turnTableEncoder = n.advertise<std_msgs::Float64>("pid/turnTable", MESSAGE_CACHE_SIZE);
-
-    ros::Subscriber encoderSub = n.subscribe("/hsi/roboclaw/aux0/enc/right", MESSAGE_CACHE_SIZE,
-            static_cast<boost::function<void(const std_msgs::UInt32::ConstPtr&)>>(
-                [&turnTableEncoder](const std_msgs::UInt32::ConstPtr& msg) {
-                    std_msgs::Float64 out;
-                    out.data = msg->data;
-                    turnTableEncoder.publish(out);
-                }
-    ));
-    ros::Subscriber screwLiftSub = n.subscribe("logic/science/screwLift", MESSAGE_CACHE_SIZE,
-            static_cast<boost::function<void(const std_msgs::Float32::ConstPtr&)>>(
-                [&screwLiftPow](const std_msgs::Float32::ConstPtr& msg) {
-                    std_msgs::Int16 out;
-                    out.data = msg->data * INT16_MAX;
-                    screwLiftPow.publish(out);
-                }
-    ));
-    ros::Subscriber turnTableSub = n.subscribe("pid/turnTablePow", MESSAGE_CACHE_SIZE,
-            static_cast<boost::function<void(const std_msgs::Float64::ConstPtr&)>>(
-                [&turnTablePow](const std_msgs::Float64::ConstPtr& msg) {
-                    std_msgs::Int16 out;
-                    out.data = msg->data * INT16_MAX;
-                    turnTablePow.publish(out);
-                }
-            )); 
-            
-    ros::Subscriber linearActuatorSub = n.subscribe("logic/science/linearActuator", MESSAGE_CACHE_SIZE,
-            static_cast<boost::function<void(const std_msgs::Float32::ConstPtr&)>>(
-                [&linearActuatorPow](const std_msgs::Float32::ConstPtr& msg) {
-                    std_msgs::Int16 out;
-                    out.data = msg->data * INT16_MAX;
-                    linearActuatorPow.publish(out);
-                }
-    ));
-    ros::Subscriber clawSub = n.subscribe("logic/science/claw", MESSAGE_CACHE_SIZE,
-            static_cast<boost::function<void(const std_msgs::Float32::ConstPtr&)>>(
-                [&clawPow](const std_msgs::Float32::ConstPtr& msg) {
-                    std_msgs::Int16 out;
-                    out.data = msg->data * INT16_MAX;
-                    clawPow.publish(out);
-                }
-    ));
-
-    ros::spin();
+    tcsetattr(fileHandle, TCSANOW, &toptions);
 }
-    
