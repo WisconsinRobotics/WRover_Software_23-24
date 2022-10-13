@@ -14,7 +14,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://arm_assembly/meshes/base_link.STL" />
+                <mesh filename="package://arm_assembly/meshes/base_link.stl" />
             </geometry>
             <material name="">
                 <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
@@ -23,7 +23,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://arm_assembly/meshes/base_link.STL" />
+                <mesh filename="package://arm_assembly/meshes/base_link.stl" />
             </geometry>
         </collision>
     </link>
@@ -38,7 +38,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://arm_assembly/meshes/shoulderBase_link.STL" />
+                <mesh filename="package://arm_assembly/meshes/shoulderBase_link.stl" />
             </geometry>
             <material name="">
                 <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
@@ -47,7 +47,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://arm_assembly/meshes/shoulderBase_link.STL" />
+                <mesh filename="package://arm_assembly/meshes/shoulderBase_link.stl" />
             </geometry>
         </collision>
     </link>
@@ -69,7 +69,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://arm_assembly/meshes/upperArm_link.STL" />
+                <mesh filename="package://arm_assembly/meshes/upperArm_link.stl" />
             </geometry>
             <material name="">
                 <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
@@ -78,7 +78,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://arm_assembly/meshes/upperArm_link.STL" />
+                <mesh filename="package://arm_assembly/meshes/upperArm_link.stl" />
             </geometry>
         </collision>
     </link>
@@ -100,7 +100,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://arm_assembly/meshes/forarm_link.STL" />
+                <mesh filename="package://arm_assembly/meshes/forarm_link.stl" />
             </geometry>
             <material name="">
                 <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
@@ -109,7 +109,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://arm_assembly/meshes/forarm_link.STL" />
+                <mesh filename="package://arm_assembly/meshes/forarm_link.stl" />
             </geometry>
         </collision>
     </link>
@@ -131,7 +131,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://arm_assembly/meshes/wirstBase_link.STL" />
+                <mesh filename="package://arm_assembly/meshes/wirstBase_link.stl" />
             </geometry>
             <material name="">
                 <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
@@ -140,7 +140,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://arm_assembly/meshes/wirstBase_link.STL" />
+                <mesh filename="package://arm_assembly/meshes/wirstBase_link.stl" />
             </geometry>
         </collision>
     </link>
@@ -162,7 +162,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://arm_assembly/meshes/wrist_link.STL" />
+                <mesh filename="package://arm_assembly/meshes/wrist_link.stl" />
             </geometry>
             <material name="">
                 <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
@@ -171,7 +171,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://arm_assembly/meshes/wrist_link.STL" />
+                <mesh filename="package://arm_assembly/meshes/wrist_link.stl" />
             </geometry>
         </collision>
     </link>
@@ -193,7 +193,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://arm_assembly/meshes/manipulator_link.STL" />
+                <mesh filename="package://arm_assembly/meshes/manipulator_link.stl" />
             </geometry>
             <material name="">
                 <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
@@ -202,7 +202,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://arm_assembly/meshes/manipulator_link.STL" />
+                <mesh filename="package://arm_assembly/meshes/manipulator_link.stl" />
             </geometry>
         </collision>
     </link>

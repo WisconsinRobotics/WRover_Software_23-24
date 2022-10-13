@@ -52,6 +52,8 @@ class ArmMotor{
         unsigned int motorID;
         /// The current encoder value
         uint32_t encoderVal;
+        /// Target encoder counts for run to target
+        uint32_t target;
         /// The ROS Subscriber that reads the encoders
         ros::Subscriber encRead;
         /// The ROS Publisher that sets the encoder targets
