@@ -27,7 +27,6 @@
       "build": {
         "provider": "noop"
       }
-<<<<<<< HEAD
     },
     {
       "name": "moveit",
@@ -42,8 +41,6 @@
         "package": "ros-noetic-moveit-visual-tools",
         "provider": "apt"
       }
-=======
->>>>>>> 2969bf18b37bf4a838ef4979cb08db315d0fd321
     }
   ]
 }
