@@ -1,2 +1,2 @@
-paramiko==2.6.0
+paramiko>=2.10.1
 rospkg==1.2.10

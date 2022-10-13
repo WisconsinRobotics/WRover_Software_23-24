@@ -1,0 +1,10 @@
+rate: 50
+controllers:
+  - setpointTopic: "/logic/science/turnTable"
+    feedbackTopic: "pid/turnTable"
+    outputTopic: "pid/turnTablePow"
+    P: 0
+    I: 0
+    D: 0
+    min: -1
+    max: 1
