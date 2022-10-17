@@ -56,7 +56,13 @@ void ArmMotor::redirectPowerOutput(const Std_Float64 &msg){
 }
 
 void ArmMotor::storeStallStatus(const Std_Bool &msg) {
-    this->isStall = static_cast<bool>(msg->data);
+    if (static_cast<bool>(msg->data)) {
+        if ((ros::Time::now() - beginStallTime).toSec() >= STALL_THRESHOLD_TIME) {
+            this->setPower(0.0F, MotorState::STALLING);
+        }
+    } else {
+        beginStallTime = ros::Time::now();
+    }
 }
 
 /// controllerID is constrained between [0,3]
@@ -144,20 +150,8 @@ void ArmMotor::setPower(float power, MotorState state){
     this->currState = state;
 }
 
-auto ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block) -> bool{
-    // Checks for stall
+void ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block){
     this->target = targetCounts; 
-
-    if (this->isStall) {
-        std::cout << "stall" << std::endl;
-        if ((ros::Time::now() - begin).toSec() >= STALL_THRESHOLD_TIME) {
-            this->setPower(0.0F, MotorState::STOP);
-            this->currState = MotorState::STOP;
-            return false;
-        }
-    } else {
-        begin = ros::Time::now();
-    }
     this->maxPower = power;
     // If we are not at our target...
     if(!this->hasReachedTarget(targetCounts)){
@@ -183,14 +177,12 @@ auto ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block) -> bo
         while(!this->hasReachedTarget(targetCounts));
         this->setPower(0.F, MotorState::RUN_TO_TARGET);
     }
-
-    return true;
 }
 
-auto ArmMotor::runToTarget(double rads, float power) -> bool{
+void ArmMotor::runToTarget(double rads, float power){
     // std::cout << "run to target: " << rads << ":" << this->radToEnc(rads) << ":" << this->getEncoderCounts() << std::endl;
     
-    return runToTarget(this->radToEnc(rads), power, false);
+    runToTarget(this->radToEnc(rads), power, false);
 }
 
 auto ArmMotor::getMotorName() const -> std::string{

@@ -35,7 +35,7 @@ public:
 
     void configSetpoint(int degreeIndex, double position, double velocity);
 
-    auto exectute() -> bool;
+    void exectute();
 
     void stopJoint();
 

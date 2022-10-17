@@ -133,7 +133,17 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
 
         for(int k = 0; k < joint->getDegreesOfFreedom(); k++){
 
-          hasPositionFinished &= joint->getMotor(k)->getMotorState() == MotorState::STOP;      
+          if (joint->getMotor(k)->getMotorState() == MotorState::STALLING) {
+            IKEnabled = false;
+            std_srvs::Trigger srv;
+            if (enableServiceClient.call(srv)) {
+              ROS_WARN("%s", (std::string{"PLACEHOLDER_NAME: "} + srv.response.message).data()); // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
+            } else {
+              ROS_WARN("Error: failed to call service PLACEHOLDER_NAME"); // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
+            }
+          } else {
+            hasPositionFinished &= joint->getMotor(k)->getMotorState() == MotorState::STOP;
+          }      
           // DEBUGGING OUTPUT: Print each motor's name, radian position, encoder position, and power
           // std::cout<<std::setw(30)<<motors[j]->getEncoderCounts()<<std::endl;
         }
