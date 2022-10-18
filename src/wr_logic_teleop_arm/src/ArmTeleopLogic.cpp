@@ -69,6 +69,7 @@ auto main(int argc, char** argv) -> int{
     const tf2::Quaternion SPIN_Y {0, sin(2*M_PI/1000), 0, cos(2*M_PI/1000)};
     const tf2::Quaternion SPIN_Z {0, 0, sin(2*M_PI/1000), cos(2*M_PI/1000)};
 
+    ros::Duration(5).sleep();
     moveit::planning_interface::MoveGroupInterface move("arm");
     // move.setPlannerId("RRTStar");
     move.setPlanningTime(PLANNING_TIME);
