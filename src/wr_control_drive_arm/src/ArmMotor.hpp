@@ -33,7 +33,7 @@ class ArmMotor{
         /// Time tolerance of over-current detection before a stall fault is triggered
         static constexpr float STALL_THRESHOLD_TIME = 0.5;
         /// Tolerance ratio w.r.t the counts per rotation for encoder run-to-position motion
-        static constexpr double TOLERANCE_RATIO = 0.1/360;
+        static constexpr double TOLERANCE_RATIO = 0.5/360;
         /// Size of ROS Topic message caches
         static constexpr uint32_t MESSAGE_CACHE_SIZE = 10;
         /// The number of encoder counts per rotation

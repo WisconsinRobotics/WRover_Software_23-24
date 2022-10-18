@@ -9,7 +9,5 @@ controller_list:
       - wrist_pitch
       - wrist_roll
 initial:  # Define initial robot poses.
-#  - group: arm
-#    pose: home
-
-  []
+ - group: arm
+   pose: home

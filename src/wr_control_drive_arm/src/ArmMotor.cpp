@@ -42,9 +42,9 @@ void ArmMotor::storeEncoderVals(const Std_UInt32 &msg){
     this->feedbackPub.publish(feedbackMsg);
 
     if(this->currState == MotorState::RUN_TO_TARGET){
-        std::cout << "[2] " << (hasReachedTarget(this->target) ? "at target " : "not at target ") << this->target << ":" << this->encoderVal << std::endl;
+        // std::cout << "[2] " << (hasReachedTarget(this->target) ? "at target " : "not at target ") << this->target << ":" << this->encoderVal << std::endl;
         if(hasReachedTarget(this->target)){
-            std::cout << "[1] stop motor" << std::endl;
+            // std::cout << "[1] stop motor" << std::endl;
             this->setPower(0.F, MotorState::STOP);
         }
     }
@@ -103,7 +103,7 @@ auto ArmMotor::getEncoderCounts() const -> uint32_t{
 }
 
 void ArmMotor::runToTarget(uint32_t targetCounts, float power){
-    std::cout << "run to enc: " << targetCounts << std::endl;
+    // std::cout << "run to enc: " << targetCounts << std::endl;
     this->runToTarget(targetCounts, power, false);
 }
 
@@ -112,6 +112,8 @@ auto ArmMotor::hasReachedTarget(uint32_t targetCounts, uint32_t tolerance) const
     uint32_t lBound = ArmMotor::corrMod(static_cast<double>(targetCounts - tolerance), static_cast<double>(ArmMotor::ENCODER_BOUNDS[1]));
     uint32_t uBound = ArmMotor::corrMod(static_cast<double>(targetCounts + tolerance), static_cast<double>(ArmMotor::ENCODER_BOUNDS[1]));
     // If the computed lower bound is lower than the upper bound, perform the computation normally
+    if(lBound == uBound)
+        return this->getEncoderCounts() == lBound;
     if(lBound < uBound)
         return this->getEncoderCounts() <= uBound && this->getEncoderCounts() >=lBound;
     // Otherwise, check if the value is outside either bound and negate the response
@@ -119,7 +121,7 @@ auto ArmMotor::hasReachedTarget(uint32_t targetCounts, uint32_t tolerance) const
 }
 
 /// Current tolerance is &pm;0.1 degree w.r.t. the current number of counts per rotation
-auto ArmMotor::hasReachedTarget(uint32_t targetCounts) const -> bool{
+auto ArmMotor::hasReachedTarget(uint32_t targetCounts) const -> bool {
     return ArmMotor::hasReachedTarget(targetCounts, ArmMotor::TOLERANCE_RATIO * static_cast<double>(std::abs(this->COUNTS_PER_ROTATION)));
 }
 
@@ -161,7 +163,7 @@ auto ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block) -> bo
     this->maxPower = power;
     // If we are not at our target...
     if(!this->hasReachedTarget(targetCounts)){
-        // std::cout << "has not reached target" << std::endl;
+        // std::cout << " | not at target" << std::endl;
         // Set the power in the correct direction and continue running to the target
         this->currState = MotorState::RUN_TO_TARGET;
         std_msgs::Float64 setpointMsg;
@@ -174,7 +176,7 @@ auto ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block) -> bo
 
     // Otherwise, stop the motor
     } else {
-        // std::cout << "has reached target" << std::endl;
+        // std::cout << " | has reached target" << std::endl;
         this->setPower(0.F, MotorState::STOP);
     }
     // If this is a blocking call...
@@ -188,8 +190,7 @@ auto ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block) -> bo
 }
 
 auto ArmMotor::runToTarget(double rads, float power) -> bool{
-    // std::cout << "run to target: " << rads << ":" << this->radToEnc(rads) << ":" << this->getEncoderCounts() << std::endl;
-    
+    // std::cout << "run to target: " << (rads * 180 / M_PI )<< ":" << this->encToRad(this->getEncoderCounts()) * 180 / M_PI;
     return runToTarget(this->radToEnc(rads), power, false);
 }
 

@@ -127,7 +127,6 @@ include_directories(
    src/ArmMotor.cpp
    src/AbstractJoint.cpp
    src/DifferentialJoint.cpp
-   src/SimpleJoint.cpp
  )
 
 ## Add cmake target dependencies of the library

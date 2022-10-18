@@ -18,7 +18,6 @@
 #include <array>
 #include <memory>
 #include <std_srvs/Trigger.h>
-#include "SimpleJoint.hpp"
 #include "DifferentialJoint.hpp"
 #include "ros/console.h"
 
@@ -47,8 +46,9 @@ constexpr float TIMER_CALLBACK_DURATION = 1.0 / 50.0;
 /**
  * @brief Defines space for all Joint references
  */
-constexpr int NUM_JOINTS = 5;
-std::array<std::unique_ptr<AbstractJoint>, NUM_JOINTS> joints;
+constexpr int NUM_JOINTS = 4;
+std::array<std::unique_ptr<ArmMotor>, NUM_JOINTS> joints;
+std::unique_ptr<DifferentialJoint> differentialJoint;
 // AbstractJoint *joints[numJoints];
 /**
  * @brief The Joint State Publisher for MoveIt
@@ -107,18 +107,19 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
       ));
 
     ArmMotor *currmotor = NULL; 
-    int currItr = 0;
     std::cout << currPoint << " / " << goal->trajectory.points.size() << std::endl;
     currPoint++;
-    for(const auto &joint : joints){
-      for(int i = 0; i < joint->getDegreesOfFreedom(); i++){
-        double velocity = VELOCITY_MAX == 0.F ? JOINT_SAFETY_HOLD_SPEED : currTargetPosition.velocities[currItr]/VELOCITY_MAX;
-        std::cout << "config setpoint: " << currTargetPosition.positions[currItr] << ":" << velocity << std::endl;
-        joint->configSetpoint(i, currTargetPosition.positions[currItr], velocity);
-        currItr++;
+    for(int i = 0; i < 6; i++){
+      double velocity = VELOCITY_MAX == 0.F ? JOINT_SAFETY_HOLD_SPEED : currTargetPosition.velocities[i]/VELOCITY_MAX;
+      // std::cout << "config setpoint: " << currTargetPosition.positions[currItr] << ":" << velocity << std::endl;
+      if(i < 4){
+        joints.at(i)->runToTarget(currTargetPosition.positions[i], velocity);
+      } else {
+        differentialJoint->configSetpoint(i-4, currTargetPosition.positions[i], velocity);
       }
-      joint->exectute();
     }
+
+    differentialJoint->exectute();
 
     // While the current position is not complete yet...
     while(!hasPositionFinished){
@@ -127,28 +128,13 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
       // Create the Joint State message for the current update cycle
 
       // For each joint specified in the currTargetPosition...
-      for(const auto &joint : joints){
-
-        // joint->exectute();
-
-        for(int k = 0; k < joint->getDegreesOfFreedom(); k++){
-
-          hasPositionFinished &= joint->getMotor(k)->getMotorState() == MotorState::STOP;      
-          // DEBUGGING OUTPUT: Print each motor's name, radian position, encoder position, and power
-          // std::cout<<std::setw(30)<<motors[j]->getEncoderCounts()<<std::endl;
-        }
-
-        // if (!joint->exectute()) {
-        //   IKEnabled = false;
-        //   std_srvs::Trigger srv;
-        //   if (enableServiceClient.call(srv)) {
-        //     ROS_WARN("%s", (std::string{"PLACEHOLDER_NAME: "} + srv.response.message).data()); // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
-        //   } else {
-        //     ROS_WARN("Error: failed to call service PLACEHOLDER_NAME"); // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
-        //   }
-        //   return;
-        // }
+      for(const auto &motor : joints){
+        hasPositionFinished &= motor->getMotorState() == MotorState::STOP;      
       }
+
+      hasPositionFinished &= differentialJoint->getMotor(0)->getMotorState() == MotorState::STOP;
+      hasPositionFinished &= differentialJoint->getMotor(1)->getMotorState() == MotorState::STOP;
+
       // Sleep until the next update cycle
       loop.sleep();
     }
@@ -167,12 +153,18 @@ void publishJointStates(const ros::TimerEvent &event){
   std::vector<double> positions;
   sensor_msgs::JointState js_msg;
 
-  for(const auto &joint : joints){
-    for(int i = 0; i < joint->getDegreesOfFreedom(); i++){
-      names.push_back(joint->getMotor(i)->getMotorName());
-      positions.push_back(joint->getMotor(i)->getRads());
-    }
+
+  for(const auto &motor : joints){
+    names.push_back(motor->getMotorName());
+    positions.push_back(motor->getRads());
   }
+
+  std::vector<double> motorPositions = {differentialJoint->getMotor(0)->getRads(), differentialJoint->getMotor(0)->getRads()};
+  std::vector<double> jointPositions = differentialJoint->getJointPositions(motorPositions);
+  names.push_back(differentialJoint->getMotor(0)->getMotorName());
+  names.push_back(differentialJoint->getMotor(1)->getMotorName());
+  positions.push_back(jointPositions.at(0));
+  positions.push_back(jointPositions.at(1));
 
   js_msg.name = names;
   js_msg.position = positions;
@@ -200,20 +192,32 @@ auto main(int argc, char** argv) ->int
   pn.getParam("encoder_parameters", encParams);
 
   // Initialize all motors with their MoveIt name, WRoboclaw initialization, and reference to the current node
+  
+  // elbow
   auto elbow = std::make_unique<ArmMotor>("elbow", 1, 0, static_cast<int>(encParams[0]["counts_per_rotation"]), static_cast<int>(encParams[0]["offset"]), n);
+  // forearm roll
   auto forearmRoll = std::make_unique<ArmMotor>("forearm_roll", 1, 1, static_cast<int>(encParams[1]["counts_per_rotation"]), static_cast<int>(encParams[1]["offset"]), n);
+  // shoulder
   auto shoulder = std::make_unique<ArmMotor>("shoulder", 0, 1, static_cast<int>(encParams[2]["counts_per_rotation"]), static_cast<int>(encParams[2]["offset"]), n);
+  // turntable
   auto turntable = std::make_unique<ArmMotor>("turntable", 0, 0, static_cast<int>(encParams[3]["counts_per_rotation"]), static_cast<int>(encParams[3]["offset"]), n);
+  // wrist left
   auto wristLeft = std::make_unique<ArmMotor>("wrist_pitch", 2, 0, static_cast<int>(encParams[4]["counts_per_rotation"]), static_cast<int>(encParams[4]["offset"]), n);
+  // wrist right
   auto wristRight = std::make_unique<ArmMotor>("wrist_roll", 2, 1, static_cast<int>(encParams[5]["counts_per_rotation"]), static_cast<int>(encParams[5]["offset"]), n);
   std::cout << "init motors" << std::endl;
 
   // Initialize all Joints
-  joints.at(0) = std::make_unique<SimpleJoint>(std::move(elbow), n);
-  joints.at(1) = std::make_unique<SimpleJoint>(std::move(forearmRoll), n);
-  joints.at(2) = std::make_unique<SimpleJoint>(std::move(shoulder), n);
-  joints.at(3) = std::make_unique<SimpleJoint>(std::move(turntable), n);
-  joints.at(4) = std::make_unique<DifferentialJoint>(std::move(wristLeft), std::move(wristRight), n, "/control/arm/5/pitch", "/control/arm/5/roll", "/control/arm/20/", "/control/arm/21/");
+  joints.at(0) = std::move(elbow);
+  joints.at(1) = std::move(forearmRoll);
+  joints.at(2) = std::move(shoulder);
+  joints.at(3) = std::move(turntable);
+  differentialJoint = std::make_unique<DifferentialJoint>(
+    std::move(wristLeft), std::move(wristRight), n, 
+    "/control/arm/5/pitch", "/control/arm/5/roll", 
+    "/control/arm/20/", "/control/arm/21/"
+  );
+
   std::cout << "init joints" << std::endl;
   
   // Initialize the Joint State Data Publisher
