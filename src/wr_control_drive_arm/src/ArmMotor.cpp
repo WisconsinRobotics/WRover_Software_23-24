@@ -41,12 +41,8 @@ void ArmMotor::storeEncoderVals(const Std_UInt32 &msg){
     feedbackMsg.data = ArmMotor::encToRad(msg->data);
     this->feedbackPub.publish(feedbackMsg);
 
-    if(this->currState == MotorState::RUN_TO_TARGET){
-        // std::cout << "[2] " << (hasReachedTarget(this->target) ? "at target " : "not at target ") << this->target << ":" << this->encoderVal << std::endl;
-        if(hasReachedTarget(this->target)){
-            // std::cout << "[1] stop motor" << std::endl;
-            this->setPower(0.F, MotorState::STOP);
-        }
+    if(this->currState == MotorState::RUN_TO_TARGET && hasReachedTarget(this->target)){
+        this->setPower(0.F, MotorState::STOP);
     }
 }
 

@@ -159,12 +159,11 @@ void publishJointStates(const ros::TimerEvent &event){
     positions.push_back(motor->getRads());
   }
 
-  std::vector<double> motorPositions = {differentialJoint->getMotor(0)->getRads(), differentialJoint->getMotor(0)->getRads()};
-  std::vector<double> jointPositions = differentialJoint->getJointPositions(motorPositions);
   names.push_back(differentialJoint->getMotor(0)->getMotorName());
+  positions.push_back(differentialJoint->getMotor(0)->getRads());
+  
   names.push_back(differentialJoint->getMotor(1)->getMotorName());
-  positions.push_back(jointPositions.at(0));
-  positions.push_back(jointPositions.at(1));
+  positions.push_back(differentialJoint->getMotor(1)->getRads());
 
   js_msg.name = names;
   js_msg.position = positions;
