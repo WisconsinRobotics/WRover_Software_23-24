@@ -11,6 +11,6 @@ while [ $COUNT -ne 0 ]; do
 done
 rm ./out.temp;
 export WROVER_LOCAL=true
-export WROVER_HW=MOCK
-gnome-terminal -- roslaunch wr_entry_point mock_arm.launch
+export WROVER_HW=REAL
+gnome-terminal -- roslaunch wr_entry_point run_arm.launch
 
