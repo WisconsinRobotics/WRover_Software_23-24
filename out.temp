@@ -1,0 +1,16 @@
+Traceback (most recent call last):
+  File "/opt/ros/noetic/bin/rostopic", line 34, in <module>
+    import rostopic
+  File "/opt/ros/noetic/lib/python3/dist-packages/rostopic/__init__.py", line 62, in <module>
+    import roslib.message
+  File "/opt/ros/noetic/lib/python3/dist-packages/roslib/__init__.py", line 53, in <module>
+    import roslib.stacks  # noqa: F401, I100
+  File "/opt/ros/noetic/lib/python3/dist-packages/roslib/stacks.py", line 45, in <module>
+    import roslib.packages
+  File "/opt/ros/noetic/lib/python3/dist-packages/roslib/packages.py", line 50, in <module>
+    import roslib.manifest  # noqa: F401
+  File "/opt/ros/noetic/lib/python3/dist-packages/roslib/manifest.py", line 45, in <module>
+    import roslib.manifestlib
+  File "/opt/ros/noetic/lib/python3/dist-packages/roslib/manifestlib.py", line 256, in <module>
+    class Platform(object):
+KeyboardInterrupt

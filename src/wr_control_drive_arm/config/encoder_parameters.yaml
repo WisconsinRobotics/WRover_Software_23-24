@@ -16,4 +16,4 @@ encoder_parameters:
     offset: 886
 # wrist_roll
   - counts_per_rotation: 2048
-    offset: 1050
+    offset: 0
