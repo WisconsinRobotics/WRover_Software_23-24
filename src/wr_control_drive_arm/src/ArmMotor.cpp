@@ -88,7 +88,7 @@ ArmMotor::ArmMotor(
     this->speedPub = n.advertise<std_msgs::Int16>(tpString + "/cmd/" + (motorID == 0 ? "left" : "right"), ArmMotor::MESSAGE_CACHE_SIZE);
     this->targetPub = n.advertise<std_msgs::Float64>(controlString + "/setpoint", ArmMotor::MESSAGE_CACHE_SIZE);
     this->feedbackPub = n.advertise<std_msgs::Float64>(controlString + "/feedback", ArmMotor::MESSAGE_CACHE_SIZE);
-//    this->outputRead = n.subscribe(controlString + "/output", ArmMotor::MESSAGE_CACHE_SIZE, &ArmMotor::redirectPowerOutput, this);
+    this->outputRead = n.subscribe(controlString + "/output", ArmMotor::MESSAGE_CACHE_SIZE, &ArmMotor::redirectPowerOutput, this);
     this->stallRead = n.subscribe(tpString + "/curr/over_lim/" + (motorID == 0 ? "left" : "right"), ArmMotor::MESSAGE_CACHE_SIZE, &ArmMotor::storeStallStatus, this);
 
     std::cout << this->motorName << ": " << this->COUNTS_PER_ROTATION << std::endl;
