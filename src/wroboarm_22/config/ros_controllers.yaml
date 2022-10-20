@@ -26,6 +26,8 @@ controller_list:
     action_ns: follow_joint_trajectory
     default: True
     type: FollowJointTrajectory
+    allowed_execution_duration_scaling: 1.2
+    allowed_goal_duration_margin: 100000.0
     joints:
       - turntable
       - shoulder

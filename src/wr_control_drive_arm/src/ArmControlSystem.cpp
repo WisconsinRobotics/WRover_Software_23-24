@@ -87,13 +87,20 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
   int currPoint = 1;
 
   std::cout << "start exec: " << goal->trajectory.points.size() << std::endl;
-  // For each point in the trajectory execution sequence...
+  for(auto jointName : goal->trajectory.joint_names){
+      std::cout << jointName << "  ";
+
+  }
+  
+  std::cout << std::endl;
   for(const auto &currTargetPosition : goal->trajectory.points){
     for(double pos : currTargetPosition.positions){
       std::cout << std::round(pos*100)/100 << "  ";
     }  
     std::cout << std::endl;
   }
+
+  // For each point in the trajectory execution sequence...
   for(const auto &currTargetPosition : goal->trajectory.points){
     // Track whether or not the current position is done
     bool hasPositionFinished = false;
