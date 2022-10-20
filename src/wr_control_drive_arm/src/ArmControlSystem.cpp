@@ -110,7 +110,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
     std::cout << currPoint << " / " << goal->trajectory.points.size() << std::endl;
     currPoint++;
     for(int i = 0; i < 6; i++){
-      double velocity = VELOCITY_MAX == 0.F ? JOINT_SAFETY_HOLD_SPEED :100* JOINT_SAFETY_MAX_SPEED * currTargetPosition.velocities[i]/VELOCITY_MAX;
+      double velocity = VELOCITY_MAX == 0.F ? JOINT_SAFETY_HOLD_SPEED : JOINT_SAFETY_MAX_SPEED * currTargetPosition.velocities[i]/VELOCITY_MAX;
       // std::cout << "config setpoint: " << currTargetPosition.positions[currItr] << ":" << velocity << std::endl;
       if(i < 4){
         joints.at(i)->runToTarget(currTargetPosition.positions[i], velocity);
