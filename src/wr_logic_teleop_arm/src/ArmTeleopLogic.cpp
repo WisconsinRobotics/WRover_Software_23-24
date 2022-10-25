@@ -50,8 +50,8 @@ auto main(int argc, char** argv) -> int{
     constexpr float STEP_Y = 0.003;
     constexpr float STEP_Z = 0.003;
 
-    constexpr float HOME_X = -0.7;
-    constexpr float HOME_Y = 0.0;
+    constexpr float HOME_X = 0.0;
+    constexpr float HOME_Y = -0.7;
     constexpr float HOME_Z = 0.2;
 
 

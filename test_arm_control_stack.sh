@@ -1,7 +1,7 @@
 #!/bin/bash
 ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $ROOT_DIR
-./assemble.py build
+./assemble.py build -o
 #gnome-terminal -- roscore
 #rostopic list &>./out.temp;
 #COUNT=$(grep -Ec "Unable to communicate with master" out.temp)
@@ -11,6 +11,6 @@ cd $ROOT_DIR
 #done
 #rm ./out.temp;
 export WROVER_LOCAL=true
-export WROVER_HW=REAL
+export WROVER_HW=MOCK
 roslaunch wr_entry_point mock_arm.launch
 

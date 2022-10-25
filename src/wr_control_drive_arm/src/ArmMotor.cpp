@@ -5,6 +5,8 @@
  * @date 2021-04-05
  */
 #include "ArmMotor.hpp"
+#include <algorithm>
+#include <cmath>
 #include <stdexcept>
 #include <sstream>
 
@@ -20,11 +22,13 @@ auto ArmMotor::corrMod(double i, double j) -> double {
 
 /// Currently consistent with the rad->enc equation as specified <a target="_blank" href="https://www.desmos.com/calculator/nwxtenccc6">here</a>.
 auto ArmMotor::radToEnc(double rads) const -> uint32_t{
-    return this->COUNTS_PER_ROTATION * ArmMotor::corrMod(rads, 2 * M_PI)/(2 * M_PI) + this->ENCODER_OFFSET;
+    double remappedEnc = ArmMotor::corrMod(rads, 2 * M_PI)/(2 * M_PI);
+    return ArmMotor::corrMod((this->COUNTS_PER_ROTATION * remappedEnc) + this->ENCODER_OFFSET, this->COUNTS_PER_ROTATION);
 }
 
 auto ArmMotor::encToRad(uint32_t enc) const -> double{
-    return ArmMotor::corrMod(static_cast<double>(enc - this->ENCODER_OFFSET) / static_cast<double>(this->COUNTS_PER_ROTATION) * 2 * M_PI + M_PI, 2 * M_PI) - M_PI;
+    double remappedEnc = ArmMotor::corrMod(static_cast<double>(enc - this->ENCODER_OFFSET), static_cast<double>(this->COUNTS_PER_ROTATION)) / this->COUNTS_PER_ROTATION;
+    return ArmMotor::corrMod( remappedEnc * 2 * M_PI + M_PI, 2 * M_PI) - M_PI;
 }
 
 /// Currently consistent with the enc->rad equation as specified <a target="_blank" href="https://www.desmos.com/calculator/nwxtenccc6">here</a>.
@@ -52,16 +56,19 @@ void ArmMotor::storeEncoderVals(const Std_UInt32 &msg){
 
 void ArmMotor::redirectPowerOutput(const Std_Float64 &msg){
     // Set the speed to be the contained data
+    if(abs(msg->data) > 1) std::cout << "Received power " << msg->data << " from PID for motor " << motorName << std::endl;
     if(this->getMotorState() == MotorState::RUN_TO_TARGET) this->setPower(static_cast<float>(msg->data) * this->maxPower, MotorState::RUN_TO_TARGET);
 }
 
 void ArmMotor::storeStallStatus(const Std_Bool &msg) {
     if (static_cast<bool>(msg->data)) {
         if ((ros::Time::now() - beginStallTime).toSec() >= STALL_THRESHOLD_TIME) {
+            std::cout << "over lim" << std::endl;
             this->setPower(0.0F, MotorState::STALLING);
         }
     } else {
         beginStallTime = ros::Time::now();
+        //std::cout << "below lim" << std::endl;
     }
 }
 
@@ -114,6 +121,7 @@ void ArmMotor::runToTarget(uint32_t targetCounts, float power){
 }
 
 auto ArmMotor::hasReachedTarget(uint32_t targetCounts, uint32_t tolerance) const -> bool{
+    std::cout << "TOLERANCE: " << tolerance << std::endl;
     // Compute the upper and lower bounds in the finite encoder space
     uint32_t lBound = ArmMotor::corrMod(static_cast<double>(targetCounts - tolerance), static_cast<double>(ArmMotor::ENCODER_BOUNDS[1]));
     uint32_t uBound = ArmMotor::corrMod(static_cast<double>(targetCounts + tolerance), static_cast<double>(ArmMotor::ENCODER_BOUNDS[1]));
@@ -126,7 +134,8 @@ auto ArmMotor::hasReachedTarget(uint32_t targetCounts, uint32_t tolerance) const
 
 /// Current tolerance is &pm;0.1 degree w.r.t. the current number of counts per rotation
 auto ArmMotor::hasReachedTarget(uint32_t targetCounts) const -> bool{
-    return ArmMotor::hasReachedTarget(targetCounts, ArmMotor::TOLERANCE_RATIO * static_cast<double>(std::abs(this->COUNTS_PER_ROTATION)));
+    auto tol = ArmMotor::TOLERANCE_RATIO * static_cast<double>(std::abs(this->COUNTS_PER_ROTATION));
+    return ArmMotor::hasReachedTarget(targetCounts, std::max(1.0,tol));
 }
 
 auto ArmMotor::getMotorState() const -> MotorState{

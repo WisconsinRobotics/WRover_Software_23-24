@@ -3,6 +3,7 @@
         <node name="WResponseControl_ArmMotors" pkg="wresponsecontrol" type="WResponseControl">
             <rosparam file="$(find wr_control_drive_arm)/config/arm_motor_PID.yaml"/>
         </node>
+        <remap from="/hsi/roboclaw/aux0/curr/over_lim/left" to="/test_over_lim" />
         <node name="ArmControlSystem" pkg="wr_control_drive_arm" type="ArmControlSystem" output="screen">
             <rosparam file="$(find wr_control_drive_arm)/config/encoder_parameters.yaml"/>
         </node>
