@@ -23,11 +23,11 @@ auto ArmMotor::corrMod(double i, double j) -> double {
 /// Currently consistent with the rad->enc equation as specified <a target="_blank" href="https://www.desmos.com/calculator/nwxtenccc6">here</a>.
 auto ArmMotor::radToEnc(double rads) const -> uint32_t{
     double remappedEnc = ArmMotor::corrMod(rads, 2 * M_PI)/(2 * M_PI);
-    return ArmMotor::corrMod((this->COUNTS_PER_ROTATION * remappedEnc) + this->ENCODER_OFFSET, this->COUNTS_PER_ROTATION);
+    return ArmMotor::corrMod((this->COUNTS_PER_ROTATION * remappedEnc) + this->ENCODER_OFFSET, abs(this->COUNTS_PER_ROTATION));
 }
 
 auto ArmMotor::encToRad(uint32_t enc) const -> double{
-    double remappedEnc = ArmMotor::corrMod(static_cast<double>(enc - this->ENCODER_OFFSET), static_cast<double>(this->COUNTS_PER_ROTATION)) / this->COUNTS_PER_ROTATION;
+    double remappedEnc = ArmMotor::corrMod(static_cast<double>(enc - this->ENCODER_OFFSET), abs(static_cast<double>(this->COUNTS_PER_ROTATION))) / this->COUNTS_PER_ROTATION;
     return ArmMotor::corrMod( remappedEnc * 2 * M_PI + M_PI, 2 * M_PI) - M_PI;
 }
 
@@ -46,7 +46,7 @@ void ArmMotor::storeEncoderVals(const Std_UInt32 &msg){
     this->feedbackPub.publish(feedbackMsg);
 
     if(this->currState == MotorState::RUN_TO_TARGET){
-        std::cout << "[2] " << (hasReachedTarget(this->target) ? "at target " : "not at target ") << this->target << ":" << this->encoderVal << std::endl;
+        std::cout << "[2] motor " << motorName << " position " << (hasReachedTarget(this->target) ? "at target " : "not at target ") << this->target << ":" << this->encoderVal << std::endl;
         if(hasReachedTarget(this->target)){
             std::cout << "[1] stop motor" << std::endl;
             this->setPower(0.F, MotorState::STOP);
@@ -123,13 +123,17 @@ void ArmMotor::runToTarget(uint32_t targetCounts, float power){
 auto ArmMotor::hasReachedTarget(uint32_t targetCounts, uint32_t tolerance) const -> bool{
     std::cout << "TOLERANCE: " << tolerance << std::endl;
     // Compute the upper and lower bounds in the finite encoder space
-    uint32_t lBound = ArmMotor::corrMod(static_cast<double>(targetCounts - tolerance), static_cast<double>(ArmMotor::ENCODER_BOUNDS[1]));
-    uint32_t uBound = ArmMotor::corrMod(static_cast<double>(targetCounts + tolerance), static_cast<double>(ArmMotor::ENCODER_BOUNDS[1]));
+    int32_t lBound = ArmMotor::corrMod(static_cast<double>(targetCounts - tolerance), static_cast<double>(ArmMotor::ENCODER_BOUNDS[1]));
+    int32_t uBound = ArmMotor::corrMod(static_cast<double>(targetCounts + tolerance), static_cast<double>(ArmMotor::ENCODER_BOUNDS[1]));
+    std::cout << "LBOUND: " << (lBound) << " UBOUND: " << (uBound) << std::endl;
+    auto position = ArmMotor::corrMod(getEncoderCounts(), ENCODER_BOUNDS[1]);
+    std::cout << "POSITION RAW: " << encToRad(getEncoderCounts()) << "/" << getEncoderCounts() << std::endl;
+    std::cout << "POSITION: " << encToRad(position) << "/" << position << std::endl;
     // If the computed lower bound is lower than the upper bound, perform the computation normally
     if(lBound < uBound)
-        return this->getEncoderCounts() <= uBound && this->getEncoderCounts() >=lBound;
+        return position <= uBound && position >=lBound;
     // Otherwise, check if the value is outside either bound and negate the response
-    return this->getEncoderCounts() <= uBound || this->getEncoderCounts() >= lBound;
+    return position <= uBound || position >= lBound;
 }
 
 /// Current tolerance is &pm;0.1 degree w.r.t. the current number of counts per rotation
@@ -161,7 +165,7 @@ void ArmMotor::setPower(float power, MotorState state){
 
 void ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block){
     this->target = targetCounts; 
-    this->maxPower = power;
+    this->maxPower = abs(power);
     // If we are not at our target...
     if(!this->hasReachedTarget(targetCounts)){
         // std::cout << "has not reached target" << std::endl;
@@ -173,7 +177,7 @@ void ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block){
 
         // long int direction = targetCounts - this->getEncoderCounts();
         // power = abs(power) * (corrMod(direction, ((long int)this->COUNTS_PER_ROTATION)) < corrMod(-direction, ((long int)this->COUNTS_PER_ROTATION)) ? 1 : -1);
-        this->setPower(power, MotorState::RUN_TO_TARGET);
+        // this->setPower(power, MotorState::RUN_TO_TARGET);
 
     // Otherwise, stop the motor
     } else {

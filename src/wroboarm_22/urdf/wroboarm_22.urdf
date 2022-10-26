@@ -49,7 +49,7 @@
         <parent link="base_link" />
         <child link="shoulderBase_link" />
         <axis xyz="0 1 0" />
-        <limit effort="50" velocity="1.5" lower="-0.523599" upper="1.0472"/>
+        <limit effort="50" velocity="1.5" lower="-1.57" upper="1.57" />
 
     </joint>
     <link name="upperArm_link">
@@ -81,7 +81,7 @@
         <parent link="shoulderBase_link" />
         <child link="upperArm_link" />
         <axis xyz="1 0 0" />
-        <limit effort="50" velocity="1.5" lower="-0.349" upper="0.78539"/>
+        <limit effort="50" velocity="1.5" lower="-1.57" upper="1.57" />
 
     </joint>
     <link name="forarm_link">
@@ -113,7 +113,7 @@
         <parent link="upperArm_link" />
         <child link="forarm_link" />
         <axis xyz="1 0 0" />
-        <limit effort="50" velocity="1.5" lower="-2.26893" upper="0.174533"/>
+        <limit effort="50" velocity="1.5" lower="-1.57" upper="1.57" />
 
     </joint>
     <link name="wirstBase_link">
@@ -145,7 +145,7 @@
         <parent link="forarm_link" />
         <child link="wirstBase_link" />
         <axis xyz="0 0 1" />
-        <limit effort="50" velocity="1.5" lower="-3.1" upper="3.1"/>
+        <limit effort="50" velocity="1.5" lower="-1.57" upper="1.57" />
 
     </joint>
     <link name="wrist_link">
@@ -177,7 +177,7 @@
         <parent link="wirstBase_link" />
         <child link="wrist_link" />
         <axis xyz="1 0 0" />
-        <limit effort="50" velocity="1.5" lower="-3.1" upper="3.1"/>
+        <limit effort="50" velocity="1.5" lower="-1.57" upper="1.57" />
 
     </joint>
     <link name="manipulator_link">
@@ -209,7 +209,7 @@
         <parent link="wrist_link" />
         <child link="manipulator_link" />
         <axis xyz="0 0 1" />
-        <limit effort="50" velocity="1.5" lower="-3.1" upper="3.1"/>
+        <limit effort="50" velocity="1.5" lower="-1.57" upper="1.57" />
 
     </joint>
     

@@ -129,7 +129,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
       // For each joint specified in the currTargetPosition...
       for(const auto &joint : joints){
 
-        // joint->exectute();
+        joint->exectute();
 
         for(int k = 0; k < joint->getDegreesOfFreedom(); k++){
 
