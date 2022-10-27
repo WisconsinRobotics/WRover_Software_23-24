@@ -7,7 +7,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://wroboarm_22/meshes/base_link.STL" />
+                <mesh filename="package://wroboarm_22/meshes/base_link.stl" />
             </geometry>
             <material name="">
                 <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
@@ -16,7 +16,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://wroboarm_22/meshes/base_link.STL" />
+                <mesh filename="package://wroboarm_22/meshes/base_link.stl" />
             </geometry>
         </collision>
     </link>
@@ -31,7 +31,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://wroboarm_22/meshes/shoulderBase_link.STL" />
+                <mesh filename="package://wroboarm_22/meshes/shoulderBase_link.stl" />
             </geometry>
             <material name="">
                 <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
@@ -40,7 +40,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://wroboarm_22/meshes/shoulderBase_link.STL" />
+                <mesh filename="package://wroboarm_22/meshes/shoulderBase_link.stl" />
             </geometry>
         </collision>
     </link>
@@ -63,7 +63,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://wroboarm_22/meshes/upperArm_link.STL" />
+                <mesh filename="package://wroboarm_22/meshes/upperArm_link.stl" />
             </geometry>
             <material name="">
                 <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
@@ -72,7 +72,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://wroboarm_22/meshes/upperArm_link.STL" />
+                <mesh filename="package://wroboarm_22/meshes/upperArm_link.stl" />
             </geometry>
         </collision>
     </link>
@@ -95,7 +95,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://wroboarm_22/meshes/forarm_link.STL" />
+                <mesh filename="package://wroboarm_22/meshes/forarm_link.stl" />
             </geometry>
             <material name="">
                 <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
@@ -104,7 +104,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://wroboarm_22/meshes/forarm_link.STL" />
+                <mesh filename="package://wroboarm_22/meshes/forarm_link.stl" />
             </geometry>
         </collision>
     </link>
@@ -127,7 +127,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://wroboarm_22/meshes/wirstBase_link.STL" />
+                <mesh filename="package://wroboarm_22/meshes/wirstBase_link.stl" />
             </geometry>
             <material name="">
                 <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
@@ -136,7 +136,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://wroboarm_22/meshes/wirstBase_link.STL" />
+                <mesh filename="package://wroboarm_22/meshes/wirstBase_link.stl" />
             </geometry>
         </collision>
     </link>
@@ -159,7 +159,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://wroboarm_22/meshes/wrist_link.STL" />
+                <mesh filename="package://wroboarm_22/meshes/wrist_link.stl" />
             </geometry>
             <material name="">
                 <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
@@ -168,7 +168,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://wroboarm_22/meshes/wrist_link.STL" />
+                <mesh filename="package://wroboarm_22/meshes/wrist_link.stl" />
             </geometry>
         </collision>
     </link>
@@ -191,7 +191,7 @@
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://wroboarm_22/meshes/manipulator_link.STL" />
+                <mesh filename="package://wroboarm_22/meshes/manipulator_link.stl" />
             </geometry>
             <material name="">
                 <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
@@ -200,7 +200,7 @@
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0" />
             <geometry>
-                <mesh filename="package://wroboarm_22/meshes/manipulator_link.STL" />
+                <mesh filename="package://wroboarm_22/meshes/manipulator_link.stl" />
             </geometry>
         </collision>
     </link>

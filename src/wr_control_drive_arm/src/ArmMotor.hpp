@@ -23,7 +23,9 @@ enum class MotorState{
     /// A Motor is moving (non-0 power command)
     MOVING,
     /// A Motor is running to a given target
-    RUN_TO_TARGET
+    RUN_TO_TARGET,
+    /// A Motor is stalling (over safety current limit)
+    STALLING
 };
 /**
  * @brief A way to control arm motors with WRoboclaw
@@ -52,6 +54,8 @@ class ArmMotor{
         unsigned int motorID;
         /// The current encoder value
         uint32_t encoderVal;
+        /// Target encoder counts for run to target
+        uint32_t target;
         /// The ROS Subscriber that reads the encoders
         ros::Subscriber encRead;
         /// The ROS Publisher that sets the encoder targets
@@ -64,12 +68,10 @@ class ArmMotor{
         ros::Publisher speedPub;
         /// The most recent power message sent
         std_msgs::Int16 powerMsg;
-        /// If the motor is stalling or not
-        volatile bool isStall = false;
         /// The ROS Subscriber that reads stall status data
         ros::Subscriber stallRead;
         /// The time when the motor began stalling
-        ros::Time begin;
+        ros::Time beginStallTime;
         /// Motor power
         float power;
         /// Maximum absolute motor power in RUN_TO_POSITION mode.
@@ -157,7 +159,7 @@ class ArmMotor{
          * @param block Specifies whether or not this action should block until it is complete
          * @return True if the motor had stalled, and false otherwise
          */
-        auto runToTarget(uint32_t targetCounts, float power, bool block) -> bool;
+        void runToTarget(uint32_t targetCounts, float power, bool block);
 
         /**
          * @brief Sends the motor to run to a specified position at a given power
@@ -166,7 +168,7 @@ class ArmMotor{
          * @param power The power to move the motor at (Bounded between [-1, 1])
          * @return True if the motor had stalled, and false otherwise
          */
-        auto runToTarget(double rads, float power) -> bool;
+        void runToTarget(double rads, float power);
 
         /**
          * @brief Get the current state of the ArmMotor
