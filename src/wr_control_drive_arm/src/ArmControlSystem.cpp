@@ -129,11 +129,21 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
       // For each joint specified in the currTargetPosition...
       for(const auto &joint : joints){
 
-        joint->exectute();
-
         for(int k = 0; k < joint->getDegreesOfFreedom(); k++){
+          if (joint->getMotor(k)->getMotorState() == MotorState::MOVING) {
+            std::cout << "Moving" << std::endl;
+          } else if (joint->getMotor(k)->getMotorState() == MotorState::RUN_TO_TARGET) {
+            std::cout << "Run to target" << std::endl;
+          } else if (joint->getMotor(k)->getMotorState() == MotorState::STALLING) {
+            std::cout << "Stalling" << std::endl;
+          } else if (joint->getMotor(k)->getMotorState() == MotorState::STOP) {
+            std::cout << "Stop" << std::endl;
+          } else {
+            std::cout << "Error" << std::endl;
+          }
 
           if (joint->getMotor(k)->getMotorState() == MotorState::STALLING) {
+            std::cout << "ACS stall detected" << std::endl;
             IKEnabled = false;
             std_srvs::Trigger srv;
             if (enableServiceClient.call(srv)) {
@@ -147,6 +157,8 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
           // DEBUGGING OUTPUT: Print each motor's name, radian position, encoder position, and power
           // std::cout<<std::setw(30)<<motors[j]->getEncoderCounts()<<std::endl;
         }
+
+        joint->exectute();
 
         // if (!joint->exectute()) {
         //   IKEnabled = false;

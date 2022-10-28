@@ -10,6 +10,7 @@
 #include "tf2/LinearMath/Vector3.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include <atomic>
+#include <cmath>
 #include <cstdint>
 #include <ros/ros.h>
 #include <moveit/move_group_interface/move_group_interface.h>
@@ -62,7 +63,7 @@ auto main(int argc, char** argv) -> int{
     float y_pos = HOME_Y;
     float z_pos = HOME_Z;
 
-    tf2::Quaternion orientation {0, sin(-M_PI/4), 0, cos(-M_PI/4)};
+    tf2::Quaternion orientation {sin(M_PI/4), 0, 0, cos(-M_PI/4)};
     orientation = orientation;
 
     const tf2::Quaternion SPIN_X {sin(2*M_PI/1000), 0, 0, cos(2*M_PI/1000)};

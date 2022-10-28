@@ -68,7 +68,6 @@ void ArmMotor::storeStallStatus(const Std_Bool &msg) {
         }
     } else {
         beginStallTime = ros::Time::now();
-        //std::cout << "below lim" << std::endl;
     }
 }
 
