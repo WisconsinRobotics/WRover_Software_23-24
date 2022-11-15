@@ -1,0 +1,11 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: wroboarm_23
+    relative_path: urdf/ArmAssembly.SLDASM.urdf
+    xacro_args: ""
+  SRDF:
+    relative_path: config/wroboarm_23.srdf
+  CONFIG:
+    author_name: Ben Nowotny
+    author_email: bennowotny65535@gmail.com
+    generated_timestamp: 1668478000
