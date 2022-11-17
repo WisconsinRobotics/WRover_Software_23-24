@@ -12,7 +12,7 @@
   
   <!-- <include file="$(find wr_entry_point)/launch/comp/comp_arm.launch"/> -->
   
-  <include file="$(find wroboarm_22)/launch/demo_test.launch"/>
+  <include file="$(find wroboarm_23)/launch/demo_test.launch"/>
   
 
   <node name="arm_driver" pkg="wr_logic_teleop_arm" type="ArmTeleopLogic" />
