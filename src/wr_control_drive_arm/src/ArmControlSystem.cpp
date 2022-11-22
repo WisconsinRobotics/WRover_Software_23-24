@@ -222,20 +222,20 @@ auto main(int argc, char** argv) ->int
   pn.getParam("encoder_parameters", encParams);
 
   // Initialize all motors with their MoveIt name, WRoboclaw initialization, and reference to the current node
-  auto elbow = std::make_unique<ArmMotor>("elbow", 1, 0, static_cast<int>(encParams[0]["counts_per_rotation"]), static_cast<int>(encParams[0]["offset"]), n);
-  auto forearmRoll = std::make_unique<ArmMotor>("forearm_roll", 1, 1, static_cast<int>(encParams[1]["counts_per_rotation"]), static_cast<int>(encParams[1]["offset"]), n);
-  auto shoulder = std::make_unique<ArmMotor>("shoulder", 0, 1, static_cast<int>(encParams[2]["counts_per_rotation"]), static_cast<int>(encParams[2]["offset"]), n);
-  auto turntable = std::make_unique<ArmMotor>("turntable", 0, 0, static_cast<int>(encParams[3]["counts_per_rotation"]), static_cast<int>(encParams[3]["offset"]), n);
-  auto wristLeft = std::make_unique<ArmMotor>("wrist_pitch", 2, 0, static_cast<int>(encParams[4]["counts_per_rotation"]), static_cast<int>(encParams[4]["offset"]), n);
-  auto wristRight = std::make_unique<ArmMotor>("wrist_roll", 2, 1, static_cast<int>(encParams[5]["counts_per_rotation"]), static_cast<int>(encParams[5]["offset"]), n);
+  auto elbowPitch_joint = std::make_unique<ArmMotor>("elbowPitch_joint", 1, 0, static_cast<int>(encParams[0]["counts_per_rotation"]), static_cast<int>(encParams[0]["offset"]), n);
+  auto elbowRoll_joint = std::make_unique<ArmMotor>("elbowRoll_joint", 1, 1, static_cast<int>(encParams[1]["counts_per_rotation"]), static_cast<int>(encParams[1]["offset"]), n);
+  auto shoulder_joint = std::make_unique<ArmMotor>("shoulder_joint", 0, 1, static_cast<int>(encParams[2]["counts_per_rotation"]), static_cast<int>(encParams[2]["offset"]), n);
+  auto turntable_joint = std::make_unique<ArmMotor>("turntable_joint", 0, 0, static_cast<int>(encParams[3]["counts_per_rotation"]), static_cast<int>(encParams[3]["offset"]), n);
+  auto wristPitch_joint = std::make_unique<ArmMotor>("wristPitch_joint", 2, 0, static_cast<int>(encParams[4]["counts_per_rotation"]), static_cast<int>(encParams[4]["offset"]), n);
+  auto wristRoll_link = std::make_unique<ArmMotor>("wristRoll_link", 2, 1, static_cast<int>(encParams[5]["counts_per_rotation"]), static_cast<int>(encParams[5]["offset"]), n);
   std::cout << "init motors" << std::endl;
 
   // Initialize all Joints
-  joints.at(0) = std::make_unique<SimpleJoint>(std::move(elbow), n);
-  joints.at(1) = std::make_unique<SimpleJoint>(std::move(forearmRoll), n);
-  joints.at(2) = std::make_unique<SimpleJoint>(std::move(shoulder), n);
-  joints.at(3) = std::make_unique<SimpleJoint>(std::move(turntable), n);
-  joints.at(4) = std::make_unique<DifferentialJoint>(std::move(wristLeft), std::move(wristRight), n, "/control/arm/5/pitch", "/control/arm/5/roll", "/control/arm/20/", "/control/arm/21/");
+  joints.at(0) = std::make_unique<SimpleJoint>(std::move(turntable_joint), n);
+  joints.at(1) = std::make_unique<SimpleJoint>(std::move(shoulder_joint), n);
+  joints.at(2) = std::make_unique<SimpleJoint>(std::move(elbowPitch_joint), n);
+  joints.at(3) = std::make_unique<SimpleJoint>(std::move(elbowRoll_joint), n);
+  joints.at(4) = std::make_unique<DifferentialJoint>(std::move(wristPitch_joint), std::move(wristRoll_link), n, "/control/arm/5/pitch", "/control/arm/5/roll", "/control/arm/20/", "/control/arm/21/");
   std::cout << "init joints" << std::endl;
   
   // Initialize the Joint State Data Publisher
