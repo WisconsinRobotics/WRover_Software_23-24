@@ -1,6 +1,7 @@
 <launch>
     <group ns="teleop">
 
-        <node name="ArmTeleop" pkg="wr_logic_teleop_arm" type="ArmTeleopLogic" />
+        <node name="ArmTeleop" pkg="wr_logic_teleop_arm" type="ArmTeleopLogic">
+        </node>
     </group>
 </launch>

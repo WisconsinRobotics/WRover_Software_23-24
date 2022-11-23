@@ -242,7 +242,7 @@ auto main(int argc, char** argv) -> int{
         p.pose.position.y = y_pos;
         p.pose.position.z = z_pos;
         p.pose.orientation = tf2::toMsg(orientation);
-        p.header.frame_id = "odom_combined";
+        p.header.frame_id = "world";
 
         move.setPoseTarget(p);
         move.setStartStateToCurrentState();
@@ -250,7 +250,7 @@ auto main(int argc, char** argv) -> int{
         //plan and execute path
         move.asyncMove();
 
-        while(ros::ok){
+        while(ros::ok()){
             updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
 
             if(move.getMoveGroupClient().getState().isDone()){

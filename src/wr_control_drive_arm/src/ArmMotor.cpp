@@ -46,9 +46,9 @@ void ArmMotor::storeEncoderVals(const Std_UInt32 &msg){
     this->feedbackPub.publish(feedbackMsg);
 
     if(this->currState == MotorState::RUN_TO_TARGET){
-        std::cout << "[2] motor " << motorName << " position " << (hasReachedTarget(this->target) ? "at target " : "not at target ") << this->target << ":" << this->encoderVal << std::endl;
+        // std::cout << "[2] motor " << motorName << " position " << (hasReachedTarget(this->target) ? "at target " : "not at target ") << this->target << ":" << this->encoderVal << std::endl;
         if(hasReachedTarget(this->target)){
-            std::cout << "[1] stop motor" << std::endl;
+            // std::cout << "[1] stop motor" << std::endl;
             this->setPower(0.F, MotorState::STOP);
         }
     }
@@ -115,19 +115,19 @@ auto ArmMotor::getEncoderCounts() const -> uint32_t{
 }
 
 void ArmMotor::runToTarget(uint32_t targetCounts, float power){
-    std::cout << "run to enc: " << targetCounts << std::endl;
+    // std::cout << "run to enc: " << targetCounts << std::endl;
     this->runToTarget(targetCounts, power, false);
 }
 
 auto ArmMotor::hasReachedTarget(uint32_t targetCounts, uint32_t tolerance) const -> bool{
-    std::cout << "TOLERANCE: " << tolerance << std::endl;
+    // std::cout << "TOLERANCE: " << tolerance << std::endl;
     // Compute the upper and lower bounds in the finite encoder space
     int32_t lBound = ArmMotor::corrMod(static_cast<double>(targetCounts - tolerance), static_cast<double>(ArmMotor::ENCODER_BOUNDS[1]));
     int32_t uBound = ArmMotor::corrMod(static_cast<double>(targetCounts + tolerance), static_cast<double>(ArmMotor::ENCODER_BOUNDS[1]));
-    std::cout << "LBOUND: " << (lBound) << " UBOUND: " << (uBound) << std::endl;
+    // std::cout << "LBOUND: " << (lBound) << " UBOUND: " << (uBound) << std::endl;
     auto position = ArmMotor::corrMod(getEncoderCounts(), ENCODER_BOUNDS[1]);
-    std::cout << "POSITION RAW: " << encToRad(getEncoderCounts()) << "/" << getEncoderCounts() << std::endl;
-    std::cout << "POSITION: " << encToRad(position) << "/" << position << std::endl;
+    // std::cout << "POSITION RAW: " << encToRad(getEncoderCounts()) << "/" << getEncoderCounts() << std::endl;
+    // std::cout << "POSITION: " << encToRad(position) << "/" << position << std::endl;
     // If the computed lower bound is lower than the upper bound, perform the computation normally
     if(lBound < uBound)
         return position <= uBound && position >=lBound;

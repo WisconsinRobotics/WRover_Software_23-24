@@ -88,9 +88,13 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
 
   std::cout << "start exec: " << goal->trajectory.points.size() << std::endl;
   // For each point in the trajectory execution sequence...
+  for(const auto& name : goal->trajectory.joint_names){
+    std::cout << name << "\t";
+  }
+  std::cout << std::endl;
   for(const auto &currTargetPosition : goal->trajectory.points){
     for(double pos : currTargetPosition.positions){
-      std::cout << std::round(pos*100)/100 << "  ";
+      std::cout << std::round(pos*100)/100 << "\t";
     }  
     std::cout << std::endl;
   }
@@ -108,12 +112,12 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
 
     ArmMotor *currmotor = NULL; 
     int currItr = 0;
-    std::cout << currPoint << " / " << goal->trajectory.points.size() << std::endl;
+    // std::cout << currPoint << " / " << goal->trajectory.points.size() << std::endl;
     currPoint++;
     for(const auto &joint : joints){
       for(int i = 0; i < joint->getDegreesOfFreedom(); i++){
         double velocity = VELOCITY_MAX == 0.F ? JOINT_SAFETY_HOLD_SPEED : currTargetPosition.velocities[currItr]/VELOCITY_MAX;
-        std::cout << "config setpoint: " << currTargetPosition.positions[currItr] << ":" << velocity << std::endl;
+        // std::cout << "config setpoint: " << currTargetPosition.positions[currItr] << ":" << velocity << std::endl;
         joint->configSetpoint(i, currTargetPosition.positions[currItr], velocity);
         currItr++;
       }
@@ -130,17 +134,17 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server
       for(const auto &joint : joints){
 
         for(int k = 0; k < joint->getDegreesOfFreedom(); k++){
-          if (joint->getMotor(k)->getMotorState() == MotorState::MOVING) {
-            std::cout << "Moving" << std::endl;
-          } else if (joint->getMotor(k)->getMotorState() == MotorState::RUN_TO_TARGET) {
-            std::cout << "Run to target" << std::endl;
-          } else if (joint->getMotor(k)->getMotorState() == MotorState::STALLING) {
-            std::cout << "Stalling" << std::endl;
-          } else if (joint->getMotor(k)->getMotorState() == MotorState::STOP) {
-            std::cout << "Stop" << std::endl;
-          } else {
-            std::cout << "Error" << std::endl;
-          }
+          // if (joint->getMotor(k)->getMotorState() == MotorState::MOVING) {
+          //   std::cout << "Moving" << std::endl;
+          // } else if (joint->getMotor(k)->getMotorState() == MotorState::RUN_TO_TARGET) {
+          //   std::cout << "Run to target" << std::endl;
+          // } else if (joint->getMotor(k)->getMotorState() == MotorState::STALLING) {
+          //   std::cout << "Stalling" << std::endl;
+          // } else if (joint->getMotor(k)->getMotorState() == MotorState::STOP) {
+          //   std::cout << "Stop" << std::endl;
+          // } else {
+          //   std::cout << "Error" << std::endl;
+          // }
 
           if (joint->getMotor(k)->getMotorState() == MotorState::STALLING) {
             std::cout << "ACS stall detected" << std::endl;
@@ -198,6 +202,7 @@ void publishJointStates(const ros::TimerEvent &event){
 
   js_msg.name = names;
   js_msg.position = positions;
+  js_msg.header.stamp = ros::Time::now();
   // Publish the Joint State message
   jointStatePublisher.publish(js_msg);
 }
@@ -231,15 +236,15 @@ auto main(int argc, char** argv) ->int
   std::cout << "init motors" << std::endl;
 
   // Initialize all Joints
-  joints.at(0) = std::make_unique<SimpleJoint>(std::move(turntable_joint), n);
-  joints.at(1) = std::make_unique<SimpleJoint>(std::move(shoulder_joint), n);
-  joints.at(2) = std::make_unique<SimpleJoint>(std::move(elbowPitch_joint), n);
-  joints.at(3) = std::make_unique<SimpleJoint>(std::move(elbowRoll_joint), n);
+  joints.at(3) = std::make_unique<SimpleJoint>(std::move(turntable_joint), n);
+  joints.at(2) = std::make_unique<SimpleJoint>(std::move(shoulder_joint), n);
+  joints.at(0) = std::make_unique<SimpleJoint>(std::move(elbowPitch_joint), n);
+  joints.at(1) = std::make_unique<SimpleJoint>(std::move(elbowRoll_joint), n);
   joints.at(4) = std::make_unique<DifferentialJoint>(std::move(wristPitch_joint), std::move(wristRoll_link), n, "/control/arm/5/pitch", "/control/arm/5/roll", "/control/arm/20/", "/control/arm/21/");
   std::cout << "init joints" << std::endl;
   
   // Initialize the Joint State Data Publisher
-  jointStatePublisher = n.advertise<sensor_msgs::JointState>("/control/arm_joint_states", MESSAGE_CACHE_SIZE);
+  jointStatePublisher = n.advertise<sensor_msgs::JointState>("/joint_states", MESSAGE_CACHE_SIZE);
 
   // Initialize the Action Server
   Server server(n, "/arm_controller/follow_joint_trajectory", boost::bind(&execute, _1, &server), false);
