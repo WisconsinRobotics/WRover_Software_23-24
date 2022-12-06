@@ -86,7 +86,7 @@
   </link>
   <joint
     name="turntable_joint"
-    type="continuous">
+    type="revolute">
     <origin
       xyz="0 0 0.035865"
       rpy="1.5708 0 -0.84509" />
@@ -96,6 +96,7 @@
       link="turntable_link" />
     <axis
       xyz="0 1 0" />
+    <limit effort="50" velocity="1.5" lower="0" upper="1.57" />
   </joint>
   <link
     name="upperArm_link">
@@ -139,7 +140,7 @@
   </link>
   <joint
     name="shoulder_joint"
-    type="continuous">
+    type="revolute">
     <origin
       xyz="0 0.18098 0.043071"
       rpy="-1.5572 0 0" />
@@ -149,6 +150,7 @@
       link="upperArm_link" />
     <axis
       xyz="-1 0 0" />
+    <limit effort="50" velocity="1.5" lower="0" upper="1.57" />
   </joint>
   <link
     name="forearm_link">
@@ -192,7 +194,7 @@
   </link>
   <joint
     name="elbowPitch_joint"
-    type="continuous">
+    type="revolute">
     <origin
       xyz="0 0 0.46634"
       rpy="2.7009 0 0" />
@@ -202,6 +204,7 @@
       link="forearm_link" />
     <axis
       xyz="-1 0 0" />
+    <limit effort="50" velocity="1.5" lower="0" upper="1.57" />
   </joint>
   <link
     name="wrist_link">
@@ -245,7 +248,7 @@
   </link>
   <joint
     name="elbowRoll_joint"
-    type="continuous">
+    type="revolute">
     <origin
       xyz="0 0.04445 0.23038"
       rpy="0 0 0" />
@@ -255,6 +258,7 @@
       link="wrist_link" />
     <axis
       xyz="0 0 1" />
+    <limit effort="50" velocity="1.5" lower="0" upper="1.57" />
   </joint>
   <link
     name="carpus_link">
@@ -298,7 +302,7 @@
   </link>
   <joint
     name="wristPitch_joint"
-    type="continuous">
+    type="revolute">
     <origin
       xyz="0 0 0.23528"
       rpy="0 0 0" />
@@ -308,6 +312,7 @@
       link="carpus_link" />
     <axis
       xyz="-1 0 0" />
+    <limit effort="50" velocity="1.5" lower="0" upper="1.57" />
   </joint>
   <link
     name="endEffector_link">
@@ -351,7 +356,7 @@
   </link>
   <joint
     name="wristRoll_link"
-    type="continuous">
+    type="revolute">
     <origin
       xyz="0 0 0"
       rpy="0 0 0" />
@@ -361,5 +366,6 @@
       link="endEffector_link" />
     <axis
       xyz="0 0 1" />
+    <limit effort="50" velocity="1.5" lower="0" upper="1.57" />
   </joint>
 </robot>
