@@ -39,6 +39,16 @@ public:
 
     void stopJoint();
 
+    virtual ~AbstractJoint() = default;
+
+    AbstractJoint(const AbstractJoint&) = delete;
+
+    auto operator=(const AbstractJoint&) -> AbstractJoint& = delete;
+
+    AbstractJoint(AbstractJoint&&) = delete;
+
+    auto operator=(AbstractJoint&&) -> AbstractJoint& = delete;
+
 protected:
     vector<MotorHandler> motors;
 };
