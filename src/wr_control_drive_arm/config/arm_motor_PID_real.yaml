@@ -3,7 +3,7 @@ controllers:
   - setpointTopic: "/control/arm/00/setpoint"
     feedbackTopic: "/control/arm/00/feedback"
     outputTopic: "/control/arm/00/output"
-    P: 5 
+    P: 5
     I: 0
     D: 0
     min: -1
