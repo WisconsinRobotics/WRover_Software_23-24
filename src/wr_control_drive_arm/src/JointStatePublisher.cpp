@@ -7,6 +7,8 @@
  */
 #include "XmlRpcValue.h"
 
+#include "moveit_msgs/DisplayRobotState.h"
+#include "ros/publisher.h"
 #include "ros/ros.h"
 #include <control_msgs/FollowJointTrajectoryAction.h>
 #include <actionlib/server/simple_action_server.h>
@@ -46,10 +48,18 @@ std::array<std::unique_ptr<AbstractJoint>, NUM_JOINTS> joints;
  */
 ros::Publisher jointStatePublisher;
 
+/**
+ * @brief 
+ */
+ros::Publisher robotStatePublisher;
+
 void publishJointStates(const ros::TimerEvent &event){
   std::vector<std::string> names;
   std::vector<double> positions;
   sensor_msgs::JointState js_msg;
+
+  moveit_msgs::DisplayRobotState rs_msg;
+  rs_msg.state.joint_state = js_msg;
 
   for(const auto &joint : joints){
     for(int i = 0; i < joint->getDegreesOfFreedom(); i++){
@@ -63,6 +73,7 @@ void publishJointStates(const ros::TimerEvent &event){
   js_msg.header.stamp = ros::Time::now();
   // Publish the Joint State message
   jointStatePublisher.publish(js_msg);
+  robotStatePublisher.publish(rs_msg);
 }
 
 /**
@@ -104,11 +115,17 @@ auto main(int argc, char** argv) -> int {
     // Initialize the Joint State Data Publisher
     jointStatePublisher = n.advertise<sensor_msgs::JointState>("/joint_states", MESSAGE_CACHE_SIZE);
 
+    // Initialize the robot state publisher
+    robotStatePublisher = n.advertise<moveit_msgs::DisplayRobotState>("/display_robot_state", MESSAGE_CACHE_SIZE);
+
     // Timer that will call publishJointStates periodically
     ros::Timer timer = n.createTimer(ros::Duration(TIMER_CALLBACK_DURATION), publishJointStates);
 
     // Enter ROS spin
     ros::spin();
+
+    moveit_msgs::DisplayRobotState joe;
+    joe.state.joint_state;
 
     return 0;
 }
