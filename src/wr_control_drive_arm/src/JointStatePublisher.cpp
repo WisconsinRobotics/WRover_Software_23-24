@@ -59,7 +59,6 @@ void publishJointStates(const ros::TimerEvent &event){
   sensor_msgs::JointState js_msg;
 
   moveit_msgs::DisplayRobotState rs_msg;
-  rs_msg.state.joint_state = js_msg;
 
   for(const auto &joint : joints){
     for(int i = 0; i < joint->getDegreesOfFreedom(); i++){
@@ -71,7 +70,10 @@ void publishJointStates(const ros::TimerEvent &event){
   js_msg.name = names;
   js_msg.position = positions;
   js_msg.header.stamp = ros::Time::now();
-  // Publish the Joint State message
+
+  rs_msg.state.joint_state = js_msg;
+  
+  // Publish the Joint State message and robot state message
   jointStatePublisher.publish(js_msg);
   robotStatePublisher.publish(rs_msg);
 }
