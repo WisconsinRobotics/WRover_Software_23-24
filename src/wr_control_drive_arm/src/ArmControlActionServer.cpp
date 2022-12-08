@@ -1,8 +1,8 @@
 /**
- * @file ArmControlSystem.cpp
+ * @file ArmControlActionServer.cpp
  * @author Ben Nowotny
  * @brief The exeutable file to run the Arm Control Action Server
- * @date 2021-04-05
+ * @date 2022-12-05
  */
 #include "XmlRpcValue.h"
 
@@ -218,41 +218,15 @@ auto main(int argc, char** argv) ->int
 {
   std::cout << "start main" << std::endl;
   // Initialize the current node as ArmControlSystem
-  ros::init(argc, argv, "ArmControlSystem");
+  ros::init(argc, argv, "ArmControlActionServer");
   // Create the NodeHandle to the current ROS node
   ros::NodeHandle n;
-  ros::NodeHandle pn{"~"};
-
-  XmlRpcValue encParams;
-  pn.getParam("encoder_parameters", encParams);
-
-  // Initialize all motors with their MoveIt name, WRoboclaw initialization, and reference to the current node
-  auto elbowPitch_joint = std::make_unique<ArmMotor>("elbowPitch_joint", 1, 0, static_cast<int>(encParams[0]["counts_per_rotation"]), static_cast<int>(encParams[0]["offset"]), n);
-  auto elbowRoll_joint = std::make_unique<ArmMotor>("elbowRoll_joint", 1, 1, static_cast<int>(encParams[1]["counts_per_rotation"]), static_cast<int>(encParams[1]["offset"]), n);
-  auto shoulder_joint = std::make_unique<ArmMotor>("shoulder_joint", 0, 1, static_cast<int>(encParams[2]["counts_per_rotation"]), static_cast<int>(encParams[2]["offset"]), n);
-  auto turntable_joint = std::make_unique<ArmMotor>("turntable_joint", 0, 0, static_cast<int>(encParams[3]["counts_per_rotation"]), static_cast<int>(encParams[3]["offset"]), n);
-  auto wristPitch_joint = std::make_unique<ArmMotor>("wristPitch_joint", 2, 0, static_cast<int>(encParams[4]["counts_per_rotation"]), static_cast<int>(encParams[4]["offset"]), n);
-  auto wristRoll_link = std::make_unique<ArmMotor>("wristRoll_link", 2, 1, static_cast<int>(encParams[5]["counts_per_rotation"]), static_cast<int>(encParams[5]["offset"]), n);
-  std::cout << "init motors" << std::endl;
-
-  // Initialize all Joints
-  joints.at(3) = std::make_unique<SimpleJoint>(std::move(turntable_joint), n);
-  joints.at(2) = std::make_unique<SimpleJoint>(std::move(shoulder_joint), n);
-  joints.at(0) = std::make_unique<SimpleJoint>(std::move(elbowPitch_joint), n);
-  joints.at(1) = std::make_unique<SimpleJoint>(std::move(elbowRoll_joint), n);
-  joints.at(4) = std::make_unique<DifferentialJoint>(std::move(wristPitch_joint), std::move(wristRoll_link), n, "/control/arm/5/pitch", "/control/arm/5/roll", "/control/arm/20/", "/control/arm/21/");
-  std::cout << "init joints" << std::endl;
-  
-  // Initialize the Joint State Data Publisher
-  jointStatePublisher = n.advertise<sensor_msgs::JointState>("/joint_states", MESSAGE_CACHE_SIZE);
 
   // Initialize the Action Server
   Server server(n, "/arm_controller/follow_joint_trajectory", boost::bind(&execute, _1, &server), false);
   // Start the Action Server
   server.start();
   std::cout << "server started" << std::endl;
-
-  ros::Timer timer = n.createTimer(ros::Duration(TIMER_CALLBACK_DURATION), publishJointStates);
 
   enableServiceServer = n.advertiseService("start_IK", 
     static_cast<boost::function<bool(std_srvs::Trigger::Request&, std_srvs::Trigger::Response&)>>(
