@@ -1,4 +1,7 @@
 <launch>
     <include file="$(find wr_control_drive_arm)/launch/jointstatepublisher.launch" />
-    <include file="$(find wr_logic_teleop_arm)/launch/bad_driver.launch" />
+    <param
+    name="robot_description"
+    textfile="$(find wroboarm_23)/urdf/ArmAssembly.SLDASM.urdf" />
+    <!-- <include file="$(find wr_logic_teleop_arm)/launch/bad_driver.launch" /> -->
 </launch>
