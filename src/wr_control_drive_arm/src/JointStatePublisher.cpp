@@ -63,7 +63,10 @@ void publishJointStates(const ros::TimerEvent &event){
   js_msg.name = names;
   js_msg.position = positions;
   js_msg.header.stamp = ros::Time::now();
-  // Publish the Joint State message
+
+  rs_msg.state.joint_state = js_msg;
+  
+  // Publish the Joint State message and robot state message
   jointStatePublisher.publish(js_msg);
 }
 
