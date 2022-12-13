@@ -64,7 +64,7 @@ void publishJointStates(const ros::TimerEvent &event){
   js_msg.position = positions;
   js_msg.header.stamp = ros::Time::now();
   
-  // Publish the Joint State message and robot state message
+  // Publish the Joint State message
   jointStatePublisher.publish(js_msg);
 }
 
@@ -112,9 +112,6 @@ auto main(int argc, char** argv) -> int {
 
     // Enter ROS spin
     ros::spin();
-
-    moveit_msgs::DisplayRobotState joe;
-    joe.state.joint_state;
 
     return 0;
 }
