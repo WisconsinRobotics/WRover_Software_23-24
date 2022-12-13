@@ -40,6 +40,8 @@ void ArmMotor::storeEncoderVals(const Std_UInt32 &msg){
     // Store the message value in this ArmMotor's encoderVal variable
     this->encoderVal = msg->data;
     
+    std::cout << this->motorName << " " <<  this->encoderVal << std::endl;
+
     // Send feedback
     std_msgs::Float64 feedbackMsg;
     feedbackMsg.data = ArmMotor::encToRad(msg->data);
@@ -106,6 +108,8 @@ ArmMotor::ArmMotor(
     this->feedbackPub = n.advertise<std_msgs::Float64>(controlString + "/feedback", ArmMotor::MESSAGE_CACHE_SIZE);
     this->outputRead = n.subscribe(controlString + "/output", ArmMotor::MESSAGE_CACHE_SIZE, &ArmMotor::redirectPowerOutput, this);
     this->stallRead = n.subscribe(tpString + "/curr/over_lim/" + (motorID == 0 ? "left" : "right"), ArmMotor::MESSAGE_CACHE_SIZE, &ArmMotor::storeStallStatus, this);
+
+    std::cout << this->encRead.getTopic() << " " << this->motorName << std::endl;
 
     std::cout << this->motorName << ": " << this->COUNTS_PER_ROTATION << std::endl;
 }
