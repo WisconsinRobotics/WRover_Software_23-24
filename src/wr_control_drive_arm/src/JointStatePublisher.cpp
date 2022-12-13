@@ -113,8 +113,5 @@ auto main(int argc, char** argv) -> int {
     // Enter ROS spin
     ros::spin();
 
-    moveit_msgs::DisplayRobotState joe;
-    joe.state.joint_state;
-
     return 0;
 }
