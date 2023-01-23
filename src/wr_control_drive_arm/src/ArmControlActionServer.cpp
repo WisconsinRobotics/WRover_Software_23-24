@@ -6,21 +6,21 @@
  */
 #include "XmlRpcValue.h"
 
-#include "ros/ros.h"
-#include <control_msgs/FollowJointTrajectoryAction.h>
-#include <actionlib/server/simple_action_server.h>
-#include <sensor_msgs/JointState.h>
-#include <std_msgs/Float64.h>
-#include <std_msgs/Empty.h>
-#include <algorithm>
-#include <csignal>
-#include <string>
-#include <array>
-#include <memory>
-#include <std_srvs/Trigger.h>
-#include "SimpleJoint.hpp"
 #include "DifferentialJoint.hpp"
+#include "SimpleJoint.hpp"
 #include "ros/console.h"
+#include "ros/ros.h"
+#include <actionlib/server/simple_action_server.h>
+#include <algorithm>
+#include <array>
+#include <control_msgs/FollowJointTrajectoryAction.h>
+#include <csignal>
+#include <memory>
+#include <sensor_msgs/JointState.h>
+#include <std_msgs/Empty.h>
+#include <std_msgs/Float64.h>
+#include <std_srvs/Trigger.h>
+#include <string>
 
 using XmlRpc::XmlRpcValue;
 
@@ -29,7 +29,7 @@ using XmlRpc::XmlRpcValue;
  */
 constexpr float CLOCK_RATE = 50;
 
-constexpr double IK_WARN_RATE = 1.0/2;
+constexpr double IK_WARN_RATE = 1.0 / 2;
 
 constexpr double JOINT_SAFETY_MAX_SPEED = 0.3;
 constexpr double JOINT_SAFETY_HOLD_SPEED = 0.15;
@@ -37,7 +37,7 @@ constexpr double JOINT_SAFETY_HOLD_SPEED = 0.15;
 /**
  * @brief Nessage cache size of publisher
  */
-constexpr std::uint32_t MESSAGE_CACHE_SIZE = 1000; 
+constexpr std::uint32_t MESSAGE_CACHE_SIZE = 1000;
 
 /**
  * @brief Period between timer callback
@@ -57,7 +57,8 @@ ros::Publisher jointStatePublisher;
 /**
  * @brief Simplify the SimpleActionServer reference name
  */
-typedef actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction> Server;
+typedef actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction>
+    Server;
 /**
  * @brief The service server for enabling IK
  */
@@ -72,177 +73,250 @@ std::atomic_bool IKEnabled{true};
 ros::ServiceClient enableServiceClient;
 
 /**
- * @brief Perform the given action as interpreted as moving the arm joints to specified positions
- * 
+ * @brief Perform the given action as interpreted as moving the arm joints to
+ * specified positions
+ *
  * @param goal The goal state given
  * @param as The Action Server this is occuring on
  */
-void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr& goal, Server* as) {
-  if (!IKEnabled) {
-    as->setAborted();
-    ROS_WARN_THROTTLE(IK_WARN_RATE, "IK is disabled"); // NOLINT(hicpp-no-array-decay,hicpp,hicpp-vararg,cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
-    return;
-  }
-
-  int currPoint = 1;
-
-  std::cout << "start exec: " << goal->trajectory.points.size() << std::endl;
-  // For each point in the trajectory execution sequence...
-  for(const auto& name : goal->trajectory.joint_names){
-    std::cout << name << "\t";
-  }
-  std::cout << std::endl;
-  for(const auto &currTargetPosition : goal->trajectory.points){
-    for(double pos : currTargetPosition.positions){
-      std::cout << std::round(pos*100)/100 << "\t";
-    }  
-    std::cout << std::endl;
-  }
-  for(const auto &currTargetPosition : goal->trajectory.points){
-    // Track whether or not the current position is done
-    bool hasPositionFinished = false;
-    // Keep max loop rate at 50 Hz
-    ros::Rate loop{CLOCK_RATE};
-
-    const double VELOCITY_MAX = abs(*std::max_element(
-        currTargetPosition.velocities.begin(),
-        currTargetPosition.velocities.end(),
-        [](double a, double b) -> bool{ return abs(a)<abs(b); }
-      ));
-
-    ArmMotor *currmotor = NULL; 
-    int currItr = 0;
-    // std::cout << currPoint << " / " << goal->trajectory.points.size() << std::endl;
-    currPoint++;
-    for(const auto &joint : joints){
-      for(int i = 0; i < joint->getDegreesOfFreedom(); i++){
-        double velocity = VELOCITY_MAX == 0.F ? JOINT_SAFETY_HOLD_SPEED : currTargetPosition.velocities[currItr]/VELOCITY_MAX;
-        // std::cout << "config setpoint: " << currTargetPosition.positions[currItr] << ":" << velocity << std::endl;
-        joint->configSetpoint(i, currTargetPosition.positions[currItr], velocity);
-        currItr++;
-      }
-      joint->exectute();
+void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
+             Server *as) {
+    if (!IKEnabled) {
+        as->setAborted();
+        ROS_WARN_THROTTLE(
+            IK_WARN_RATE,
+            "IK is disabled"); // NOLINT(hicpp-no-array-decay,hicpp,hicpp-vararg,cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
+        return;
     }
 
-    // While the current position is not complete yet...
-    while(!hasPositionFinished){
-      // Assume the current action is done until proven otherwise
-      hasPositionFinished = true;
-      // Create the Joint State message for the current update cycle
+    int currPoint = 1;
 
-      // For each joint specified in the currTargetPosition...
-      for(const auto &joint : joints){
+    std::cout << "start exec: " << goal->trajectory.points.size() << std::endl;
+    // For each point in the trajectory execution sequence...
+    for (const auto &name : goal->trajectory.joint_names) {
+        std::cout << name << "\t";
+    }
+    std::cout << std::endl;
+    for (const auto &currTargetPosition : goal->trajectory.points) {
+        for (double pos : currTargetPosition.positions) {
+            std::cout << std::round(pos * 100) / 100 << "\t";
+        }
+        std::cout << std::endl;
+    }
+    for (const auto &currTargetPosition : goal->trajectory.points) {
+        // Track whether or not the current position is done
+        bool hasPositionFinished = false;
+        // Keep max loop rate at 50 Hz
+        ros::Rate loop{CLOCK_RATE};
 
-        for(int k = 0; k < joint->getDegreesOfFreedom(); k++){
-          // if (joint->getMotor(k)->getMotorState() == MotorState::MOVING) {
-          //   std::cout << "Moving" << std::endl;
-          // } else if (joint->getMotor(k)->getMotorState() == MotorState::RUN_TO_TARGET) {
-          //   std::cout << "Run to target" << std::endl;
-          // } else if (joint->getMotor(k)->getMotorState() == MotorState::STALLING) {
-          //   std::cout << "Stalling" << std::endl;
-          // } else if (joint->getMotor(k)->getMotorState() == MotorState::STOP) {
-          //   std::cout << "Stop" << std::endl;
-          // } else {
-          //   std::cout << "Error" << std::endl;
-          // }
+        const double VELOCITY_MAX = abs(*std::max_element(
+            currTargetPosition.velocities.begin(),
+            currTargetPosition.velocities.end(),
+            [](double a, double b) -> bool { return abs(a) < abs(b); }));
 
-          if (joint->getMotor(k)->getMotorState() == MotorState::STALLING) {
-            std::cout << "ACS stall detected" << std::endl;
-            IKEnabled = false;
-            std_srvs::Trigger srv;
-            if (enableServiceClient.call(srv)) {
-              ROS_WARN("%s", (std::string{"PLACEHOLDER_NAME: "} + srv.response.message).data()); // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
-            } else {
-              ROS_WARN("Error: failed to call service PLACEHOLDER_NAME"); // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
+        ArmMotor *currmotor = NULL;
+        int currItr = 0;
+        // std::cout << currPoint << " / " << goal->trajectory.points.size() <<
+        // std::endl;
+        currPoint++;
+        for (const auto &joint : joints) {
+            for (int i = 0; i < joint->getDegreesOfFreedom(); i++) {
+                double velocity =
+                    VELOCITY_MAX == 0.F
+                        ? JOINT_SAFETY_HOLD_SPEED
+                        : currTargetPosition.velocities[currItr] / VELOCITY_MAX;
+                // std::cout << "config setpoint: " <<
+                // currTargetPosition.positions[currItr] << ":" << velocity <<
+                // std::endl;
+                joint->configSetpoint(i, currTargetPosition.positions[currItr],
+                                      velocity);
+                currItr++;
             }
-          } else {
-            hasPositionFinished &= joint->getMotor(k)->getMotorState() == MotorState::STOP;
-          }      
-          // DEBUGGING OUTPUT: Print each motor's name, radian position, encoder position, and power
-          // std::cout<<std::setw(30)<<motors[j]->getEncoderCounts()<<std::endl;
+            joint->exectute();
         }
 
-        joint->exectute();
+        // While the current position is not complete yet...
+        while (!hasPositionFinished) {
+            // Assume the current action is done until proven otherwise
+            hasPositionFinished = true;
+            // Create the Joint State message for the current update cycle
 
-        // if (!joint->exectute()) {
-        //   IKEnabled = false;
-        //   std_srvs::Trigger srv;
-        //   if (enableServiceClient.call(srv)) {
-        //     ROS_WARN("%s", (std::string{"PLACEHOLDER_NAME: "} + srv.response.message).data()); // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
-        //   } else {
-        //     ROS_WARN("Error: failed to call service PLACEHOLDER_NAME"); // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
-        //   }
-        //   return;
-        // }
-      }
-      // Sleep until the next update cycle
-      loop.sleep();
+            // For each joint specified in the currTargetPosition...
+            for (const auto &joint : joints) {
+
+                for (int k = 0; k < joint->getDegreesOfFreedom(); k++) {
+                    // if (joint->getMotor(k)->getMotorState() ==
+                    // MotorState::MOVING) {
+                    //   std::cout << "Moving" << std::endl;
+                    // } else if (joint->getMotor(k)->getMotorState() ==
+                    // MotorState::RUN_TO_TARGET) {
+                    //   std::cout << "Run to target" << std::endl;
+                    // } else if (joint->getMotor(k)->getMotorState() ==
+                    // MotorState::STALLING) {
+                    //   std::cout << "Stalling" << std::endl;
+                    // } else if (joint->getMotor(k)->getMotorState() ==
+                    // MotorState::STOP) {
+                    //   std::cout << "Stop" << std::endl;
+                    // } else {
+                    //   std::cout << "Error" << std::endl;
+                    // }
+
+                    if (joint->getMotor(k)->getMotorState() ==
+                        MotorState::STALLING) {
+                        std::cout << "ACS stall detected" << std::endl;
+                        IKEnabled = false;
+                        std_srvs::Trigger srv;
+                        if (enableServiceClient.call(srv)) {
+                            ROS_WARN(
+                                "%s",
+                                (std::string{"PLACEHOLDER_NAME: "} +
+                                 srv.response.message)
+                                    .data()); // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
+                        } else {
+                            ROS_WARN(
+                                "Error: failed to call service "
+                                "PLACEHOLDER_NAME"); // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
+                        }
+                    } else {
+                        hasPositionFinished &=
+                            joint->getMotor(k)->getMotorState() ==
+                            MotorState::STOP;
+                    }
+                    // DEBUGGING OUTPUT: Print each motor's name, radian
+                    // position, encoder position, and power
+                    // std::cout << std::setw(30) << joint->getMotor(k)->getRads()
+                    //           << std::endl;
+                }
+
+                joint->exectute();
+
+                // if (!joint->exectute()) {
+                //   IKEnabled = false;
+                //   std_srvs::Trigger srv;
+                //   if (enableServiceClient.call(srv)) {
+                //     ROS_WARN("%s", (std::string{"PLACEHOLDER_NAME: "} + srv.response.message).data()); // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
+                //   } else {
+                //     ROS_WARN("Error: failed to call service PLACEHOLDER_NAME"); // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
+                //   }
+                //   return;
+                // }
+            }
+            // Sleep until the next update cycle
+            loop.sleep();
+        }
     }
-  }
 
-  //When all positions have been reached, set the current task as succeeded
-  
-  as->setSucceeded();
+    // When all positions have been reached, set the current task as succeeded
+
+    as->setSucceeded();
 }
 
 /**
  * @brief publishes the arm's position
  */
-void publishJointStates(const ros::TimerEvent &event){
-  std::vector<std::string> names;
-  std::vector<double> positions;
-  sensor_msgs::JointState js_msg;
+void publishJointStates(const ros::TimerEvent &event) {
+    std::vector<std::string> names;
+    std::vector<double> positions;
+    sensor_msgs::JointState js_msg;
 
-  for(const auto &joint : joints){
-    for(int i = 0; i < joint->getDegreesOfFreedom(); i++){
-      names.push_back(joint->getMotor(i)->getMotorName());
-      positions.push_back(joint->getMotor(i)->getRads());
+    for (const auto &joint : joints) {
+        for (int i = 0; i < joint->getDegreesOfFreedom(); i++) {
+            names.push_back(joint->getMotor(i)->getMotorName());
+            positions.push_back(joint->getMotor(i)->getRads());
+        }
     }
-  }
 
-  js_msg.name = names;
-  js_msg.position = positions;
-  js_msg.header.stamp = ros::Time::now();
-  // Publish the Joint State message
-  jointStatePublisher.publish(js_msg);
+    js_msg.name = names;
+    js_msg.position = positions;
+    js_msg.header.stamp = ros::Time::now();
+    // Publish the Joint State message
+    jointStatePublisher.publish(js_msg);
 }
 
 /**
- * @brief The main executable method of the node.  Starts the ROS node and the Action Server for processing Arm Control commands
- * 
+ * @brief The main executable method of the node.  Starts the ROS node and the
+ * Action Server for processing Arm Control commands
+ *
  * @param argc The number of program arguments
  * @param argv The given program arguments
  * @return int The status code on exiting the program
  */
-auto main(int argc, char** argv) ->int
-{
-  std::cout << "start main" << std::endl;
-  // Initialize the current node as ArmControlSystem
-  ros::init(argc, argv, "ArmControlActionServer");
-  // Create the NodeHandle to the current ROS node
-  ros::NodeHandle n;
+auto main(int argc, char **argv) -> int {
+    std::cout << "start main" << std::endl;
+    // Initialize the current node as ArmControlSystem
+    ros::init(argc, argv, "ArmControlActionServer");
+    // Create the NodeHandle to the current ROS node
+    ros::NodeHandle n;
+    ros::NodeHandle pn{"~"};
 
-  // Initialize the Action Server
-  Server server(n, "/arm_controller/follow_joint_trajectory", boost::bind(&execute, _1, &server), false);
-  // Start the Action Server
-  server.start();
-  std::cout << "server started" << std::endl;
+    XmlRpcValue encParams;
+    pn.getParam("encoder_parameters", encParams);
 
-  enableServiceServer = n.advertiseService("start_IK", 
-    static_cast<boost::function<bool(std_srvs::Trigger::Request&, std_srvs::Trigger::Response&)>>(
-      [](std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res)->bool{
-        IKEnabled = true;
-        res.message = "Arm IK Enabled";
-        res.success = static_cast<unsigned char>(true);
-        return true;
-      }
-    ));
+    // Initialize all motors with their MoveIt name, WRoboclaw initialization,
+    // and reference to the current node
+    auto elbowPitch_joint = std::make_unique<ArmMotor>(
+        "elbowPitch_joint", 1, 0,
+        static_cast<int>(encParams[0]["counts_per_rotation"]),
+        static_cast<int>(encParams[0]["offset"]), n);
+    auto elbowRoll_joint = std::make_unique<ArmMotor>(
+        "elbowRoll_joint", 1, 1,
+        static_cast<int>(encParams[1]["counts_per_rotation"]),
+        static_cast<int>(encParams[1]["offset"]), n);
+    auto shoulder_joint = std::make_unique<ArmMotor>(
+        "shoulder_joint", 0, 1,
+        static_cast<int>(encParams[2]["counts_per_rotation"]),
+        static_cast<int>(encParams[2]["offset"]), n);
+    auto turntable_joint = std::make_unique<ArmMotor>(
+        "turntable_joint", 0, 0,
+        static_cast<int>(encParams[3]["counts_per_rotation"]),
+        static_cast<int>(encParams[3]["offset"]), n);
+    auto wristPitch_joint = std::make_unique<ArmMotor>(
+        "wristPitch_joint", 2, 0,
+        static_cast<int>(encParams[4]["counts_per_rotation"]),
+        static_cast<int>(encParams[4]["offset"]), n);
+    auto wristRoll_link = std::make_unique<ArmMotor>(
+        "wristRoll_link", 2, 1,
+        static_cast<int>(encParams[5]["counts_per_rotation"]),
+        static_cast<int>(encParams[5]["offset"]), n);
+    std::cout << "init motors" << std::endl;
 
-  enableServiceClient = n.serviceClient<std_srvs::Trigger>("PLACEHOLDER_NAME");
-  
-  std::cout << "entering ROS spin..." << std::endl;
-  // ROS spin for communication with other nodes
-  ros::spin();
-  // Return 0 on exit (successful exit)
-  return 0;
+    // Initialize all Joints
+    joints.at(0) =
+        std::make_unique<SimpleJoint>(std::move(elbowPitch_joint), n);
+    joints.at(1) = std::make_unique<SimpleJoint>(std::move(elbowRoll_joint), n);
+    joints.at(2) = std::make_unique<SimpleJoint>(std::move(shoulder_joint), n);
+    joints.at(3) = std::make_unique<SimpleJoint>(std::move(turntable_joint), n);
+    joints.at(4) = std::make_unique<DifferentialJoint>(
+        std::move(wristPitch_joint), std::move(wristRoll_link), n,
+        "/control/arm/5/pitch", "/control/arm/5/roll", "/control/arm/20/",
+        "/control/arm/21/");
+    std::cout << "init joints" << std::endl;
+
+    // Initialize the Action Server
+    Server server(n, "/arm_controller/follow_joint_trajectory",
+                  boost::bind(&execute, _1, &server), false);
+    // Start the Action Server
+    server.start();
+    std::cout << "server started" << std::endl;
+
+    enableServiceServer = n.advertiseService(
+        "start_IK",
+        static_cast<boost::function<bool(std_srvs::Trigger::Request &,
+                                         std_srvs::Trigger::Response &)>>(
+            [](std_srvs::Trigger::Request &req,
+               std_srvs::Trigger::Response &res) -> bool {
+                IKEnabled = true;
+                res.message = "Arm IK Enabled";
+                res.success = static_cast<unsigned char>(true);
+                return true;
+            }));
+
+    enableServiceClient =
+        n.serviceClient<std_srvs::Trigger>("PLACEHOLDER_NAME");
+
+    std::cout << "entering ROS spin..." << std::endl;
+    // ROS spin for communication with other nodes
+    ros::spin();
+    // Return 0 on exit (successful exit)
+    return 0;
 }
