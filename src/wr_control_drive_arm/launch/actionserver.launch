@@ -2,7 +2,7 @@
 <launch>
     <group ns="control">
         <node name="WResponseControl_ArmMotors" pkg="wresponsecontrol" type="WResponseControl">
-            <rosparam file="$(find wr_control_drive_arm)/config/arm_motor_PID.yaml" />
+            <rosparam file="$(find wr_control_drive_arm)/config/arm_motor_PID_real.yaml" />
         </node>
         <node name="ArmControlActionServer" pkg="wr_control_drive_arm"
             type="ArmControlActionServer"

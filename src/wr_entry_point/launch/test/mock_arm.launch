@@ -2,7 +2,7 @@
 <launch>
   <include file="$(find wr_entry_point)/launch/comp/comp_init.launch"/>
   
-  <include file="$(find wr_entry_point)/launch/comp/comp_roboclaw.launch">
+  <include file="$(find wr_hsi_roboclaw)/launch/roboclaw_real.launch">
     <arg name="use_encoders" value="true"/>
   </include>
 
@@ -17,5 +17,5 @@
 
   <node name="arm_driver" pkg="wr_logic_teleop_arm" type="ArmTeleopLogic" output="screen"/>
   
-  <include file="$(find wr_control_drive_arm)/launch/std.launch" />
+  <include file="$(find wr_control_drive_arm)/launch/std.launch"/>
 </launch>

@@ -31,7 +31,7 @@ constexpr float CLOCK_RATE = 50;
 
 constexpr double IK_WARN_RATE = 1.0 / 2;
 
-constexpr double JOINT_SAFETY_MAX_SPEED = 0.3;
+constexpr double JOINT_SAFETY_MAX_SPEED = 0.5;
 constexpr double JOINT_SAFETY_HOLD_SPEED = 0.15;
 
 /**
@@ -124,10 +124,10 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
                 double velocity =
                     VELOCITY_MAX == 0.F
                         ? JOINT_SAFETY_HOLD_SPEED
-                        : currTargetPosition.velocities[currItr] / VELOCITY_MAX;
-                // std::cout << "config setpoint: " <<
-                // currTargetPosition.positions[currItr] << ":" << velocity <<
-                // std::endl;
+                        : JOINT_SAFETY_MAX_SPEED * currTargetPosition.velocities[currItr] / VELOCITY_MAX;
+                std::cout << "config setpoint: " <<
+                currTargetPosition.positions[currItr] << ":" << velocity <<
+                std::endl;
                 joint->configSetpoint(i, currTargetPosition.positions[currItr],
                                       velocity);
                 currItr++;
@@ -136,7 +136,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
         }
 
         // While the current position is not complete yet...
-        while (!hasPositionFinished) {
+        while (!hasPositionFinished && ros::ok()) {
             // Assume the current action is done until proven otherwise
             hasPositionFinished = true;
             // Create the Joint State message for the current update cycle
@@ -181,6 +181,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
                         hasPositionFinished &=
                             joint->getMotor(k)->getMotorState() ==
                             MotorState::STOP;
+                        std::cout << joint->getMotor(k)->getMotorName() << " state: " << (joint->getMotor(k)->getMotorState() == MotorState::STOP) << std::endl;
                     }
                     // DEBUGGING OUTPUT: Print each motor's name, radian
                     // position, encoder position, and power

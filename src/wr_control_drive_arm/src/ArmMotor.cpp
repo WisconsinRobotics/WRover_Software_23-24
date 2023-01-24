@@ -146,7 +146,7 @@ auto ArmMotor::hasReachedTarget(uint32_t targetCounts, uint32_t tolerance) const
 /// Current tolerance is &pm;0.1 degree w.r.t. the current number of counts per rotation
 auto ArmMotor::hasReachedTarget(uint32_t targetCounts) const -> bool {
     auto tol = ArmMotor::TOLERANCE_RATIO * static_cast<double>(std::abs(this->COUNTS_PER_ROTATION));
-    return ArmMotor::hasReachedTarget(targetCounts, std::max(1.0, tol));
+    return ArmMotor::hasReachedTarget(targetCounts, std::max(10.0, tol));
 }
 
 auto ArmMotor::getMotorState() const -> MotorState {
@@ -176,15 +176,17 @@ void ArmMotor::setPower(float power, MotorState state) {
 void ArmMotor::runToTarget(uint32_t targetCounts, float power, bool block) {
     this->target = targetCounts;
     this->maxPower = abs(power);
+
+    std_msgs::Float64 setpointMsg;
+    setpointMsg.data = ArmMotor::encToRad(targetCounts);
+    if (!readOnly)
+        this->targetPub.publish(setpointMsg);
+        
     // If we are not at our target...
     if (!this->hasReachedTarget(targetCounts)) {
         // std::cout << "has not reached target" << std::endl;
         // Set the power in the correct direction and continue running to the target
         this->currState = MotorState::RUN_TO_TARGET;
-        std_msgs::Float64 setpointMsg;
-        setpointMsg.data = ArmMotor::encToRad(targetCounts);
-        if (!readOnly)
-            this->targetPub.publish(setpointMsg);
 
         // long int direction = targetCounts - this->getEncoderCounts();
         // power = abs(power) * (corrMod(direction, ((long int)this->COUNTS_PER_ROTATION)) < corrMod(-direction, ((long int)this->COUNTS_PER_ROTATION)) ? 1 : -1);

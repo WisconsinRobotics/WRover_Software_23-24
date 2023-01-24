@@ -34,8 +34,8 @@ joint_limits:
     max_velocity: 10
     has_acceleration_limits: true
     max_acceleration: 10
-    max_position: !radians pi / 2
-    min_position: !radians 0
+    max_position: !radians pi
+    min_position: !radians -pi
   wristPitch_joint:
     has_velocity_limits: true
     max_velocity: 10
@@ -48,5 +48,5 @@ joint_limits:
     max_velocity: 10
     has_acceleration_limits: true
     max_acceleration: 10
-    max_position: !radians pi / 2
-    min_position: !radians -pi / 2
+    max_position: !radians pi
+    min_position: !radians -pi

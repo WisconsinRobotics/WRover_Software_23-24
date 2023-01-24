@@ -19,6 +19,7 @@ DifferentialJoint::DifferentialJoint(std::unique_ptr<ArmMotor> leftMotor, std::u
     this->motors.at(0) = {std::move(leftMotor), 0, 0, "", "", false};
     this->motors.at(1) = {std::move(rightMotor), 0, 0, "", "", false};
 
+    // TODO:  This should NOT be bypassing the motors in handling PID.  This should do frame conversions and pass the results into the motors to handle the actual ROS comms
     this->pitchOutputSubscriber = n.subscribe<std_msgs::Float64>(pitchTopicName + "/output", MESSAGE_CACHE_SIZE, &DifferentialJoint::handoffPitchOutput, this);
     this->rollOutputSubscriber = n.subscribe<std_msgs::Float64>(rollTopicName + "/output", MESSAGE_CACHE_SIZE, &DifferentialJoint::handoffRollOutput, this);
     this->leftOutputPublisher = n.advertise<std_msgs::Float64>(leftTopicName + "/output", MESSAGE_CACHE_SIZE);
