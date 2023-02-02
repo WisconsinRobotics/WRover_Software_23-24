@@ -1,15 +1,51 @@
 @startuml Structure
-enum MotorChannel{
+enum RoboclawChannel{
     + A
     + B
 }
+
+note right of RoboclawChannel::A
+    Analogous to 'LEFT'
+end note
+
+note right of RoboclawChannel::B
+    Analogous to 'RIGHT'
+end note
+
 class Motor{
-    + Motor(string controllerName, Channel motorChannel)
+    - powerPublisher : ros::Publisher
+
+    + Motor(string controllerName, RoboclawChannel channel)
     + void setPower(double power)
     + bool getOverCurrentStatus()
 }
 
-Motor -> MotorChannel
+Motor --> RoboclawChannel
+
+class EncoderJointPositionMonitor {
+    - encoderSubscriber : ros::Subscriber
+    - countsPerRotation : const int
+    - offset : const int
+    
+    + EncoderJointPositionMonitor(string controllerName, RoboclawChannel channel, int countsPerRotation, int offset)
+    - void encoderCallback(std_msgs::Int32)
+}
+
+EncoderJointPositionMonitor --> RoboclawChannel
+
+class DirectJointToMotorSpeedConverter {
+    + DirectJointToMotorSpeedConverter(Motor motor)
+    + void operator()(double)
+}
+
+DirectJointToMotorSpeedConverter "1" --> "1" Motor
+
+class DifferentialJointToMotorSpeedConverter {
+    + void setPitchSpeed(double)
+    + void setRollSpeed(double)
+}
+
+DifferentialJointToMotorSpeedConverter "1" --> "2" Motor
 
 class Joint{
     + Joint(String name)
@@ -18,25 +54,12 @@ class Joint{
     + void stop()  
 }
 
-interface JointPositionMonitor{
-    + {abstract} virtual double getJointPosition()
-}
-
-class EncoderJointPositionMonitor implements JointPositionMonitor{
-
-}
-
-interface JointToMotorSpeedConverter{
-    + {abstract} virtual void setJointSpeed(double speed)
-}
-
-class DirectJointToMotorSpeedConverter implements JointToMotorSpeedConverter{
-
-}
-
-class DifferentialJointToMotorSpeedConverter implements JointToMotorSpeedConverter{
-
-}
+Joint --> EncoderJointPositionMonitor : via function parameter <double()>
+<> speedConversion
+Joint --> speedConversion : via function parameter <void(double)>
+speedConversion --> DirectJointToMotorSpeedConverter : as functor
+speedConversion --> DifferentialJointToMotorSpeedConverter::setPitchSpeed : as function pointer
+speedConversion --> DifferentialJointToMotorSpeedConverter::setRollSpeed : as function pointer
 
 @enduml
 
@@ -55,11 +78,12 @@ class DifferentialJointToMotorSpeedConverter implements JointToMotorSpeedConvert
             Joint -> "PID Loop" : Feed the setpoint
             Joint -> JointPositionMonitor : Ask for the joint position
             activate JointPositionMonitor
-            JointPositionMonitor -> Joint : Sends back joint position
+            JointPositionMonitor --> Joint : Sends back joint position
             deactivate JointPositionMonitor
             Joint -> "PID Loop" : Feed the feedback
             deactivate Joint
 
+            note left of Joint : Happens asynchonously
             "PID Loop" -> Joint : New output available
             activate Joint
             Joint -> JointToMotorSpeedConverter : Dispatch new speed
@@ -70,5 +94,6 @@ class DifferentialJointToMotorSpeedConverter implements JointToMotorSpeedConvert
             deactivate Joint
         end
     end
+    ActionServer -> MoveIt : Report motion as complete
     
 @enduml
