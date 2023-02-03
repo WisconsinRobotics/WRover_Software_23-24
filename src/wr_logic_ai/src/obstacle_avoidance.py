@@ -7,7 +7,8 @@ from finder import get_navigation_angle
 from angle_calculations import AngleCalculations
 import angle_to_drive_methods as angle_calc
 
-from sensor_msgs.msg import LaserScan
+from sensor_msgs.msg import LaserScan 
+
 from wr_logic_ai.msg import NavigationMsg
 from wr_drive_msgs.msg import DriveTrainCmd
 
@@ -24,6 +25,7 @@ VISION_ANGLE = 180
 # initialize target angle to move forward
 target_angle = 90
 target_sector = target_angle / SECTOR_COUNT
+oi=1
 
 ## Initialize node
 rospy.init_node('nav_autonomous', anonymous=False)
@@ -33,21 +35,32 @@ drive_pub = rospy.Publisher('/control/drive_system/cmd', DriveTrainCmd, queue_si
 
 # Start the tasks managed to drive autonomously
 def initialize() -> None:
+    
+    
+    
+    ## Subscribe to location data               
+    rospy.Subscriber('/nav_data', NavigationMsg, set_target_angle)
+    
+    
+    rospy.Subscriber('/nav_data', NavigationMsg, update_heading)
+    
+    
     ## Subscribe to lidar data
     rospy.Subscriber('/scan', LaserScan, update_navigation)
-    ## Subscribe to location data
-    rospy.Subscriber('/nav_data', NavigationMsg, set_target_angle)
-    rospy.Subscriber('/nav_data', NavigationMsg, update_heading)
+    
 
-    ## Asynchronously update the target navigation
+    # Asynchronously update the target navigation
     th = threading.Thread(target=update_target_sector)
     th.daemon = True
     th.start()
+    rospy.spin()
 
-HEADING = None
+HEADING = 67
 def update_heading(data) -> None:
     global HEADING
     HEADING = data.heading
+    print("HEADING: " + str(HEADING))
+    
 
 ## Calculate the planar target angle
 def set_target_angle(data) -> None:
@@ -56,7 +69,8 @@ def set_target_angle(data) -> None:
     imu = AngleCalculations(data.cur_lat, data.cur_long, data.tar_lat, data.tar_long)
     target_angle = imu.get_angle()
     ## Debug Out the target angle
-    #print('Target angle: ' + str(target_angle))
+    print('Target angle: ' + str(target_angle))
+    
 
 # TODO: consider wheter to directly call from callback
 # or every 2 seconds, depends on the computational cost
@@ -71,9 +85,12 @@ def update_target_sector() -> None:
 # t = 0
 # Update the robot's navigation and drive it towards the target angle
 def update_navigation(data) -> None:
+    
     global HEADING # , t
-    data_avg = sum(cur_range for cur_range in data.ranges) / len(data.ranges)
-    print(str(data_avg))
+    
+    print("Length of data: " + str(len(data.ranges)))
+    data_avg = sum(cur_range for cur_range in data.ranges) /  270#Temporary Hardcoded#len(data.ranges)
+    print("Data Avg: " + str(data_avg))
     # TODO: data threshold might depend of lidar model, double check
     if data_avg >= 0.5: # data_avg is above 0.5 almost always, but result stays the same (?)
         # Gets best possible angle, considering obstacles
@@ -85,7 +102,7 @@ def update_navigation(data) -> None:
             VISION_ANGLE,
             data,
             smoothing_constant = rospy.get_param("smoothing_constant", 3))
-        print(str(result))
+        print("Results: " + str(result))
 
         # Get the speed multiplier of the current runtime for the obstacle_avoidance
         speed_factor = rospy.get_param("speed_factor", 0.3) # 0.2 dos not work
@@ -101,6 +118,8 @@ def update_navigation(data) -> None:
         msg.left_value *= speed_factor # Right value was inverted, -1 "fixes"
         msg.right_value *= -1*speed_factor
         # Publish the DriveTrainCmd to the topic
+        print("Left Value: " + msg.left_value)
+        print("Right Value: " + msg.right_value)
         drive_pub.publish(msg)
 
 # If this file was executed...
