@@ -48,8 +48,11 @@ class AngleCalculations:
     # Get the planar angle relative to planar East as the straight-line trajectory towards the goal
     def get_angle(self) -> float:
         # Use the Great Circle distances of the spherical triangle legs to get the angle (-90,90) to the goal coordinates
-        angle = math.atan(self.latitude_to_distance(self.cur_lat, self.tar_lat) / self.longitude_to_distance(self.cur_long, self.tar_long))
-        angle = math.degrees(angle)
+        if(self.cur_long != self.tar_long):
+            angle = math.atan(self.latitude_to_distance(self.cur_lat, self.tar_lat) / self.longitude_to_distance(self.cur_long, self.tar_long))
+            angle = math.degrees(angle)
+        else:
+            angle = 90
 
         # Use the reference flags to move the angle to the right quadrant.
         # Angle in Q II

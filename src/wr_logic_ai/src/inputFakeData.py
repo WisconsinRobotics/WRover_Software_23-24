@@ -19,7 +19,7 @@ inputData = []
 #laser.intensities()
 
 for x in range(270):
-    distance = 10
+    distance = 100
     if distance > 12:
         distance = 12
     #inputData.append(str('%.5f' % distance) + " is the distance at angle " + str(x+1))
@@ -27,9 +27,9 @@ for x in range(270):
     #print(distance)
 
 #laser.angle_min = 0.
-#laser.angle_max = (2/3)*math.pi
-#laser.angle_increment = math.pi/180.
-#laser.time_increment = 1
+laser.angle_max = 270
+laser.angle_increment = 1
+laser.time_increment = 1
 laser.scan_time = 1.
 laser.range_min = 0.
 laser.range_max = 20.
@@ -38,11 +38,11 @@ laser.ranges = inputData
 
 nav = NavigationMsg()
 
-nav.cur_lat = 100
-nav.cur_long = 100
+nav.cur_lat = 1
+nav.cur_long = 10
 
-nav.tar_lat = 100
-nav.tar_long = 101
+nav.tar_lat = -1
+nav.tar_long = 10
 nav.heading = 0
 
 

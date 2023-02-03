@@ -118,8 +118,8 @@ def update_navigation(data) -> None:
         msg.left_value *= speed_factor # Right value was inverted, -1 "fixes"
         msg.right_value *= -1*speed_factor
         # Publish the DriveTrainCmd to the topic
-        print("Left Value: " + msg.left_value)
-        print("Right Value: " + msg.right_value)
+        print("Left Value: " + str(msg.left_value))
+        print("Right Value: " + str(msg.right_value))
         drive_pub.publish(msg)
 
 # If this file was executed...
