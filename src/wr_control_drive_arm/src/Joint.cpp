@@ -1,8 +1,11 @@
 #include "Joint.hpp"
-#include "ros/node_handle.h"
-#include "std_msgs/Float64.h"
+#include "MathUtil.hpp"
+#include <numbers>
+#include <ros/node_handle.h>
+#include <std_msgs/Float64.h>
 
 using std::literals::string_literals::operator""s;
+using MathUtil::RADIANS_PER_ROTATION;
 
 Joint::Joint(std::string name,
              std::function<double()> positionMonitor,
@@ -23,7 +26,20 @@ void Joint::setTarget(double target) {
     controlLoopUpdateTimer.start();
 }
 
-auto Joint::hasReachedTarget() const -> bool {} // TODO: IMPLEMENT ME
+auto Joint::hasReachedTarget() const -> bool {
+    // Copy-on-read to avoid inconsistencies on asynchronous change
+    auto currentTarget = target.load();
+
+    // Compute the upper and lower bounds in the finite encoder space
+    auto lBound = MathUtil::corrMod(currentTarget - JOINT_TOLERANCE_RADIANS, RADIANS_PER_ROTATION);
+    auto uBound = MathUtil::corrMod(currentTarget + JOINT_TOLERANCE_RADIANS, RADIANS_PER_ROTATION);
+    auto position = MathUtil::corrMod(positionMonitor(), RADIANS_PER_ROTATION);
+    // If the computed lower bound is lower than the upper bound, perform the computation normally
+    if (lBound < uBound)
+        return position <= uBound && position >= lBound;
+    // Otherwise, check if the value is outside either bound and negate the response
+    return position <= uBound || position >= lBound;
+}
 
 auto Joint::getName() const -> std::string {
     return name;

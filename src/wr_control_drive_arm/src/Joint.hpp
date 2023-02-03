@@ -18,6 +18,7 @@ public:
 
 private:
     static constexpr double FEEDBACK_UPDATE_FREQUENCY_HZ{50};
+    static constexpr double JOINT_TOLERANCE_RADIANS{std::numbers::pi / 180};
 
     const std::string name;
     const std::function<double()> positionMonitor;
