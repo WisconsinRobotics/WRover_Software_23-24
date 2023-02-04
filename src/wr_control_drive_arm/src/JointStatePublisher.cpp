@@ -8,7 +8,6 @@
 
 #include "SingleEncoderJointPositionMonitor.hpp"
 #include "XmlRpcValue.h"
-#include "ros/spinner.h"
 
 #include <actionlib/server/simple_action_server.h>
 #include <algorithm>

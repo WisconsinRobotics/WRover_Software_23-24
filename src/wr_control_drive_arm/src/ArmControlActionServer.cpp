@@ -16,6 +16,7 @@
 #include <actionlib/server/simple_action_server.h>
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <control_msgs/FollowJointTrajectoryAction.h>
 #include <csignal>
 #include <memory>
@@ -25,6 +26,7 @@
 #include <std_msgs/Float64.h>
 #include <std_srvs/Trigger.h>
 #include <string>
+#include <thread>
 #include <unordered_map>
 
 using XmlRpc::XmlRpcValue;
@@ -88,25 +90,12 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
         return;
     }
 
-    std::cout << "start exec: " << goal->trajectory.points.size() << std::endl;
-    // DEBUG: Display every point in the movement sequence
-    for (const auto &name : goal->trajectory.joint_names) {
-        std::cout << name << "\t";
-    }
-    std::cout << std::endl;
-    for (const auto &currTargetPosition : goal->trajectory.points) {
-        for (double pos : currTargetPosition.positions) {
-            std::cout << std::round(pos * 100) / 100 << "\t";
-        }
-        std::cout << std::endl;
-    }
-
     for (const auto &currTargetPosition : goal->trajectory.points) {
 
         const double VELOCITY_MAX = abs(*std::max_element(
             currTargetPosition.velocities.begin(),
             currTargetPosition.velocities.end(),
-            [](double a, double b) -> bool { return abs(a) < abs(b); }));
+            [](double lhs, double rhs) -> bool { return abs(lhs) < abs(rhs); }));
 
         for (uint32_t i = 0; i < goal->trajectory.joint_names.size(); ++i) {
             auto jointVelocity{JOINT_SAFETY_HOLD_SPEED};
@@ -127,9 +116,13 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
         }
         updateRate.sleep();
     }
-    // When all positions have been reached, set the current task as succeeded
 
-    server->setSucceeded();
+    // Report preemption if it occurred
+    if (server->isNewGoalAvailable())
+        server->setPreempted();
+    // When all positions have been reached, set the current task as succeeded
+    else
+        server->setSucceeded();
 }
 
 auto getEncoderConfigFromParams(const XmlRpcValue &params, const std::string &jointName) -> EncoderConfiguration {

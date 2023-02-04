@@ -39,7 +39,7 @@ auto SingleEncoderJointPositionMonitor::operator()() -> double {
 }
 
 void SingleEncoderJointPositionMonitor::onEncoderReceived(const std_msgs::UInt32::ConstPtr &msg) {
-    auto enc = msg->data;
-    auto rotations = MathUtil::corrMod(static_cast<double>(enc - offset), countsPerRotation) / countsPerRotation;
+    auto enc = static_cast<double>(msg->data);
+    auto rotations = MathUtil::corrMod(enc - offset, countsPerRotation) / countsPerRotation;
     position = MathUtil::corrMod(rotations * RADIANS_PER_ROTATION + M_PI, RADIANS_PER_ROTATION) - M_PI;
 }
