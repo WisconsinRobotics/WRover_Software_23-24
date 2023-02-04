@@ -49,7 +49,6 @@ void publishJointStates(const ros::TimerEvent &event) {
     for (auto &[name, monitor] : namedJointPositionMonitors) {
         names.push_back(name);
         positions.push_back(monitor());
-        std::cout << name << " : " << monitor() << std::endl;
     }
 
     js_msg.name = names;
@@ -82,37 +81,6 @@ auto main(int argc, char **argv) -> int {
 
     XmlRpcValue encParams;
     pn.getParam("encoder_parameters", encParams);
-
-    // SingleEncoderJointPositionMonitor turntablePositionMonitor{
-    //     "aux0",
-    //     RoboclawChannel::A,
-    //     getEncoderConfigFromParams(encParams, "turntable"),
-    //     n};
-    // SingleEncoderJointPositionMonitor shoulderPositionMonitor{
-    //     "aux0",
-    //     RoboclawChannel::B,
-    //     getEncoderConfigFromParams(encParams, "shoulder"),
-    //     n};
-    // SingleEncoderJointPositionMonitor elbowPositionMonitor{
-    //     "aux1",
-    //     RoboclawChannel::A,
-    //     getEncoderConfigFromParams(encParams, "elbow"),
-    //     n};
-    // SingleEncoderJointPositionMonitor forearmRollPositionMonitor{
-    //     "aux1",
-    //     RoboclawChannel::B,
-    //     getEncoderConfigFromParams(encParams, "forearmRoll"),
-    //     n};
-    // SingleEncoderJointPositionMonitor wristPitchPositionMonitor{
-    //     "aux2",
-    //     RoboclawChannel::A,
-    //     getEncoderConfigFromParams(encParams, "wristPitch"),
-    //     n};
-    // SingleEncoderJointPositionMonitor wristRollPositionMonitor{
-    //     "aux2",
-    //     RoboclawChannel::B,
-    //     getEncoderConfigFromParams(encParams, "wristRoll"),
-    //     n};
 
     namedJointPositionMonitors.try_emplace("elbowPitch_joint",
 

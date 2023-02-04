@@ -2,7 +2,6 @@
 #include "MathUtil.hpp"
 #include "RoboclawChannel.hpp"
 #include "ros/node_handle.h"
-#include "ros/this_node.h"
 
 using std::literals::string_literals::operator""s;
 using MathUtil::RADIANS_PER_ROTATION;
@@ -12,36 +11,30 @@ SingleEncoderJointPositionMonitor::SingleEncoderJointPositionMonitor(
     RoboclawChannel channel,
     EncoderConfiguration config,
     ros::NodeHandle node)
-    : my_counter{SingleEncoderJointPositionMonitor::counter},
-      countsPerRotation{config.countsPerRotation},
+    : countsPerRotation{config.countsPerRotation},
       offset{config.offset},
       encoderSubscriber{
-          node.subscribe(
+          std::make_shared<ros::Subscriber>(node.subscribe(
               "/hsi/roboclaw/"s + controllerName + "/enc/" + (channel == RoboclawChannel::A ? "left" : "right"),
               1,
               &SingleEncoderJointPositionMonitor::onEncoderReceived,
-              this)} {
-    ++SingleEncoderJointPositionMonitor::counter;
-}
+              this))} {}
 
 SingleEncoderJointPositionMonitor::SingleEncoderJointPositionMonitor(
     const SingleEncoderJointPositionMonitor &other)
-    : my_counter{SingleEncoderJointPositionMonitor::counter},
-      countsPerRotation(other.countsPerRotation),
+    : countsPerRotation(other.countsPerRotation),
       offset(other.offset),
       encoderSubscriber{other.encoderSubscriber},
-      position{other.position.load()} { ++SingleEncoderJointPositionMonitor::counter; }
+      position{other.position.load()} {}
 
 SingleEncoderJointPositionMonitor::SingleEncoderJointPositionMonitor(
     SingleEncoderJointPositionMonitor &&other) noexcept
-    : my_counter{SingleEncoderJointPositionMonitor::counter},
-      countsPerRotation(other.countsPerRotation),
+    : countsPerRotation(other.countsPerRotation),
       offset(other.offset),
-      encoderSubscriber{other.encoderSubscriber},
-      position{other.position.load()} { ++SingleEncoderJointPositionMonitor::counter; }
+      encoderSubscriber{std::move(other.encoderSubscriber)},
+      position{other.position.load()} {}
 
 auto SingleEncoderJointPositionMonitor::operator()() -> double {
-    std::cout << ros::this_node::getName() << " (" << my_counter << ") READ POS : " << position << std::endl;
     return position;
 }
 
@@ -49,5 +42,4 @@ void SingleEncoderJointPositionMonitor::onEncoderReceived(const std_msgs::UInt32
     auto enc = msg->data;
     auto rotations = MathUtil::corrMod(static_cast<double>(enc - offset), countsPerRotation) / countsPerRotation;
     position = MathUtil::corrMod(rotations * RADIANS_PER_ROTATION + M_PI, RADIANS_PER_ROTATION) - M_PI;
-    std::cout << ros::this_node::getName() << " (" << my_counter << ") READ POS : " << position << std::endl;
 }

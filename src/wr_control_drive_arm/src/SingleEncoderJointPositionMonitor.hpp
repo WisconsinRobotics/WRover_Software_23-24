@@ -27,12 +27,8 @@ public:
 private:
     void onEncoderReceived(const std_msgs::UInt32::ConstPtr &msg);
 
-    inline static std::size_t counter{0};
-
-    const std::size_t my_counter;
-
     std::atomic<double> position;
-    ros::Subscriber encoderSubscriber;
+    std::shared_ptr<ros::Subscriber> encoderSubscriber;
     const uint32_t countsPerRotation;
     const uint32_t offset;
 };
