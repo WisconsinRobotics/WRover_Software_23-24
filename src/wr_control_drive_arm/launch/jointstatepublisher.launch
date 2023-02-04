@@ -1,9 +1,12 @@
 <!--Launches the joint state publisher node-->
 <launch>
     <group ns="control">
-        <node name="JointStatePublisher" pkg="wr_control_drive_arm" type="JointStatePublisher" output="screen">
-            <rosparam file="$(find wr_control_drive_arm)/config/encoder_parameters_real.yaml" if="$(eval env('WROVER_HW') == 'REAL')"/>
-            <rosparam file="$(find wr_control_drive_arm)/config/encoder_parameters_mock.yaml" if="$(eval env('WROVER_HW') == 'MOCK')"/>
+        <node name="JointStatePublisher" pkg="wr_control_drive_arm" type="JointStatePublisher"
+            output="screen">
+            <rosparam file="$(find wr_control_drive_arm)/config/encoder_parameters_real.yaml"
+                if="$(eval env('WROVER_HW') == 'REAL')" />
+            <rosparam file="$(find wr_control_drive_arm)/config/encoder_parameters_mock.yaml"
+                if="$(eval env('WROVER_HW') == 'MOCK')" />
         </node>
     </group>
 </launch>

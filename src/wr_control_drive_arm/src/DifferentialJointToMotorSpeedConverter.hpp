@@ -9,6 +9,12 @@ public:
     void setPitchSpeed(double speed);
     void setRollSpeed(double speed);
 
+    DifferentialJointToMotorSpeedConverter(const DifferentialJointToMotorSpeedConverter &);
+    auto operator=(const DifferentialJointToMotorSpeedConverter &) -> DifferentialJointToMotorSpeedConverter & = delete;
+    DifferentialJointToMotorSpeedConverter(DifferentialJointToMotorSpeedConverter &&) noexcept;
+    auto operator=(DifferentialJointToMotorSpeedConverter &&) -> DifferentialJointToMotorSpeedConverter & = delete;
+    ~DifferentialJointToMotorSpeedConverter() = default;
+
 private:
     std::atomic<double> cachedPitchSpeed;
     std::atomic<double> cachedRollSpeed;

@@ -9,6 +9,20 @@ DifferentialJointToMotorSpeedConverter::DifferentialJointToMotorSpeedConverter(
       leftMotor{std::move(leftMotor)},
       rightMotor{std::move(rightMotor)} {}
 
+DifferentialJointToMotorSpeedConverter::DifferentialJointToMotorSpeedConverter(
+    const DifferentialJointToMotorSpeedConverter &other)
+    : cachedPitchSpeed{other.cachedPitchSpeed.load()},
+      cachedRollSpeed{other.cachedRollSpeed.load()},
+      leftMotor{other.leftMotor},
+      rightMotor{other.rightMotor} {}
+
+DifferentialJointToMotorSpeedConverter::DifferentialJointToMotorSpeedConverter(
+    DifferentialJointToMotorSpeedConverter &&other) noexcept
+    : cachedPitchSpeed{other.cachedPitchSpeed.load()},
+      cachedRollSpeed{other.cachedRollSpeed.load()},
+      leftMotor{other.leftMotor},
+      rightMotor{other.rightMotor} {}
+
 void DifferentialJointToMotorSpeedConverter::setPitchSpeed(double speed) {
     cachedPitchSpeed = speed;
     dispatchDifferentialSpeed();

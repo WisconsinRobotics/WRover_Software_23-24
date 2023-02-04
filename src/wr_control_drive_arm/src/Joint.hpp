@@ -11,14 +11,14 @@
 class Joint {
 public:
     explicit Joint(std::string name, std::function<double()> positionMonitor, std::function<void(double)> motorSpeedDispatcher, ros::NodeHandle node);
-    void setTarget(double target);
+    void setTarget(double target, double maxSpeed);
     [[nodiscard]] auto hasReachedTarget() const -> bool;
     [[nodiscard]] auto getName() const -> std::string;
     void stop();
 
 private:
     static constexpr double FEEDBACK_UPDATE_FREQUENCY_HZ{50};
-    static constexpr double JOINT_TOLERANCE_RADIANS{std::numbers::pi / 180};
+    static constexpr double JOINT_TOLERANCE_RADIANS{M_PI / 180};
 
     const std::string name;
     const std::function<double()> positionMonitor;
@@ -28,6 +28,7 @@ private:
     void onFeedbackUpdateEvent(const ros::TimerEvent &event);
 
     std::atomic<double> target;
+    std::atomic<double> maxSpeed;
     std::atomic<bool> executeMotion;
     ros::Timer controlLoopUpdateTimer;
     ros::Subscriber controlLoopOutputSubscriber;

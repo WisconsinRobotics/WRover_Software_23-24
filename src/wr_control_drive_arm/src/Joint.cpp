@@ -16,12 +16,13 @@ Joint::Joint(std::string name,
       motorSpeedDispatcher{std::move(motorSpeedDispatcher)},
       executeMotion{false},
       controlLoopUpdateTimer{node.createTimer(ros::Rate{FEEDBACK_UPDATE_FREQUENCY_HZ}, &Joint::onFeedbackUpdateEvent, this, false, false)},
-      controlLoopOutputSubscriber{node.subscribe("/control/pid/"s + name + "/output", 1, &Joint::onControlLoopOutput, this)},
-      controlLoopSetpointPublisher{node.advertise<std_msgs::Float64>("/control/pid"s + name + "/setpoint", 1)},
-      controlLoopFeedbackPublisher{node.advertise<std_msgs::Float64>("/control/pid"s + name + "/feedback", 1)} {}
+      controlLoopOutputSubscriber{node.subscribe("/control/arm/pid/"s + this->name + "/output", 1, &Joint::onControlLoopOutput, this)},
+      controlLoopSetpointPublisher{node.advertise<std_msgs::Float64>("/control/arm/pid/"s + this->name + "/setpoint", 1)},
+      controlLoopFeedbackPublisher{node.advertise<std_msgs::Float64>("/control/arm/pid/"s + this->name + "/feedback", 1)} {}
 
-void Joint::setTarget(double target) {
+void Joint::setTarget(double target, double maxSpeed) {
     this->target = target;
+    this->maxSpeed = maxSpeed;
     executeMotion = true;
     controlLoopUpdateTimer.start();
 }
@@ -52,7 +53,11 @@ void Joint::stop() {
 }
 
 void Joint::onControlLoopOutput(const std_msgs::Float64::ConstPtr &msg) {
-    motorSpeedDispatcher(executeMotion ? msg->data : 0);
+    auto cappedPowerUnsigned{std::min(std::abs(msg->data), std::abs(maxSpeed))};
+    double cappedPower{0};
+    if (msg->data != 0)
+        cappedPower = (std::abs(msg->data) / msg->data) * cappedPowerUnsigned;
+    motorSpeedDispatcher(executeMotion ? cappedPower : 0);
 }
 
 void Joint::onFeedbackUpdateEvent(const ros::TimerEvent &event) {
