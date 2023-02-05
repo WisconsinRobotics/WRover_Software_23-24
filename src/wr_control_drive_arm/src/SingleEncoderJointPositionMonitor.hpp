@@ -9,8 +9,8 @@
 #include <string>
 
 struct EncoderConfiguration {
-    uint32_t countsPerRotation;
-    uint32_t offset;
+    int32_t countsPerRotation;
+    int32_t offset;
 };
 
 class SingleEncoderJointPositionMonitor {
@@ -29,8 +29,8 @@ private:
 
     std::atomic<double> position;
     std::shared_ptr<ros::Subscriber> encoderSubscriber;
-    const uint32_t countsPerRotation;
-    const uint32_t offset;
+    const int32_t countsPerRotation;
+    const int32_t offset;
 };
 
 #endif

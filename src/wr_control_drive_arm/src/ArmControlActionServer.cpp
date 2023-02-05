@@ -90,6 +90,17 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
         return;
     }
 
+    for(const auto& jointName : goal->trajectory.joint_names){
+        std::cout << jointName << "\t";
+    }
+    std::cout << std::endl;
+    for(const auto& waypoint : goal->trajectory.points){
+        for(const auto& jointVal : waypoint.positions){
+            std::cout << jointVal << "\t";
+        }
+        std::cout << std::endl;
+    }
+
     for (const auto &currTargetPosition : goal->trajectory.points) {
 
         const double VELOCITY_MAX = abs(*std::max_element(
@@ -126,8 +137,8 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
 }
 
 auto getEncoderConfigFromParams(const XmlRpcValue &params, const std::string &jointName) -> EncoderConfiguration {
-    return {.countsPerRotation = static_cast<uint32_t>(static_cast<int32_t>(params[jointName]["counts_per_rotation"])),
-            .offset = static_cast<uint32_t>(static_cast<int32_t>(params[jointName]["offset"]))};
+    return {.countsPerRotation = static_cast<int32_t>(params[jointName]["counts_per_rotation"]),
+            .offset = static_cast<int32_t>(params[jointName]["offset"])};
 }
 
 /**
@@ -206,17 +217,17 @@ auto main(int argc, char **argv) -> int {
     namedJointMap.insert({"turntable_joint", std::make_unique<Joint>(
                                                  "turntable"s,
                                                  [turntablePositionMonitor]() -> double { return (*turntablePositionMonitor)(); },
-                                                 [turntableSpeedConverter](double speed) { (*turntableSpeedConverter)(speed); },
+                                                 [turntableSpeedConverter](double speed) { (*turntableSpeedConverter)(-speed); },
                                                  n)});
     namedJointMap.insert({"shoulder_joint", std::make_unique<Joint>(
                                                 "shoulder",
                                                 [shoulderPositionMonitor]() -> double { return (*shoulderPositionMonitor)(); },
-                                                [shoulderSpeedConverter](double speed) { (*shoulderSpeedConverter)(speed); },
+                                                [shoulderSpeedConverter](double speed) { (*shoulderSpeedConverter)(-speed); },
                                                 n)});
     namedJointMap.insert({"elbowPitch_joint", std::make_unique<Joint>(
                                                   "elbow",
                                                   [elbowPositionMonitor]() -> double { return (*elbowPositionMonitor)(); },
-                                                  [elbowSpeedConverter](double speed) { (*elbowSpeedConverter)(speed); },
+                                                  [elbowSpeedConverter](double speed) { (*elbowSpeedConverter)(-speed); },
                                                   n)});
     namedJointMap.insert({"elbowRoll_joint", std::make_unique<Joint>(
                                                  "forearmRoll",
@@ -226,7 +237,7 @@ auto main(int argc, char **argv) -> int {
     namedJointMap.insert({"wristPitch_joint", std::make_unique<Joint>(
                                                   "wristPitch",
                                                   [wristPitchPositionMonitor]() -> double { return (*wristPitchPositionMonitor)(); },
-                                                  [converter = differentialSpeedConverter](double speed) { converter->setPitchSpeed(speed); },
+                                                  [converter = differentialSpeedConverter](double speed) { converter->setPitchSpeed(-speed); },
                                                   n)});
     namedJointMap.insert({"wristRoll_link", std::make_unique<Joint>(
                                                 "wristRoll",

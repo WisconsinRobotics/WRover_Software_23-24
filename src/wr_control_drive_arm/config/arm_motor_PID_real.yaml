@@ -3,7 +3,7 @@ controllers:
   - setpointTopic: "/control/arm/pid/turntable/setpoint"
     feedbackTopic: "/control/arm/pid/turntable/feedback"
     outputTopic: "/control/arm/pid/turntable/output"
-    P: 5
+    P: 10
     I: 0
     D: 0
     min: -1
@@ -12,7 +12,7 @@ controllers:
   - setpointTopic: "/control/arm/pid/shoulder/setpoint"
     feedbackTopic: "/control/arm/pid/shoulder/feedback"
     outputTopic: "/control/arm/pid/shoulder/output"
-    P: 5
+    P: 10
     I: 0
     D: 0
     min: -1
@@ -21,7 +21,7 @@ controllers:
   - setpointTopic: "/control/arm/pid/elbow/setpoint"
     feedbackTopic: "/control/arm/pid/elbow/feedback"
     outputTopic: "/control/arm/pid/elbow/output"
-    P: 5
+    P: 10
     I: 0
     D: 0
     min: -1
@@ -30,7 +30,7 @@ controllers:
   - setpointTopic: "/control/arm/pid/forearmRoll/setpoint"
     feedbackTopic: "/control/arm/pid/forearmRoll/feedback"
     outputTopic: "/control/arm/pid/forearmRoll/output"
-    P: 5
+    P: 10
     I: 0
     D: 0
     min: -1
@@ -39,7 +39,7 @@ controllers:
   - setpointTopic: "/control/arm/pid/wristPitch/setpoint"
     feedbackTopic: "/control/arm/pid/wristPitch/feedback"
     outputTopic: "/control/arm/pid/wristPitch/output"
-    P: 5
+    P: 10
     I: 0
     D: 0
     min: -1
@@ -48,7 +48,7 @@ controllers:
   - setpointTopic: "/control/arm/pid/wristRoll/setpoint"
     feedbackTopic: "/control/arm/pid/wristRoll/feedback"
     outputTopic: "/control/arm/pid/wristRoll/output"
-    P: 5
+    P: 10
     I: 0
     D: 0
     min: -1

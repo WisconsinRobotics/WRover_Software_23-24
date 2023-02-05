@@ -58,8 +58,8 @@ void publishJointStates(const ros::TimerEvent &event) {
 }
 
 auto getEncoderConfigFromParams(const XmlRpcValue &params, const std::string &jointName) -> EncoderConfiguration {
-    return {.countsPerRotation = static_cast<uint32_t>(static_cast<int32_t>(params[jointName]["counts_per_rotation"])),
-            .offset = static_cast<uint32_t>(static_cast<int32_t>(params[jointName]["offset"]))};
+    return {.countsPerRotation = static_cast<int32_t>(params[jointName]["counts_per_rotation"]),
+            .offset = static_cast<int32_t>(params[jointName]["offset"])};
 }
 
 /**

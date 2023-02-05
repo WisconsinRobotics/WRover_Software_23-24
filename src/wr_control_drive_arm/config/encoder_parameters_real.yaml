@@ -1,19 +1,19 @@
 encoder_parameters: 
   elbow:
-    counts_per_rotation: -2048
-    offset: 610
+    counts_per_rotation: 2048
+    offset: 533
   forearmRoll:
-    counts_per_rotation: -2048
+    counts_per_rotation: 2048
     offset: 540
   shoulder:
-    counts_per_rotation: -6144
-    offset: 1129
+    counts_per_rotation: 6144
+    offset: 1332
   turntable:
-    counts_per_rotation: 2048
-    offset: 985
+    counts_per_rotation: 7200
+    offset: 375
   wristPitch:
-    counts_per_rotation: 2048
+    counts_per_rotation: -2048
     offset: 886
   wristRoll:
     counts_per_rotation: 2048
-    offset: 1050
+    offset: 842

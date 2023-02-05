@@ -42,7 +42,7 @@ joint_limits:
     has_acceleration_limits: true
     max_acceleration: 10
     max_position: !radians pi
-    min_position: !radians 0
+    min_position: !radians -pi
   wristRoll_link:
     has_velocity_limits: true
     max_velocity: 10

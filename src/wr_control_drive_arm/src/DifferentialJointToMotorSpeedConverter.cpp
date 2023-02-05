@@ -34,7 +34,7 @@ void DifferentialJointToMotorSpeedConverter::setRollSpeed(double speed) {
 }
 
 void DifferentialJointToMotorSpeedConverter::dispatchDifferentialSpeed() {
-    const std::lock_guard guard{mutex};
+    const std::lock_guard<std::mutex> guard{mutex};
     auto m1Speed{cachedPitchSpeed - (cachedRollSpeed * AVERAGE_SCALING_FACTOR)};
     auto m2Speed{cachedPitchSpeed + (cachedRollSpeed * AVERAGE_SCALING_FACTOR)};
     leftMotor->setSpeed(m1Speed);
