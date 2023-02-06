@@ -4,9 +4,14 @@
 #include "Motor.hpp"
 #include <memory>
 
+enum class MotorSpeedDirection {
+    FORWARD,
+    REVERSE
+};
+
 class DirectJointToMotorSpeedConverter {
 public:
-    explicit DirectJointToMotorSpeedConverter(std::shared_ptr<Motor> outputMotor);
+    DirectJointToMotorSpeedConverter(std::shared_ptr<Motor> outputMotor, MotorSpeedDirection direction);
     void operator()(double speed);
 
     DirectJointToMotorSpeedConverter(const DirectJointToMotorSpeedConverter &) = default;
@@ -16,6 +21,7 @@ public:
     ~DirectJointToMotorSpeedConverter() = default;
 
 private:
+    const MotorSpeedDirection direction;
     const std::shared_ptr<Motor> outputMotor;
 };
 
