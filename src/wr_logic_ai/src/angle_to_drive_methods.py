@@ -11,6 +11,7 @@ def get_x(heading: float, target_angle: float) -> float:
 # the domain [-90, 0] or [0, 90] (depending on the side) and extend 1 and -1 outside of that domain
 def piecewise_linear(heading: float, target_angle: float) -> DriveTrainCmd:
     x = get_x(heading, target_angle)
+    print("X: " + str(x))
     if x < 0:
         return DriveTrainCmd(left_value = max(2/90*x+1,-1),right_value = 1)
     else:

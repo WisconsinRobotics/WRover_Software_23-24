@@ -55,7 +55,7 @@ def initialize() -> None:
     th.start()
     rospy.spin()
 
-HEADING = 67
+HEADING = 0
 def update_heading(data) -> None:
     global HEADING
     HEADING = data.heading
@@ -89,8 +89,8 @@ def update_navigation(data) -> None:
     global HEADING # , t
     
     print("Length of data: " + str(len(data.ranges)))
-    data_avg = sum(cur_range for cur_range in data.ranges) /  270#Temporary Hardcoded#len(data.ranges)
-    print("Data Avg: " + str(data_avg))
+    data_avg = sum(cur_range for cur_range in data.ranges) /  270 #Temporary Hardcoded#len(data.ranges)
+    #print("Data Avg: " + str(data_avg))
     # TODO: data threshold might depend of lidar model, double check
     if data_avg >= 0.5: # data_avg is above 0.5 almost always, but result stays the same (?)
         # Gets best possible angle, considering obstacles
@@ -116,7 +116,7 @@ def update_navigation(data) -> None:
 #            t = -90
         # Scale the resultant DriveTrainCmd by the speed multiplier
         msg.left_value *= speed_factor # Right value was inverted, -1 "fixes"
-        msg.right_value *= -1*speed_factor
+        msg.right_value *= speed_factor
         # Publish the DriveTrainCmd to the topic
         print("Left Value: " + str(msg.left_value))
         print("Right Value: " + str(msg.right_value))
