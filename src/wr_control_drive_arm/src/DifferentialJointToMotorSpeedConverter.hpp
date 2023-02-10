@@ -18,12 +18,12 @@ public:
 private:
     std::atomic<double> cachedPitchSpeed;
     std::atomic<double> cachedRollSpeed;
-    std::mutex mutex;
+    std::recursive_mutex mutex;
 
     const std::shared_ptr<Motor> leftMotor;
     const std::shared_ptr<Motor> rightMotor;
 
-    static constexpr double AVERAGE_SCALING_FACTOR{0.5};
+    static constexpr double AVERAGE_SCALING_FACTOR{1};
 
     void dispatchDifferentialSpeed();
 };

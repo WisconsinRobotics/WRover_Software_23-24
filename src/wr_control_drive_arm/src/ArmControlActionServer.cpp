@@ -38,8 +38,8 @@ constexpr float CLOCK_RATE{50};
 
 constexpr double IK_WARN_RATE{1.0 / 2};
 
-constexpr double JOINT_SAFETY_MAX_SPEED{0.3};
-constexpr double JOINT_SAFETY_HOLD_SPEED{0.15};
+constexpr double JOINT_SAFETY_MAX_SPEED{0.5};
+constexpr double JOINT_SAFETY_HOLD_SPEED{0.3};
 
 /**
  * @brief Nessage cache size of publisher
@@ -124,6 +124,8 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
         waypointComplete = true;
         for (const auto &[_, joint] : namedJointMap) {
             waypointComplete &= joint->hasReachedTarget();
+            if(!joint->hasReachedTarget())
+                std::cout << "Waiting on joint " << _ << std::endl;
         }
         updateRate.sleep();
     }
@@ -134,6 +136,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
     // When all positions have been reached, set the current task as succeeded
     else
         server->setSucceeded();
+    std::cout << "Action Complete!" << std::endl;
 }
 
 auto getEncoderConfigFromParams(const XmlRpcValue &params, const std::string &jointName) -> EncoderConfiguration {
@@ -207,7 +210,7 @@ auto main(int argc, char **argv) -> int {
     const auto turntableSpeedConverter{std::make_shared<DirectJointToMotorSpeedConverter>(turntableMotor, MotorSpeedDirection::REVERSE)};
     const auto shoulderSpeedConverter{std::make_shared<DirectJointToMotorSpeedConverter>(shoulderMotor, MotorSpeedDirection::REVERSE)};
     const auto elbowSpeedConverter{std::make_shared<DirectJointToMotorSpeedConverter>(elbowMotor, MotorSpeedDirection::REVERSE)};
-    const auto forearmRollSpeedConverter{std::make_shared<DirectJointToMotorSpeedConverter>(forearmRollMotor, MotorSpeedDirection::FORWARD)};
+    const auto forearmRollSpeedConverter{std::make_shared<DirectJointToMotorSpeedConverter>(forearmRollMotor, MotorSpeedDirection::REVERSE)};
     const auto differentialSpeedConverter{std::make_shared<DifferentialJointToMotorSpeedConverter>(wristLeftMotor, wristRightMotor)};
 
     // Initialize all Joints

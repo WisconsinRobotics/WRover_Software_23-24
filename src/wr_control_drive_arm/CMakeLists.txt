@@ -146,11 +146,15 @@ add_executable(ArmControlActionServer src/ArmControlActionServer.cpp)
 target_link_libraries(ArmControlActionServer ${catkin_LIBRARIES} ${PROJECT_NAME})
 add_executable(JointStatePublisher src/JointStatePublisher.cpp)
 target_link_libraries(JointStatePublisher ${catkin_LIBRARIES} ${PROJECT_NAME})
+add_executable(testDifferential src/testDifferential.cpp)
+target_link_libraries(testDifferential ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 set_property(TARGET ArmControlActionServer PROPERTY CXX_STANDARD 17)
 set_property(TARGET JointStatePublisher PROPERTY CXX_STANDARD 17)
 set_property(TARGET ArmControlActionServer PROPERTY CXX_STANDARD_REQUIRED true)
 set_property(TARGET JointStatePublisher PROPERTY CXX_STANDARD_REQUIRED true)
+set_property(TARGET testDifferential PROPERTY CXX_STANDARD 17)
+set_property(TARGET testDifferential PROPERTY CXX_STANDARD_REQUIRED true)
 
 # # Rename C++ executable without prefix
 # # The above recommended prefix causes long target names, the following renames the

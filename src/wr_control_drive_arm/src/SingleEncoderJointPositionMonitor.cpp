@@ -13,6 +13,7 @@ SingleEncoderJointPositionMonitor::SingleEncoderJointPositionMonitor(
     ros::NodeHandle node)
     : countsPerRotation{config.countsPerRotation},
       offset{config.offset},
+      position{0},
       encoderSubscriber{
           std::make_shared<ros::Subscriber>(node.subscribe(
               "/hsi/roboclaw/"s + controllerName + "/enc/" + (channel == RoboclawChannel::A ? "left" : "right"),
