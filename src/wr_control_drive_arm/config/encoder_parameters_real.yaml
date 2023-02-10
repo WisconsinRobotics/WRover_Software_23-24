@@ -3,7 +3,7 @@ encoder_parameters:
     counts_per_rotation: 2048
     offset: 533
   forearmRoll:
-    counts_per_rotation: 2048
+    counts_per_rotation: -2048
     offset: 540
   shoulder:
     counts_per_rotation: 6144
@@ -15,5 +15,5 @@ encoder_parameters:
     counts_per_rotation: -2048
     offset: 886
   wristRoll:
-    counts_per_rotation: 2048
-    offset: 842
+    counts_per_rotation: -2048
+    offset: 1011
