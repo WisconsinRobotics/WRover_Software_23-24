@@ -27,8 +27,8 @@ inputData = []
 #laser.intensities()
 
 for x in range(120):
-    distance = 50
-    # if 80 <= x and x <= 100:
+    distance = 100 * math.cos((x * math.pi * math.pi) / 120 / 180)
+    # if x <= 10 and x >= 110:
     #     distance = 50
     inputData.append(distance)
 
@@ -38,7 +38,7 @@ laser.angle_increment = 3 * math.pi / 180
 laser.time_increment = 0
 laser.scan_time = 1
 laser.range_min = 0
-laser.range_max = 52
+laser.range_max = 150
 laser.ranges = inputData
 laser.header.frame_id = "map"
 laser.intensities = []
@@ -49,7 +49,7 @@ nav.cur_lat = 0
 nav.cur_long = 0
 nav.heading = 0
 
-nav.tar_lat = 1
+nav.tar_lat = 0
 nav.tar_long = 10
 
 print("sent fake nav data")

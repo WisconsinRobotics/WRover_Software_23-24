@@ -12,10 +12,25 @@ def get_x(heading: float, target_angle: float) -> float:
 def piecewise_linear(heading: float, target_angle: float) -> DriveTrainCmd:
     x = get_x(heading, target_angle)
     print("X: " + str(x))
+
+    #Takes fastest angle to turn robot
+    if x < 0 and x > -180:
+        return DriveTrainCmd(left_value = max(2/90*x+1,-1),right_value = 1)
+    elif x < -180:
+        return DriveTrainCmd(left_value = 1, right_value = max(-2/90*x-7,-1))
+    elif x > 0 and x < 180:
+        return DriveTrainCmd(left_value = 1, right_value = max(-2/90*x+1,-1))
+    else: #X is greater than 180
+        return DriveTrainCmd(left_value = max(2/90*x-7,-1),right_value = 1)
+
+    
+
+    '''
     if x < 0:
         return DriveTrainCmd(left_value = max(2/90*x+1,-1),right_value = 1)
     else:
         return DriveTrainCmd(left_value = 1, right_value = max(-2/90*x+1,-1))
+    '''
 
 # Creates a DriveTrainCmd using sigmoid functions that are approximately linear on 
 # the domain [-90, 0] or [0,90] (depending on the side) on the range (-1,1)

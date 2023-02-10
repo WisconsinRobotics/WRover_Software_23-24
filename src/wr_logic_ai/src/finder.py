@@ -63,6 +63,7 @@ def get_valley(
 
     # For each sector in the histogram...
     for i in range(len(hist.sectors)):
+        print(hist.sectors[i])
 
         # If the start of the valley hasn't been set yet...
         if valley_start is None:
@@ -123,6 +124,7 @@ def get_navigation_angle(
         vision_angle,
         data,
         smoothing = smoothing_constant)
+    print("best valley: " + str(best_valley[0]) + " " + str(best_valley[1]))
 
     # Define the difference between 'wide' and 'narrow' valleys
     # For wide valleys, we want to drive on the edge of the valley

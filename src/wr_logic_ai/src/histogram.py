@@ -23,9 +23,6 @@ class Histogram():
         self.alpha = 360 / sector_count
         # Copy the vision angle
         self.vision_angle = vision_angle
-        # Set the maximum range of the LIDAR
-        # Correct maximum range of the LIDAR is about 50 meters, TODO: constant currently under tuning
-        self.data.range_max = 52
         # Populate the histogram sectors with the LIDAR data & smooth
         self.populate_sectors(smoothing_constant=smoothing)
 
@@ -81,6 +78,7 @@ class Histogram():
                 data_count = 0
 
         # Smooth the sector data using a Gaussian filter
+        print("self.sectors: " + str(self.sectors))
         self.sectors = gaussian_smooth.gaussian_filter1d(self.sectors, smoothing_constant) 
 
 
@@ -93,4 +91,5 @@ class Histogram():
         # we could try it with squared distance as well
         a = 1.0
         b = a / (self.data.range_max)  # * self.data.range_max)
+        print(f"d{distance} a{a} b{b} res{a-b*distance}")
         return a - b * distance  # * distance

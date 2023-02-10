@@ -18,7 +18,9 @@ import os
 import numpy as np
 
 ## Navigation parameters
-HIST_TRESH = 22.5
+HIST_THRESH_DISTANCE = 8 #m
+LIDAR_MAX_DISTANCE = 10 #m
+HIST_TRESH = HIST_THRESH_DISTANCE/LIDAR_MAX_DISTANCE
 SECTOR_COUNT = 120
 SECTOR_ANGLE = 360 / SECTOR_COUNT
 VISION_ANGLE = 180
@@ -67,7 +69,7 @@ def set_target_angle(data) -> None:
     global target_angle
     ## Construct the planar target angle relative to east, accounting for curvature
     imu = AngleCalculations(data.cur_lat, data.cur_long, data.tar_lat, data.tar_long)
-    target_angle = imu.get_angle()
+    target_angle = imu.get_angle() % 360
     ## Debug Out the target angle
     print('Target angle: ' + str(target_angle))
     
@@ -88,7 +90,7 @@ def update_navigation(data) -> None:
     
     global HEADING # , t
     
-    data_avg = sum(cur_range for cur_range in data.ranges) /  270 #Temporary Hardcoded#len(data.ranges)
+    data_avg = sum(cur_range for cur_range in data.ranges) / len(data.ranges)
     #print("Data Avg: " + str(data_avg))
     # TODO: data threshold might depend of lidar model, double check
     if data_avg >= 0.5: # data_avg is above 0.5 almost always, but result stays the same (?)
