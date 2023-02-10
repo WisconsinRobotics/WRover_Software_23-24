@@ -60,8 +60,6 @@ class AngleCalculations:
             else:
                 self.up = False
 
-        print("Self.right: " + str(self.right))
-        print("Self.up" + str(self.up))
         # Use the reference flags to move the angle to the right quadrant.
         # Angle in Q II
         if (not self.right and self.up):

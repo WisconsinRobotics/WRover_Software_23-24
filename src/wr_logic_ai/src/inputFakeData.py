@@ -26,14 +26,15 @@ laser = LaserScan()
 inputData = []
 #laser.intensities()
 
-for x in range(360):
-    distance = 5 * math.cos(x) 
-    #inputData.append(str('%.5f' % distance) + " is the distance at angle " + str(x+1))
+for x in range(120):
+    distance = 50
+    # if 80 <= x and x <= 100:
+    #     distance = 50
     inputData.append(distance)
 
 #laser.angle_min = 0.
 laser.angle_max = 2 * math.pi
-laser.angle_increment = math.pi / 180
+laser.angle_increment = 3 * math.pi / 180
 laser.time_increment = 0
 laser.scan_time = 1
 laser.range_min = 0
@@ -44,13 +45,12 @@ laser.intensities = []
 
 nav = NavigationMsg()
 
-nav.cur_lat = 20
-nav.cur_long = 10
+nav.cur_lat = 0
+nav.cur_long = 0
+nav.heading = 0
 
-nav.tar_lat = 30
+nav.tar_lat = 1
 nav.tar_long = 10
-nav.heading = 270
-
 
 print("sent fake nav data")
 

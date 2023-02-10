@@ -133,7 +133,6 @@ def get_navigation_angle(
     # research suggest that the biggest valley should not be bigger than 90
     # degrees
     max_valley = int(90 / sector_angle)
-
     # If the target is already in the best valley...
     if get_target_distance(
             best_valley[0],

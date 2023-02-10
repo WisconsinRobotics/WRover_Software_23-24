@@ -59,7 +59,7 @@ HEADING = 0
 def update_heading(data) -> None:
     global HEADING
     HEADING = data.heading
-    print("HEADING: " + str(HEADING))
+    print("Current heading: " + str(HEADING))
     
 
 ## Calculate the planar target angle
@@ -88,7 +88,6 @@ def update_navigation(data) -> None:
     
     global HEADING # , t
     
-    print("Length of data: " + str(len(data.ranges)))
     data_avg = sum(cur_range for cur_range in data.ranges) /  270 #Temporary Hardcoded#len(data.ranges)
     #print("Data Avg: " + str(data_avg))
     # TODO: data threshold might depend of lidar model, double check
