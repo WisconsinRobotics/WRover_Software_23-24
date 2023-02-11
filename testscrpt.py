@@ -5,11 +5,13 @@ import matplotlib.pyplot as plt
 from threading import Thread
 
 positions = None
+names = None
 
 def newJS(jsMsg: sensor_msgs.JointState):
-    global positions
+    global positions, names
     if positions is None:
         positions = []
+        names = [name for name in jsMsg.name]
         for pos in jsMsg.position:
             positions.append([pos])
     else:
@@ -19,13 +21,15 @@ def newJS(jsMsg: sensor_msgs.JointState):
                 del l[0]
 
 def plot():
-    global positions
+    global positions, names
     while not rospy.is_shutdown():
-        if positions is not None:
+        if positions is not None and names is not None:
             for l in positions:
                 plt.plot(l)
+            plt.legend(names)
             plt.pause(0.05)
             plt.clf()
+
 
 if __name__=="__main__":
     rospy.init_node("testNode")
