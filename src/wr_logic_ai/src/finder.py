@@ -1,6 +1,7 @@
 from typing import List
-import histogram
+#import histogram
 import math
+import scipy.ndimage as gaussian_smooth
 
 import pickle
 
@@ -35,45 +36,40 @@ def is_wide_valley(sector_i: int, sector_f: int, max_valley: int) -> bool:
 # Get the 'best' valley from the LIDAR data.  The valley is formatted as [Start Sector, End Sector]
 def get_valley(
         target: int,
-        sector_count: int,
-        sector_angle: float,
         threshold: float,
-        vision_angle: int,
         data,
         smoothing: float = 3) -> List[int]:
 
+    sector_count = len(data.ranges)
+    sector_angle = data.angle_increment
+
     # Get the smoothed histogram of the vision data
-    hist = histogram.Histogram(
-        sector_count,
-        threshold,
-        vision_angle,
-        data,
-        smoothing)
+    hist = gaussian_smooth.gaussian_filter1d(data.ranges, smoothing)
 
     # Write the sectors data to an output file for logging
     output_file = open('sectors.data', 'wb')
-    pickle.dump(hist.sectors, output_file)
+    pickle.dump(hist, output_file)
     output_file.close()
 
     # Initialize the target valley to the worst conditions so that it is immediately overriden
     valley_start = None
-    best_valley = [0, len(hist.sectors) - 1]
+    best_valley = [0, len(hist) - 1]
     # The furthest a valley could every be from is 360 degrees since this is a circle
     best_distance = 361
 
     # For each sector in the histogram...
-    for i in range(len(hist.sectors)):
-        print(hist.sectors[i])
+    for i in range(len(hist)):
+        # print(hist[i])
 
         # If the start of the valley hasn't been set yet...
         if valley_start is None:
             # ...and the sector is below the threshold...
-            if hist.sectors[i] < threshold:
+            if hist[i] > threshold:
                 # Start the valley at the current sector
                 valley_start = i
 
         # If the start of the valley has been set and the current sector is above the threshold...
-        elif hist.sectors[i] > threshold:
+        elif hist[i] < threshold:
             # Get the effective distance between the target angle and the sector
             dist = get_target_distance(valley_start, i, target, sector_angle)
 
@@ -108,23 +104,17 @@ def get_valley(
 # Gets the best angle to navigate to
 def get_navigation_angle(
         target: int,
-        sector_count: int,
-        sector_angle: int,
         threshold: float,
-        vision_angle: int,
         data,
-        smoothing_constant:float = 3) -> float:
+        smoothing_constant: float = 3) -> float:
 
     # Get the best valley in the LIDAR data given our target angle
     best_valley = get_valley(
         target,
-        sector_count,
-        sector_angle,
         threshold,
-        vision_angle,
         data,
-        smoothing = smoothing_constant)
-    print("best valley: " + str(best_valley[0]) + " " + str(best_valley[1]))
+        smoothing_constant)
+    #print("best valley: " + str(best_valley[0]) + " " + str(best_valley[1]))
 
     # Define the difference between 'wide' and 'narrow' valleys
     # For wide valleys, we want to drive on the edge of the valley
@@ -134,16 +124,17 @@ def get_navigation_angle(
 
     # research suggest that the biggest valley should not be bigger than 90
     # degrees
-    max_valley = int(90 / sector_angle)
+    max_valley = int(90 / data.angle_increment)
     # If the target is already in the best valley...
     if get_target_distance(
             best_valley[0],
             best_valley[1],
             target,
-            sector_angle) == 0:
+            data.angle_increment) == 0:
 
         # Report the current target angle; no adjustment needed
-        return target * sector_angle
+        #print("target * data.angle_increment = " + str(target * data.angle_increment))
+        return target * data.angle_increment
 
     # If the valley is wide...
     elif is_wide_valley(best_valley[0], best_valley[1], max_valley):
@@ -157,14 +148,14 @@ def get_navigation_angle(
             max_valley if target > best_valley[1] else best_valley[0] + max_valley
         # Ensure that this new border edge is within the bounds of allowable sectors
         border_sector = 0 if border_sector < 0 else border_sector
-        border_sector = sector_count if border_sector > sector_count else border_sector
+        border_sector = len(data.ranges) if border_sector > len(data.ranges) else border_sector
 
         # Aim for the center of this new max_valley valley (this helps avoid accidentally clipping an edge of the robot)
-        return ((nearest_sector + border_sector) / 2.0) * sector_angle
+        return ((nearest_sector + border_sector) / 2.0) * data.angle_increment
 
     # If the valley is narrow...
     else:
         # Follow the probotcol as defined above for narrow valleys
         
         #Aim for the center of the valley
-        return ((best_valley[0] + best_valley[1]) / 2.0) * sector_angle
+        return ((best_valley[0] + best_valley[1]) / 2.0) * data.angle_increment
