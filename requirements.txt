@@ -1,2 +1,4 @@
 paramiko==2.6.0
 rospkg==1.2.10
+numpy==1.24.1
+opencv-contrib-python==4.7.0.68
