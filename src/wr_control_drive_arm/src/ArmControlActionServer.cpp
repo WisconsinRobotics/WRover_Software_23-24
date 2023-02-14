@@ -11,11 +11,14 @@
 #include "RoboclawChannel.hpp"
 #include "SingleEncoderJointPositionMonitor.hpp"
 #include "XmlRpcValue.h"
+#include "ros/forwards.h"
 #include "ros/init.h"
 
 #include <actionlib/server/simple_action_server.h>
 #include <algorithm>
 #include <array>
+#include <atomic>
+#include <boost/range/concepts.hpp>
 #include <chrono>
 #include <control_msgs/FollowJointTrajectoryAction.h>
 #include <csignal>
@@ -28,6 +31,7 @@
 #include <string>
 #include <thread>
 #include <unordered_map>
+#include <vector>
 
 using XmlRpc::XmlRpcValue;
 
@@ -74,6 +78,17 @@ std::atomic_bool IKEnabled{true};
 ros::ServiceClient enableServiceClient;
 
 /**
+ * @brief The atomic flag for turning off the server due to over current faults
+ */
+std::atomic_flag serverEnabled = true;
+
+/**
+ * @brief The list of motors
+ * 
+ */
+std::vector<std::shared_ptr<Motor>> motors{};
+
+/**
  * @brief Perform the given action as interpreted as moving the arm joints to
  * specified positions
  *
@@ -89,6 +104,8 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
             "IK is disabled");
         return;
     }
+
+    //TODO: Set server aborted when the over current checker stops the joints
 
     for (const auto &jointName : goal->trajectory.joint_names) {
         std::cout << jointName << "\t";
@@ -144,6 +161,19 @@ auto getEncoderConfigFromParams(const XmlRpcValue &params, const std::string &jo
             .offset = static_cast<int32_t>(params[jointName]["offset"])};
 }
 
+void checkOverCurrentFaults(const ros::TimerEvent& event){
+    for(const auto& motor : motors){
+        if (motor->isOverCurrent()) {
+            serverEnabled.clear();
+
+            for (const auto& joint : namedJointMap) {
+                joint.second->stop();
+            }
+        }
+        // TODO:  arbitrate control to old arm driver
+    }
+}
+
 /**
  * @brief The main executable method of the node.  Starts the ROS node and the
  * Action Server for processing Arm Control commands
@@ -175,6 +205,13 @@ auto main(int argc, char **argv) -> int {
     const auto forearmRollMotor{std::make_shared<Motor>("aux1"s, RoboclawChannel::B, n)};
     const auto wristLeftMotor{std::make_shared<Motor>("aux2"s, RoboclawChannel::A, n)};
     const auto wristRightMotor{std::make_shared<Motor>("aux2"s, RoboclawChannel::B, n)};
+
+    motors.push_back(turntableMotor);
+    motors.push_back(shoulderMotor);
+    motors.push_back(elbowMotor);
+    motors.push_back(forearmRollMotor);
+    motors.push_back(wristLeftMotor);
+    motors.push_back(wristRightMotor);
 
     const auto turntablePositionMonitor{std::make_shared<SingleEncoderJointPositionMonitor>(
         "aux0"s,
@@ -270,6 +307,8 @@ auto main(int argc, char **argv) -> int {
 
     enableServiceClient =
         n.serviceClient<std_srvs::Trigger>("PLACEHOLDER_NAME");
+
+    ros::Timer currentTimer = n.createTimer(TIMER_CALLBACK_DURATION, n, checkOverCurrentFaults);
 
     std::cout << "entering ROS spin..." << std::endl;
     // ROS spin for communication with other nodes
