@@ -1,5 +1,5 @@
 <launch>
-  <node pkg="wr_logic_ai" name="obstacle_avoidance" type="obstacle_avoidance.py" output="screen" />
+  <node pkg="wr_logic_ai" name="obstacle_avoidance" type="obstacle_avoidance.py" output="screen" launch-prefix="gnome-terminal -- python3 -m pdb"/>
   <!-- <node pkg="wr_logic_ai" name="dead_reckoning" type="dead_reckoning.py" output="screen"/> -->
   <node pkg="wr_logic_ai" name="testData" type="inputFakeData.py" output="screen"/>
 </launch>
