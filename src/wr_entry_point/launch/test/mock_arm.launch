@@ -2,7 +2,7 @@
 <launch>
   <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" />
 
-  <include file="$(find wr_hsi_roboclaw)/launch/roboclaw_real.launch">
+  <include file="$(find wr_hsi_roboclaw)/launch/roboclaw_mock.launch">
     <arg name="use_encoders" value="true" />
   </include>
 
