@@ -158,8 +158,8 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
         waypointComplete = true;
         for (const auto &[_, joint] : namedJointMap) {
             waypointComplete &= joint->hasReachedTarget();
-            if(!joint->hasReachedTarget())
-                std::cout << "Waiting on joint " << _ << std::endl;
+        //    if(!joint->hasReachedTarget())
+        //        std::cout << "Waiting on joint " << _ << std::endl;
         }
         updateRate.sleep();
     }
@@ -325,7 +325,7 @@ auto main(int argc, char **argv) -> int {
     enableServiceClient =
         n.serviceClient<std_srvs::Trigger>("PLACEHOLDER_NAME");
 
-    ros::Timer currentTimer = n.createTimer(TIMER_CALLBACK_DURATION, n, checkOverCurrentFaults);
+    ros::Timer currentTimer = n.createTimer(ros::Duration{TIMER_CALLBACK_DURATION}, &checkOverCurrentFaults);
 
     std::cout << "entering ROS spin..." << std::endl;
     // ROS spin for communication with other nodes

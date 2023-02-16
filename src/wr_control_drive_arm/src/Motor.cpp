@@ -5,6 +5,7 @@
 #include "std_msgs/Int16.h"
 #include <atomic>
 #include <cstdint>
+#include <optional>
 #include <stdexcept>
 
 using std::literals::string_literals::operator""s;
@@ -15,7 +16,7 @@ Motor::Motor(const std::string &controllerName, RoboclawChannel channel, ros::No
               "/hsi/roboclaw/"s + controllerName + "/cmd/"s + (channel == RoboclawChannel::A ? "left" : "right"),
               1)},
       currentOverLimitSubscriber{
-          node.subscribe("/hsi/roboclaw/"s + controllerName + "/cmd/"s + (channel == RoboclawChannel::A ? "left" : "right") + "/curr/over_lim/",
+          node.subscribe("/hsi/roboclaw/"s + controllerName + "/curr/over_lim/" + (channel == RoboclawChannel::A ? "left" : "right"),
               1, &Motor::setCurrentStatus, this)} {}
 
 void Motor::setSpeed(double speed) {
@@ -28,16 +29,18 @@ void Motor::setSpeed(double speed) {
 }
 
 void Motor::setCurrentStatus(const std_msgs::Bool::ConstPtr &msg) {
-    if (static_cast<bool>(msg->data)) {
-        this->beginStallTime = ros::Time::now();
-    } else {
-        this->beginStallTime = std::nullopt;
+    if (this->beginStallTime == std::nullopt) {
+        if (static_cast<bool>(msg->data)) {
+            this->beginStallTime = ros::Time::now();
+        } else {
+            this->beginStallTime = std::nullopt;
+        }
     }
 }
 
 auto Motor::isOverCurrent() -> bool { // NOLINT(readability-convert-member-functions-to-static)
     if (this->beginStallTime != std::nullopt) {
-        return ((ros::Time::now() - this->beginStallTime.value()).toSec() >= STALL_THRESHOLD_TIME);
+        return static_cast<bool>((ros::Time::now() - this->beginStallTime.value()).toSec() >= STALL_THRESHOLD_TIME);
     }
     return false;
 }
