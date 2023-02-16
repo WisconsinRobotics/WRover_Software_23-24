@@ -78,9 +78,9 @@ std::atomic_bool IKEnabled{true};
 ros::ServiceClient enableServiceClient;
 
 /**
- * @brief The atomic flag for turning off the server due to over current faults
+ * @brief The atomic bool for turning off the server due to over current faults
  */
-std::atomic_flag serverEnabled = true;
+std::atomic_bool serverEnabled{true};
 
 /**
  * @brief The list of motors
@@ -105,7 +105,11 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
         return;
     }
 
-    //TODO: Set server aborted when the over current checker stops the joints
+    if (!serverEnabled) {
+        server->setAborted();
+        std::cout << "Over current fault!" << std::endl;
+        return;
+    }
 
     for (const auto &jointName : goal->trajectory.joint_names) {
         std::cout << jointName << "\t";
@@ -119,6 +123,12 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
     }
 
     for (const auto &currTargetPosition : goal->trajectory.points) {
+
+        if (!serverEnabled) {
+            server->setAborted();
+            std::cout << "Over current fault!" << std::endl;
+            return;
+        }
 
         const double VELOCITY_MAX = abs(*std::max_element(
             currTargetPosition.velocities.begin(),
@@ -138,6 +148,13 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
     ros::Rate updateRate{CLOCK_RATE};
 
     while (!waypointComplete && ros::ok() && !server->isNewGoalAvailable()) {
+
+        if (!serverEnabled) {
+            server->setAborted();
+            std::cout << "Over current fault!" << std::endl;
+            return;
+        }
+
         waypointComplete = true;
         for (const auto &[_, joint] : namedJointMap) {
             waypointComplete &= joint->hasReachedTarget();
@@ -164,7 +181,7 @@ auto getEncoderConfigFromParams(const XmlRpcValue &params, const std::string &jo
 void checkOverCurrentFaults(const ros::TimerEvent& event){
     for(const auto& motor : motors){
         if (motor->isOverCurrent()) {
-            serverEnabled.clear();
+            serverEnabled = false;
 
             for (const auto& joint : namedJointMap) {
                 joint.second->stop();
