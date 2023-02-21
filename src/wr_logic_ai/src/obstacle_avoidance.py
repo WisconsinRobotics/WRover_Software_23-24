@@ -11,6 +11,7 @@ from sensor_msgs.msg import LaserScan
 
 from wr_logic_ai.msg import NavigationMsg
 from wr_drive_msgs.msg import DriveTrainCmd
+from geometry_msgs.msg import PoseStamped
 
 import signal
 import sys
@@ -20,7 +21,6 @@ import numpy as np
 ## Navigation parameters
 LIDAR_THRESH_DISTANCE = 5 # meters
 # initialize target angle to move forward
-sector_angle = 0
 target_angle = 90
 target_sector = 0
 oi=1
@@ -30,69 +30,61 @@ rospy.init_node('nav_autonomous', anonymous=False)
 
 ## Publisher
 drive_pub = rospy.Publisher('/control/drive_system/cmd', DriveTrainCmd, queue_size=1)
+heading_pub = rospy.Publisher('/debug_heading', PoseStamped, queue_size=1)
+
+heading_msg = PoseStamped()
+heading_msg.pose.position.x = 0
+heading_msg.pose.position.y = 0
+heading_msg.pose.position.z = 0
+heading_msg.pose.orientation.x = 0
+heading_msg.pose.orientation.y = 0
+frameCount = 0
 
 # Start the tasks managed to drive autonomously
 def initialize() -> None:
+
     ## Subscribe to location data               
-    rospy.Subscriber('/nav_data', NavigationMsg, set_target_angle)
-    rospy.Subscriber('/nav_data', NavigationMsg, update_heading)
+    rospy.Subscriber('/nav_data', NavigationMsg, update_heading_and_target)
     
     ## Subscribe to lidar data
     rospy.Subscriber('/scan', LaserScan, update_navigation)
     
-    # Asynchronously update the target navigation
-    th = threading.Thread(target=update_target_sector)
-    # th.daemon = True
-    th.start()
     rospy.spin()
 
 HEADING = 0
-def update_heading(data) -> None:
+## Calculate current heading and the planar target angle
+def update_heading_and_target(data) -> None:
     global HEADING
-    HEADING = data.heading
-    #print("Current heading: " + str(HEADING))
-    
-
-## Calculate the planar target angle
-def set_target_angle(data) -> None: #TODO: MERGE WITH update_heading
     global target_angle
+    
+    HEADING = data.heading
+
     ## Construct the planar target angle relative to east, accounting for curvature
     imu = AngleCalculations(data.cur_lat, data.cur_long, data.tar_lat, data.tar_long)
     target_angle = imu.get_angle() % 360
-    ## Debug Out the target angle
-    #print('Target angle: ' + str(target_angle))
-    
+    print("Current heading: " + str(HEADING))
+    print('Target angle: ' + str(target_angle))
 
 # TODO: consider wheter to directly call from callback
 # or every 2 seconds, depends on the computational cost
 
-# Update the target sector based on the target angle
-def update_target_sector() -> None: # TODO: MOVE TO finder.py
-    global sector_angle
-    global target_sector
-    while True:
-        # map angle to sector
-        print("target_sector updated" + str(target_sector))
-        target_sector = target_angle / sector_angle
-
 # t = 0
 # Update the robot's navigation and drive it towards the target angle
 def update_navigation(data) -> None:
-    global sector_angle
     global HEADING # , t
+    global frameCount
     
-    sector_angle = data.angle_increment
     data_avg = sum(cur_range for cur_range in data.ranges) / len(data.ranges)
     #print("Data Avg: " + str(data_avg))
     # TODO: data threshold might depend of lidar model, double check
     if data_avg >= 0.5: # data_avg is above 0.5 almost always, but result stays the same (?)
         # Gets best possible angle, considering obstacles
         result = get_navigation_angle(
-            target_sector,
+            target_angle / math.degrees(data.angle_increment), # sector angle
             LIDAR_THRESH_DISTANCE,
             data,
             smoothing_constant = rospy.get_param("smoothing_constant", 3))
-        #print("Results: " + str(result))
+        print("Results: " + str(result))
 
         # Get the speed multiplier of the current runtime for the obstacle_avoidance
         speed_factor = rospy.get_param("speed_factor", 0.3) # 0.2 dos not work
@@ -111,6 +103,14 @@ def update_navigation(data) -> None:
         #print("Left Value: " + str(msg.left_value))
         #print("Right Value: " + str(msg.right_value))
         drive_pub.publish(msg)
+
+        heading_msg.header.seq = frameCount
+        heading_msg.header.stamp = rospy.get_rostime()
+        heading_msg.header.frame_id = "map"
+        frameCount += 1
+        heading_msg.pose.orientation.z = math.sin(math.radians(result) / 2)
+        heading_msg.pose.orientation.w = math.cos(math.radians(result) / 2)
+        heading_pub.publish(heading_msg)
 
 # If this file was executed...
 if __name__ == '__main__':

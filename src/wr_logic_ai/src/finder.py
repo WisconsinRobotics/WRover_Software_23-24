@@ -2,8 +2,26 @@ from typing import List
 #import histogram
 import math
 import scipy.ndimage as gaussian_smooth
+import rospy
+from sensor_msgs.msg import LaserScan 
 
 import pickle
+
+MAX_WINDOW_DISTANCE = 2
+
+prevData = []
+
+# rospy.init_node('publish_altered_histogram', anonymous=False)
+distanceData = rospy.Publisher('/scan', LaserScan, queue_size=10)
+laser2 = LaserScan()
+laser2.angle_max = 2 * math.pi
+laser2.angle_increment = math.pi / 180
+laser2.time_increment = 0
+laser2.scan_time = 1
+laser2.range_min = 0
+laser2.range_max = 150
+laser2.header.frame_id = "map"
+laser2.intensities = []
 
 # Returns angular distance (in degrees) from sector parameter to target
 # Returns 0 if sector parameter contains target
@@ -36,15 +54,27 @@ def is_wide_valley(sector_i: int, sector_f: int, max_valley: int) -> bool:
 # Get the 'best' valley from the LIDAR data.  The valley is formatted as [Start Sector, End Sector]
 def get_valley(
         target: int,
+        sector_angle: float,
         threshold: float,
         data,
         smoothing: float = 3) -> List[int]:
+    global prevData
 
     sector_count = len(data.ranges)
-    sector_angle = data.angle_increment
 
     # Get the smoothed histogram of the vision data
+    if len(prevData) == 0:
+        prevData = [0] * sector_count
+    
+    rangesDelayed = [0] * sector_count
+    for i in range(sector_count):
+        rangesDelayed[i] = data.ranges[i] - prevData[i] / 2
+    prevData = data.ranges
+
     hist = gaussian_smooth.gaussian_filter1d(data.ranges, smoothing)
+    hist2 = gaussian_smooth.gaussian_filter1d(rangesDelayed, smoothing)
+
+    laser2.ranges = hist2
 
     # Write the sectors data to an output file for logging
     output_file = open('sectors.data', 'wb')
@@ -66,18 +96,23 @@ def get_valley(
             # ...and the sector is below the threshold...
             if hist[i] > threshold:
                 # Start the valley at the current sector
-                valley_start = i
+                valley_start = i 
+
 
         # If the start of the valley has been set and the current sector is above the threshold...
         elif hist[i] < threshold:
-            # Get the effective distance between the target angle and the sector
-            dist = get_target_distance(valley_start, i, target, sector_angle)
-
+            # Get the effective distance in degrees between the target angle and the sector
+            dist = get_target_distance(valley_start, i, target, sector_angle) # dist is the degree from target to current sector
             # If current valley is closer to the target than the current best valley...
             if dist < best_distance:
                 # Replace the best distance and best valley
-                best_distance = dist
-                best_valley = [valley_start, i]
+                y = hist[i]
+                x = hist[valley_start]
+                angle = (i - valley_start)*sector_angle
+                valley_width = math.sqrt(y*y+x*x-2*x*y*math.cos(math.radians(angle)))
+                if valley_width > 2:
+                    best_distance = dist
+                    best_valley = [valley_start, i]
 
             # Since we are above the threshold limit, end the current valley
             valley_start = None
@@ -91,7 +126,17 @@ def get_valley(
         # If that distance was better than the current best sector distance...
         if dist < best_distance:
             # Set the best valley to the measured valley
-            best_valley = [valley_start, i]
+           # Replace the best distance and best valley
+            y = hist[i]
+            x = hist[valley_start]
+            angle = (i - valley_start)*sector_angle
+            valley_width = math.sqrt(y*y+x*x-2*x*y*math.cos(math.radians(angle)))
+            if valley_width > 2:
+                best_distance = dist
+                best_valley = [valley_start, i]
+
+    #Make calculations to check if best valley is enough for robot to go through
+    
 
     # TODO: REVERSE DIRECTION IN CASE OF EMPTY VALLEY if best_valley is [None,
     # None]:
@@ -108,9 +153,12 @@ def get_navigation_angle(
         data,
         smoothing_constant: float = 3) -> float:
 
+    sector_angle = math.degrees(data.angle_increment)
+
     # Get the best valley in the LIDAR data given our target angle
     best_valley = get_valley(
         target,
+        sector_angle,
         threshold,
         data,
         smoothing_constant)
@@ -124,17 +172,17 @@ def get_navigation_angle(
 
     # research suggest that the biggest valley should not be bigger than 90
     # degrees
-    max_valley = int(90 / data.angle_increment)
+    max_valley = int(90 / sector_angle)
     # If the target is already in the best valley...
     if get_target_distance(
             best_valley[0],
             best_valley[1],
             target,
-            data.angle_increment) == 0:
+            sector_angle) == 0:
 
         # Report the current target angle; no adjustment needed
-        #print("target * data.angle_increment = " + str(target * data.angle_increment))
-        return target * data.angle_increment
+        #print("target * sector_angle = " + str(target * sector_angle))
+        return target * sector_angle
 
     # If the valley is wide...
     elif is_wide_valley(best_valley[0], best_valley[1], max_valley):
@@ -151,11 +199,16 @@ def get_navigation_angle(
         border_sector = len(data.ranges) if border_sector > len(data.ranges) else border_sector
 
         # Aim for the center of this new max_valley valley (this helps avoid accidentally clipping an edge of the robot)
-        return ((nearest_sector + border_sector) / 2.0) * data.angle_increment
+        return ((nearest_sector + border_sector) / 2.0) * sector_angle
 
     # If the valley is narrow...
     else:
         # Follow the probotcol as defined above for narrow valleys
         
         #Aim for the center of the valley
-        return ((best_valley[0] + best_valley[1]) / 2.0) * data.angle_increment
+        return ((best_valley[0] + best_valley[1]) / 2.0) * sector_angle
+
+#while not rospy.is_shutdown():
+#    
+#    #rospy.loginfo(nav)
+#    distanceData.publish(laser2)
