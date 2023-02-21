@@ -11,14 +11,11 @@
 #include "RoboclawChannel.hpp"
 #include "SingleEncoderJointPositionMonitor.hpp"
 #include "XmlRpcValue.h"
-#include "ros/forwards.h"
 #include "ros/init.h"
 
 #include <actionlib/server/simple_action_server.h>
 #include <algorithm>
 #include <array>
-#include <atomic>
-#include <boost/range/concepts.hpp>
 #include <chrono>
 #include <control_msgs/FollowJointTrajectoryAction.h>
 #include <csignal>
@@ -78,17 +75,6 @@ std::atomic_bool IKEnabled{true};
 ros::ServiceClient enableServiceClient;
 
 /**
- * @brief The atomic bool for turning off the server due to over current faults
- */
-std::atomic_bool serverEnabled{true};
-
-/**
- * @brief The list of motors
- * 
- */
-std::vector<std::shared_ptr<Motor>> motors{};
-
-/**
  * @brief Perform the given action as interpreted as moving the arm joints to
  * specified positions
  *
@@ -105,12 +91,6 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
         return;
     }
 
-    if (!serverEnabled) {
-        server->setAborted();
-        std::cout << "Over current fault!" << std::endl;
-        return;
-    }
-
     for (const auto &jointName : goal->trajectory.joint_names) {
         std::cout << jointName << "\t";
     }
@@ -124,7 +104,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
 
     for (const auto &currTargetPosition : goal->trajectory.points) {
 
-        if (!serverEnabled) {
+        if (!IKEnabled) {
             server->setAborted();
             std::cout << "Over current fault!" << std::endl;
             return;
@@ -149,7 +129,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
 
     while (!waypointComplete && ros::ok() && !server->isNewGoalAvailable()) {
 
-        if (!serverEnabled) {
+        if (!IKEnabled) {
             server->setAborted();
             std::cout << "Over current fault!" << std::endl;
             return;
@@ -158,8 +138,6 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
         waypointComplete = true;
         for (const auto &[_, joint] : namedJointMap) {
             waypointComplete &= joint->hasReachedTarget();
-        //    if(!joint->hasReachedTarget())
-        //        std::cout << "Waiting on joint " << _ << std::endl;
         }
         updateRate.sleep();
     }
@@ -178,10 +156,11 @@ auto getEncoderConfigFromParams(const XmlRpcValue &params, const std::string &jo
             .offset = static_cast<int32_t>(params[jointName]["offset"])};
 }
 
-void checkOverCurrentFaults(const ros::TimerEvent& event){
+void checkOverCurrentFaults(std::vector<std::shared_ptr<Motor>> &motors){
     for(const auto& motor : motors){
         if (motor->isOverCurrent()) {
-            serverEnabled = false;
+            IKEnabled = false;
+            std::cout << "Over current fault!" << std::endl;
 
             for (const auto& joint : namedJointMap) {
                 joint.second->stop();
@@ -213,6 +192,11 @@ auto main(int argc, char **argv) -> int {
     // Initialize all motors with their MoveIt name, WRoboclaw initialization,
     // and reference to the current node
     std::cout << "init motors" << std::endl;
+
+    /**
+     * @brief The list of motors
+     */
+    std::vector<std::shared_ptr<Motor>> motors{};
 
     using std::literals::string_literals::operator""s;
 
@@ -325,7 +309,7 @@ auto main(int argc, char **argv) -> int {
     enableServiceClient =
         n.serviceClient<std_srvs::Trigger>("PLACEHOLDER_NAME");
 
-    ros::Timer currentTimer = n.createTimer(ros::Duration{TIMER_CALLBACK_DURATION}, &checkOverCurrentFaults);
+    ros::Timer currentTimer = n.createTimer(ros::Duration{TIMER_CALLBACK_DURATION}, [&motors](const ros::TimerEvent& event) { checkOverCurrentFaults(motors); });
 
     std::cout << "entering ROS spin..." << std::endl;
     // ROS spin for communication with other nodes

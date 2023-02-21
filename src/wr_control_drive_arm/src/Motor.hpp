@@ -16,7 +16,8 @@ public:
 
 private:
 
-    static constexpr float STALL_THRESHOLD_TIME = 0.5F;
+    static constexpr float STALL_THRESHOLD_TIME{0.5F};
+    static constexpr int OVER_CURRENT_QUEUE_SIZE{25};
 
 
     void setCurrentStatus(const std_msgs::Bool::ConstPtr &msg); 

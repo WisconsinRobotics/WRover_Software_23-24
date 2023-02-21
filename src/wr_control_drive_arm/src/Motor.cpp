@@ -17,7 +17,7 @@ Motor::Motor(const std::string &controllerName, RoboclawChannel channel, ros::No
               1)},
       currentOverLimitSubscriber{
           node.subscribe("/hsi/roboclaw/"s + controllerName + "/curr/over_lim/" + (channel == RoboclawChannel::A ? "left" : "right"),
-              1, &Motor::setCurrentStatus, this)} {}
+              OVER_CURRENT_QUEUE_SIZE, &Motor::setCurrentStatus, this)} {}
 
 void Motor::setSpeed(double speed) {
     if (abs(speed) > 1)
@@ -29,17 +29,16 @@ void Motor::setSpeed(double speed) {
 }
 
 void Motor::setCurrentStatus(const std_msgs::Bool::ConstPtr &msg) {
-    if (this->beginStallTime == std::nullopt) {
-        if (static_cast<bool>(msg->data)) {
-            this->beginStallTime = ros::Time::now();
-        } else {
-            this->beginStallTime = std::nullopt;
-        }
+    bool overCurrent = static_cast<bool>(msg->data);
+    if (overCurrent && !this->beginStallTime.has_value()) {
+        this->beginStallTime = ros::Time::now();
+    } else if (!overCurrent && this->beginStallTime.has_value()) {
+        this->beginStallTime = std::nullopt;
     }
 }
 
 auto Motor::isOverCurrent() -> bool { // NOLINT(readability-convert-member-functions-to-static)
-    if (this->beginStallTime != std::nullopt) {
+    if (this->beginStallTime.has_value()) {
         return static_cast<bool>((ros::Time::now() - this->beginStallTime.value()).toSec() >= STALL_THRESHOLD_TIME);
     }
     return false;
