@@ -11,7 +11,6 @@ def get_x(heading: float, target_angle: float) -> float:
 # the domain [-90, 0] or [0, 90] (depending on the side) and extend 1 and -1 outside of that domain
 def piecewise_linear(heading: float, target_angle: float) -> DriveTrainCmd:
     x = get_x(heading, target_angle)
-    print("X: " + str(x))
 
     #Takes fastest angle to turn robot
     if x < 0 and x > -180:

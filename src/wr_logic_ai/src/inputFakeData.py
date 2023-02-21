@@ -26,20 +26,23 @@ laser = LaserScan()
 inputData = []
 #laser.intensities()
 
-for x in range(120):
-    distance = 8
-    # if 80 <= x and x <= 100:
-    #     distance = 2
-    inputData.append(distance)
+def getLaserRanges(t=0):
+    inputData = []
+    for x in range(360):
+        distance = 10
+        if t <= x and x <= t + 40:
+            distance = 2
+        inputData.append(distance)
+    return inputData
 
 #laser.angle_min = 0.
 laser.angle_max = 2 * math.pi
-laser.angle_increment = 3 * math.pi / 180
+laser.angle_increment = math.pi / 180
 laser.time_increment = 0
 laser.scan_time = 1
 laser.range_min = 0
 laser.range_max = 150
-laser.ranges = inputData
+laser.ranges = getLaserRanges(0)
 laser.header.frame_id = "map"
 laser.intensities = []
 
@@ -47,7 +50,7 @@ nav = NavigationMsg()
 
 nav.cur_lat = 0
 nav.cur_long = 0
-nav.heading = 90
+nav.heading = 0
 
 nav.tar_lat = 10
 nav.tar_long = 0
@@ -55,13 +58,13 @@ nav.tar_long = 0
 print("sent fake nav data")
 
 sleeper = rospy.Rate(10)
+t=0
 while not rospy.is_shutdown():
     
-    #rospy.loginfo(nav)
+    laser.ranges = getLaserRanges(t)
     distanceData.publish(laser)
   
     navigation.publish(nav) #send nav data to subscriber in obstacle avoidance
-    #print('subs')
-    #rospy.spin()
-    #print('spin')
     sleeper.sleep()
+    t += 2
+    t %= 360
