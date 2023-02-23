@@ -7,10 +7,11 @@ from sensor_msgs.msg import LaserScan
 
 import pickle
 
-MAX_WINDOW_DISTANCE = 2
+ROVER_WIDTH = 0
 
 prevData = []
 
+# TESTING
 # rospy.init_node('publish_altered_histogram', anonymous=False)
 distanceData = rospy.Publisher('/scan', LaserScan, queue_size=10)
 laser2 = LaserScan()
@@ -44,6 +45,11 @@ def get_target_distance(sector_i: int, sector_f: int, target: int, sector_angle:
 def is_wide_valley(sector_i: int, sector_f: int, max_valley: int) -> bool:
     #TODO: Cleaner way to write this?
     return 1 + sector_f - sector_i > max_valley
+
+def check_valley_width(left_sector: int, right_sector: int, left_sector_dist: int, right_sector_dist: int, sector_angle: int) -> bool:
+    angle = (right_sector - left_sector) * sector_angle
+    valley_width = math.sqrt(left_sector_dist * left_sector_dist + right_sector_dist * right_sector_dist - 2 * left_sector_dist * right_sector_dist * math.cos(math.radians(angle)))
+    return (valley_width > ROVER_WIDTH)
 
 # represent a valley as an ordered pair as in (start sector, end sector)
 # iterate through sector array to add valleys to new candidate valleys list
@@ -87,32 +93,27 @@ def get_valley(
     # The furthest a valley could every be from is 360 degrees since this is a circle
     best_distance = 361
 
+    print(data.angle_increment)
+    print(len(data.ranges))
     # For each sector in the histogram...
     for i in range(len(hist)):
-        # print(hist[i])
-
-        # If the start of the valley hasn't been set yet...
+        print(hist[math.floor(len(hist) / 4)])
+        # If the start of the vaprint(data.angle_increment)lley hasn't been set yet...
         if valley_start is None:
             # ...and the sector is below the threshold...
             if hist[i] > threshold:
                 # Start the valley at the current sector
                 valley_start = i 
 
-
         # If the start of the valley has been set and the current sector is above the threshold...
         elif hist[i] < threshold:
             # Get the effective distance in degrees between the target angle and the sector
             dist = get_target_distance(valley_start, i, target, sector_angle) # dist is the degree from target to current sector
             # If current valley is closer to the target than the current best valley...
-            if dist < best_distance:
+            if dist < best_distance and check_valley_width(valley_start, i, hist[valley_start], hist[i], sector_angle):
                 # Replace the best distance and best valley
-                y = hist[i]
-                x = hist[valley_start]
-                angle = (i - valley_start)*sector_angle
-                valley_width = math.sqrt(y*y+x*x-2*x*y*math.cos(math.radians(angle)))
-                if valley_width > 2:
-                    best_distance = dist
-                    best_valley = [valley_start, i]
+                best_distance = dist
+                best_valley = [valley_start, i]
 
             # Since we are above the threshold limit, end the current valley
             valley_start = None
@@ -124,16 +125,11 @@ def get_valley(
             valley_start, sector_count, target, sector_angle)
         
         # If that distance was better than the current best sector distance...
-        if dist < best_distance:
+        if dist < best_distance and check_valley_width(valley_start, i, hist[valley_start], hist[i], sector_angle):
             # Set the best valley to the measured valley
-           # Replace the best distance and best valley
-            y = hist[i]
-            x = hist[valley_start]
-            angle = (i - valley_start)*sector_angle
-            valley_width = math.sqrt(y*y+x*x-2*x*y*math.cos(math.radians(angle)))
-            if valley_width > 2:
-                best_distance = dist
-                best_valley = [valley_start, i]
+            # Replace the best distance and best valley
+            best_distance = dist
+            best_valley = [valley_start, i]
 
     #Make calculations to check if best valley is enough for robot to go through
     

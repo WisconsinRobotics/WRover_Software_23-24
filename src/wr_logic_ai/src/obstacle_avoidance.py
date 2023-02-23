@@ -2,7 +2,6 @@
 import math
 import rospy
 import time
-import threading
 from finder import get_navigation_angle
 from angle_calculations import AngleCalculations
 import angle_to_drive_methods as angle_calc
@@ -19,7 +18,7 @@ import os
 import numpy as np
 
 ## Navigation parameters
-LIDAR_THRESH_DISTANCE = 5 # meters
+LIDAR_THRESH_DISTANCE = 0.5 # meters
 # initialize target angle to move forward
 target_angle = 90
 target_sector = 0
@@ -30,14 +29,15 @@ rospy.init_node('nav_autonomous', anonymous=False)
 
 ## Publisher
 drive_pub = rospy.Publisher('/control/drive_system/cmd', DriveTrainCmd, queue_size=1)
+# TESING
 heading_pub = rospy.Publisher('/debug_heading', PoseStamped, queue_size=1)
-
 heading_msg = PoseStamped()
 heading_msg.pose.position.x = 0
 heading_msg.pose.position.y = 0
 heading_msg.pose.position.z = 0
 heading_msg.pose.orientation.x = 0
 heading_msg.pose.orientation.y = 0
+heading_msg.header.frame_id = "laser"
 frameCount = 0
 
 # Start the tasks managed to drive autonomously
@@ -62,6 +62,8 @@ def update_heading_and_target(data) -> None:
     ## Construct the planar target angle relative to east, accounting for curvature
     imu = AngleCalculations(data.cur_lat, data.cur_long, data.tar_lat, data.tar_long)
     target_angle = imu.get_angle() % 360
+
+    # TESTING
     print("Current heading: " + str(HEADING))
     print('Target angle: ' + str(target_angle))
 
@@ -84,6 +86,8 @@ def update_navigation(data) -> None:
             LIDAR_THRESH_DISTANCE,
             data,
             smoothing_constant = rospy.get_param("smoothing_constant", 3))
+
+        # TESTING
         print("Results: " + str(result))
 
         # Get the speed multiplier of the current runtime for the obstacle_avoidance
@@ -104,9 +108,9 @@ def update_navigation(data) -> None:
         #print("Right Value: " + str(msg.right_value))
         drive_pub.publish(msg)
 
+        # TESTING
         heading_msg.header.seq = frameCount
         heading_msg.header.stamp = rospy.get_rostime()
-        heading_msg.header.frame_id = "map"
         frameCount += 1
         heading_msg.pose.orientation.z = math.sin(math.radians(result) / 2)
         heading_msg.pose.orientation.w = math.cos(math.radians(result) / 2)

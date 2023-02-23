@@ -7,6 +7,7 @@ Panels:
         - /Global Options1
         - /Status1
         - /Pose1
+        - /Pose2
       Splitter Ratio: 0.5
     Tree Height: 476
   - Class: rviz/Selection
@@ -73,7 +74,7 @@ Visualization Manager:
       Queue Size: 10
       Selectable: true
       Size (Pixels): 3
-      Size (m): 0.10000000149011612
+      Size (m): 0.019999999552965164
       Style: Flat Squares
       Topic: /scan
       Unreliable: false
@@ -86,21 +87,37 @@ Visualization Manager:
       Class: rviz/Pose
       Color: 255; 25; 0
       Enabled: true
-      Head Length: 0.30000001192092896
-      Head Radius: 0.10000000149011612
+      Head Length: 0.15000000596046448
+      Head Radius: 0.07500000298023224
       Name: Pose
       Queue Size: 10
-      Shaft Length: 1
-      Shaft Radius: 0.05000000074505806
+      Shaft Length: 0.5
+      Shaft Radius: 0.02500000037252903
       Shape: Arrow
       Topic: /debug_heading
+      Unreliable: false
+      Value: true
+    - Alpha: 1
+      Axes Length: 1
+      Axes Radius: 0.10000000149011612
+      Class: rviz/Pose
+      Color: 0; 0; 255
+      Enabled: true
+      Head Length: 0.15000000596046448
+      Head Radius: 0.07500000298023224
+      Name: Pose
+      Queue Size: 10
+      Shaft Length: 0.5
+      Shaft Radius: 0.02500000037252903
+      Shape: Arrow
+      Topic: /debug_zero
       Unreliable: false
       Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
     Default Light: true
-    Fixed Frame: map
+    Fixed Frame: laser
     Frame Rate: 30
   Name: root
   Tools:
@@ -124,7 +141,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 10
+      Distance: 4.086756229400635
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -140,9 +157,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.785398006439209
+      Pitch: 1.2253977060317993
       Target Frame: <Fixed Frame>
-      Yaw: 0.785398006439209
+      Yaw: 4.53857946395874
     Saved: ~
 Window Geometry:
   Displays:
