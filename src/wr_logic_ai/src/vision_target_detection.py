@@ -66,6 +66,8 @@ def main():
         cap = cv.VideoCapture(stream_url)
     else:
         cap = cv.VideoCapture(0)
+        cap.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
+        cap.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
 
     if not cap.isOpened():
         rospy.logerr('Failed to open camera')
