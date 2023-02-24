@@ -1,5 +1,5 @@
-com_port: '/dev/ttyTHS1'
-baud: 38400
+com_port: '/dev/ttyAMA0'
+baud: 115200
 claws:
   aux0: # arm turntable/shoulder, science ?
     topic: '/hsi/roboclaw/aux0'
@@ -37,6 +37,3 @@ claws:
     enc_right:
         enabled: true
         max_speed: 300000000
-  drive: # drive train
-    topic: '/hsi/roboclaw/drive'
-    address: 0x84
