@@ -1,9 +1,9 @@
 from typing import List
-#import histogram
 import math
 import scipy.ndimage as gaussian_smooth
 import rospy
 from sensor_msgs.msg import LaserScan 
+from copy import deepcopy
 
 import pickle
 
@@ -12,17 +12,7 @@ ROVER_WIDTH = 0
 prevData = []
 
 # TESTING
-# rospy.init_node('publish_altered_histogram', anonymous=False)
-distanceData = rospy.Publisher('/scan', LaserScan, queue_size=10)
-laser2 = LaserScan()
-laser2.angle_max = 2 * math.pi
-laser2.angle_increment = math.pi / 180
-laser2.time_increment = 0
-laser2.scan_time = 1
-laser2.range_min = 0
-laser2.range_max = 150
-laser2.header.frame_id = "map"
-laser2.intensities = []
+scan_rviz_pub = rospy.Publisher('/scan_rviz', LaserScan, queue_size=10)
 
 # Returns angular distance (in degrees) from sector parameter to target
 # Returns 0 if sector parameter contains target
@@ -40,16 +30,27 @@ def get_target_distance(sector_i: int, sector_f: int, target: int, sector_angle:
     # Angular distance is then 0
     return 0
 
-
 # Returns whether or not a valley is as wide or wider than the recommended max valley size
 def is_wide_valley(sector_i: int, sector_f: int, max_valley: int) -> bool:
     #TODO: Cleaner way to write this?
     return 1 + sector_f - sector_i > max_valley
 
+# Returns if valley is wide enough for rover to pass
 def check_valley_width(left_sector: int, right_sector: int, left_sector_dist: int, right_sector_dist: int, sector_angle: int) -> bool:
     angle = (right_sector - left_sector) * sector_angle
     valley_width = math.sqrt(left_sector_dist * left_sector_dist + right_sector_dist * right_sector_dist - 2 * left_sector_dist * right_sector_dist * math.cos(math.radians(angle)))
     return (valley_width > ROVER_WIDTH)
+
+# Transforms the raw lidar data from compass coordinates (0 at north, clockwise) to math coordinates (0 at east, counterclockwise)
+def offset_lidar_data(data, sector_angle, is_rviz = False):
+    offset_data = [0] * len(data)
+    if is_rviz:
+        for i in range(len(data)):
+            offset_data[(i + math.floor(90 / sector_angle) + math.floor(len(data) / 2)) % len(data)] = data[i]
+    else:
+        for i in range(len(data)):
+            offset_data[(i + math.floor(90 / sector_angle)) % len(data)] = data[i]
+    return offset_data
 
 # represent a valley as an ordered pair as in (start sector, end sector)
 # iterate through sector array to add valleys to new candidate valleys list
@@ -67,6 +68,9 @@ def get_valley(
     global prevData
 
     sector_count = len(data.ranges)
+    rviz_data = deepcopy(data)
+    rviz_data.ranges = offset_lidar_data(data.ranges, sector_angle, True)
+    scan_rviz_pub.publish(rviz_data)
 
     # Get the smoothed histogram of the vision data
     if len(prevData) == 0:
@@ -77,10 +81,7 @@ def get_valley(
         rangesDelayed[i] = data.ranges[i] - prevData[i] / 2
     prevData = data.ranges
 
-    hist = gaussian_smooth.gaussian_filter1d(data.ranges, smoothing)
-    hist2 = gaussian_smooth.gaussian_filter1d(rangesDelayed, smoothing)
-
-    laser2.ranges = hist2
+    hist = offset_lidar_data(gaussian_smooth.gaussian_filter1d(data.ranges, smoothing), sector_angle)
 
     # Write the sectors data to an output file for logging
     output_file = open('sectors.data', 'wb')
@@ -93,11 +94,9 @@ def get_valley(
     # The furthest a valley could every be from is 360 degrees since this is a circle
     best_distance = 361
 
-    print(data.angle_increment)
-    print(len(data.ranges))
     # For each sector in the histogram...
     for i in range(len(hist)):
-        print(hist[math.floor(len(hist) / 4)])
+        print(hist[len(hist) // 2])
         # If the start of the vaprint(data.angle_increment)lley hasn't been set yet...
         if valley_start is None:
             # ...and the sector is below the threshold...
@@ -203,8 +202,3 @@ def get_navigation_angle(
         
         #Aim for the center of the valley
         return ((best_valley[0] + best_valley[1]) / 2.0) * sector_angle
-
-#while not rospy.is_shutdown():
-#    
-#    #rospy.loginfo(nav)
-#    distanceData.publish(laser2)

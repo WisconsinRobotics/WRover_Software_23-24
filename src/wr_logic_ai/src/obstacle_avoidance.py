@@ -18,7 +18,7 @@ import os
 import numpy as np
 
 ## Navigation parameters
-LIDAR_THRESH_DISTANCE = 0.5 # meters
+LIDAR_THRESH_DISTANCE = 0.3 # meters
 # initialize target angle to move forward
 target_angle = 90
 target_sector = 0

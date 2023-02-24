@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /LaserScan1
         - /Pose1
         - /Pose2
       Splitter Ratio: 0.5
@@ -76,7 +77,7 @@ Visualization Manager:
       Size (Pixels): 3
       Size (m): 0.019999999552965164
       Style: Flat Squares
-      Topic: /scan
+      Topic: /scan_rviz
       Unreliable: false
       Use Fixed Frame: true
       Use rainbow: true
