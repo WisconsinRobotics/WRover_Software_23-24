@@ -32,7 +32,7 @@ def main():
             if target_info.is_visible:
                 if (target_info.area >= TARGET_AREA):
                     turn = kP * (target_info.x_center - WIDTH / 2)
-                    drive(SPEED + turn, SPEED -turn)
+                    drive(SPEED + turn, SPEED - turn)
                 else:
                     drive(0, 0)
         except rospy.ServiceException as e:
