@@ -82,9 +82,9 @@ def main():
                 if bumper_l.data:
                     if bumper_r.data:
                         pub_forearm.publish(Int16(0))
-                    pub_forearm.publish(Int16(16384))
+                    pub_forearm.publish(Int16(32767))
                 elif bumper_r.data:
-                    pub_forearm.publish(Int16(-16384))
+                    pub_forearm.publish(Int16(-32768))
                 else:
                     pub_forearm.publish(Int16(0))
             
