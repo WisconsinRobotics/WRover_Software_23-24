@@ -37,8 +37,11 @@ int main(int argc, char **argv) {
                       const wr_drive_msgs::DriveTrainCmd::ConstPtr &)>>(
                       [&outLeft, &outRight](
                           const wr_drive_msgs::DriveTrainCmd::ConstPtr &msg) {
-                        outLeft.publish(msg->left_value);
-                        outRight.publish(-msg->right_value);
+                        std_msgs::Float64 left, right;
+                        left.data = msg->left_value;
+                        right.data = -msg->right_value;
+                        outLeft.publish(left);
+                        outRight.publish(right);
                       }));
 
   ros::spin();
