@@ -36,11 +36,4 @@ claws:
         max_speed: 100
     enc_right:
         enabled: true
-<<<<<<< HEAD
         max_speed: 300000000
-=======
-        max_speed: 100
-  drive: # drive train
-    topic: '/hsi/roboclaw/drive'
-    address: 0x84
->>>>>>> origin/feature/arm-code-refactoring

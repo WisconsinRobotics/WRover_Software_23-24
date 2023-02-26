@@ -1,0 +1,5 @@
+<launch>
+    <include file="$(find wroboarm_23)/launch/demo_test.launch" />
+    <node name="arm_driver" pkg="wr_logic_teleop_arm" type="ArmTeleopLogic" output="screen" />
+    <include file="$(find wr_control_drive_arm)/launch/std.launch" />
+</launch>
