@@ -3,7 +3,7 @@
   <include file="$(find wr_hci_hid)/launch/teleop_arm.launch"/>
   <!-- TODO: arm logic -->
   <!-- TODO: arm control systems -->
-  <node name="arm_driver" pkg="wr_logic_teleop_arm" type="bad_arm_driver.py">
+  <node name="bad_arm_driver" pkg="wr_logic_teleop_arm" type="bad_arm_driver.py">
     <param name="controller_ns" value="/hci/arm/gamepad"/>
     <param name="claw_ns_0" value="/hsi/roboclaw/aux0"/>
     <param name="claw_ns_1" value="/hsi/roboclaw/aux1"/>

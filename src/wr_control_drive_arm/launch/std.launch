@@ -1,0 +1,5 @@
+<!--Launches the action server and the joint state publisher-->
+<launch>
+    <include file="$(find wr_control_drive_arm)/launch/actionserver.launch" />
+    <include file="$(find wr_control_drive_arm)/launch/jointstatepublisher.launch" />
+</launch>
