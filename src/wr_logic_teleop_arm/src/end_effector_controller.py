@@ -40,8 +40,10 @@ if __name__ == "__main__":
 
     with open("/sys/class/gpio/export", "w") as exportFile:
         exportFile.write("6")
+        exportFile.flush()
     with open("/sys/class/gpio/gpio6/direction", "w") as gpioFile:
         gpioFile.write("out")
+        gpioFile.flush()
 
     rospy.loginfo("GPIO setup complete!")
     solenoidSubscriber = rospy.Subscriber("/hci/arm/gamepad/button/y", std_msgs.Bool, actuateSolenoid, queue_size=1)
