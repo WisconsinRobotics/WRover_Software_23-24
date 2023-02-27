@@ -37,7 +37,7 @@ if __name__ == "__main__":
 
     rospy.loginfo("Starting GPIO setup...")
 
-    with open("/sys/class/export", "w") as exportFile:
+    with open("/sys/class/gpio/export", "w") as exportFile:
         exportFile.write("6")
     with open("/sys/class/gpio/gpio6/direction", "w") as gpioFile:
         gpioFile.write("out")
@@ -47,5 +47,5 @@ if __name__ == "__main__":
 
     rospy.spin()
     
-    with open("/sys/class/unexport", "w") as unexportFile:
+    with open("/sys/class/gpio/unexport", "w") as unexportFile:
         unexportFile.write("6")
