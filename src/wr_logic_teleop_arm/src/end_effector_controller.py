@@ -21,7 +21,7 @@ class ClawController:
         self._publish_claw_speed()
 
     def _publish_claw_speed(self):
-        speed = std_msgs.Int16(ClawController.OPEN_SPEED if self._open_pressed else ClawController.CLOSE_SPEED if self._close_pressed else 0)
+        speed = std_msgs.Int16(ClawController.OPEN_SPEED if self._open_pressed else (ClawController.CLOSE_SPEED if self._close_pressed else 0))
         self._publisher.publish(speed)
 
 def actuateSolenoid(msg: std_msgs.Bool):
@@ -35,7 +35,7 @@ if __name__ == "__main__":
 
     claw = ClawController("/hsi/roboclaw/aux3/cmd/left")
     openSubscriber = rospy.Subscriber("/hci/arm/gamepad/button/a", std_msgs.Bool, lambda msg: claw.open_claw(msg.data))
-    closeSubscriber = rospy.Subscriber("/hci/arm/gamepad/button/b", std_msgs.Bool, lambda msg: claw.open_claw(msg.data))
+    closeSubscriber = rospy.Subscriber("/hci/arm/gamepad/button/b", std_msgs.Bool, lambda msg: claw.close_claw(msg.data))
 
     rospy.loginfo("Starting GPIO setup...")
 
