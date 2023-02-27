@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import rospy
 import std_msgs.msg as std_msgs
 
@@ -40,7 +41,7 @@ if __name__ == "__main__":
     with open("/sys/class/gpio6/direction") as gpioFile:
         gpioFile.write("out")
 
-    solenoidSubscriber = rospy.Subscriber("/hci/arm/gamepad/button/x", std_msgs.Bool, actuateSolenoid)
+    solenoidSubscriber = rospy.Subscriber("/hci/arm/gamepad/button/y", std_msgs.Bool, actuateSolenoid)
 
     rospy.spin()
     
