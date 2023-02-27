@@ -24,7 +24,7 @@ class ClawController:
         self._publisher.publish(speed)
 
 def actuateSolenoid(msg: std_msgs.Bool):
-    with open("/sys/class/gpio6/value") as gpioFile:
+    with open("/sys/class/gpio/gpio6/value") as gpioFile:
         gpioFile.write("1" if msg.data else "0")
 
 if __name__ == "__main__":
@@ -35,12 +35,14 @@ if __name__ == "__main__":
     openSubscriber = rospy.Subscriber("/hci/arm/gamepad/button/a", std_msgs.Bool, lambda msg: claw.open_claw(msg.data))
     closeSubscriber = rospy.Subscriber("/hci/arm/gamepad/button/b", std_msgs.Bool, lambda msg: claw.open_claw(msg.data))
 
+    rospy.loginfo("Starting GPIO setup...")
 
     with open("/sys/class/export") as exportFile:
         exportFile.write("6")
-    with open("/sys/class/gpio6/direction") as gpioFile:
+    with open("/sys/class/gpio/gpio6/direction") as gpioFile:
         gpioFile.write("out")
 
+    rospy.loginfo("GPIO setup complete!")
     solenoidSubscriber = rospy.Subscriber("/hci/arm/gamepad/button/y", std_msgs.Bool, actuateSolenoid)
 
     rospy.spin()

@@ -7,7 +7,7 @@ encoder_parameters:
     offset: 576
   shoulder:
     counts_per_rotation: 5550
-    offset: 1281
+    offset: 1512
   turntable:
     counts_per_rotation: 6900 #7200
     offset: 90
