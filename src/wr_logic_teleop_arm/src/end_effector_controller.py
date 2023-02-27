@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import rospy
 import std_msgs.msg as std_msgs
+import time
 
 class ClawController:
     OPEN_SPEED = 32767
@@ -41,6 +42,7 @@ if __name__ == "__main__":
     with open("/sys/class/gpio/export", "w") as exportFile:
         exportFile.write("6")
         exportFile.flush()
+    time.sleep(1)
     with open("/sys/class/gpio/gpio6/direction", "w") as gpioFile:
         gpioFile.write("out")
         gpioFile.flush()
