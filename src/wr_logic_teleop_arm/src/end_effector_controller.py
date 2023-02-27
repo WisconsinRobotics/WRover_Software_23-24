@@ -23,7 +23,7 @@ class ClawController:
         self._publisher.publish(speed)
 
 def actuateSolenoid(msg: std_msgs.Bool):
-    with open("/sys/classs/gpio6/value") as gpioFile:
+    with open("/sys/class/gpio6/value") as gpioFile:
         gpioFile.write("1" if msg.data else "0")
 
 if __name__ == "__main__":

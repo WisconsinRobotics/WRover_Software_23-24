@@ -128,30 +128,19 @@ auto main(int argc, char **argv) -> int {
                                              }
                                          }));
 
-    // roll counter clockwise
-    ros::Subscriber rollUp = np.subscribe("/hci/arm/gamepad/button/y",
-                                          MESSAGE_QUEUE_LENGTH,
-                                          static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
-                                              if (msg->data) {
-                                                  orientation *= SPIN_Z * step_mult;
-                                                  updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
-                                                  isNewPath.store(true);
-                                              }
-                                          }));
-
-    // roll clockwise
-    ros::Subscriber rollDown = np.subscribe("/hci/arm/gamepad/button/a",
-                                            MESSAGE_QUEUE_LENGTH,
-                                            static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
-                                                if (msg->data) {
-                                                    orientation *= SPIN_Z.inverse();
-                                                    updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
-                                                    isNewPath.store(true);
-                                                }
-                                            }));
+    // roll
+    ros::Subscriber roll = np.subscribe("/hci/arm/gamepad/axis/pov_x",
+                                        MESSAGE_QUEUE_LENGTH,
+                                        static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
+                                            if (abs(msg->data) >= 0.5) {
+                                                orientation *= (msg->data > 0 ? SPIN_Z : SPIN_Z.inverse()) * step_mult;
+                                                updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+                                                isNewPath.store(true);
+                                            }
+                                        }));
 
     // pitch
-    ros::Subscriber pitch = np.subscribe("/hci/arm/gamepad/axis/stick_right_y",
+    ros::Subscriber pitch = np.subscribe("/hci/arm/gamepad/axis/pov_y",
                                          MESSAGE_QUEUE_LENGTH,
                                          static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
                                              if (abs(msg->data) >= 0.5) {
