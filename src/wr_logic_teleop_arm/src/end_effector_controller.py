@@ -24,7 +24,7 @@ class ClawController:
         self._publisher.publish(speed)
 
 def actuateSolenoid(msg: std_msgs.Bool):
-    with open("/sys/class/gpio/gpio6/value") as gpioFile:
+    with open("/sys/class/gpio/gpio6/value", "w") as gpioFile:
         gpioFile.write("1" if msg.data else "0")
 
 if __name__ == "__main__":
@@ -37,9 +37,9 @@ if __name__ == "__main__":
 
     rospy.loginfo("Starting GPIO setup...")
 
-    with open("/sys/class/export") as exportFile:
+    with open("/sys/class/export", "w") as exportFile:
         exportFile.write("6")
-    with open("/sys/class/gpio/gpio6/direction") as gpioFile:
+    with open("/sys/class/gpio/gpio6/direction", "w") as gpioFile:
         gpioFile.write("out")
 
     rospy.loginfo("GPIO setup complete!")
@@ -47,5 +47,5 @@ if __name__ == "__main__":
 
     rospy.spin()
     
-    with open("/sys/class/unexport") as unexportFile:
+    with open("/sys/class/unexport", "w") as unexportFile:
         unexportFile.write("6")
