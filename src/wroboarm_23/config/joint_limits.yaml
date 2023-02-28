@@ -13,7 +13,7 @@ joint_limits:
     max_velocity: 10
     has_acceleration_limits: true
     max_acceleration: 10
-    max_position: !radians 2.2
+    max_position: !radians 2.5
     min_position: !radians -0.2
   elbowRoll_joint:
     has_velocity_limits: true
