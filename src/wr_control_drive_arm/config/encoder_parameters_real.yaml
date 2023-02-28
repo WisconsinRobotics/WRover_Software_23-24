@@ -1,7 +1,7 @@
 encoder_parameters: 
   elbow:
     counts_per_rotation: 1850
-    offset: 546
+    offset: 670
   forearmRoll:
     counts_per_rotation: -1850
     offset: 576
