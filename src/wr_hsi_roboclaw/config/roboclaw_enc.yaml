@@ -13,7 +13,7 @@ claws:
     current_limit_left: 5
     current_limit_right: 5
   aux1: # arm elbow/forearm, science ?
-    topic: '/hsi/roboclaw/aux1v'
+    topic: '/hsi/roboclaw/aux1'
     address: 0x81
     enc_left:
         enabled: true

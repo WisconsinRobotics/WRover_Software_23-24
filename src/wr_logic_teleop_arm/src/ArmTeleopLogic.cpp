@@ -91,7 +91,7 @@ auto main(int argc, char **argv) -> int {
                                              if (abs(msg->data) >= JOYSTICK_DEADBAND) {
                                                  y_pos += msg->data * STEP_Y;
                                                  updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
-                                                 isNewPath.store(true);
+                                                //  isNewPath.store(true);
                                              }
                                          }));
 
@@ -102,7 +102,7 @@ auto main(int argc, char **argv) -> int {
                                              if (abs(msg->data) >= JOYSTICK_DEADBAND) {
                                                  x_pos += msg->data * STEP_X;
                                                  updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
-                                                 isNewPath.store(true);
+                                                //  isNewPath.store(true);
                                              }
                                          }));
 
@@ -113,7 +113,7 @@ auto main(int argc, char **argv) -> int {
                                            if (msg->data) {
                                                z_pos += STEP_Y * step_mult;
                                                updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
-                                               isNewPath.store(true);
+                                            //    isNewPath.store(true);
                                            }
                                        }));
 
@@ -124,7 +124,7 @@ auto main(int argc, char **argv) -> int {
                                              if (msg->data) {
                                                  z_pos -= STEP_Y * step_mult;
                                                  updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
-                                                 isNewPath.store(true);
+                                                //  isNewPath.store(true);
                                              }
                                          }));
 
@@ -135,7 +135,7 @@ auto main(int argc, char **argv) -> int {
                                             if (abs(msg->data) >= 0.5) {
                                                 orientation *= (msg->data > 0 ? SPIN_Z : SPIN_Z.inverse()) * step_mult;
                                                 updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
-                                                isNewPath.store(true);
+                                                // isNewPath.store(true);
                                             }
                                         }));
 
@@ -146,7 +146,7 @@ auto main(int argc, char **argv) -> int {
                                              if (abs(msg->data) >= 0.5) {
                                                  orientation *= (msg->data > 0 ? SPIN_Y : SPIN_Y.inverse());
                                                  updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
-                                                 isNewPath.store(true);
+                                                //  isNewPath.store(true);
                                              }
                                          }));
 
@@ -157,7 +157,7 @@ auto main(int argc, char **argv) -> int {
                                            if (abs(msg->data) >= 0.5) {
                                                orientation *= (msg->data > 0 ? SPIN_X : SPIN_X.inverse());
                                                updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
-                                               isNewPath.store(true);
+                                            //    isNewPath.store(true);
                                            }
                                        }));
 
