@@ -23,6 +23,11 @@ laser2.range_max = 150
 laser2.header.frame_id = "map"
 laser2.intensities = []
 
+def calculateAngleToCheck(t:float) ->float:
+     return math.degrees(math.acos((2*t*t - MAX_WINDOW_DISTANCE*MAX_WINDOW_DISTANCE)/(2*t*t)))/2
+    
+angleToCheck = calculateAngleToCheck(4)
+
 # Returns angular distance (in degrees) from sector parameter to target
 # Returns 0 if sector parameter contains target
 # TODO: Is there a cleaner way to write the logic?
@@ -95,10 +100,9 @@ def get_valley(
         if valley_start is None:
             # ...and the sector is below the threshold...
             if hist[i] > threshold:
-                # Start the valley at the current sector
-                valley_start = i 
-
-
+                if(checkWith(i ,threshold, hist)):
+                    valley_start = i
+                # Start the valley at the current sector        
         # If the start of the valley has been set and the current sector is above the threshold...
         elif hist[i] < threshold:
             # Get the effective distance in degrees between the target angle and the sector
@@ -111,8 +115,13 @@ def get_valley(
                 angle = (i - valley_start)*sector_angle
                 valley_width = math.sqrt(y*y+x*x-2*x*y*math.cos(math.radians(angle)))
                 if valley_width > 2:
-                    best_distance = dist
-                    best_valley = [valley_start, i]
+                    if(checkWith(i ,threshold, hist)):
+                        best_distance = dist
+                        best_valley = [valley_start, i]
+                    else:
+                        best_distance = dist
+                        best_valley = [valley_start, i-angleToCheck]
+                   
 
             # Since we are above the threshold limit, end the current valley
             valley_start = None
@@ -132,8 +141,12 @@ def get_valley(
             angle = (i - valley_start)*sector_angle
             valley_width = math.sqrt(y*y+x*x-2*x*y*math.cos(math.radians(angle)))
             if valley_width > 2:
-                best_distance = dist
-                best_valley = [valley_start, i]
+                if(checkWith(i ,threshold, hist)):
+                    best_distance = dist
+                    best_valley = [valley_start, i]
+                else:
+                    best_distance = dist
+                    best_valley = [valley_start, i-angleToCheck]
 
     #Make calculations to check if best valley is enough for robot to go through
     
@@ -143,7 +156,19 @@ def get_valley(
     # TODO: Implement play_navigation (drive in reverse w.r.t. log file)
 
     # Return the sectors defining the best valley
+    
+    
     return best_valley
+
+def checkWith(angle: int,
+              threshold: float,
+              hist: List) -> bool:
+    for i in range(int(angle-angleToCheck)%360, int(angle +angleToCheck)%360):
+        if(hist[i] < threshold):
+            return False
+
+    return True
+
 
 
 # Gets the best angle to navigate to
@@ -162,7 +187,7 @@ def get_navigation_angle(
         threshold,
         data,
         smoothing_constant)
-    #print("best valley: " + str(best_valley[0]) + " " + str(best_valley[1]))
+    print("best valley: " + str(best_valley[0]) + " " + str(best_valley[1]))
 
     # Define the difference between 'wide' and 'narrow' valleys
     # For wide valleys, we want to drive on the edge of the valley
