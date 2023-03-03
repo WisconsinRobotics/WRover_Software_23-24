@@ -19,38 +19,36 @@ from wr_logic_ai.srv import GetTargetInfo, GetTargetInfoResponse
 # corners = np.empty(0)
 cap: cv.VideoCapture = None
 
-
 def handle_get_target_info(req: GetTargetInfo):
-    ret, frame = cap.read()
+    if cap is not None:
+        ret, frame = cap.read()
+        if not ret:
+            rospy.logerr('Failed to read frame')
+        else:
+            (corners, ids, _) = aruco_lib.detect_aruco(frame)
+            if ids is not None:
+                id_list = ids.flatten().tolist()
+                try:
+                    id_ind = id_list.index(req.id)
+                    target = corners[id_ind][0]
+                    top_left_arr = target[0].tolist()
+                    bottom_right_arr = target[2].tolist()
+                    side_lengths = []
+                    min_x = target[0][0]
+                    max_x = target[0][0]
+                    for i in range(len(target)):
+                        side_lengths.append(
+                            np.linalg.norm(target[i-1] - target[i]))
+                        min_x = min(min_x, target[i][0])
+                        max_x = max(max_x, target[i][0])
+                    x_center = (max_x + min_x) / 2
+                    area_estimate = max(side_lengths)**2
 
-    if not ret:
-        rospy.logerr('Failed to read frame')
-    else:
-        (corners, ids, _) = aruco_lib.detect_aruco(frame)
-        if len(ids) != 0:
-            id_list = ids.flatten().tolist()
-
-            try:
-                id_ind = id_list.index(req.id)
-                target = corners[id_ind][0]
-                top_left_arr = target[0].tolist()
-                bottom_right_arr = target[2].tolist()
-                side_lengths = []
-                min_x = target[0][0]
-                max_x = target[0][0]
-                for i in range(len(target)):
-                    side_lengths.append(
-                        np.linalg.norm(target[i-1] - target[i]))
-                    min_x = min(min_x, target[i][0])
-                    max_x = max(max_x, target[i][0])
-                x_center = (max_x - min_x) / 2
-                area_estimate = max(side_lengths)**2
-
-                rospy.loginfo("Target ID: %s, top left corner: %s, bottom right corner: %s, corners: %s, side_lengths: %s, area_estimate: %f",
-                              str(id), str(top_left_arr), str(bottom_right_arr), str(target.tolist()), str(side_lengths), area_estimate)
-                return GetTargetInfoResponse(True, top_left_arr, bottom_right_arr, x_center, area_estimate)
-            except:
-                rospy.loginfo("Requested target not found")
+                    # rospy.loginfo("Target ID: %s, top left corner: %s, bottom right corner: %s, corners: %s, side_lengths: %s, area_estimate: %f",
+                                #   str(id), str(top_left_arr), str(bottom_right_arr), str(target.tolist()), str(side_lengths), area_estimate)
+                    return GetTargetInfoResponse(True, top_left_arr, bottom_right_arr, x_center, area_estimate)
+                except:
+                    rospy.loginfo("Requested target not found")
     return GetTargetInfoResponse(False, [0, 0], [0, 0], 0, 0)
 
 
