@@ -14,6 +14,11 @@ prevData = []
 # TESTING
 scan_rviz_pub = rospy.Publisher('/scan_rviz', LaserScan, queue_size=10)
 
+def calculateAngleToCheck(t:float) ->float:
+     return math.degrees(math.acos((2*t*t - MAX_WINDOW_DISTANCE*MAX_WINDOW_DISTANCE)/(2*t*t)))/2
+    
+angleToCheck = calculateAngleToCheck(4)
+
 # Returns angular distance (in degrees) from sector parameter to target
 # Returns 0 if sector parameter contains target
 # TODO: Is there a cleaner way to write the logic?
@@ -101,9 +106,10 @@ def get_valley(
         if valley_start is None:
             # ...and the sector is below the threshold...
             if hist[i] > threshold:
-                # Start the valley at the current sector
-                valley_start = i 
-
+                if(checkWidth(i ,threshold, hist)):
+                    valley_start = i
+                # Start the valley at the current sector        
+                
         # If the start of the valley has been set and the current sector is above the threshold...
         elif hist[i] < threshold:
             # Get the effective distance in degrees between the target angle and the sector
@@ -111,8 +117,17 @@ def get_valley(
             # If current valley is closer to the target than the current best valley...
             if dist < best_distance and check_valley_width(valley_start, i, hist[valley_start], hist[i], sector_angle):
                 # Replace the best distance and best valley
-                best_distance = dist
-                best_valley = [valley_start, i]
+                y = hist[i]
+                x = hist[valley_start]
+                angle = (i - valley_start)*sector_angle
+                valley_width = math.sqrt(y*y+x*x-2*x*y*math.cos(math.radians(angle)))
+                if valley_width > 2:
+                    if(checkWidth(i ,threshold, hist)):
+                        best_distance = dist
+                        best_valley = [valley_start, i]
+                    else:
+                        best_distance = dist
+                        best_valley = [valley_start, i-angleToCheck]
 
             # Since we are above the threshold limit, end the current valley
             valley_start = None
@@ -126,9 +141,18 @@ def get_valley(
         # If that distance was better than the current best sector distance...
         if dist < best_distance and check_valley_width(valley_start, i, hist[valley_start], hist[i], sector_angle):
             # Set the best valley to the measured valley
-            # Replace the best distance and best valley
-            best_distance = dist
-            best_valley = [valley_start, i]
+           # Replace the best distance and best valley
+            y = hist[i]
+            x = hist[valley_start]
+            angle = (i - valley_start)*sector_angle
+            valley_width = math.sqrt(y*y+x*x-2*x*y*math.cos(math.radians(angle)))
+            if valley_width > 2:
+                if(checkWidth(i ,threshold, hist)):
+                    best_distance = dist
+                    best_valley = [valley_start, i]
+                else:
+                    best_distance = dist
+                    best_valley = [valley_start, i-angleToCheck]
 
     #Make calculations to check if best valley is enough for robot to go through
     
@@ -138,7 +162,19 @@ def get_valley(
     # TODO: Implement play_navigation (drive in reverse w.r.t. log file)
 
     # Return the sectors defining the best valley
+    
+    
     return best_valley
+
+def checkWidth(angle: int,
+              threshold: float,
+              hist: List) -> bool:
+    for i in range(int(angle-angleToCheck)%360, int(angle +angleToCheck)%360):
+        if(hist[i] < threshold):
+            return False
+
+    return True
+
 
 
 # Gets the best angle to navigate to
@@ -157,7 +193,7 @@ def get_navigation_angle(
         threshold,
         data,
         smoothing_constant)
-    #print("best valley: " + str(best_valley[0]) + " " + str(best_valley[1]))
+    print("best valley: " + str(best_valley[0]) + " " + str(best_valley[1]))
 
     # Define the difference between 'wide' and 'narrow' valleys
     # For wide valleys, we want to drive on the edge of the valley

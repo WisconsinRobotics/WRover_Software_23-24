@@ -43,7 +43,7 @@ def getLaserRanges(t = 0):
     for x in range(360):
         distance = 10
         if t <= x and x <= t + 40:
-            distance = 2
+            distance = 3
         inputData.append(distance)
     return inputData
 
