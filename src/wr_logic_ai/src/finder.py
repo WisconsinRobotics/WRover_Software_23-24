@@ -100,7 +100,7 @@ def get_valley(
         if valley_start is None:
             # ...and the sector is below the threshold...
             if hist[i] > threshold:
-                if(checkWith(i ,threshold, hist)):
+                if(checkWidth(i ,threshold, hist)):
                     valley_start = i
                 # Start the valley at the current sector        
         # If the start of the valley has been set and the current sector is above the threshold...
@@ -115,7 +115,7 @@ def get_valley(
                 angle = (i - valley_start)*sector_angle
                 valley_width = math.sqrt(y*y+x*x-2*x*y*math.cos(math.radians(angle)))
                 if valley_width > 2:
-                    if(checkWith(i ,threshold, hist)):
+                    if(checkWidth(i ,threshold, hist)):
                         best_distance = dist
                         best_valley = [valley_start, i]
                     else:
@@ -141,7 +141,7 @@ def get_valley(
             angle = (i - valley_start)*sector_angle
             valley_width = math.sqrt(y*y+x*x-2*x*y*math.cos(math.radians(angle)))
             if valley_width > 2:
-                if(checkWith(i ,threshold, hist)):
+                if(checkWidth(i ,threshold, hist)):
                     best_distance = dist
                     best_valley = [valley_start, i]
                 else:
@@ -160,7 +160,7 @@ def get_valley(
     
     return best_valley
 
-def checkWith(angle: int,
+def checkWidth(angle: int,
               threshold: float,
               hist: List) -> bool:
     for i in range(int(angle-angleToCheck)%360, int(angle +angleToCheck)%360):
