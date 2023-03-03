@@ -2,5 +2,6 @@
   <node pkg="wr_logic_ai" name="obstacle_avoidance" type="obstacle_avoidance.py" output="screen"/>
   <!-- <node pkg="wr_logic_ai" name="dead_reckoning" type="dead_reckoning.py" output="screen"/> -->
   <node pkg="wr_logic_ai" name="testData" type="inputFakeData.py" output="screen"/>
-  
+  <include file="$(find rplidar_ros)/launch/rplidar.launch"/>
+  <node pkg="rviz" name="$(anon rviz)" type="rviz" output="screen" args="-d $(find wr_logic_ai)/launch/obstacle_avoidance.rviz"/>
 </launch>

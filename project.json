@@ -20,6 +20,13 @@
       "build": {
         "provider": "pip"
       }
+    },
+    {
+      "name": "rplidar",
+      "repo": "ssh://git@github.com/Slamtec/rplidar_ros.git",
+      "build": {
+        "provider": "noop"
+      }
     }
   ]
 }
