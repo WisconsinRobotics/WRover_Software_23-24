@@ -52,7 +52,7 @@ auto main(int argc, char **argv) -> int {
     constexpr float STEP_Z = 0.003;
 
     constexpr float HOME_X = 0.0;
-    constexpr float HOME_Y = -0.7;
+    constexpr float HOME_Y = -0.3;
     constexpr float HOME_Z = 0.2;
 
     float accel = 1.0;
