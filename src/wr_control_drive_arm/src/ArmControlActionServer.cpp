@@ -4,61 +4,63 @@
  * @brief The exeutable file to run the Arm Control Action Server
  * @date 2022-12-05
  */
+#include "DifferentialJointToMotorSpeedConverter.hpp"
+#include "DirectJointToMotorSpeedConverter.hpp"
+#include "Joint.hpp"
+#include "Motor.hpp"
+#include "RoboclawChannel.hpp"
+#include "SingleEncoderJointPositionMonitor.hpp"
 #include "XmlRpcValue.h"
+#include "ros/init.h"
 
-#include "DifferentialJoint.hpp"
-#include "SimpleJoint.hpp"
-#include "ros/console.h"
-#include "ros/ros.h"
 #include <actionlib/server/simple_action_server.h>
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <control_msgs/FollowJointTrajectoryAction.h>
 #include <csignal>
 #include <memory>
+#include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
 #include <std_msgs/Empty.h>
 #include <std_msgs/Float64.h>
 #include <std_srvs/Trigger.h>
 #include <string>
+#include <thread>
+#include <unordered_map>
+#include <vector>
 
 using XmlRpc::XmlRpcValue;
 
 /**
  * @brief Refresh rate of ros::Rate
  */
-constexpr float CLOCK_RATE = 50;
+constexpr float CLOCK_RATE{50};
 
-constexpr double IK_WARN_RATE = 1.0 / 2;
+constexpr double IK_WARN_RATE{1.0 / 2};
 
-constexpr double JOINT_SAFETY_MAX_SPEED = 0.5;
-constexpr double JOINT_SAFETY_HOLD_SPEED = 0.15;
+constexpr double JOINT_SAFETY_MAX_SPEED{0.5};
+constexpr double JOINT_SAFETY_HOLD_SPEED{0.3};
 
 /**
  * @brief Nessage cache size of publisher
  */
-constexpr std::uint32_t MESSAGE_CACHE_SIZE = 1000;
+constexpr std::uint32_t MESSAGE_CACHE_SIZE{10};
 
 /**
  * @brief Period between timer callback
  */
-constexpr float TIMER_CALLBACK_DURATION = 1.0 / 50.0;
+constexpr float TIMER_CALLBACK_DURATION{1.0 / 50.0};
 
 /**
  * @brief Defines space for all Joint references
  */
-constexpr int NUM_JOINTS = 5;
-std::array<std::unique_ptr<AbstractJoint>, NUM_JOINTS> joints;
-// AbstractJoint *joints[numJoints];
-/**
- * @brief The Joint State Publisher for MoveIt
- */
-ros::Publisher jointStatePublisher;
+std::unordered_map<std::string, std::unique_ptr<Joint>> namedJointMap;
+
 /**
  * @brief Simplify the SimpleActionServer reference name
  */
-typedef actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction>
-    Server;
+using Server = actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction>;
 /**
  * @brief The service server for enabling IK
  */
@@ -80,158 +82,92 @@ ros::ServiceClient enableServiceClient;
  * @param as The Action Server this is occuring on
  */
 void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
-             Server *as) {
+             Server *server) {
     if (!IKEnabled) {
-        as->setAborted();
-        ROS_WARN_THROTTLE(
+        server->setAborted();
+        ROS_WARN_THROTTLE( // NOLINT(hicpp-no-array-decay,hicpp,hicpp-vararg,cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
             IK_WARN_RATE,
-            "IK is disabled"); // NOLINT(hicpp-no-array-decay,hicpp,hicpp-vararg,cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
+            "IK is disabled");
         return;
     }
 
-    int currPoint = 1;
-
-    std::cout << "start exec: " << goal->trajectory.points.size() << std::endl;
-    // For each point in the trajectory execution sequence...
-    for (const auto &name : goal->trajectory.joint_names) {
-        std::cout << name << "\t";
+    for (const auto &jointName : goal->trajectory.joint_names) {
+        std::cout << jointName << "\t";
     }
     std::cout << std::endl;
-    for (const auto &currTargetPosition : goal->trajectory.points) {
-        for (double pos : currTargetPosition.positions) {
-            std::cout << std::round(pos * 100) / 100 << "\t";
+    for (const auto &waypoint : goal->trajectory.points) {
+        for (const auto &jointVal : waypoint.positions) {
+            std::cout << jointVal << "\t";
         }
         std::cout << std::endl;
     }
+
     for (const auto &currTargetPosition : goal->trajectory.points) {
-        // Track whether or not the current position is done
-        bool hasPositionFinished = false;
-        // Keep max loop rate at 50 Hz
-        ros::Rate loop{CLOCK_RATE};
+
+        if (!IKEnabled) {
+            server->setAborted();
+            std::cout << "Over current fault!" << std::endl;
+            return;
+        }
 
         const double VELOCITY_MAX = abs(*std::max_element(
             currTargetPosition.velocities.begin(),
             currTargetPosition.velocities.end(),
-            [](double a, double b) -> bool { return abs(a) < abs(b); }));
+            [](double lhs, double rhs) -> bool { return abs(lhs) < abs(rhs); }));
 
-        ArmMotor *currmotor = NULL;
-        int currItr = 0;
-        // std::cout << currPoint << " / " << goal->trajectory.points.size() <<
-        // std::endl;
-        currPoint++;
-        for (const auto &joint : joints) {
-            for (int i = 0; i < joint->getDegreesOfFreedom(); i++) {
-                double velocity =
-                    VELOCITY_MAX == 0.F
-                        ? JOINT_SAFETY_HOLD_SPEED
-                        : JOINT_SAFETY_MAX_SPEED * currTargetPosition.velocities[currItr] / VELOCITY_MAX;
-                std::cout << "config setpoint: " <<
-                currTargetPosition.positions[currItr] << ":" << velocity <<
-                std::endl;
-                joint->configSetpoint(i, currTargetPosition.positions[currItr],
-                                      velocity);
-                currItr++;
-            }
-            joint->exectute();
-        }
+        for (uint32_t i = 0; i < goal->trajectory.joint_names.size(); ++i) {
+            auto jointVelocity{JOINT_SAFETY_HOLD_SPEED};
+            if (VELOCITY_MAX != 0)
+                jointVelocity = currTargetPosition.velocities.at(i) / VELOCITY_MAX * JOINT_SAFETY_MAX_SPEED;
 
-        // While the current position is not complete yet...
-        while (!hasPositionFinished && ros::ok()) {
-            // Assume the current action is done until proven otherwise
-            hasPositionFinished = true;
-            // Create the Joint State message for the current update cycle
-
-            // For each joint specified in the currTargetPosition...
-            for (const auto &joint : joints) {
-
-                for (int k = 0; k < joint->getDegreesOfFreedom(); k++) {
-                    // if (joint->getMotor(k)->getMotorState() ==
-                    // MotorState::MOVING) {
-                    //   std::cout << "Moving" << std::endl;
-                    // } else if (joint->getMotor(k)->getMotorState() ==
-                    // MotorState::RUN_TO_TARGET) {
-                    //   std::cout << "Run to target" << std::endl;
-                    // } else if (joint->getMotor(k)->getMotorState() ==
-                    // MotorState::STALLING) {
-                    //   std::cout << "Stalling" << std::endl;
-                    // } else if (joint->getMotor(k)->getMotorState() ==
-                    // MotorState::STOP) {
-                    //   std::cout << "Stop" << std::endl;
-                    // } else {
-                    //   std::cout << "Error" << std::endl;
-                    // }
-
-                    if (joint->getMotor(k)->getMotorState() ==
-                        MotorState::STALLING) {
-                        std::cout << "ACS stall detected" << std::endl;
-                        IKEnabled = false;
-                        std_srvs::Trigger srv;
-                        if (enableServiceClient.call(srv)) {
-                            ROS_WARN(
-                                "%s",
-                                (std::string{"PLACEHOLDER_NAME: "} +
-                                 srv.response.message)
-                                    .data()); // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
-                        } else {
-                            ROS_WARN(
-                                "Error: failed to call service "
-                                "PLACEHOLDER_NAME"); // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
-                        }
-                    } else {
-                        hasPositionFinished &=
-                            joint->getMotor(k)->getMotorState() ==
-                            MotorState::STOP;
-                        std::cout << joint->getMotor(k)->getMotorName() << " state: " << (joint->getMotor(k)->getMotorState() == MotorState::STOP) << std::endl;
-                    }
-                    // DEBUGGING OUTPUT: Print each motor's name, radian
-                    // position, encoder position, and power
-                    // std::cout << std::setw(30) << joint->getMotor(k)->getRads()
-                    //           << std::endl;
-                }
-
-                joint->exectute();
-
-                // if (!joint->exectute()) {
-                //   IKEnabled = false;
-                //   std_srvs::Trigger srv;
-                //   if (enableServiceClient.call(srv)) {
-                //     ROS_WARN("%s", (std::string{"PLACEHOLDER_NAME: "} + srv.response.message).data()); // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
-                //   } else {
-                //     ROS_WARN("Error: failed to call service PLACEHOLDER_NAME"); // NOLINT(cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
-                //   }
-                //   return;
-                // }
-            }
-            // Sleep until the next update cycle
-            loop.sleep();
+            namedJointMap.at(goal->trajectory.joint_names.at(i))->setTarget(currTargetPosition.positions.at(i), jointVelocity);
         }
     }
 
-    // When all positions have been reached, set the current task as succeeded
+    auto waypointComplete{false};
+    ros::Rate updateRate{CLOCK_RATE};
 
-    as->setSucceeded();
+    while (!waypointComplete && ros::ok() && !server->isNewGoalAvailable()) {
+
+        if (!IKEnabled) {
+            server->setAborted();
+            std::cout << "Over current fault!" << std::endl;
+            return;
+        }
+
+        waypointComplete = true;
+        for (const auto &[_, joint] : namedJointMap) {
+            waypointComplete &= joint->hasReachedTarget();
+        }
+        updateRate.sleep();
+    }
+
+    // Report preemption if it occurred
+    if (server->isNewGoalAvailable())
+        server->setPreempted();
+    // When all positions have been reached, set the current task as succeeded
+    else
+        server->setSucceeded();
+    std::cout << "Action Complete!" << std::endl;
 }
 
-/**
- * @brief publishes the arm's position
- */
-void publishJointStates(const ros::TimerEvent &event) {
-    std::vector<std::string> names;
-    std::vector<double> positions;
-    sensor_msgs::JointState js_msg;
+auto getEncoderConfigFromParams(const XmlRpcValue &params, const std::string &jointName) -> EncoderConfiguration {
+    return {.countsPerRotation = static_cast<int32_t>(params[jointName]["counts_per_rotation"]),
+            .offset = static_cast<int32_t>(params[jointName]["offset"])};
+}
 
-    for (const auto &joint : joints) {
-        for (int i = 0; i < joint->getDegreesOfFreedom(); i++) {
-            names.push_back(joint->getMotor(i)->getMotorName());
-            positions.push_back(joint->getMotor(i)->getRads());
+void checkOverCurrentFaults(const std::vector<std::shared_ptr<Motor>> &motors){
+    for(const auto& motor : motors){
+        if (motor->isOverCurrent()) {
+            IKEnabled = false;
+            std::cout << "Over current fault!" << std::endl;
+
+            for (const auto& joint : namedJointMap) {
+                joint.second->stop();
+            }
         }
+        // TODO:  arbitrate control to old arm driver
     }
-
-    js_msg.name = names;
-    js_msg.position = positions;
-    js_msg.header.stamp = ros::Time::now();
-    // Publish the Joint State message
-    jointStatePublisher.publish(js_msg);
 }
 
 /**
@@ -255,47 +191,105 @@ auto main(int argc, char **argv) -> int {
 
     // Initialize all motors with their MoveIt name, WRoboclaw initialization,
     // and reference to the current node
-    auto elbowPitch_joint = std::make_unique<ArmMotor>(
-        "elbowPitch_joint", 1, 0,
-        static_cast<int>(encParams[0]["counts_per_rotation"]),
-        static_cast<int>(encParams[0]["offset"]), n);
-    auto elbowRoll_joint = std::make_unique<ArmMotor>(
-        "elbowRoll_joint", 1, 1,
-        static_cast<int>(encParams[1]["counts_per_rotation"]),
-        static_cast<int>(encParams[1]["offset"]), n);
-    auto shoulder_joint = std::make_unique<ArmMotor>(
-        "shoulder_joint", 0, 1,
-        static_cast<int>(encParams[2]["counts_per_rotation"]),
-        static_cast<int>(encParams[2]["offset"]), n);
-    auto turntable_joint = std::make_unique<ArmMotor>(
-        "turntable_joint", 0, 0,
-        static_cast<int>(encParams[3]["counts_per_rotation"]),
-        static_cast<int>(encParams[3]["offset"]), n);
-    auto wristPitch_joint = std::make_unique<ArmMotor>(
-        "wristPitch_joint", 2, 0,
-        static_cast<int>(encParams[4]["counts_per_rotation"]),
-        static_cast<int>(encParams[4]["offset"]), n);
-    auto wristRoll_link = std::make_unique<ArmMotor>(
-        "wristRoll_link", 2, 1,
-        static_cast<int>(encParams[5]["counts_per_rotation"]),
-        static_cast<int>(encParams[5]["offset"]), n);
     std::cout << "init motors" << std::endl;
 
+    /**
+     * @brief The list of motors
+     */
+    std::vector<std::shared_ptr<Motor>> motors{};
+
+    using std::literals::string_literals::operator""s;
+
+    const auto turntableMotor{std::make_shared<Motor>("aux0"s, RoboclawChannel::A, n)};
+    const auto shoulderMotor{std::make_shared<Motor>("aux0"s, RoboclawChannel::B, n)};
+    const auto elbowMotor{std::make_shared<Motor>("aux1"s, RoboclawChannel::A, n)};
+    const auto forearmRollMotor{std::make_shared<Motor>("aux1"s, RoboclawChannel::B, n)};
+    const auto wristLeftMotor{std::make_shared<Motor>("aux2"s, RoboclawChannel::A, n)};
+    const auto wristRightMotor{std::make_shared<Motor>("aux2"s, RoboclawChannel::B, n)};
+
+    motors.push_back(turntableMotor);
+    motors.push_back(shoulderMotor);
+    motors.push_back(elbowMotor);
+    motors.push_back(forearmRollMotor);
+    motors.push_back(wristLeftMotor);
+    motors.push_back(wristRightMotor);
+
+    const auto turntablePositionMonitor{std::make_shared<SingleEncoderJointPositionMonitor>(
+        "aux0"s,
+        RoboclawChannel::A,
+        getEncoderConfigFromParams(encParams, "turntable"),
+        n)};
+    const auto shoulderPositionMonitor{std::make_shared<SingleEncoderJointPositionMonitor>(
+        "aux0"s,
+        RoboclawChannel::B,
+        getEncoderConfigFromParams(encParams, "shoulder"),
+        n)};
+    const auto elbowPositionMonitor{std::make_shared<SingleEncoderJointPositionMonitor>(
+        "aux1"s,
+        RoboclawChannel::A,
+        getEncoderConfigFromParams(encParams, "elbow"),
+        n)};
+    const auto forearmRollPositionMonitor{std::make_shared<SingleEncoderJointPositionMonitor>(
+        "aux1"s,
+        RoboclawChannel::B,
+        getEncoderConfigFromParams(encParams, "forearmRoll"),
+        n)};
+    const auto wristPitchPositionMonitor{std::make_shared<SingleEncoderJointPositionMonitor>(
+        "aux2"s,
+        RoboclawChannel::A,
+        getEncoderConfigFromParams(encParams, "wristPitch"),
+        n)};
+    const auto wristRollPositionMonitor{std::make_shared<SingleEncoderJointPositionMonitor>(
+        "aux2"s,
+        RoboclawChannel::B,
+        getEncoderConfigFromParams(encParams, "wristRoll"),
+        n)};
+
+    const auto turntableSpeedConverter{std::make_shared<DirectJointToMotorSpeedConverter>(turntableMotor, MotorSpeedDirection::REVERSE)};
+    const auto shoulderSpeedConverter{std::make_shared<DirectJointToMotorSpeedConverter>(shoulderMotor, MotorSpeedDirection::REVERSE)};
+    const auto elbowSpeedConverter{std::make_shared<DirectJointToMotorSpeedConverter>(elbowMotor, MotorSpeedDirection::REVERSE)};
+    const auto forearmRollSpeedConverter{std::make_shared<DirectJointToMotorSpeedConverter>(forearmRollMotor, MotorSpeedDirection::REVERSE)};
+    const auto differentialSpeedConverter{std::make_shared<DifferentialJointToMotorSpeedConverter>(wristLeftMotor, wristRightMotor)};
+
     // Initialize all Joints
-    joints.at(0) =
-        std::make_unique<SimpleJoint>(std::move(elbowPitch_joint), n);
-    joints.at(1) = std::make_unique<SimpleJoint>(std::move(elbowRoll_joint), n);
-    joints.at(2) = std::make_unique<SimpleJoint>(std::move(shoulder_joint), n);
-    joints.at(3) = std::make_unique<SimpleJoint>(std::move(turntable_joint), n);
-    joints.at(4) = std::make_unique<DifferentialJoint>(
-        std::move(wristPitch_joint), std::move(wristRoll_link), n,
-        "/control/arm/5/pitch", "/control/arm/5/roll", "/control/arm/20/",
-        "/control/arm/21/");
+
     std::cout << "init joints" << std::endl;
 
+    namedJointMap.insert({"turntable_joint", std::make_unique<Joint>(
+                                                 "turntable"s,
+                                                 [turntablePositionMonitor]() -> double { return (*turntablePositionMonitor)(); },
+                                                 [turntableSpeedConverter](double speed) { (*turntableSpeedConverter)(speed); },
+                                                 n)});
+    namedJointMap.insert({"shoulder_joint", std::make_unique<Joint>(
+                                                "shoulder",
+                                                [shoulderPositionMonitor]() -> double { return (*shoulderPositionMonitor)(); },
+                                                [shoulderSpeedConverter](double speed) { (*shoulderSpeedConverter)(speed); },
+                                                n)});
+    namedJointMap.insert({"elbowPitch_joint", std::make_unique<Joint>(
+                                                  "elbow",
+                                                  [elbowPositionMonitor]() -> double { return (*elbowPositionMonitor)(); },
+                                                  [elbowSpeedConverter](double speed) { (*elbowSpeedConverter)(speed); },
+                                                  n)});
+    namedJointMap.insert({"elbowRoll_joint", std::make_unique<Joint>(
+                                                 "forearmRoll",
+                                                 [forearmRollPositionMonitor]() -> double { return (*forearmRollPositionMonitor)(); },
+                                                 [forearmRollSpeedConverter](double speed) { (*forearmRollSpeedConverter)(speed); },
+                                                 n)});
+    namedJointMap.insert({"wristPitch_joint", std::make_unique<Joint>(
+                                                  "wristPitch",
+                                                  [wristPitchPositionMonitor]() -> double { return (*wristPitchPositionMonitor)(); },
+                                                  [converter = differentialSpeedConverter](double speed) { converter->setPitchSpeed(speed); },
+                                                  n)});
+    namedJointMap.insert({"wristRoll_link", std::make_unique<Joint>(
+                                                "wristRoll",
+                                                [wristRollPositionMonitor]() -> double { return (*wristRollPositionMonitor)(); },
+                                                [converter = differentialSpeedConverter](double speed) { converter->setRollSpeed(speed); },
+                                                n)});
+
     // Initialize the Action Server
-    Server server(n, "/arm_controller/follow_joint_trajectory",
-                  boost::bind(&execute, _1, &server), false);
+    Server server(
+        n, "/arm_controller/follow_joint_trajectory",
+        [&server](auto goal) { execute(goal, &server); }, false);
     // Start the Action Server
     server.start();
     std::cout << "server started" << std::endl;
@@ -314,6 +308,8 @@ auto main(int argc, char **argv) -> int {
 
     enableServiceClient =
         n.serviceClient<std_srvs::Trigger>("PLACEHOLDER_NAME");
+
+    ros::Timer currentTimer = n.createTimer(ros::Duration{TIMER_CALLBACK_DURATION}, [&motors](const ros::TimerEvent& event) { checkOverCurrentFaults(motors); });
 
     std::cout << "entering ROS spin..." << std::endl;
     // ROS spin for communication with other nodes
