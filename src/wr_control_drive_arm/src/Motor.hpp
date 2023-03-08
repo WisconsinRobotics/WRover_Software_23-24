@@ -12,7 +12,7 @@ class Motor {
 public:
     Motor(const std::string &controllerName, RoboclawChannel channel, ros::NodeHandle node);
     void setSpeed(double speed);
-    auto isOverCurrent() -> bool;
+    auto isOverCurrent() const -> bool;
 
 private:
 
