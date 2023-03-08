@@ -156,7 +156,7 @@ auto getEncoderConfigFromParams(const XmlRpcValue &params, const std::string &jo
             .offset = static_cast<int32_t>(params[jointName]["offset"])};
 }
 
-void checkOverCurrentFaults(std::vector<std::shared_ptr<Motor>> &motors){
+void checkOverCurrentFaults(const std::vector<std::shared_ptr<Motor>> &motors){
     for(const auto& motor : motors){
         if (motor->isOverCurrent()) {
             IKEnabled = false;
