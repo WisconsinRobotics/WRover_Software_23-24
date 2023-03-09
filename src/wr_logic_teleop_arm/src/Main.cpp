@@ -1,7 +1,14 @@
+#include "ClawController.hpp"
 #include "ros/init.h"
+#include "ros/node_handle.h"
 
-int main(int argc, char **argv)
+auto main(int argc, char **argv) -> int
 {
-    ros::init(argc, argv, "ArmTeleopLogic");
+    ros::init(argc, argv, "Main");
+
+    ros::NodeHandle nHand;
+    ClawController claw = *new ClawController(nHand);
+    
+
     return 0;
 }

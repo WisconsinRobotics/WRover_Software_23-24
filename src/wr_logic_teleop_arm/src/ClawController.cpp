@@ -1,5 +1,7 @@
 #include "ClawController.hpp"
 #include "ros/node_handle.h"
+#include "ros/publisher.h"
+#include "ros/subscriber.h"
 #include "std_msgs/Bool.h"
 #include "std_msgs/Int16.h"
 
@@ -9,48 +11,60 @@
 // an argument.
 
 constexpr uint32_t MESSAGE_QUEUE_LENGTH = 1000;
+constexpr int16_t openSpeed = 32767;
+constexpr int16_t closeSpeed = -32768;
 
-ClawController::ClawController(ros::NodeHandle& n)
-{
-    ros::Publisher openAPub = n.advertise<std_msgs::Int16>("/hsi/roboclaw/aux3/cmd/left", MESSAGE_QUEUE_LENGTH);
-    ros::Publisher closeBPub = n.advertise<std_msgs::Int16>("/hsi/roboclaw/aux3/cmd/left", MESSAGE_QUEUE_LENGTH);
-    ros::Subscriber openASub = n.subscribe("/hci/arm/gamepad/button/a", MESSAGE_QUEUE_LENGTH, &ClawController::openClaw, this);
-    ros::Subscriber closeBSub = n.subscribe("/hci/arm/gamepad/button/b", MESSAGE_QUEUE_LENGTH, &ClawController::closeClaw, this);
-}
+ClawController::ClawController(ros::NodeHandle& n) : 
+    openAPub(n.advertise<std_msgs::Int16>("/hsi/roboclaw/aux3/cmd/left", 
+        MESSAGE_QUEUE_LENGTH)), 
+    openASub(n.subscribe("/hci/arm/gamepad/button/a", 
+        MESSAGE_QUEUE_LENGTH, &ClawController::openClaw, this)),
+    closeBPub(n.advertise<std_msgs::Int16>("/hsi/roboclaw/aux3/cmd/left", 
+        MESSAGE_QUEUE_LENGTH)), 
+    closeBSub(n.subscribe("/hci/arm/gamepad/button/b", 
+        MESSAGE_QUEUE_LENGTH, &ClawController::closeClaw, this)),
+    aPressed(false), bPressed(false) {}
 
 void ClawController::openClaw(const std_msgs::Bool::ConstPtr& msg)
 {
     // This should open the claw
     // ROS_INFO("I heard: [%s]", msg->data);
     this->aPressed = (msg->data != 0U);
-    
+
 }
 
 void ClawController::closeClaw(const std_msgs::Bool::ConstPtr& msg)
 {
     // This should close the claw
-    ROS_INFO("I heard: [%s]", msg->data.c_str());
+    // ROS_INFO("I heard: [%s]", msg->data.c_str());
+    this->bPressed = (msg->data != 0U);
 }
 
 void ClawController::checkMessage()
 {
-    if (this->openClaw() == )
+    while (ros::ok())
     {
-        std_msgs::Int16 msgNA;
-        msgNA.data = 0;
-        openAPub.publish(msgNA);
-        closeBPub.publish(msgNA);
-    }
-    else if ()
-    {
-        std_msgs::Int16 msgA;
-        msgA.data = 32767;
-        openAPub.publish(msgA);
-    }
-    else
-    {
-        std_msgs::Int16 msgB;
-        msgB.data = -32768;
-        closeBPub.publish(msgB);
+        if (aPressed && bPressed)
+        {
+            std_msgs::Int16 msgNA;
+            msgNA.data = 0;
+            openAPub.publish(msgNA);
+            closeBPub.publish(msgNA);
+            // ROS_INFO("%i", msgNA.data);
+        }
+        else if (aPressed)
+        {
+            std_msgs::Int16 msgA;
+            msgA.data = openSpeed;
+            openAPub.publish(msgA);
+            // ROS_INFO("%i", msgA.data);
+        }
+        else
+        {
+            std_msgs::Int16 msgB;
+            msgB.data = closeSpeed;
+            closeBPub.publish(msgB);
+            // ROS_INFO("%i", msgB.data);
+        }
     }
 }

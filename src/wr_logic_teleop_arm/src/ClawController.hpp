@@ -29,12 +29,15 @@ public:
 private:
     // You may want to keep the speed ros::Publisher as a member variable to publish
     // from the member methods
-    ros::Publisher speedPublisher;
+    ros::Publisher openAPub;
+    ros::Subscriber openASub;
+    ros::Publisher closeBPub;
+    ros::Subscriber closeBSub;
     bool aPressed;
     bool bPressed;
     // If you store a publisher, you may want to construct that publisher in the
     // constructor of the class
-
+    
 };
 
 #endif
