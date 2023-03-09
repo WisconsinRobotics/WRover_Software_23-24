@@ -28,6 +28,7 @@
 #include <string>
 #include <thread>
 #include <unordered_map>
+#include <vector>
 
 using XmlRpc::XmlRpcValue;
 
@@ -103,6 +104,12 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
 
     for (const auto &currTargetPosition : goal->trajectory.points) {
 
+        if (!IKEnabled) {
+            server->setAborted();
+            std::cout << "Over current fault!" << std::endl;
+            return;
+        }
+
         const double VELOCITY_MAX = abs(*std::max_element(
             currTargetPosition.velocities.begin(),
             currTargetPosition.velocities.end(),
@@ -121,11 +128,15 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
     ros::Rate updateRate{CLOCK_RATE};
 
     while (!waypointComplete && ros::ok() && !server->isNewGoalAvailable()) {
+        if (!IKEnabled) {
+            server->setAborted();
+            std::cout << "Over current fault!" << std::endl;
+            return;
+        }
+
         waypointComplete = true;
         for (const auto &[_, joint] : namedJointMap) {
             waypointComplete &= joint->hasReachedTarget();
-            if(!joint->hasReachedTarget())
-                std::cout << "Waiting on joint " << _ << std::endl;
         }
         updateRate.sleep();
     }
@@ -270,6 +281,8 @@ auto main(int argc, char **argv) -> int {
 
     enableServiceClient =
         n.serviceClient<std_srvs::Trigger>("PLACEHOLDER_NAME");
+
+    ros::Timer currentTimer = n.createTimer(ros::Duration{TIMER_CALLBACK_DURATION}, [&motors](const ros::TimerEvent& event) { checkOverCurrentFaults(motors); });
 
     std::cout << "entering ROS spin..." << std::endl;
     // ROS spin for communication with other nodes
