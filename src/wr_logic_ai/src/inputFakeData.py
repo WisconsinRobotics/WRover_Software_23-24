@@ -74,7 +74,7 @@ t = 0
 while not rospy.is_shutdown():
     
     laser.ranges = getLaserRanges(t)
-    # distanceData.publish(laser)
+    distanceData.publish(laser)
   
     zero_msg.header.seq = frameCount
     zero_msg.header.stamp = rospy.get_rostime()

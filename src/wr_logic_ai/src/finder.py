@@ -7,13 +7,15 @@ from copy import deepcopy
 
 import pickle
 
-ROVER_WIDTH = 0
+ROVER_WIDTH = 2
 
 # TESTING
 scan_rviz_pub = rospy.Publisher('/scan_rviz', LaserScan, queue_size=10)
 
 def calculate_angle_to_check(t: float) -> int:
-    return math.degrees(math.acos((2*t*t - ROVER_WIDTH*ROVER_WIDTH)/(2*t*t)))/2
+    return math.degrees(math.atan((ROVER_WIDTH/2)/t))
+    
+    #math.degrees(math.acos((2*t*t - ROVER_WIDTH*ROVER_WIDTH)/(2*t*t)))/2
 
 # Returns angular distance (in degrees) from sector parameter to target
 # Returns 0 if sector parameter contains target
@@ -81,59 +83,50 @@ def get_valley(
     pickle.dump(hist, output_file)
     output_file.close()
 
-    # Initialize the target valley to the worst conditions so that it is immediately overriden
-    valley_start = None
-    best_valley = [0, len(hist) - 1]
-    # The furthest a valley could every be from is 360 degrees since this is a circle
-    best_distance = 361
-
-    # For each sector in the histogram...
+    obstacle_list = list() # format: [[left bound index , right bound index], [left bound index, right bound index]]
+    one_obstacle = []
     for i in range(len(hist)):
-        print(hist[len(hist) // 2])
-        # If the start of the vaprint(data.angle_increment)lley hasn't been set yet...
-        if valley_start is None:
-            # ...and the sector is below the threshold...
-            if hist[i] > threshold:
-                if(checkWidth(i ,threshold, hist, angle_to_check)):
-                    valley_start = i
-                # Start the valley at the current sector        
+        if(hist[i] < threshold):  
+            one_obstacle.append(i)
+        elif (len(one_obstacle) != 0):
+            #Increase size of obstacle before adding it to the sets
+            minBound = math.pow(10, 1000)
+            maxBound = math.pow(-10, 1000)
+            for i in range(0, len(one_obstacle)/2):
+                #Increase size of obstacle before adding it to the sets
+                initAngleToIncrease = calculate_angle_to_check(hist[one_obstacle[i]])/sector_angle #pass in distance to target to caculate angle that allows robot to pass through
+                outitAngleToIncrease = calculate_angle_to_check(hist[one_obstacle[len(one_obstacle)-i-1]])/sector_angle
                 
-        # If the start of the valley has been set and the current sector is above the threshold...
-        elif checkWidth(i ,threshold, hist, angle_to_check):
-            # Get the effective distance in degrees between the target angle and the sector
-            dist = get_target_distance(valley_start, i, target, sector_angle) # dist is the degree from target to current sector
-            # If current valley is closer to the target than the current best valley...
-            if dist < best_distance and check_valley_width(valley_start, i, hist[valley_start], hist[i], sector_angle):
-                # Replace the best distance and best valley
-                best_distance = dist
-                best_valley = [valley_start, i]
-
-            # Since we are above the threshold limit, end the current valley
-            valley_start = None
-
-    # If a valley was started near the end of the vision range...
-    if valley_start is not None:
-        # Check the distance between the target angle and a valley starting at the recorded position and ending at the end of the view frame
-        dist = get_target_distance(
-            valley_start, sector_count, target, sector_angle)
+                minBound = min(minBound, one_obstacle[i]-initAngleToIncrease)
+                maxBound = max(maxBound, one_obstacle[len(one_obstacle)-i-1]+outitAngleToIncrease)
+            
+            if obstacle_list[len(obstacle_list) - 1][1] >= minBound:
+                obstacle_list[len(obstacle_list) - 1][1] = maxBound
+            else:
+                obstacle_list.append([minBound, maxBound])
+            one_obstacle.clear()
         
-        # If that distance was better than the current best sector distance...
-        if dist < best_distance and check_valley_width(valley_start, i, hist[valley_start], hist[i], sector_angle):
-            # Set the best valley to the measured valley
-            # Replace the best distance and best valley
+    window_list = list()
+    # If obstacle_list does not start on the left bound of lidar
+    if obstacle_list[0][0] > 0:
+        window_list.append(0, obstacle_list[0][0])
+
+    for i in range(len(obstacle_list) - 1):
+        window_list.append([obstacle_list[i][1], obstacle_list[i + 1][0]])
+    
+    # If obstacle_list does not end on the right bound of lidar
+    if obstacle_list[len(obstacle_list) - 1][1] < len(hist):
+        window_list.append(obstacle_list[len(obstacle_list) - 1][1], len(hist))
+
+    # Initialize best valley array
+    best_valley = []
+    # The furthest a valley could every be from is 360 degrees since this is a circle
+    best_distance = 361    
+    for i in range(len(window_list)):
+        dist = get_target_distance(window_list[i][0], window_list[i][1], target, sector_angle)
+        if dist < best_distance:
+            best_valley = window_list[i]
             best_distance = dist
-            best_valley = [valley_start, i]
-
-    #Make calculations to check if best valley is enough for robot to go through
-    
-
-    # TODO: REVERSE DIRECTION IN CASE OF EMPTY VALLEY if best_valley is [None,
-    # None]:
-    # TODO: Implement play_navigation (drive in reverse w.r.t. log file)
-
-    # Return the sectors defining the best valley
-    
-    
     return best_valley
 
 def checkWidth(sector: int, threshold: float, hist: List, angle_to_check: int, sector_angle: float) -> bool:
