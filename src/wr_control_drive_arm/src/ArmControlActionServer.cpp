@@ -155,6 +155,20 @@ auto getEncoderConfigFromParams(const XmlRpcValue &params, const std::string &jo
             .offset = static_cast<int32_t>(params[jointName]["offset"])};
 }
 
+void checkOverCurrentFaults(const std::vector<std::shared_ptr<Motor>> &motors){
+    for(const auto& motor : motors){
+        if (motor->isOverCurrent()) {
+            IKEnabled = false;
+            std::cout << "Over current fault!" << std::endl;
+
+            for (const auto& joint : namedJointMap) {
+                joint.second->stop();
+            }
+        }
+        // TODO:  arbitrate control to old arm driver
+    }
+}
+
 /**
  * @brief The main executable method of the node.  Starts the ROS node and the
  * Action Server for processing Arm Control commands
@@ -178,6 +192,11 @@ auto main(int argc, char **argv) -> int {
     // and reference to the current node
     std::cout << "init motors" << std::endl;
 
+    /**
+     * @brief The list of motors
+     */
+    std::vector<std::shared_ptr<Motor>> motors{};
+
     using std::literals::string_literals::operator""s;
 
     const auto turntableMotor{std::make_shared<Motor>("aux0"s, RoboclawChannel::A, n)};
@@ -186,6 +205,13 @@ auto main(int argc, char **argv) -> int {
     const auto forearmRollMotor{std::make_shared<Motor>("aux1"s, RoboclawChannel::B, n)};
     const auto wristLeftMotor{std::make_shared<Motor>("aux2"s, RoboclawChannel::A, n)};
     const auto wristRightMotor{std::make_shared<Motor>("aux2"s, RoboclawChannel::B, n)};
+
+    motors.push_back(turntableMotor);
+    motors.push_back(shoulderMotor);
+    motors.push_back(elbowMotor);
+    motors.push_back(forearmRollMotor);
+    motors.push_back(wristLeftMotor);
+    motors.push_back(wristRightMotor);
 
     const auto turntablePositionMonitor{std::make_shared<SingleEncoderJointPositionMonitor>(
         "aux0"s,
