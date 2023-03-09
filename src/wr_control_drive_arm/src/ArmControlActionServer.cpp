@@ -128,7 +128,6 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
     ros::Rate updateRate{CLOCK_RATE};
 
     while (!waypointComplete && ros::ok() && !server->isNewGoalAvailable()) {
-
         if (!IKEnabled) {
             server->setAborted();
             std::cout << "Over current fault!" << std::endl;
