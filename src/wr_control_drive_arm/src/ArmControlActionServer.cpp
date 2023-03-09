@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <cmath>
 #include <control_msgs/FollowJointTrajectoryAction.h>
 #include <csignal>
 #include <memory>
@@ -56,6 +57,8 @@ constexpr float TIMER_CALLBACK_DURATION{1.0 / 50.0};
  * @brief Defines space for all Joint references
  */
 std::unordered_map<std::string, std::unique_ptr<Joint>> namedJointMap;
+
+std::unordered_map<std::string, std::shared_ptr<SingleEncoderJointPositionMonitor>> namedPositionMonitors;
 
 /**
  * @brief Simplify the SimpleActionServer reference name
@@ -110,17 +113,23 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
             return;
         }
 
+        std::vector<double> velocityCopies{currTargetPosition.velocities};
+
+        for (uint32_t i = 0; i < goal->trajectory.joint_names.size(); ++i) {
+            velocityCopies.at(i) *= abs(namedPositionMonitors.at(goal->trajectory.joint_names.at(i))->getCountsPerRotation());
+        }
+
         const double VELOCITY_MAX = abs(*std::max_element(
-            currTargetPosition.velocities.begin(),
-            currTargetPosition.velocities.end(),
+            velocityCopies.begin(),
+            velocityCopies.end(),
             [](double lhs, double rhs) -> bool { return abs(lhs) < abs(rhs); }));
 
         for (uint32_t i = 0; i < goal->trajectory.joint_names.size(); ++i) {
             auto jointVelocity{JOINT_SAFETY_HOLD_SPEED};
             if (VELOCITY_MAX != 0)
-                jointVelocity = currTargetPosition.velocities.at(i) / VELOCITY_MAX * JOINT_SAFETY_MAX_SPEED;
+                jointVelocity = velocityCopies.at(i) / VELOCITY_MAX * JOINT_SAFETY_MAX_SPEED;
 
-            namedJointMap.at(goal->trajectory.joint_names.at(i))->setTarget(currTargetPosition.positions.at(i), jointVelocity);
+            namedJointMap.at(goal->trajectory.joint_names.at(i))->setTarget(velocityCopies.at(i), jointVelocity);
         }
     }
 
@@ -213,36 +222,41 @@ auto main(int argc, char **argv) -> int {
     motors.push_back(wristLeftMotor);
     motors.push_back(wristRightMotor);
 
-    const auto turntablePositionMonitor{std::make_shared<SingleEncoderJointPositionMonitor>(
-        "aux0"s,
-        RoboclawChannel::A,
-        getEncoderConfigFromParams(encParams, "turntable"),
-        n)};
-    const auto shoulderPositionMonitor{std::make_shared<SingleEncoderJointPositionMonitor>(
-        "aux0"s,
-        RoboclawChannel::B,
-        getEncoderConfigFromParams(encParams, "shoulder"),
-        n)};
-    const auto elbowPositionMonitor{std::make_shared<SingleEncoderJointPositionMonitor>(
-        "aux1"s,
-        RoboclawChannel::A,
-        getEncoderConfigFromParams(encParams, "elbow"),
-        n)};
-    const auto forearmRollPositionMonitor{std::make_shared<SingleEncoderJointPositionMonitor>(
-        "aux1"s,
-        RoboclawChannel::B,
-        getEncoderConfigFromParams(encParams, "forearmRoll"),
-        n)};
-    const auto wristPitchPositionMonitor{std::make_shared<SingleEncoderJointPositionMonitor>(
-        "aux2"s,
-        RoboclawChannel::A,
-        getEncoderConfigFromParams(encParams, "wristPitch"),
-        n)};
-    const auto wristRollPositionMonitor{std::make_shared<SingleEncoderJointPositionMonitor>(
-        "aux2"s,
-        RoboclawChannel::B,
-        getEncoderConfigFromParams(encParams, "wristRoll"),
-        n)};
+    namedPositionMonitors.insert({"turntable_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
+                                                            "aux0"s,
+                                                            RoboclawChannel::A,
+                                                            getEncoderConfigFromParams(encParams, "turntable"),
+                                                            n)});
+
+    namedPositionMonitors.insert({"shoulder_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
+                                                            "aux0"s,
+                                                            RoboclawChannel::B,
+                                                            getEncoderConfigFromParams(encParams, "shoulder"),
+                                                            n)});
+
+    namedPositionMonitors.insert({"elbowPitch_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
+                                                            "aux1"s,
+                                                            RoboclawChannel::A,
+                                                            getEncoderConfigFromParams(encParams, "elbow"),
+                                                            n)});
+
+    namedPositionMonitors.insert({"elbowRoll_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
+                                                            "aux1"s,
+                                                            RoboclawChannel::B,
+                                                            getEncoderConfigFromParams(encParams, "forearmRoll"),
+                                                            n)});
+
+    namedPositionMonitors.insert({"wristPitch_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
+                                                            "aux2"s,
+                                                            RoboclawChannel::A,
+                                                            getEncoderConfigFromParams(encParams, "wristPitch"),
+                                                            n)});
+
+    namedPositionMonitors.insert({"wristRoll_link", std::make_shared<SingleEncoderJointPositionMonitor>(
+                                                            "aux2"s,
+                                                            RoboclawChannel::B,
+                                                            getEncoderConfigFromParams(encParams, "wristRoll"),
+                                                            n)});
 
     const auto turntableSpeedConverter{std::make_shared<DirectJointToMotorSpeedConverter>(turntableMotor, MotorSpeedDirection::REVERSE)};
     const auto shoulderSpeedConverter{std::make_shared<DirectJointToMotorSpeedConverter>(shoulderMotor, MotorSpeedDirection::REVERSE)};
@@ -256,32 +270,32 @@ auto main(int argc, char **argv) -> int {
 
     namedJointMap.insert({"turntable_joint", std::make_unique<Joint>(
                                                  "turntable"s,
-                                                 [turntablePositionMonitor]() -> double { return (*turntablePositionMonitor)(); },
+                                                 [turntablePositionMonitor=namedPositionMonitors.at("turntable_joint")]() -> double { return (*turntablePositionMonitor)(); },
                                                  [turntableSpeedConverter](double speed) { (*turntableSpeedConverter)(speed); },
                                                  n)});
     namedJointMap.insert({"shoulder_joint", std::make_unique<Joint>(
                                                 "shoulder",
-                                                [shoulderPositionMonitor]() -> double { return (*shoulderPositionMonitor)(); },
+                                                [shoulderPositionMonitor=namedPositionMonitors.at("shoulder_joint")]() -> double { return (*shoulderPositionMonitor)(); },
                                                 [shoulderSpeedConverter](double speed) { (*shoulderSpeedConverter)(speed); },
                                                 n)});
     namedJointMap.insert({"elbowPitch_joint", std::make_unique<Joint>(
                                                   "elbow",
-                                                  [elbowPositionMonitor]() -> double { return (*elbowPositionMonitor)(); },
+                                                  [elbowPositionMonitor=namedPositionMonitors.at("elbowPitch_joint")]() -> double { return (*elbowPositionMonitor)(); },
                                                   [elbowSpeedConverter](double speed) { (*elbowSpeedConverter)(speed); },
                                                   n)});
     namedJointMap.insert({"elbowRoll_joint", std::make_unique<Joint>(
                                                  "forearmRoll",
-                                                 [forearmRollPositionMonitor]() -> double { return (*forearmRollPositionMonitor)(); },
+                                                 [forearmRollPositionMonitor=namedPositionMonitors.at("elbowRoll_joint")]() -> double { return (*forearmRollPositionMonitor)(); },
                                                  [forearmRollSpeedConverter](double speed) { (*forearmRollSpeedConverter)(speed); },
                                                  n)});
     namedJointMap.insert({"wristPitch_joint", std::make_unique<Joint>(
                                                   "wristPitch",
-                                                  [wristPitchPositionMonitor]() -> double { return (*wristPitchPositionMonitor)(); },
+                                                  [wristPitchPositionMonitor=namedPositionMonitors.at("wristPitch_joint")]() -> double { return (*wristPitchPositionMonitor)(); },
                                                   [converter = differentialSpeedConverter](double speed) { converter->setPitchSpeed(speed); },
                                                   n)});
     namedJointMap.insert({"wristRoll_link", std::make_unique<Joint>(
                                                 "wristRoll",
-                                                [wristRollPositionMonitor]() -> double { return (*wristRollPositionMonitor)(); },
+                                                [wristRollPositionMonitor=namedPositionMonitors.at("wristRoll_link")]() -> double { return (*wristRollPositionMonitor)(); },
                                                 [converter = differentialSpeedConverter](double speed) { converter->setRollSpeed(speed); },
                                                 n)});
 
