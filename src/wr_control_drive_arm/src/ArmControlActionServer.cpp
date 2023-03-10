@@ -129,7 +129,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
             if (VELOCITY_MAX != 0)
                 jointVelocity = velocityCopies.at(i) / VELOCITY_MAX * JOINT_SAFETY_MAX_SPEED;
 
-            namedJointMap.at(goal->trajectory.joint_names.at(i))->setTarget(velocityCopies.at(i), jointVelocity);
+            namedJointMap.at(goal->trajectory.joint_names.at(i))->setTarget(currTargetPosition.positions.at(i), velocityCopies.at(i));
         }
     }
 
