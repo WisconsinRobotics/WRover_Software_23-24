@@ -115,9 +115,9 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
 
         std::vector<double> velocityCopies{currTargetPosition.velocities};
 
-        for (uint32_t i = 0; i < goal->trajectory.joint_names.size(); ++i) {
-            velocityCopies.at(i) *= abs(namedPositionMonitors.at(goal->trajectory.joint_names.at(i))->getCountsPerRotation());
-        }
+        // for (uint32_t i = 0; i < goal->trajectory.joint_names.size(); ++i) {
+        //     velocityCopies.at(i) *= abs(namedPositionMonitors.at(goal->trajectory.joint_names.at(i))->getCountsPerRotation());
+        // }
 
         const double VELOCITY_MAX = abs(*std::max_element(
             velocityCopies.begin(),
