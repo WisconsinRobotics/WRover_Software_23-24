@@ -175,7 +175,7 @@ void checkOverCurrentFaults(const std::vector<std::shared_ptr<Motor>> &motors){
             std::cout << "Over current fault!" << std::endl;
 
             for (const auto& joint : namedJointMap) {
-                joint.second->stop();
+                // joint.second->stop();
             }
         }
         // TODO:  arbitrate control to old arm driver
