@@ -128,7 +128,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
             auto jointVelocity{JOINT_SAFETY_HOLD_SPEED};
             if (VELOCITY_MAX != 0)
                 jointVelocity = velocityCopies.at(i) / VELOCITY_MAX * JOINT_SAFETY_MAX_SPEED;
-
+            std::cout << "Joint : " << goal->trajectory.joint_names.at(i) << " has speed " << jointVelocity << std::endl;
             namedJointMap.at(goal->trajectory.joint_names.at(i))->setTarget(currTargetPosition.positions.at(i), velocityCopies.at(i));
         }
     }
