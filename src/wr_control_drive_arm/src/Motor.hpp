@@ -27,8 +27,4 @@ private:
     std::optional<ros::Time> beginStallTime;
 };
 
-<<<<<<< HEAD
 #endif
-=======
-#endif
->>>>>>> b5ba58849ac6bdf12ff8ef8a27746c2fa6813dbd
