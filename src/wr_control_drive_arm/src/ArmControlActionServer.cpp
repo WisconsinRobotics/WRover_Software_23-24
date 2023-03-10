@@ -123,8 +123,6 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
             velocityCopies.begin(),
             velocityCopies.end(),
             [](double lhs, double rhs) -> bool { return abs(lhs) < abs(rhs); }));
-        std::cout << "MAX SPEED : " << VELOCITY_MAX << std::endl;
-        ROS_INFO_STREAM("MAX SPEED : " << VELOCITY_MAX);
 
         for (uint32_t i = 0; i < goal->trajectory.joint_names.size(); ++i) {
             auto jointVelocity{JOINT_SAFETY_HOLD_SPEED};
@@ -132,7 +130,6 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
                 jointVelocity = velocityCopies.at(i) / VELOCITY_MAX * JOINT_SAFETY_MAX_SPEED;
             std::cout << "Joint : " << goal->trajectory.joint_names.at(i) << " has speed " << jointVelocity << std::endl;
             namedJointMap.at(goal->trajectory.joint_names.at(i))->setTarget(currTargetPosition.positions.at(i), velocityCopies.at(i));
-            ROS_INFO_STREAM("Joint : " << goal->trajectory.joint_names.at(i) << " has speed " << jointVelocity);
         }
     }
 
