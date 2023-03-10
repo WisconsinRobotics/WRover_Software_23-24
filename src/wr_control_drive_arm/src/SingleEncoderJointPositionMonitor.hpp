@@ -24,8 +24,6 @@ public:
     auto operator=(SingleEncoderJointPositionMonitor &&) -> SingleEncoderJointPositionMonitor & = delete;
     ~SingleEncoderJointPositionMonitor() = default;
 
-    [[nodiscard]] auto getCountsPerRotation() const -> int32_t;
-
 private:
     void onEncoderReceived(const std_msgs::UInt32::ConstPtr &msg);
 

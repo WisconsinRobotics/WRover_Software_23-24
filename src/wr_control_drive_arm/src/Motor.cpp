@@ -37,7 +37,7 @@ void Motor::setCurrentStatus(const std_msgs::Bool::ConstPtr &msg) {
     }
 }
 
-auto Motor::isOverCurrent() const -> bool {
+auto Motor::isOverCurrent() -> bool { // NOLINT(readability-convert-member-functions-to-static)
     if (this->beginStallTime.has_value()) {
         return static_cast<bool>((ros::Time::now() - this->beginStallTime.value()).toSec() >= STALL_THRESHOLD_TIME);
     }

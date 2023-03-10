@@ -2,7 +2,6 @@
 #include "MathUtil.hpp"
 #include "RoboclawChannel.hpp"
 #include "ros/node_handle.h"
-#include <cstdint>
 
 using std::literals::string_literals::operator""s;
 using MathUtil::RADIANS_PER_ROTATION;
@@ -44,8 +43,4 @@ void SingleEncoderJointPositionMonitor::onEncoderReceived(const std_msgs::UInt32
     auto enc = static_cast<double>(msg->data);
     auto rotations = MathUtil::corrMod(enc - offset, countsPerRotation) / countsPerRotation;
     position = MathUtil::corrMod(rotations * RADIANS_PER_ROTATION + M_PI, RADIANS_PER_ROTATION) - M_PI;
-}
-
-auto SingleEncoderJointPositionMonitor::getCountsPerRotation() const -> int32_t {
-    return this->countsPerRotation;
 }

@@ -12,11 +12,11 @@ class Motor {
 public:
     Motor(const std::string &controllerName, RoboclawChannel channel, ros::NodeHandle node);
     void setSpeed(double speed);
-    auto isOverCurrent() const -> bool;
+    auto isOverCurrent() -> bool;
 
 private:
 
-    static constexpr float STALL_THRESHOLD_TIME{0.5F};
+    static constexpr float STALL_THRESHOLD_TIME{2.0F};
     static constexpr int OVER_CURRENT_QUEUE_SIZE{25};
 
 
@@ -27,8 +27,4 @@ private:
     std::optional<ros::Time> beginStallTime;
 };
 
-<<<<<<< HEAD
 #endif
-=======
-#endif
->>>>>>> b5ba58849ac6bdf12ff8ef8a27746c2fa6813dbd
