@@ -134,24 +134,24 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
             namedJointMap.at(goal->trajectory.joint_names.at(i))->setTarget(currTargetPosition.positions.at(i), velocityCopies.at(i));
             ROS_INFO_STREAM("Joint : " << goal->trajectory.joint_names.at(i) << " has speed " << jointVelocity);
         }
+    }
 
-        auto waypointComplete{false};
-        ros::Rate updateRate{CLOCK_RATE};
+    auto waypointComplete{false};
+    ros::Rate updateRate{CLOCK_RATE};
 
-        while (!waypointComplete && ros::ok() && !server->isNewGoalAvailable()) {
+    while (!waypointComplete && ros::ok() && !server->isNewGoalAvailable()) {
 
-            if (!IKEnabled) {
-                server->setAborted();
-                std::cout << "Over current fault!" << std::endl;
-                return;
-            }
-
-            waypointComplete = true;
-            for (const auto &[_, joint] : namedJointMap) {
-                waypointComplete &= joint->hasReachedTarget();
-            }
-            updateRate.sleep();
+        if (!IKEnabled) {
+            server->setAborted();
+            std::cout << "Over current fault!" << std::endl;
+            return;
         }
+
+        waypointComplete = true;
+        for (const auto &[_, joint] : namedJointMap) {
+            waypointComplete &= joint->hasReachedTarget();
+        }
+        updateRate.sleep();
     }
 
     // Report preemption if it occurred
