@@ -4,64 +4,33 @@ import rospy
 import cv2 as cv
 import numpy as np
 import aruco_lib
-# from std_msgs.msg import UInt16
-# from wr_logic_ai.msg import TargetMsg
-from wr_logic_ai.srv import GetTargetInfo, GetTargetInfoResponse
-# from wr_logic_ai.msg import CameraInfoMsg
-# from wr_logic_ai.msg import CameraInfoMsg
+from wr_logic_ai.msg import TargetMsg
 
-# target_topic = '/wr_logic_ai/shortrange_ai/vision_target_data'
-# target_id_topic = '/wr_logic_ai/shortrange_ai/vision_target_id'
-# camera_info_topic = '/wr_logic_ai/shortrange_ai/vision_camera_info'
-# camera_info = rospy.Publisher(camera_info_topic, CameraInfoMsg, queue_size=1)
+target_topic = '/wr_logic_ai/shortrange_ai/vision_target_data'
 
-# ids = np.empty(0)
-# corners = np.empty(0)
-cap: cv.VideoCapture = None
 
-def handle_get_target_info(req: GetTargetInfo):
-    if cap is not None:
-        ret, frame = cap.read()
-        if not ret:
-            rospy.logerr('Failed to read frame')
-        else:
-            (corners, ids, _) = aruco_lib.detect_aruco(frame)
-            if ids is not None:
-                id_list = ids.flatten().tolist()
-                try:
-                    id_ind = id_list.index(req.id)
-                    target = corners[id_ind][0]
-                    top_left_arr = target[0].tolist()
-                    bottom_right_arr = target[2].tolist()
-                    side_lengths = []
-                    min_x = target[0][0]
-                    max_x = target[0][0]
-                    for i in range(len(target)):
-                        side_lengths.append(
-                            np.linalg.norm(target[i-1] - target[i]))
-                        min_x = min(min_x, target[i][0])
-                        max_x = max(max_x, target[i][0])
-                    x_center = (max_x + min_x) / 2
-                    area_estimate = max(side_lengths)**2
-
-                    # rospy.loginfo("Target ID: %s, top left corner: %s, bottom right corner: %s, corners: %s, side_lengths: %s, area_estimate: %f",
-                                #   str(id), str(top_left_arr), str(bottom_right_arr), str(target.tolist()), str(side_lengths), area_estimate)
-                    return GetTargetInfoResponse(True, top_left_arr, bottom_right_arr, x_center, area_estimate)
-                except:
-                    rospy.loginfo("Requested target not found")
-    return GetTargetInfoResponse(False, [0, 0], [0, 0], 0, 0)
+def process_corners(id: int, corners) -> TargetMsg:
+    top_left_arr = corners[0].tolist()
+    bottom_right_arr = corners[2].tolist()
+    side_lengths = []
+    min_x = corners[0][0]
+    max_x = corners[0][0]
+    for i in range(len(corners)):
+        side_lengths.append(np.linalg.norm(corners[i-1] - corners[i]))
+        min_x = min(min_x, corners[i][0])
+        max_x = max(max_x, corners[i][0])
+    x_center = (max_x + min_x) / 2
+    area_estimate = max(side_lengths)**2
+    return TargetMsg(id, top_left_arr, bottom_right_arr, x_center, area_estimate, True)
 
 
 def main():
-    global cap
-
+    pub = rospy.Publisher(target_topic, TargetMsg, queue_size=10)
     rospy.init_node('vision_target_detection')
-    rospy.Service('get_target_info', GetTargetInfo, handle_get_target_info)
+    rate = rospy.Rate(10)
 
     stream_url = rospy.get_param('video_stream')
-    rospy.loginfo("Stream: " + stream_url)
-
-    if stream_url != None and stream_url != '':
+    if stream_url is not None and stream_url != '':
         cap = cv.VideoCapture(stream_url)
     else:
         cap = cv.VideoCapture(0)
@@ -72,7 +41,19 @@ def main():
         rospy.logerr('Failed to open camera')
         exit()
 
-    rospy.spin()
+    while not rospy.is_shutdown():
+        ret, frame = cap.read()
+        if not ret:
+            rospy.logerr('Failed to read frame')
+        else:
+            (corners, ids, _) = aruco_lib.dettect()
+            if ids is not None:
+                for i, id in enumerate(ids):
+                    pub.publish(process_corners(id, corners[i][0]))
+            else:
+                pub.publish(TargetMsg(0, [0, 0], [0, 0], 0, 0, False))
+        rate.sleep()
+
     cap.release()
 
 
