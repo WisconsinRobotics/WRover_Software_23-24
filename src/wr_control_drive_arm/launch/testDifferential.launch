@@ -1,0 +1,3 @@
+<launch>
+    <node pkg="wr_control_drive_arm" name="testDifferential" type="testDifferential" output="screen"/>
+</launch>
