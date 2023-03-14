@@ -1,0 +1,99 @@
+@startuml Structure
+enum RoboclawChannel{
+    + A
+    + B
+}
+
+note right of RoboclawChannel::A
+    Analogous to 'LEFT'
+end note
+
+note right of RoboclawChannel::B
+    Analogous to 'RIGHT'
+end note
+
+class Motor{
+    - powerPublisher : ros::Publisher
+
+    + Motor(string controllerName, RoboclawChannel channel)
+    + void setPower(double power)
+    + bool getOverCurrentStatus()
+}
+
+Motor --> RoboclawChannel
+
+class EncoderJointPositionMonitor {
+    - encoderSubscriber : ros::Subscriber
+    - countsPerRotation : const int
+    - offset : const int
+    
+    + EncoderJointPositionMonitor(string controllerName, RoboclawChannel channel, int countsPerRotation, int offset)
+    - void encoderCallback(std_msgs::Int32)
+}
+
+EncoderJointPositionMonitor --> RoboclawChannel
+
+class DirectJointToMotorSpeedConverter {
+    + DirectJointToMotorSpeedConverter(Motor motor)
+    + void operator()(double)
+}
+
+DirectJointToMotorSpeedConverter "1" --> "1" Motor
+
+class DifferentialJointToMotorSpeedConverter {
+    + void setPitchSpeed(double)
+    + void setRollSpeed(double)
+}
+
+DifferentialJointToMotorSpeedConverter "1" --> "2" Motor
+
+class Joint{
+    + Joint(String name)
+    + void setTarget(double target)
+    + bool hasReachedTarget()
+    + void stop()  
+}
+
+Joint --> EncoderJointPositionMonitor : via function parameter <double()>
+<> speedConversion
+Joint --> speedConversion : via function parameter <void(double)>
+speedConversion --> DirectJointToMotorSpeedConverter : as functor
+speedConversion --> DifferentialJointToMotorSpeedConverter::setPitchSpeed : as function pointer
+speedConversion --> DifferentialJointToMotorSpeedConverter::setRollSpeed : as function pointer
+
+@enduml
+
+@startuml seq
+    participant ROS
+    MoveIt -> ActionServer : Sends a motion path
+    loop For each waypoint in the motion
+        loop For each joint in the arm
+            ActionServer -> Joint : Set the next setpoint per joint
+            Joint -> Joint : Start the execution loop
+        end
+        loop While some joint has not reached its setpoint
+            note over ActionServer : Wait
+            ROS -> Joint : Kicks off Timer Event
+            activate Joint
+            Joint -> "PID Loop" : Feed the setpoint
+            Joint -> JointPositionMonitor : Ask for the joint position
+            activate JointPositionMonitor
+            JointPositionMonitor --> Joint : Sends back joint position
+            deactivate JointPositionMonitor
+            Joint -> "PID Loop" : Feed the feedback
+            deactivate Joint
+
+            note left of Joint : Happens asynchonously
+            "PID Loop" -> Joint : New output available
+            activate Joint
+            Joint -> JointToMotorSpeedConverter : Dispatch new speed
+            activate JointToMotorSpeedConverter
+            JointToMotorSpeedConverter -> JointToMotorSpeedConverter : Determine hardware speeds
+            JointToMotorSpeedConverter -> "Motor(s)" : Dispatch hardware speeds
+            deactivate JointToMotorSpeedConverter
+            deactivate Joint
+        end
+    end
+    ActionServer -> MoveIt : Report motion as complete
+    
+@enduml

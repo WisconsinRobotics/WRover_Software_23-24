@@ -5,3 +5,5 @@ CommentPragmas: 'NOLINT'
 PackConstructorInitializers: CurrentLine
 AlignOperands: AlignAfterOperator
 AlignTrailingComments: true
+ColumnLimit: 0
+SeparateDefinitionBlocks: Always
