@@ -1,0 +1,18 @@
+<launch>
+    <!-- Machine definitions -->
+    <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" />
+
+    <!-- Launches joint state publisher on the rover -->
+    <!-- Launches the bad arm driver on the rover -->
+    <include file="$(find wr_control_drive_arm)/launch/jsp_and_bad_driver.launch" />
+
+    <!-- Launches roboclaw on the rover -->
+    <include file="$(find wr_hsi_roboclaw)/launch/roboclaw_real.launch" />
+
+    <!-- Launches readinput on the base station -->
+    <include file="$(find wr_entry_point)/launch/comp/comp_arm.launch" />
+
+    <!-- Launches wready on the base station -->
+    <include file="$(find wr_entry_point)/launch/comp/comp_ui.launch" />
+
+</launch>

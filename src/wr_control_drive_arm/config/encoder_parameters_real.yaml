@@ -1,4 +1,4 @@
-encoder_parameters: 
+encoder_parameters:
   elbow:
     counts_per_rotation: 1850
     offset: 546
