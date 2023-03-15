@@ -88,5 +88,6 @@
     "python.analysis.extraPaths": [
         "/home/nomorenickels/Documents/WRover_Software/devel/lib/python3/dist-packages",
         "/opt/ros/noetic/lib/python3/dist-packages"
-    ]
+    ],
+    "cmake.sourceDirectory": "${workspaceFolder}/src"
 }

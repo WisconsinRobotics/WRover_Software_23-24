@@ -11,6 +11,8 @@ cd $ROOT_DIR
 #done
 #rm ./out.temp;
 export WROVER_LOCAL=true
-export WROVER_HW=REAL
+export WROVER_HW=MOCK
+MOTOR_TO_INSPECT=11
+# (sleep 2 && rqt_plot /control/arm/$MOTOR_TO_INSPECT/output /control/arm/$MOTOR_TO_INSPECT/setpoint /control/arm/$MOTOR_TO_INSPECT/feedback) & #/hsi/roboclaw/aux1/cmd/left 
 roslaunch wr_entry_point mock_arm.launch
 

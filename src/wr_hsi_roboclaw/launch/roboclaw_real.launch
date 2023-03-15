@@ -1,6 +1,6 @@
 <!-- Launches the real hardware interface for the roboclaws. -->
 <launch>
-  <arg name="use_encoders" default="false"/>
+  <arg name="use_encoders" default="true"/>
 
   <group ns="hsi">
     <group ns="roboclaw">
