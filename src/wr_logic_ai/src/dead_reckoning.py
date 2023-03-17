@@ -34,6 +34,7 @@ while((sensor.getVector(BNO055.VECTOR_EULER)[2] == 0.0)and
     rate.sleep()
     imuInitCounter+=1
 
+# TODO : New GPS is I2C, need to double check that this implementation is ok.
 # Listen on port 2947 of localhost for gps
 session = gps.gps("localhost", "2947")
 session.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
