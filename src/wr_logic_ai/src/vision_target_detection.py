@@ -21,7 +21,7 @@ def process_corners(id: int, corners) -> TargetMsg:
         max_x = max(max_x, corners[i][0])
     x_center = (max_x + min_x) / 2
     area_estimate = max(side_lengths)**2
-    return TargetMsg(id, top_left_arr, bottom_right_arr, x_center, area_estimate, True)
+    return TargetMsg(id, top_left_arr, bottom_right_arr, x_center, area_estimate, True) # TODO : Do we need all this data?  If we have an area estimate and the center of the target, do we need the corner data?
 
 
 def main():

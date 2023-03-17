@@ -7,11 +7,13 @@ from wr_logic_ai.msg import TargetMsg
 from wr_drive_msgs.msg import DriveTrainCmd
 from geometry_msgs.msg import PoseStamped
 
-WIDTH = 1280
+# TODO : Document/rename variables, I'm not sure what all of these are for
+WIDTH = 1280 # TODO : From what I can tell, this is used to figure out if we're directly facing the target.  Maybe we could publish an offset instead and avoid repeating the frame information?
 TARGET_AREA = 500 ** 2
 SPEED = 0.1
 kP = 0.001
 
+# TODO : Maybe use ROS params/remaps (low priority, can do later)
 target_topic = '/wr_logic_ai/shortrange_ai/vision_target_data'
 
 drivetrain_topic = '/control/drive_system/cmd'
