@@ -11,10 +11,12 @@
 
 constexpr uint32_t MESSAGE_QUEUE_LENGTH = 1000;
 
+// TODO ; Make sure you set up the GPIO pin in the constructor!
+// TODO : (And take down the pin in the destructor "~SolenoidController()")
 SolenoidController::SolenoidController(ros::NodeHandle& n) : 
     extendYSub(n.subscribe("/hci/arm/gamepad/button/y", 
         MESSAGE_QUEUE_LENGTH, &SolenoidController::extendSolenoid, this)),
-    yPressed(false) {}
+    yPressed(false) {} // TODO : Use brace-initialization
 
 void SolenoidController::extendSolenoid(const std_msgs::Bool::ConstPtr& msg)
 {
@@ -25,16 +27,16 @@ void SolenoidController::extendSolenoid(const std_msgs::Bool::ConstPtr& msg)
 
 void SolenoidController::checkMessage()
 {
-    while (ros::ok())
+    while (ros::ok()) // TODO : ROS-OK check not needed here
     {
         if (yPressed)
         {
-            std_msgs::Int16 msgY;
+            std_msgs::Int16 msgY; // TODO : This behavior can move to the extendSolenoid function, and then you may not need this method at all.
 
-            char buff = '1';
-            int file = open("/sys/class/gpio/gpio6/value", "w");
+            char buff = '1';  // TODO : Where do we close?
+            int file = open("/sys/class/gpio/gpio6/value", "w"); // TODO : Modernize - prefer std::(o)fstream for RAII handling
             write (file, &buff, 1);
-            close(file);
+            close(file); // TODO : Maybe open in the constructor to avoid constantly re-opening the same file, replace with flush
         }
         else
         {

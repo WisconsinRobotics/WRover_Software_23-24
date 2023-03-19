@@ -15,15 +15,15 @@ constexpr int16_t openSpeed = 32767;
 constexpr int16_t closeSpeed = -32768;
 
 ClawController::ClawController(ros::NodeHandle& n) : 
-    openAPub(n.advertise<std_msgs::Int16>("/hsi/roboclaw/aux3/cmd/left", 
+    openAPub(n.advertise<std_msgs::Int16>("/hsi/roboclaw/aux3/cmd/left", // TODO : This is the same as the closeBPub, so why not just have a single publisher?
         MESSAGE_QUEUE_LENGTH)), 
     openASub(n.subscribe("/hci/arm/gamepad/button/a", 
         MESSAGE_QUEUE_LENGTH, &ClawController::openClaw, this)),
-    closeBPub(n.advertise<std_msgs::Int16>("/hsi/roboclaw/aux3/cmd/left", 
+    closeBPub(n.advertise<std_msgs::Int16>("/hsi/roboclaw/aux3/cmd/left", // TODO : This is the same as the openAPub, so why not just have a single publisher?
         MESSAGE_QUEUE_LENGTH)), 
     closeBSub(n.subscribe("/hci/arm/gamepad/button/b", 
         MESSAGE_QUEUE_LENGTH, &ClawController::closeClaw, this)),
-    aPressed(false), bPressed(false) {}
+    aPressed(false), bPressed(false) {} // TODO : I know the linter won't catch this, but use brace-initialization (rather than parenthesis-initialization)
 
 void ClawController::openClaw(const std_msgs::Bool::ConstPtr& msg)
 {
@@ -40,9 +40,9 @@ void ClawController::closeClaw(const std_msgs::Bool::ConstPtr& msg)
     this->bPressed = (msg->data != 0U);
 }
 
-void ClawController::checkMessage()
+void ClawController::checkMessage() // TODO : this function isn't called anywhere
 {
-    while (ros::ok())
+    while (ros::ok()) // TODO : This doesn't need a ROS-OK loop.  This should be called by the subscriber callbacks, and if those are called, then ROS is ok.
     {
         if (aPressed && bPressed)
         {
