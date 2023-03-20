@@ -42,7 +42,7 @@ def getLaserRanges(t = 0):
     inputData = []
     for x in range(360):
         distance = 10
-        if t <= x and x <= t + 40:
+        if (t <= x and x <= t + 40) or (t - 40 <= x and x <= t - 10):
             distance = 3
         inputData.append(distance)
     return inputData
@@ -55,7 +55,7 @@ laser.scan_time = 1
 laser.range_min = 0
 laser.range_max = 150
 laser.ranges = getLaserRanges(0)
-laser.header.frame_id = "map"
+laser.header.frame_id = "laser"
 laser.intensities = []
 
 nav = NavigationMsg()
@@ -83,5 +83,5 @@ while not rospy.is_shutdown():
     navigation.publish(nav) #send nav data to subscriber in obstacle avoidance
     zero_pub.publish(zero_msg)
     sleeper.sleep()
-    t += 2
+    t += 3
     t %= 360
