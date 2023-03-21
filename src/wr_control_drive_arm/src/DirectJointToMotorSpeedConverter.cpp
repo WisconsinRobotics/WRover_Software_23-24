@@ -1,9 +1,8 @@
 #include "DirectJointToMotorSpeedConverter.hpp"
 
-DirectJointToMotorSpeedConverter::DirectJointToMotorSpeedConverter(std::shared_ptr<Motor> outputMotor, MotorSpeedDirection direction, MotorConfiguration config)
+DirectJointToMotorSpeedConverter::DirectJointToMotorSpeedConverter(std::shared_ptr<Motor> outputMotor, MotorSpeedDirection direction)
     : outputMotor{std::move(outputMotor)},
-      direction{direction},
-      gearRatio{config.gearRatio} {}
+      direction{direction} {}
 
 void DirectJointToMotorSpeedConverter::operator()(double speed) {
     double actualSpeed{0}; // In event of enum error, stop the motor
@@ -16,8 +15,4 @@ void DirectJointToMotorSpeedConverter::operator()(double speed) {
         break;
     }
     outputMotor->setSpeed(actualSpeed);
-}
-
-auto DirectJointToMotorSpeedConverter::getGearRatio() const -> double {
-    return this->gearRatio;
 }
