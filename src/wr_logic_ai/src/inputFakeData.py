@@ -7,12 +7,9 @@ from wr_logic_ai.msg import NavigationMsg
 from wr_drive_msgs.msg import DriveTrainCmd
 from geometry_msgs.msg import PoseStamped
 from finder import offset_lidar_data
+from copy import deepcopy
 
 import math
-
-def updateHeading(data) -> None:
-    global nav
-    nav.heading = (nav.heading + (data.right_value - data.left_value)*10) % 360
 
 def get_laser_ranges(t = 0):
         inputData = []
@@ -24,7 +21,8 @@ def get_laser_ranges(t = 0):
         return inputData
 
 def run_mock_data() -> None:
-    rospy.init_node('publish_fake_data', anonymous=False)
+    global nav
+
     distanceData = rospy.Publisher('/scan', LaserScan, queue_size=10)
     navigation = rospy.Publisher('/nav_data', NavigationMsg, queue_size=10)
     zero_pub = rospy.Publisher('/debug_zero', PoseStamped, queue_size=10)
@@ -45,9 +43,6 @@ def run_mock_data() -> None:
     laser = LaserScan()
     #vara.intensities
 
-    inputData = []
-    #laser.intensities()
-
     #laser.angle_min = 0.
     laser.angle_max = 2 * math.pi
     laser.angle_increment = math.pi / 180
@@ -56,7 +51,7 @@ def run_mock_data() -> None:
     laser.range_min = 0
     laser.range_max = 150
     laser.ranges = get_laser_ranges(0)
-    laser.header.frame_id = "map"
+    laser.header.frame_id = "laser"
     laser.intensities = []
 
     nav = NavigationMsg()
@@ -85,18 +80,26 @@ def run_mock_data() -> None:
         sleeper.sleep()
         t += 2
         t %= 360
-    
+
+def updateHeading(data) -> None:
+    global nav
+    nav.heading = (nav.heading + (data.right_value - data.left_value)*10) % 360
+
 def display_data(data) -> None:
-    data.ranges = offset_lidar_data(data.ranges, math.degrees(data.angle_increment), True)
+    rviz_data = deepcopy(data)
+    rviz_data.ranges = offset_lidar_data(rviz_data.ranges, math.degrees(rviz_data.angle_increment), True)
     scan_rviz_pub = rospy.Publisher('/scan_rviz', LaserScan, queue_size=10)
-    scan_rviz_pub.publish(data)
+    scan_rviz_pub.publish(rviz_data)
 
 def run_real_data() -> None:
     rospy.Subscriber('/scan', LaserScan, display_data)
     
 if __name__ == '__main__':
-    #Run fake data
-    run_mock_data()
+    rospy.init_node('publish_fake_data', anonymous=False)
+    # Run fake data
+    # run_mock_data()
 
-    #Run lidar data
-    #run_real_data()
+    # Run lidar data
+    sub = rospy.Subscriber('/scan', LaserScan, display_data)
+    # run_real_data()
+    rospy.spin()

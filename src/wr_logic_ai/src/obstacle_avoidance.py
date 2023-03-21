@@ -86,6 +86,8 @@ def update_heading_and_target(data) -> None:
 def update_navigation(data) -> None:
     global HEADING  # , t
     global frameCount
+    global smoothing_constant
+    global speed_factor
 
     data_avg = sum(cur_range for cur_range in data.ranges) / len(data.ranges)
     #print("Data Avg: " + str(data_avg))
