@@ -22,7 +22,10 @@ LIDAR_THRESH_DISTANCE = 5  # meters
 # initialize target angle to move forward
 target_angle = 90
 target_sector = 0
-oi = 1
+smoothing_constant = rospy.get_param("smoothing_constant", 3)
+# Get the speed multiplier of the current runtime for the obstacle_avoidance
+# 0.2 is bugged
+speed_factor = rospy.get_param("speed_factor", 0.3)
 
 # Initialize node
 rospy.init_node('nav_autonomous', anonymous=False)
@@ -74,9 +77,6 @@ def update_heading_and_target(data) -> None:
     print("Current heading: " + str(HEADING))
     print('Target angle: ' + str(target_angle))
 
-# TODO: consider wheter to directly call from callback
-# or every 2 seconds, depends on the computational cost
-
 # t = 0
 # Update the robot's navigation and drive it towards the target angle
 
@@ -88,6 +88,7 @@ def update_navigation(data) -> None:
     data_avg = sum(cur_range for cur_range in data.ranges) / len(data.ranges)
     #print("Data Avg: " + str(data_avg))
     # TODO: data threshold might depend of lidar model, double check
+            #Change if units/lidar changes
     # data_avg is above 0.5 almost always, but result stays the same (?)
     if data_avg >= 0.5:
         # Gets best possible angle, considering obstacles
@@ -95,19 +96,15 @@ def update_navigation(data) -> None:
             target_angle / math.degrees(data.angle_increment),  # sector angle
             LIDAR_THRESH_DISTANCE,
             data,
-            smoothing_constant=rospy.get_param("smoothing_constant", 3))  # TODO : Get and cache on start, don't call every callback
+            smoothing_constant)
 
         # TESTING
         print("Results: " + str(result))
 
-        # Get the speed multiplier of the current runtime for the obstacle_avoidance
-        # 0.2 dos not work # TODO : Get and cache on start, don't call every callback
-        speed_factor = rospy.get_param("speed_factor", 0.3)
         # Set the bounds of the speed multiplier
         speed_factor = 0 if speed_factor < 0 else speed_factor
         speed_factor = 1 if speed_factor > 1 else speed_factor
         # Get the DriveTrainCmd relating to the heading of the robot and the resulting best navigation angle
-        # TODO: Double check parameters -- heading??
         msg = angle_calc.piecewise_linear(HEADING if HEADING else 0, result)
 #        t += 2
 #        if t > 90: # t for debugging purposes
