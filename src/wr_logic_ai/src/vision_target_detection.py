@@ -6,12 +6,12 @@ import numpy as np
 import aruco_lib
 from wr_logic_ai.msg import TargetMsg
 
-target_topic = '/wr_logic_ai/shortrange_ai/vision_target_data'
+CAMERA_WIDTH = 1280
+CAMERA_HEIGHT = 720
+vision_topic = rospy.get_param('vision_topic')
 
 
 def process_corners(id: int, corners) -> TargetMsg:
-    top_left_arr = corners[0].tolist()
-    bottom_right_arr = corners[2].tolist()
     side_lengths = []
     min_x = corners[0][0]
     max_x = corners[0][0]
@@ -19,13 +19,13 @@ def process_corners(id: int, corners) -> TargetMsg:
         side_lengths.append(np.linalg.norm(corners[i-1] - corners[i]))
         min_x = min(min_x, corners[i][0])
         max_x = max(max_x, corners[i][0])
-    x_center = (max_x + min_x) / 2
-    area_estimate = max(side_lengths)**2
-    return TargetMsg(id, top_left_arr, bottom_right_arr, x_center, area_estimate, True) # TODO : Do we need all this data?  If we have an area estimate and the center of the target, do we need the corner data?
+    x_offset = (min_x + max_x - CAMERA_WIDTH) / 2
+    area_estimate = max(side_lengths) ** 2
+    return TargetMsg(id, x_offset, area_estimate, True)
 
 
 def main():
-    pub = rospy.Publisher(target_topic, TargetMsg, queue_size=10)
+    pub = rospy.Publisher(vision_topic, TargetMsg, queue_size=10)
     rospy.init_node('vision_target_detection')
     rate = rospy.Rate(10)
 
@@ -34,8 +34,8 @@ def main():
         cap = cv.VideoCapture(stream_url)
     else:
         cap = cv.VideoCapture(0)
-        cap.set(cv.CAP_PROP_FRAME_WIDTH, 1280)
-        cap.set(cv.CAP_PROP_FRAME_HEIGHT, 720)
+        cap.set(cv.CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH)
+        cap.set(cv.CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
 
     if not cap.isOpened():
         rospy.logerr('Failed to open camera')
@@ -51,7 +51,7 @@ def main():
                 for i, id in enumerate(ids):
                     pub.publish(process_corners(id, corners[i][0]))
             else:
-                pub.publish(TargetMsg(0, [0, 0], [0, 0], 0, 0, False))
+                pub.publish(TargetMsg(0, 0, 0, False))
         rate.sleep()
 
     cap.release()
