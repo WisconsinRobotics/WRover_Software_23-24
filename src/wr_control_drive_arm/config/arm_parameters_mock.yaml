@@ -1,0 +1,35 @@
+arm_parameters: 
+  elbow:
+    encoder_parameters:
+      counts_per_rotation: 1000
+      offset: 500
+    motor_parameters:
+      gear_ratio: 0 #placeholder
+  forearmRoll:
+    encoder_parameters:
+      counts_per_rotation: 1000
+      offset: 500
+    motor_parameters:
+      gear_ratio: 0 #placeholder
+  shoulder:
+    encoder_parameters:
+      counts_per_rotation: 1000
+      offset: 500
+    motor_parameters:
+      gear_ratio: 0 #placeholder
+  turntable:
+    encoder_parameters:
+      counts_per_rotation: 1000
+      offset: 500
+  wristPitch:
+    encoder_parameters:
+      counts_per_rotation: 1000
+      offset: 500
+    motor_parameters:
+      gear_ratio: 0 #placeholder
+  wristRoll:
+    encoder_parameters:
+      counts_per_rotation: 1000
+      offset: 500
+    motor_parameters:
+      gear_ratio: 0 #placeholder

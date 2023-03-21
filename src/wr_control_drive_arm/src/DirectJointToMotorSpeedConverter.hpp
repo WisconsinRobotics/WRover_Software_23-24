@@ -9,9 +9,13 @@ enum class MotorSpeedDirection {
     REVERSE
 };
 
+struct MotorConfiguration {
+    double gearRatio;
+};
+
 class DirectJointToMotorSpeedConverter {
 public:
-    DirectJointToMotorSpeedConverter(std::shared_ptr<Motor> outputMotor, MotorSpeedDirection direction);
+    DirectJointToMotorSpeedConverter(std::shared_ptr<Motor> outputMotor, MotorSpeedDirection direction, MotorConfiguration config);
     void operator()(double speed);
 
     DirectJointToMotorSpeedConverter(const DirectJointToMotorSpeedConverter &) = default;
@@ -20,9 +24,12 @@ public:
     auto operator=(DirectJointToMotorSpeedConverter &&) -> DirectJointToMotorSpeedConverter & = delete;
     ~DirectJointToMotorSpeedConverter() = default;
 
+    [[nodiscard]] auto getGearRatio() const -> double;
+
 private:
     const MotorSpeedDirection direction;
     const std::shared_ptr<Motor> outputMotor;
+    const double gearRatio;
 };
 
 #endif
