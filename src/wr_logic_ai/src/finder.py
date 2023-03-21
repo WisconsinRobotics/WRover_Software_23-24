@@ -10,7 +10,7 @@ import pickle
 ROVER_WIDTH = 1
 
 # TESTING
-scan_rviz_pub = rospy.Publisher('/scan_rviz', LaserScan, queue_size=10)
+scan_rviz_pub = rospy.Publisher('/scan_rviz', LaserScan, queue_size=10) # TODO : Remove ASAP, this layer should not depend on ROS directly
 
 def calculate_anti_window(d: float) -> int:
     return math.degrees(math.atan((ROVER_WIDTH / 2) / d))
@@ -77,6 +77,7 @@ def get_valley(
     pickle.dump(hist, output_file)
     output_file.close()
 
+    # TODO : The names here are a little unclear, maybe some comments/renames (F2)?
     obstacle_list = list() # format: [[left bound index , right bound index], [left bound index, right bound index]]
     one_obstacle = []
     for i in range(len(hist)):
@@ -118,6 +119,7 @@ def get_valley(
         else:
             obstacle_list.append([left_bound, right_bound])
         
+    # TODO : Maybe need to describe the algorithm, not clear if it's implemented
     window_list = list()
     # If the obstacle list is empty, the window is the entire 360 degree range
     if len(obstacle_list) == 0:
@@ -160,7 +162,7 @@ def checkWidth(sector: int, threshold: float, hist: List, angle_to_check: int, s
 def get_navigation_angle(
         target: int,
         threshold: float,
-        data,
+        data, # TODO : Type?
         smoothing_constant: float = 3) -> float:
 
     sector_angle = math.degrees(data.angle_increment)
