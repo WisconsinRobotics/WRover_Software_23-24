@@ -7,10 +7,10 @@ from copy import deepcopy
 
 import pickle
 
-ROVER_WIDTH = 2
+ROVER_WIDTH = 1
 
-def calculate_angle_to_check(t: float) -> int:
-    return math.degrees(math.atan((ROVER_WIDTH/2)/t))
+def calculate_anti_window(d: float) -> int:
+    return math.degrees(math.atan((ROVER_WIDTH / 2) / d))
     
 # Returns angular distance (in degrees) from sector parameter to target
 # Returns 0 if sector parameter contains target
@@ -60,6 +60,8 @@ def get_valley(
     global prevData
 
     hist = offset_lidar_data(gaussian_smooth.gaussian_filter1d(data.ranges, smoothing), sector_angle)
+    # For testing:
+    # hist = gaussian_smooth.gaussian_filter1d(data.ranges, smoothing)
 
     # Write the sectors data to an output file for logging
     output_file = open('sectors.data', 'wb')
@@ -75,36 +77,63 @@ def get_valley(
         if(hist[i] < threshold):  
             one_obstacle.append(i)
         elif (len(one_obstacle) != 0):
-            #Increase size of obstacle before adding it to the sets
-            minBound = math.pow(10, 1000)
-            maxBound = math.pow(-10, 1000)
-            for i in range(0, len(one_obstacle)/2):
-                #Increase size of obstacle before adding it to the sets
-                initAngleToIncrease = calculate_angle_to_check(hist[one_obstacle[i]])/sector_angle #pass in distance to target to caculate angle that allows robot to pass through
-                outitAngleToIncrease = calculate_angle_to_check(hist[one_obstacle[len(one_obstacle)-i-1]])/sector_angle
+            left_bound = len(hist)
+            right_bound = 0
+            for i in range(0, math.floor(len(one_obstacle) / 2)):
+                # Calculate size of anti-window and add to obstacle bounds
+                initAngleToIncrease = calculate_anti_window(hist[one_obstacle[i]]) / sector_angle #pass in distance to target to caculate angle that allows robot to pass through
+                outitAngleToIncrease = calculate_anti_window(hist[one_obstacle[len(one_obstacle) - i - 1]]) / sector_angle
                 
-                minBound = min(minBound, one_obstacle[i]-initAngleToIncrease)
-                maxBound = max(maxBound, one_obstacle[len(one_obstacle)-i-1]+outitAngleToIncrease)
+                # Update left and right bound
+                left_bound = max(min(left_bound, one_obstacle[i]-initAngleToIncrease), 0)
+                right_bound = min(max(right_bound, one_obstacle[len(one_obstacle) - i - 1]+outitAngleToIncrease), len(hist))
             
-            if obstacle_list[len(obstacle_list) - 1][1] >= minBound:
-                obstacle_list[len(obstacle_list) - 1][1] = maxBound
+
+            if len(obstacle_list) > 0 and obstacle_list[len(obstacle_list) - 1][1] >= left_bound:
+                obstacle_list[len(obstacle_list) - 1][1] = right_bound
             else:
-                obstacle_list.append([minBound, maxBound])
+                obstacle_list.append([left_bound, right_bound])
             one_obstacle.clear()
+            
+    if (len(one_obstacle) != 0):
+        left_bound = len(hist)
+        right_bound = 0
+        for i in range(0, math.floor(len(one_obstacle) / 2)):
+            # Calculate size of anti-window and add to obstacle bounds
+            initAngleToIncrease = calculate_anti_window(hist[one_obstacle[i]]) / sector_angle #pass in distance to target to caculate angle that allows robot to pass through
+            outitAngleToIncrease = calculate_anti_window(hist[one_obstacle[len(one_obstacle) - i - 1]]) / sector_angle
+                
+            # Update left and right bound
+            left_bound = max(min(left_bound, one_obstacle[i]-initAngleToIncrease), 0)
+            right_bound = min(max(right_bound, one_obstacle[len(one_obstacle) - i - 1]+outitAngleToIncrease), len(hist))
+            
+        if len(obstacle_list) > 0 and obstacle_list[len(obstacle_list) - 1][1] >= left_bound:
+            obstacle_list[len(obstacle_list) - 1][1] = right_bound
+        else:
+            obstacle_list.append([left_bound, right_bound])
         
     # At this point we make an inverse list of the obstacles to have a 2d list of all 
     # the places that we can drive through (our windows)
     window_list = list()
-    # If obstacle_list does not start on the left bound of lidar
-    if obstacle_list[0][0] > 0:
-        window_list.append(0, obstacle_list[0][0])
+    # If the obstacle list is empty, the window is the entire 360 degree range
+    if len(obstacle_list) == 0:
+        window_list.append([0, len(hist)])
+    else:
+        # If obstacle_list does not start on the left bound of lidar
+        if obstacle_list[0][0] > 0:
+            window_list.append([0, obstacle_list[0][0]])
 
-    for i in range(len(obstacle_list) - 1):
-        window_list.append([obstacle_list[i][1], obstacle_list[i + 1][0]])
-    
-    # If obstacle_list does not end on the right bound of lidar
-    if obstacle_list[len(obstacle_list) - 1][1] < len(hist):
-        window_list.append(obstacle_list[len(obstacle_list) - 1][1], len(hist))
+        for i in range(len(obstacle_list) - 1):
+            window_list.append([obstacle_list[i][1], obstacle_list[i + 1][0]])
+        
+        # If obstacle_list does not end on the right bound of lidar
+        if obstacle_list[len(obstacle_list) - 1][1] < len(hist):
+            window_list.append([obstacle_list[len(obstacle_list) - 1][1], len(hist)])
+
+    print("obstacle list:")
+    print(obstacle_list)
+    print("window list:")
+    print(window_list)
 
     # Initialize best valley array
     best_valley = []
@@ -136,6 +165,11 @@ def get_navigation_angle(
         threshold,
         data,
         smoothing_constant)
+
+    # If the rover is completely surrounded by obstacles, we want to turn hard right
+    if len(best_valley) == 0:
+        return 0
+    
     print("best valley: " + str(best_valley[0]) + " " + str(best_valley[1]))
 
     # Define the difference between 'wide' and 'narrow' valleys
