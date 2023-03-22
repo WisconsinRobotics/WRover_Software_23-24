@@ -7,14 +7,11 @@ from copy import deepcopy
 
 import pickle
 
-ROVER_WIDTH = 0
+ROVER_WIDTH = 1
 
-# TESTING
-scan_rviz_pub = rospy.Publisher('/scan_rviz', LaserScan, queue_size=10)
-
-def calculate_angle_to_check(t: float) -> int:
-    return math.degrees(math.acos((2*t*t - ROVER_WIDTH*ROVER_WIDTH)/(2*t*t)))/2
-
+def calculate_anti_window(d: float) -> int:
+    return math.degrees(math.atan((ROVER_WIDTH / 2) / d))
+    
 # Returns angular distance (in degrees) from sector parameter to target
 # Returns 0 if sector parameter contains target
 # TODO: Is there a cleaner way to write the logic?
@@ -35,12 +32,6 @@ def get_target_distance(sector_i: int, sector_f: int, target: int, sector_angle:
 def is_wide_valley(sector_i: int, sector_f: int, max_valley: int) -> bool:
     #TODO: Cleaner way to write this?
     return 1 + sector_f - sector_i > max_valley
-
-# Returns if valley is wide enough for rover to pass
-def check_valley_width(left_sector: int, right_sector: int, left_sector_dist: int, right_sector_dist: int, sector_angle: int) -> bool:
-    angle = (right_sector - left_sector) * sector_angle
-    valley_width = math.sqrt(left_sector_dist * left_sector_dist + right_sector_dist * right_sector_dist - 2 * left_sector_dist * right_sector_dist * math.cos(math.radians(angle)))
-    return (valley_width > ROVER_WIDTH)
 
 # Transforms the raw lidar data from compass coordinates (0 at north, clockwise) to math coordinates (0 at east, counterclockwise)
 def offset_lidar_data(data, sector_angle, is_rviz = False):
@@ -64,89 +55,105 @@ def get_valley(
         target: int,
         sector_angle: float,
         threshold: float,
-        data,
+        data: LaserScan,
         smoothing: float = 3) -> List[int]:
     global prevData
 
-    angle_to_check = calculate_angle_to_check(threshold)
-    sector_count = len(data.ranges)
-    rviz_data = deepcopy(data)
-    rviz_data.ranges = offset_lidar_data(data.ranges, sector_angle, True)
-    scan_rviz_pub.publish(rviz_data)
-
     hist = offset_lidar_data(gaussian_smooth.gaussian_filter1d(data.ranges, smoothing), sector_angle)
+    # For testing:
+    # hist = gaussian_smooth.gaussian_filter1d(data.ranges, smoothing)
 
     # Write the sectors data to an output file for logging
     output_file = open('sectors.data', 'wb')
     pickle.dump(hist, output_file)
     output_file.close()
 
-    # Initialize the target valley to the worst conditions so that it is immediately overriden
-    valley_start = None
-    best_valley = [0, len(hist) - 1]
-    # The furthest a valley could every be from is 360 degrees since this is a circle
-    best_distance = 361
-
-    # For each sector in the histogram...
+    # TODO : The names here are a little unclear, maybe some comments/renames (F2)?
+    # This chunk code will find obstacles, expand the edges of the obstacle for the length of half the robot (with some extra 
+    # for redundecy), and make a list of all the obstacles.
+    obstacle_list = list() # format: [[left bound index , right bound index], ...]
+    one_obstacle = [] #this will be an array of two values with the beginning and ending index of the obstacle.
     for i in range(len(hist)):
-        print(hist[len(hist) // 2])
-        # If the start of the vaprint(data.angle_increment)lley hasn't been set yet...
-        if valley_start is None:
-            # ...and the sector is below the threshold...
-            if hist[i] > threshold:
-                if(checkWidth(i ,threshold, hist, angle_to_check)):
-                    valley_start = i
-                # Start the valley at the current sector        
+        if(hist[i] < threshold):  
+            one_obstacle.append(i)
+        elif (len(one_obstacle) != 0):
+            left_bound = len(hist)
+            right_bound = 0
+            for i in range(0, math.floor(len(one_obstacle) / 2)):
+                # Calculate size of anti-window and add to obstacle bounds
+                initAngleToIncrease = calculate_anti_window(hist[one_obstacle[i]]) / sector_angle #pass in distance to target to caculate angle that allows robot to pass through
+                outitAngleToIncrease = calculate_anti_window(hist[one_obstacle[len(one_obstacle) - i - 1]]) / sector_angle
                 
-        # If the start of the valley has been set and the current sector is above the threshold...
-        elif checkWidth(i ,threshold, hist, angle_to_check):
-            # Get the effective distance in degrees between the target angle and the sector
-            dist = get_target_distance(valley_start, i, target, sector_angle) # dist is the degree from target to current sector
-            # If current valley is closer to the target than the current best valley...
-            if dist < best_distance and check_valley_width(valley_start, i, hist[valley_start], hist[i], sector_angle):
-                # Replace the best distance and best valley
-                best_distance = dist
-                best_valley = [valley_start, i]
+                # Update left and right bound
+                left_bound = max(min(left_bound, one_obstacle[i]-initAngleToIncrease), 0)
+                right_bound = min(max(right_bound, one_obstacle[len(one_obstacle) - i - 1]+outitAngleToIncrease), len(hist))
+            
 
-            # Since we are above the threshold limit, end the current valley
-            valley_start = None
-
-    # If a valley was started near the end of the vision range...
-    if valley_start is not None:
-        # Check the distance between the target angle and a valley starting at the recorded position and ending at the end of the view frame
-        dist = get_target_distance(
-            valley_start, sector_count, target, sector_angle)
+            if len(obstacle_list) > 0 and obstacle_list[len(obstacle_list) - 1][1] >= left_bound:
+                obstacle_list[len(obstacle_list) - 1][1] = right_bound
+            else:
+                obstacle_list.append([left_bound, right_bound])
+            one_obstacle.clear()
+            
+    if (len(one_obstacle) != 0):
+        left_bound = len(hist)
+        right_bound = 0
+        for i in range(0, math.floor(len(one_obstacle) / 2)):
+            # Calculate size of anti-window and add to obstacle bounds
+            initAngleToIncrease = calculate_anti_window(hist[one_obstacle[i]]) / sector_angle #pass in distance to target to caculate angle that allows robot to pass through
+            outitAngleToIncrease = calculate_anti_window(hist[one_obstacle[len(one_obstacle) - i - 1]]) / sector_angle
+                
+            # Update left and right bound
+            left_bound = max(min(left_bound, one_obstacle[i]-initAngleToIncrease), 0)
+            right_bound = min(max(right_bound, one_obstacle[len(one_obstacle) - i - 1]+outitAngleToIncrease), len(hist))
+            
+        if len(obstacle_list) > 0 and obstacle_list[len(obstacle_list) - 1][1] >= left_bound:
+            obstacle_list[len(obstacle_list) - 1][1] = right_bound
+        else:
+            obstacle_list.append([left_bound, right_bound])
         
-        # If that distance was better than the current best sector distance...
-        if dist < best_distance and check_valley_width(valley_start, i, hist[valley_start], hist[i], sector_angle):
-            # Set the best valley to the measured valley
-            # Replace the best distance and best valley
+    # At this point we make an inverse list of the obstacles to have a 2d list of all 
+    # the places that we can drive through (our windows)
+    window_list = list()
+    # If the obstacle list is empty, the window is the entire 360 degree range
+    if len(obstacle_list) == 0:
+        window_list.append([0, len(hist)])
+    else:
+        # If obstacle_list does not start on the left bound of lidar
+        if obstacle_list[0][0] > 0:
+            window_list.append([0, obstacle_list[0][0]])
+
+        for i in range(len(obstacle_list) - 1):
+            window_list.append([obstacle_list[i][1], obstacle_list[i + 1][0]])
+        
+        # If obstacle_list does not end on the right bound of lidar
+        if obstacle_list[len(obstacle_list) - 1][1] < len(hist):
+            window_list.append([obstacle_list[len(obstacle_list) - 1][1], len(hist)])
+
+    print("obstacle list:")
+    print(obstacle_list)
+    print("window list:")
+    print(window_list)
+
+    # Initialize best valley array
+    best_valley = []
+    # The furthest a valley could every be from is 360 degrees since this is a circle
+    best_distance = 361    
+    
+    # Checking for each window we can drive through, which window is closest to the target angle
+    # (distance is more like angle in this case)
+    for i in range(len(window_list)):
+        dist = get_target_distance(window_list[i][0], window_list[i][1], target, sector_angle)
+        if dist < best_distance:
+            best_valley = window_list[i]
             best_distance = dist
-            best_valley = [valley_start, i]
-
-    #Make calculations to check if best valley is enough for robot to go through
-    
-
-    # TODO: REVERSE DIRECTION IN CASE OF EMPTY VALLEY if best_valley is [None,
-    # None]:
-    # TODO: Implement play_navigation (drive in reverse w.r.t. log file)
-
-    # Return the sectors defining the best valley
-    
-    
     return best_valley
-
-def checkWidth(sector: int, threshold: float, hist: List, angle_to_check: int, sector_angle: float) -> bool:
-    for i in range(sector - angle_to_check / sector_angle, sector + angle_to_check / sector_angle):
-        if(hist[i % len(hist)] < threshold):
-            return True
-    return False
 
 # Gets the best angle to navigate to
 def get_navigation_angle(
         target: int,
         threshold: float,
-        data,
+        data: LaserScan, 
         smoothing_constant: float = 3) -> float:
 
     sector_angle = math.degrees(data.angle_increment)
@@ -158,6 +165,11 @@ def get_navigation_angle(
         threshold,
         data,
         smoothing_constant)
+
+    # If the rover is completely surrounded by obstacles, we want to turn hard right
+    if len(best_valley) == 0:
+        return 0
+    
     print("best valley: " + str(best_valley[0]) + " " + str(best_valley[1]))
 
     # Define the difference between 'wide' and 'narrow' valleys
