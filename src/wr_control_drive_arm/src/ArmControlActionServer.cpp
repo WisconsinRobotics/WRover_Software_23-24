@@ -161,8 +161,12 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
 }
 
 auto getEncoderConfigFromParams(const XmlRpcValue &params, const std::string &jointName) -> EncoderConfiguration {
-    return {.countsPerRotation = static_cast<int32_t>(params[jointName]["counts_per_rotation"]),
-            .offset = static_cast<int32_t>(params[jointName]["offset"])};
+    return {.countsPerRotation = static_cast<int32_t>(params[jointName]["encoder_parameters"]["counts_per_rotation"]),
+            .offset = static_cast<int32_t>(params[jointName]["encoder_parameters"]["offset"])};
+}
+
+auto getMotorConfigFromParams(const XmlRpcValue &params, const std::string &jointName) -> MotorConfiguration {
+    return {.gearRatio = static_cast<double>(params[jointName]["motor_configurations"]["gear_ratio"])};
 }
 
 void checkOverCurrentFaults(const std::vector<std::shared_ptr<Motor>> &motors){
@@ -195,8 +199,8 @@ auto main(int argc, char **argv) -> int {
     ros::NodeHandle n;
     ros::NodeHandle pn{"~"};
 
-    XmlRpcValue encParams;
-    pn.getParam("encoder_parameters", encParams);
+    XmlRpcValue armParams;
+    pn.getParam("arm_parameters", armParams);
 
     // Initialize all motors with their MoveIt name, WRoboclaw initialization,
     // and reference to the current node
@@ -226,43 +230,49 @@ auto main(int argc, char **argv) -> int {
     namedPositionMonitors.insert({"turntable_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
                                                             "aux0"s,
                                                             RoboclawChannel::A,
-                                                            getEncoderConfigFromParams(encParams, "turntable"),
+                                                            getEncoderConfigFromParams(armParams, "turntable"),
+                                                            getMotorConfigFromParams(armParams, "turntable"),
                                                             n)});
 
     namedPositionMonitors.insert({"shoulder_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
                                                             "aux0"s,
                                                             RoboclawChannel::B,
-                                                            getEncoderConfigFromParams(encParams, "shoulder"),
+                                                            getEncoderConfigFromParams(armParams, "shoulder"),
+                                                            getMotorConfigFromParams(armParams, "shoulder"),
                                                             n)});
 
     namedPositionMonitors.insert({"elbowPitch_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
                                                             "aux1"s,
                                                             RoboclawChannel::A,
-                                                            getEncoderConfigFromParams(encParams, "elbow"),
+                                                            getEncoderConfigFromParams(armParams, "elbow"),
+                                                            getMotorConfigFromParams(armParams, "elbow"),
                                                             n)});
 
     namedPositionMonitors.insert({"elbowRoll_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
                                                             "aux1"s,
                                                             RoboclawChannel::B,
-                                                            getEncoderConfigFromParams(encParams, "forearmRoll"),
+                                                            getEncoderConfigFromParams(armParams, "forearmRoll"),
+                                                            getMotorConfigFromParams(armParams, "forearmRoll"),
                                                             n)});
 
     namedPositionMonitors.insert({"wristPitch_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
                                                             "aux2"s,
                                                             RoboclawChannel::A,
-                                                            getEncoderConfigFromParams(encParams, "wristPitch"),
+                                                            getEncoderConfigFromParams(armParams, "wristPitch"),
+                                                            getMotorConfigFromParams(armParams, "wristPitch"),
                                                             n)});
 
     namedPositionMonitors.insert({"wristRoll_link", std::make_shared<SingleEncoderJointPositionMonitor>(
                                                             "aux2"s,
                                                             RoboclawChannel::B,
-                                                            getEncoderConfigFromParams(encParams, "wristRoll"),
+                                                            getEncoderConfigFromParams(armParams, "wristRoll"),
+                                                            getMotorConfigFromParams(armParams, "wristRoll"),
                                                             n)});
 
-    const auto turntableSpeedConverter{std::make_shared<DirectJointToMotorSpeedConverter>(turntableMotor, MotorSpeedDirection::REVERSE)};
-    const auto shoulderSpeedConverter{std::make_shared<DirectJointToMotorSpeedConverter>(shoulderMotor, MotorSpeedDirection::REVERSE)};
-    const auto elbowSpeedConverter{std::make_shared<DirectJointToMotorSpeedConverter>(elbowMotor, MotorSpeedDirection::REVERSE)};
-    const auto forearmRollSpeedConverter{std::make_shared<DirectJointToMotorSpeedConverter>(forearmRollMotor, MotorSpeedDirection::REVERSE)};
+    const auto turntableSpeedConverter{std::make_shared<DirectJointToMotorSpeedConverter>(turntableMotor, MotorSpeedDirection::REVERSE, getMotorConfigFromParams(armParams, "turntable"))};
+    const auto shoulderSpeedConverter{std::make_shared<DirectJointToMotorSpeedConverter>(shoulderMotor, MotorSpeedDirection::REVERSE, getMotorConfigFromParams(armParams, "shoulder"))};
+    const auto elbowSpeedConverter{std::make_shared<DirectJointToMotorSpeedConverter>(elbowMotor, MotorSpeedDirection::REVERSE, getMotorConfigFromParams(armParams, "elbow"))};
+    const auto forearmRollSpeedConverter{std::make_shared<DirectJointToMotorSpeedConverter>(forearmRollMotor, MotorSpeedDirection::REVERSE, getMotorConfigFromParams(armParams, "forearmRoll"))};
     const auto differentialSpeedConverter{std::make_shared<DifferentialJointToMotorSpeedConverter>(wristLeftMotor, wristRightMotor)};
 
     // Initialize all Joints

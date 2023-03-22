@@ -13,9 +13,13 @@ struct EncoderConfiguration {
     int32_t offset;
 };
 
+struct MotorConfiguration {
+    double gearRatio;
+};
+
 class SingleEncoderJointPositionMonitor {
 public:
-    SingleEncoderJointPositionMonitor(const std::string &controllerName, RoboclawChannel channel, EncoderConfiguration config, ros::NodeHandle node);
+    SingleEncoderJointPositionMonitor(const std::string &controllerName, RoboclawChannel channel, EncoderConfiguration eConfig, MotorConfiguration mConfig, ros::NodeHandle node);
     auto operator()() -> double;
 
     SingleEncoderJointPositionMonitor(const SingleEncoderJointPositionMonitor &);
@@ -25,6 +29,7 @@ public:
     ~SingleEncoderJointPositionMonitor() = default;
 
     [[nodiscard]] auto getCountsPerRotation() const -> int32_t;
+    [[nodiscard]] auto getGearRatio() const -> double;
 
 private:
     void onEncoderReceived(const std_msgs::UInt32::ConstPtr &msg);
@@ -33,6 +38,7 @@ private:
     std::shared_ptr<ros::Subscriber> encoderSubscriber;
     const int32_t countsPerRotation;
     const int32_t offset;
+    const double gearRatio;
 };
 
 #endif
