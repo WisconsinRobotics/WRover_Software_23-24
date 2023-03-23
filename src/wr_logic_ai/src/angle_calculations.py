@@ -4,7 +4,7 @@
 import math
 
 class AngleCalculations:
-    EARTH_RADIUS = 6378100
+    EARTH_RADIUS_METERS = 6378100
 
     #Declare a new AngleCalculations object with the current coordinates and target coordinates
     def __init__(self, clatitude: float, clongitude: float, glatitude: float, glongitude: float):
@@ -29,7 +29,7 @@ class AngleCalculations:
         deltaLatitude = math.radians(math.fabs(lat2 - lat1))
         verticalDistance = math.sin(deltaLatitude / 2.0)**2
         angularDistance = 2 * math.atan2(math.sqrt(verticalDistance), math.sqrt(1.0 - verticalDistance))
-        return angularDistance * self.EARTH_RADIUS
+        return angularDistance * self.EARTH_RADIUS_METERS
 
     # Get the Great Circle distance between two longitudes
     def longitude_to_distance(self, lon1: float, lon2: float) -> float:
@@ -40,7 +40,7 @@ class AngleCalculations:
         deltaLongitude = math.radians(math.fabs(lon2 - lon1))
         lateralDistance = math.cos(math.radians(self.cur_lat)) * math.cos(math.radians(self.tar_lat)) * math.sin(deltaLongitude / 2.0)**2
         angularDistance = 2 * math.atan2(math.sqrt(lateralDistance), math.sqrt(1.0 - lateralDistance))
-        return angularDistance * self.EARTH_RADIUS
+        return angularDistance * self.EARTH_RADIUS_METERS
 
     # Get the Great Circle distance between this object's current and target locations
     def get_distance(self) -> float:

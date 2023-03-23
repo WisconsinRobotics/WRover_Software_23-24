@@ -95,11 +95,14 @@ def run_real_data() -> None:
     rospy.Subscriber('/scan', LaserScan, display_data)
     
 if __name__ == '__main__':
+    is_mock = rospy.get_param('mock_mode', False)
     rospy.init_node('publish_fake_data', anonymous=False)
-    # Run fake data
-    # run_mock_data()
 
-    # Run lidar data
-    sub = rospy.Subscriber('/scan', LaserScan, display_data)
-    # run_real_data()
-    rospy.spin()
+    if is_mock:
+        # Run fake data
+        run_mock_data()
+    else:
+        # Run lidar data
+        sub = rospy.Subscriber('/scan', LaserScan, display_data)
+        # run_real_data()
+        rospy.spin()

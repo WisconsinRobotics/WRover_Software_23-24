@@ -35,6 +35,7 @@ rospy.init_node('nav_autonomous', anonymous=False)
 # Publisher
 drive_pub = rospy.Publisher(
     '/control/drive_system/cmd', DriveTrainCmd, queue_size=1)
+distance_pub = rospy.Publisher('/distance_to_target', float, queue_size=1)
 # TESING
 heading_pub = rospy.Publisher('/debug_heading', PoseStamped, queue_size=1)
 heading_msg = PoseStamped()
@@ -74,7 +75,7 @@ def update_heading_and_target(data) -> None:
     imu = AngleCalculations(data.cur_lat, data.cur_long,
                             data.tar_lat, data.tar_long)
     target_angle = imu.get_angle() % 360
-
+    distance_pub.publish(imu.get_distance())
     # TESTING
     print("Current heading: " + str(HEADING))
     print('Target angle: ' + str(target_angle))
