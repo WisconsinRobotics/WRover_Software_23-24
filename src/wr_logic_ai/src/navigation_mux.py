@@ -2,6 +2,7 @@ import rospy
 import topic_tools
 
 long_range_nav = rospy.get_param("long_range_output")
+rospy.init_node("navigation_multiplexer")
 
 def initialize():
     rospy.Subscriber('/distance_to_target', float, check_long_range_status)
