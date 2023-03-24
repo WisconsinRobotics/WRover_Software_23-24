@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 
 import math
+from enum import Enum
+
 import rospy
+from geometry_msgs.msg import PoseStamped
+
 from wr_logic_ai.msg import TargetMsg
 from wr_drive_msgs.msg import DriveTrainCmd
-from geometry_msgs.msg import PoseStamped
 
 # TODO : Document/rename variables, I'm not sure what all of these are for
 # Area in image at desired distance
@@ -57,6 +60,12 @@ CACHE_EXPIRY_SECS = 1
 target_cache = None
 
 
+class ShortrangeAIState(Enum):
+    NO_TARGET = 1,
+    ONE_TARGET = 2,
+    TWO_TARGETS = 3
+
+
 class TargetCache:
     def __init__(self, timestamp: float, msg: TargetMsg):
         self.timestamp = timestamp
@@ -85,13 +94,31 @@ def target_callback(msg: TargetMsg):
             rviz_zero.publish(zero_msg)
             rviz_pub.publish(pose_msg)
     else:
+        # TODO search pattern
         drive(0, 0)
 
 
-def main():
-    rospy.init_node('vision_navigation', anonymous=True)
-    rospy.Subscriber(vision_topic, TargetMsg, target_callback)
+def gate_callback(msg: TargetMsg):
+    # TODO handle two target
+    global target_cache
+    if msg.valid:
+        pass
+    else:
+        # TODO search pattern
+        drive(0, 0)
 
+
+def main(state = ShortrangeAIState.ONE_TARGET):
+    rospy.init_node('vision_navigation', anonymous=True)
+
+    if state == ShortrangeAIState.NO_TARGET:
+        # TODO signal at coordinates
+        pass
+    elif state == ShortrangeAIState.ONE_TARGET:
+        rospy.Subscriber(vision_topic, TargetMsg, target_callback)
+    elif state == ShortrangeAIState.TWO_TARGETS:
+        rospy.Subscriber(vision_topic, TargetMsg, gate_callback)
+    
     rospy.spin()
 
 

@@ -11,7 +11,7 @@ CAMERA_HEIGHT = 720
 vision_topic = rospy.get_param('vision_topic')
 
 
-def process_corners(id: int, corners) -> TargetMsg:
+def process_corners(target_id: int, corners) -> TargetMsg:
     side_lengths = []
     min_x = corners[0][0]
     max_x = corners[0][0]
@@ -21,7 +21,7 @@ def process_corners(id: int, corners) -> TargetMsg:
         max_x = max(max_x, corners[i][0])
     x_offset = (min_x + max_x - CAMERA_WIDTH) / 2
     area_estimate = max(side_lengths) ** 2
-    return TargetMsg(id, x_offset, area_estimate, True)
+    return TargetMsg(target_id, x_offset, area_estimate, True)
 
 
 def main():
@@ -46,10 +46,10 @@ def main():
         if not ret:
             rospy.logerr('Failed to read frame')
         else:
-            (corners, ids, _) = aruco_lib.dettect()
+            (corners, ids, _) = aruco_lib.detect_aruco(frame)
             if ids is not None:
-                for i, id in enumerate(ids):
-                    pub.publish(process_corners(id, corners[i][0]))
+                for i, target_id in enumerate(ids):
+                    pub.publish(process_corners(target_id, corners[i][0]))
             else:
                 pub.publish(TargetMsg(0, 0, 0, False))
         rate.sleep()
