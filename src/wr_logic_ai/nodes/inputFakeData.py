@@ -97,10 +97,7 @@ def run_real_data() -> None:
 if __name__ == '__main__':
     rospy.init_node('publish_fake_data', anonymous=False)
 
-    print(rospy.get_param('obstacle_avoidance/run_in_mock', False))
-    print(type(rospy.get_param('obstacle_avoidance/run_in_mock', False)))
-
-    if rospy.get_param('obstacle_avoidance/run_in_mock', False):
+    if rospy.get_param('~run_in_mock', False):
         # Run fake data
         run_mock_data()
     else:
