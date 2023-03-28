@@ -11,7 +11,7 @@ from sensor_msgs.msg import LaserScan
 from wr_logic_ai.msg import NavigationMsg
 from wr_drive_msgs.msg import DriveTrainCmd
 from geometry_msgs.msg import PoseStamped
-from std_msgs.msg import Float32
+from std_msgs.msg import Bool
 
 import signal
 import sys
@@ -20,7 +20,8 @@ import numpy as np
 
 
 # Navigation parameters
-LIDAR_THRESH_DISTANCE = 5  # meters
+LIDAR_THRESH_DISTANCE = 5  # distance before obstacle avoidance logics is triggered (in meters)
+NAV_THRESH_DISTANCE = 0.5 # distance before rover believes it has reached the target (in meters)
 
 # initialize target angle to move forward
 target_angle = 90
@@ -29,6 +30,8 @@ smoothing_constant = rospy.get_param("smoothing_constant", 3)
 # Get the speed multiplier of the current runtime for the obstacle_avoidance
 # 0.2 is bugged
 speed_factor = rospy.get_param("speed_factor", 0.3)
+is_active = False
+movement_complete = False
 
 # Initialize node
 rospy.init_node('nav_autonomous', anonymous=False)
@@ -36,7 +39,7 @@ rospy.init_node('nav_autonomous', anonymous=False)
 # Publisher
 drive_pub = rospy.Publisher(
     '/control/drive_system/cmd', DriveTrainCmd, queue_size=1)
-distance_pub = rospy.Publisher('/distance_to_target', Float32, queue_size=1)
+complete_state_pub = rospy.Publisher('/is_LR_complete', Bool, queue_size=1)
 # TESING
 heading_pub = rospy.Publisher('/debug_heading', PoseStamped, queue_size=1)
 heading_msg = PoseStamped()
@@ -59,6 +62,8 @@ def initialize() -> None:
     # Subscribe to lidar data
     rospy.Subscriber('/scan', LaserScan, update_navigation)
 
+    rospy.Subscriber('/set_LR_active', Bool, update_active)
+
     rospy.spin()
 
 
@@ -68,7 +73,7 @@ HEADING = 0
 
 def update_heading_and_target(data) -> None:
     global HEADING
-    global target_angle
+    global movement_complete
 
     HEADING = data.heading
 
@@ -76,7 +81,7 @@ def update_heading_and_target(data) -> None:
     imu = AngleCalculations(data.cur_lat, data.cur_long,
                             data.tar_lat, data.tar_long)
     target_angle = imu.get_angle() % 360
-    distance_pub.publish(Float32(imu.get_distance()))
+    movement_complete = imu.get_distance() < NAV_THRESH_DISTANCE
     # TESTING
     print("Current heading: " + str(HEADING))
     print('Target angle: ' + str(target_angle))
@@ -87,9 +92,6 @@ def update_heading_and_target(data) -> None:
 
 def update_navigation(data) -> None:
     global HEADING  # , t
-    global frameCount
-    global smoothing_constant
-    global speed_factor
 
     data_avg = sum(cur_range for cur_range in data.ranges) / len(data.ranges)
     #print("Data Avg: " + str(data_avg))
@@ -121,7 +123,11 @@ def update_navigation(data) -> None:
         # Publish the DriveTrainCmd to the topic
         #print("Left Value: " + str(msg.left_value))
         #print("Right Value: " + str(msg.right_value))
-        drive_pub.publish(msg)
+        if movement_complete:
+            complete_state_pub.publish(True)
+        else:
+            complete_state_pub.publish(False)
+            drive_pub.publish(msg)
 
         # TESTING
         heading_msg.header.seq = frameCount
@@ -131,6 +137,9 @@ def update_navigation(data) -> None:
         heading_msg.pose.orientation.w = math.cos(math.radians(result) / 2)
         heading_pub.publish(heading_msg)
 
+
+def update_active() -> None:
+    pass
 
 # If this file was executed...
 if __name__ == '__main__':

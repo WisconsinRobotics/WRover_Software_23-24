@@ -26,3 +26,5 @@ src/arm/lib
 # potential clang excludes
 compile_commands.json
 .cache
+
+*.png
