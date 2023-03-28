@@ -16,7 +16,7 @@ def check_LR_status(completed):
 
 def check_SR_status(completed):
     if completed == True:
-        mux_pub.publish(4) #Short range finished
+        mux_pub.publish(4   ) #Short range finished
     else:
         mux_pub.publish(2) #Short range is not finished
         
