@@ -1,116 +1,29 @@
-# StateMachine/mousetrap2/MouseTrap2Test.py
-# A better mousetrap using tables
-import string, sys
-sys.path += ['../stateMachine', '../mouse']
-import rospy
-from state_list import StateAction
-
-# StateMachine/State.py
-# A State has an operation, and can be moved
-# into the next State given an Input:
-
-def initialize():
-    rospy.Subscriber('/is_LR_complete', bool, check_LR_status)
-    rospy.Subscriber('/is_SR_complete', bool, check_SR_status)
-
-class State:
-    def run(self):
-        assert 0, "run not implemented"
-    def next(self, input):
-        assert 0, "next not implemented"
-
-
-# StateMachine/StateMachine.py
-# Takes a list of Inputs to move from State to
-# State using a template method.
+from navigation_events import *
+from navigation_states import *
 
 class StateMachine:
-    def __init__(self, initialState):
-        self.currentState = initialState
-        self.currentState.run()
-    # Template method:
-    def runAll(self, inputs):
-        for i in inputs:
-            print(i)
-            self.currentState = self.currentState.next(i)
-            self.currentState.run()
+    def __init__(self) -> None:
+        self.transitions = {}
+        self.current_state = None
 
+    def start(self, init_state: State) -> None:
+        self.current_state = init_state
+        self.current_state.enter()
 
-class StateT(State):
-    def __init__(self):
-        self.transitions = None
-    def next(self, input):
-        if self.transitions.has_key(input):
-            return self.transitions[input]
+    def process_event(self, event: Event) -> None:
+        if event in self.transitions[type(self.current_state)]:
+            self.current_state.exit()
+            self.current_state = self.transitions[type(self.current_state)][event]()
+            self.current_state.enter()
+
+    def add_transition(self, current_state: State, transition_event: Event, future_state: State) -> None:
+        if(current_state in self.transitions):
+            #enter new inner transition into the state
+            self.transitions[current_state][transition_event] = future_state
         else:
-            raise "Input not supported for current state"
+            #Make new dictionary to add to values of outer state
+            innerTransition = {}
+            innerTransition[transition_event] = future_state
 
-class Init(StateT):
-    def run(self):
-        pass
-    def next(self,input):
-        if not self.transitions:
-            Action.luring
-
-
-class check_LR_status(StateT):
-    def run(self):
-        if completed == True:
-            pass
-        else:
-            mux_pub.publish(2) #Short range is not finished
-    def next(self, input):
-        # Lazy initialization:
-        if not self.transitions:
-            self.transitions = {
-              MouseAction.appears : MouseTrap.luring
-            }
-        return StateT.next(self, input)
-
-class Luring(StateT):
-    def run(self):
-        print("Luring: Presenting Cheese, door open")
-    def next(self, input):
-        # Lazy initialization:
-        if not self.transitions:
-            self.transitions = {
-              MouseAction.enters : MouseTrap.trapping,
-              MouseAction.runsAway : MouseTrap.waiting
-            }
-        return StateT.next(self, input)
-
-class Trapping(StateT):
-    def run(self):
-        print("Trapping: Closing door")
-    def next(self, input):
-        # Lazy initialization:
-        if not self.transitions:
-            self.transitions = {
-              MouseAction.escapes : MouseTrap.waiting,
-              MouseAction.trapped : MouseTrap.holding
-            }
-        return StateT.next(self, input)
-
-class Holding(StateT):
-    def run(self):
-        print("Holding: Mouse caught")
-    def next(self, input):
-        # Lazy initialization:
-        if not self.transitions:
-            self.transitions = {
-              MouseAction.removed : MouseTrap.waiting
-            }
-        return StateT.next(self, input)
-
-class Action(StateMachine):
-    def __init__(self):
-        # Initial state
-        StateMachine.__init__(self, MouseTrap.waiting)
-
-# Static variable initialization:
-
-
-moves = map(string.strip,
-  open("../mouse/MouseMoves.txt").readlines())
-mouseMoves = map(MouseAction, moves)
-MouseTrap().runAll(mouseMoves)
+            #Add first transition to state
+            self.transitions[current_state] = innerTransition
