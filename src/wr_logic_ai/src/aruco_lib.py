@@ -3,7 +3,8 @@ import cv2 as cv
 
 ARUCO_DICT = cv.aruco.getPredefinedDictionary(cv.aruco.DICT_4X4_50)
 ARUCO_DETECTOR = cv.aruco.ArucoDetector(ARUCO_DICT)
-
+SIDE_LENGTH_1FT = 675
+FT_TO_M = 0.3048
 
 def detect_aruco(img: np.ndarray):
     return ARUCO_DETECTOR.detectMarkers(img)
@@ -56,4 +57,13 @@ def detect_contours(img: np.ndarray):
 
     contours = find_contours(img_masks_combined)
     return contours
-    
+
+
+def estimate_distance_ft(corners: np.ndarray):
+    side_lengths = [ np.linalg.norm(corners[i-1] - corners[i]) for i in range(len(corners))]
+    return SIDE_LENGTH_1FT / max(side_lengths)
+
+
+def estimate_distance_m(corners: np.ndarray):
+    return FT_TO_M * estimate_distance_ft(corners)
+ 

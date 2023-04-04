@@ -10,8 +10,8 @@ from wr_logic_ai.msg import TargetMsg
 from wr_drive_msgs.msg import DriveTrainCmd
 
 # TODO : Document/rename variables, I'm not sure what all of these are for
-# Area in image at desired distance
-TARGET_AREA = 500 ** 2
+# distance from target to stop at (in meters)
+STOP_DISTANCE_M = 3
 # Base speed for robot to move at
 SPEED = 0.1
 # Factor to for applying turn
@@ -20,6 +20,7 @@ kP = 0.001
 # TODO : Maybe use ROS params/remaps (low priority, can do later)
 vision_topic = rospy.get_param('vision_topic')
 
+# TODO : Add code for mux
 drivetrain_topic = '/control/drive_system/cmd'
 drivetrain_pub = rospy.Publisher(drivetrain_topic, DriveTrainCmd, queue_size=1)
 
@@ -58,6 +59,7 @@ if debug:
 
 CACHE_EXPIRY_SECS = 1
 target_cache = None
+two_target_cache = {}
 
 
 class ShortrangeAIState(Enum):
@@ -81,7 +83,7 @@ def target_callback(msg: TargetMsg):
     if msg.valid:
         target_cache = TargetCache(rospy.get_time(), msg)
     if target_cache is not None and rospy.get_time() - target_cache.timestamp < CACHE_EXPIRY_SECS:
-        if target_cache.msg.area > TARGET_AREA:
+        if target_cache.msg.distance_estimate < STOP_DISTANCE_M:
             rospy.loginfo(f'Reached target {target_cache.msg.id}')
             drive(0, 0)
             return
@@ -99,10 +101,18 @@ def target_callback(msg: TargetMsg):
 
 
 def gate_callback(msg: TargetMsg):
-    # TODO handle two target
-    global target_cache
+    # TODO handle two targets
+    global two_target_cache
     if msg.valid:
-        pass
+        two_target_cache[msg.id] = TargetCache(rospy.get_time(), msg)
+    if two_target_cache:
+        if len(two_target_cache) == 2:
+            # both targets found
+            # estimate when gate is reached
+            pass
+        else:
+            # only one target found
+            pass
     else:
         # TODO search pattern
         drive(0, 0)
