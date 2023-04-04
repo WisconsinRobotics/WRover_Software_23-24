@@ -113,22 +113,36 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
             return;
         }
 
+        // Copy of the velocities received from MoveIt
         std::vector<double> velocityCopies{currTargetPosition.velocities};
 
         for (uint32_t i = 0; i < goal->trajectory.joint_names.size(); ++i) {
-            velocityCopies.at(i) *= abs(namedPositionMonitors.at(goal->trajectory.joint_names.at(i))->getCountsPerRotation());
+
+            // The joint that is currently being scaled
+            auto currJoint = goal->trajectory.joint_names.at(i);
+
+            // The position monitor whose velocity is currently being scaled
+            auto currPosMtr = namedPositionMonitors.at(currJoint);
+
+            // Scale by counts per rotation and gear ratio
+            velocityCopies.at(i) *= abs(currPosMtr->getCountsPerRotation()*currPosMtr->getGearRatio());
         }
 
+        // Get the maximum velocity assigned to any joint
         const double VELOCITY_MAX = abs(*std::max_element(
             velocityCopies.begin(),
             velocityCopies.end(),
             [](double lhs, double rhs) -> bool { return abs(lhs) < abs(rhs); }));
 
         for (uint32_t i = 0; i < goal->trajectory.joint_names.size(); ++i) {
+            // Set joint to hold speed in case the greatest velocity comes through as 0
             auto jointVelocity{JOINT_SAFETY_HOLD_SPEED};
+
+            // Scale all velocities by the safety max speed with respect to the maximum velocity given by MoveIt
             if (VELOCITY_MAX != 0)
                 jointVelocity = velocityCopies.at(i) / VELOCITY_MAX * JOINT_SAFETY_MAX_SPEED;
 
+            // Set the joint's velocity
             namedJointMap.at(goal->trajectory.joint_names.at(i))->setTarget(currTargetPosition.positions.at(i), jointVelocity);
         }
     }
