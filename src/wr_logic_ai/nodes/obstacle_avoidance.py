@@ -31,7 +31,7 @@ smoothing_constant = rospy.get_param("smoothing_constant", 3)
 # 0.2 is bugged
 speed_factor = rospy.get_param("speed_factor", 0.3)
 is_active = False
-movement_complete = False
+movement_complete = None
 
 # Initialize node
 rospy.init_node('nav_autonomous', anonymous=False)
@@ -39,7 +39,9 @@ rospy.init_node('nav_autonomous', anonymous=False)
 # Publisher
 drive_pub = rospy.Publisher(
     '/control/drive_system/cmd', DriveTrainCmd, queue_size=1)
-complete_state_pub = rospy.Publisher('/is_LR_complete', Bool, queue_size=1)
+complete_state_pub = rospy.Publisher('/is_complete', Bool, queue_size=1)
+state_machine_pub = rospy.Publisher('/state_machine', str, queue_size = 1)
+
 # TESING
 heading_pub = rospy.Publisher('/debug_heading', PoseStamped, queue_size=1)
 heading_msg = PoseStamped()
@@ -62,8 +64,6 @@ def initialize() -> None:
     # Subscribe to lidar data
     rospy.Subscriber('/scan', LaserScan, update_navigation)
 
-    rospy.Subscriber('/set_LR_active', Bool, update_active)
-
     rospy.spin()
 
 
@@ -81,7 +81,14 @@ def update_heading_and_target(data) -> None:
     imu = AngleCalculations(data.cur_lat, data.cur_long,
                             data.tar_lat, data.tar_long)
     target_angle = imu.get_angle() % 360
+    last_movement_complete = movement_complete
     movement_complete = imu.get_distance() < NAV_THRESH_DISTANCE
+    if last_movement_complete != movement_complete:
+        if(movement_complete):
+            #Publish success to state machine
+            state_machine_pub.publish("evSuccess")
+        else:
+            state_machine_pub.publish("evNotComplete")
     # TESTING
     print("Current heading: " + str(HEADING))
     print('Target angle: ' + str(target_angle))
@@ -137,9 +144,6 @@ def update_navigation(data) -> None:
         heading_msg.pose.orientation.w = math.cos(math.radians(result) / 2)
         heading_pub.publish(heading_msg)
 
-
-def update_active() -> None:
-    pass
 
 # If this file was executed...
 if __name__ == '__main__':
