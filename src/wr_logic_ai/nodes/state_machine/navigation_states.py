@@ -47,8 +47,8 @@ class stLongRange(State):
         super().__init__()
 
     def enter(self) -> None:
-        self.mgr.next_line()
-        if self._mgr is None:
+        stLongRange._mgr.next_line()
+        if stLongRange._mgr is None:
             raise ValueError
         else:
             self.timer = rospy.Timer(rospy.Duration(0.2), self.publish)
@@ -80,7 +80,7 @@ class stError(State):
         pass
 
     def exit(self) -> None:
-        self.mgr.previous_line()
+        stError.mgr.previous_line()
     
     @staticmethod
     def set_coordinate_manager(mgr) -> None:
