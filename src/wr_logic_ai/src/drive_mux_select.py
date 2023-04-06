@@ -1,20 +1,25 @@
 #!/usr/bin/env python3
 import rospy
-from std_msgs.msg import String 
+from wr_logic_ai.msg import NavigationState
+from std_msgs.msg import String
+from typing import Dict
+from topic_tools.srv import MuxSelect
 
-def talker():
-    pub = rospy.Publisher('chatter', String, queue_size=10)
-    rospy.init_node('talker', anonymous=True)
-    rate = rospy.Rate(10)
-    while not rospy.is_shutdown():
-        hello_str = "hello world %s" % rospy.get_time()
-        rospy.loginfo(hello_str)
-        pub.publish(hello_str)
-        rate.sleep()
+
+def state_call_back(message: NavigationState, conversion_table: Dict[int, str], mux_name : str):
+    rospy.wait_for_service(f"/{mux_name}/select")
+    try:
+        proxy = rospy.ServiceProxy(f"/{mux_name}/select", MuxSelect)
+        proxy(conversion_table[message.state])
+    except rospy.ServiceException as e:
+        rospy.logerr(e)
 
 if __name__ == '__main__':
-    try:
-        talker()
-    except rospy.ROSInterruptException:
-        pass
-    
+    rospy.init_node('mux_select_node')
+    conversion = {
+        NavigationState.NAVIGATION_STATE_LONG_RANGE: rospy.get_param("~long_range_topic_name"),
+        NavigationState.NAVIGATION_STATE_SHORT_RANGE: rospy.get_param("~short_range_topic_name")
+    }
+    sub = rospy.Subscriber("/navigation_state",
+                           NavigationState, lambda msg: state_call_back(msg, conversion, rospy.get_param("~mux_name")))
+    rospy.spin()
