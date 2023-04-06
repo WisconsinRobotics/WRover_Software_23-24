@@ -39,8 +39,7 @@ rospy.init_node('nav_autonomous', anonymous=False)
 # Publisher
 drive_pub = rospy.Publisher(
     '/control/drive_system/cmd', DriveTrainCmd, queue_size=1)
-complete_state_pub = rospy.Publisher('/is_complete', Bool, queue_size=1)
-state_machine_pub = rospy.Publisher('/state_machine', str, queue_size = 1)
+state_machine_pub = rospy.Publisher('/state_machine', str , queue_size = 1)
 
 # TESING
 heading_pub = rospy.Publisher('/debug_heading', PoseStamped, queue_size=1)

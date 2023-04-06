@@ -1,4 +1,5 @@
 from coordinate_manager import Coordinate_manager
+from state_machine import StateMachine
 from wr_logic_ai.msg import TargetMsg
 import rospy
 
@@ -16,15 +17,17 @@ class State:
 
 class stInit(State):   
     _mgr : Coordinate_manager = None
+    _stm : StateMachine = None
 
     def __init__(self) -> None:
         super().__init__()
 
     def enter(self) -> None:
-        if self.mgr is None:
+        if stInit._mgr is None or stInit._stm is None:
             raise ValueError
         else:
-            self.mgr.read_coordinates_file()
+            stInit._mgr.read_coordinates_file()
+            stInit._stm.process_event()
 
     def exit(self) -> None:
         pass
@@ -33,6 +36,10 @@ class stInit(State):
     def set_coordinate_manager(mgr) -> None:
         stInit._mgr = mgr
 
+    @staticmethod
+    def set_state_machine(stm) -> None:
+        stInit._stm = stm
+
 class stLongRange(State):
     _mgr : Coordinate_manager = None
 
@@ -40,6 +47,7 @@ class stLongRange(State):
         super().__init__()
 
     def enter(self) -> None:
+        self.mgr.next_line()
         if self._mgr is None:
             raise ValueError
         else:
@@ -54,7 +62,7 @@ class stLongRange(State):
         target_coords.target_long = stLongRange._mgr.get_coordinate['long']
         target_coords.target_type = stLongRange._mgr.get_coordinate['target_type']
         self.pub_nav.publish(target_coords)
-        # TODO: Publish to topic /navigation_state and publish to /nav_data
+        # TODO: Publish to topic /navigation_state
 
     def exit(self) -> None:
         self.timer.shutdown()
@@ -84,10 +92,27 @@ class stLR_Recovery(State):
         super().__init__()
 
     def enter(self) -> None:
-        pass
+        if self._mgr is None:
+            raise ValueError
+        else:
+            self.timer = rospy.Timer(rospy.Duration(0.2), self.publish)
+            self.pub_nav = rospy.Publisher('/target_coord', TargetMsg, queue_size=1)
+            rospy.spin()
+       
+    def publish(self):    
+        # Publish to obstacle avoidance with the target coordinates
+        target_coords = TargetMsg()
+        target_coords.target_lat = stLongRange._mgr.get_coordinate['lat']
+        target_coords.target_long = stLongRange._mgr.get_coordinate['long']
+        target_coords.target_type = stLongRange._mgr.get_coordinate['target_type']
+        self.pub_nav.publish(target_coords)
+        # TODO: Publish to topic /navigation_state
+
 
     def exit(self) -> None:
-        pass
+       pass
+    
+            
     
     @staticmethod
     def set_coordinate_manager(mgr) -> None:
@@ -112,8 +137,8 @@ class stWaypointSuccess(State):
         pass
 
     def exit(self) -> None:
-        self.mgr.next_line()
-        
+        pass
+            
     @staticmethod
     def set_coordinate_manager(mgr) -> None:
         stWaypointSuccess._mgr = mgr
