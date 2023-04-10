@@ -7,6 +7,7 @@ claws:
     enc_left:
         enabled: true
         max_speed: 100 # TODO probably don't actually need all these encoders
+        offset: 500
     enc_right:
         enabled: true
         max_speed: 100
@@ -18,6 +19,7 @@ claws:
     enc_left:
         enabled: true
         max_speed: 100
+        offset: 500
     enc_right:
         enabled: true
         max_speed: 100
@@ -29,6 +31,7 @@ claws:
     enc_left:
         enabled: true
         max_speed: 100
+        offset: 500
     enc_right:
         enabled: true
         max_speed: 100
@@ -40,6 +43,7 @@ claws:
     enc_left:
         enabled: true
         max_speed: 100
+        offset: 500
     enc_right:
         enabled: true
         max_speed: 300000000

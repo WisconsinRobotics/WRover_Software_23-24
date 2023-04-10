@@ -58,8 +58,12 @@ void publishJointStates(const ros::TimerEvent &event) {
 }
 
 auto getEncoderConfigFromParams(const XmlRpcValue &params, const std::string &jointName) -> EncoderConfiguration {
-    return {.countsPerRotation = static_cast<int32_t>(params[jointName]["counts_per_rotation"]),
-            .offset = static_cast<int32_t>(params[jointName]["offset"])};
+    return {.countsPerRotation = static_cast<int32_t>(params[jointName]["encoder_parameters"]["counts_per_rotation"]),
+            .offset = static_cast<int32_t>(params[jointName]["encoder_parameters"]["offset"])};
+}
+
+auto getMotorConfigFromParams(const XmlRpcValue &params, const std::string &jointName) -> MotorConfiguration {
+    return {.gearRatio = static_cast<double>(params[jointName]["motor_configurations"]["gear_ratio"])};
 }
 
 /**
@@ -78,43 +82,49 @@ auto main(int argc, char **argv) -> int {
     ros::NodeHandle n;
     ros::NodeHandle pn{"~"};
 
-    XmlRpcValue encParams;
-    pn.getParam("encoder_parameters", encParams);
+    XmlRpcValue armParams;
+    pn.getParam("arm_parameters", armParams);
 
     namedJointPositionMonitors.try_emplace("elbowPitch_joint",
 
                                            "aux1",
                                            RoboclawChannel::A,
-                                           getEncoderConfigFromParams(encParams, "elbow"),
+                                           getEncoderConfigFromParams(armParams, "elbow"),
+                                           getMotorConfigFromParams(armParams, "elbow"),
                                            n);
     namedJointPositionMonitors.try_emplace("elbowRoll_joint",
 
                                            "aux1",
                                            RoboclawChannel::B,
-                                           getEncoderConfigFromParams(encParams, "forearmRoll"),
+                                           getEncoderConfigFromParams(armParams, "forearmRoll"),
+                                           getMotorConfigFromParams(armParams, "forearmRoll"),
                                            n);
     namedJointPositionMonitors.try_emplace("shoulder_joint",
 
                                            "aux0",
                                            RoboclawChannel::B,
-                                           getEncoderConfigFromParams(encParams, "shoulder"),
+                                           getEncoderConfigFromParams(armParams, "shoulder"),
+                                           getMotorConfigFromParams(armParams, "shoulder"),
                                            n);
     namedJointPositionMonitors.try_emplace("turntable_joint",
 
                                            "aux0",
                                            RoboclawChannel::A,
-                                           getEncoderConfigFromParams(encParams, "turntable"),
+                                           getEncoderConfigFromParams(armParams, "turntable"),
+                                           getMotorConfigFromParams(armParams, "turntable"),
                                            n);
     namedJointPositionMonitors.try_emplace("wristPitch_joint",
 
                                            "aux2",
                                            RoboclawChannel::A,
-                                           getEncoderConfigFromParams(encParams, "wristPitch"),
+                                           getEncoderConfigFromParams(armParams, "wristPitch"),
+                                           getMotorConfigFromParams(armParams, "wristPitch"),
                                            n);
     namedJointPositionMonitors.try_emplace("wristRoll_link",
                                            "aux2",
                                            RoboclawChannel::B,
-                                           getEncoderConfigFromParams(encParams, "wristRoll"),
+                                           getEncoderConfigFromParams(armParams, "wristRoll"),
+                                           getMotorConfigFromParams(armParams, "wristRoll"),
                                            n);
 
     // Initialize the Joint State Data Publisher
