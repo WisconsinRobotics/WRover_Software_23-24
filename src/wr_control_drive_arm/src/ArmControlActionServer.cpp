@@ -58,9 +58,15 @@ constexpr float TIMER_CALLBACK_DURATION{1.0 / 50.0};
 std::unordered_map<std::string, std::unique_ptr<Joint>> namedJointMap;
 
 /**
+ * @brief Defines space for all joint position monitor references
+ */
+std::unordered_map<std::string, std::shared_ptr<SingleEncoderJointPositionMonitor>> namedPositionMonitors;
+
+/**
  * @brief Simplify the SimpleActionServer reference name
  */
 using Server = actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction>;
+
 /**
  * @brief The service server for enabling IK
  */
