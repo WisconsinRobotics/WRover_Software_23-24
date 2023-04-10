@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <cmath>
 #include <control_msgs/FollowJointTrajectoryAction.h>
 #include <csignal>
 #include <memory>
@@ -133,8 +134,8 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
 
         // Get the maximum velocity assigned to any joint
         const double VELOCITY_MAX = abs(*std::max_element(
-            currTargetPosition.velocities.begin(),
-            currTargetPosition.velocities.end(),
+            velocityCopies.begin(),
+            velocityCopies.end(),
             [](double lhs, double rhs) -> bool { return abs(lhs) < abs(rhs); }));
 
         for (uint32_t i = 0; i < goal->trajectory.joint_names.size(); ++i) {
@@ -143,7 +144,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
 
             // Scale all velocities by the safety max speed with respect to the maximum velocity given by MoveIt
             if (VELOCITY_MAX != 0)
-                jointVelocity = currTargetPosition.velocities.at(i) / VELOCITY_MAX * JOINT_SAFETY_MAX_SPEED;
+                jointVelocity = velocityCopies.at(i) / VELOCITY_MAX * JOINT_SAFETY_MAX_SPEED;
 
             // Set the joint's velocity
             namedJointMap.at(goal->trajectory.joint_names.at(i))->setTarget(currTargetPosition.positions.at(i), jointVelocity);
@@ -186,7 +187,7 @@ auto getMotorConfigFromParams(const XmlRpcValue &params, const std::string &join
     return {.gearRatio = static_cast<double>(params[jointName]["motor_configurations"]["gear_ratio"])};
 }
 
-void checkOverCurrentFaults(std::vector<std::shared_ptr<Motor>> &motors){
+void checkOverCurrentFaults(const std::vector<std::shared_ptr<Motor>> &motors){
     for(const auto& motor : motors){
         if (motor->isOverCurrent()) {
             IKEnabled = false;
@@ -298,32 +299,32 @@ auto main(int argc, char **argv) -> int {
 
     namedJointMap.insert({"turntable_joint", std::make_unique<Joint>(
                                                  "turntable"s,
-                                                 [turntablePositionMonitor]() -> double { return (*turntablePositionMonitor)(); },
+                                                 [turntablePositionMonitor=namedPositionMonitors.at("turntable_joint")]() -> double { return (*turntablePositionMonitor)(); },
                                                  [turntableSpeedConverter](double speed) { (*turntableSpeedConverter)(speed); },
                                                  n)});
     namedJointMap.insert({"shoulder_joint", std::make_unique<Joint>(
                                                 "shoulder",
-                                                [shoulderPositionMonitor]() -> double { return (*shoulderPositionMonitor)(); },
+                                                [shoulderPositionMonitor=namedPositionMonitors.at("shoulder_joint")]() -> double { return (*shoulderPositionMonitor)(); },
                                                 [shoulderSpeedConverter](double speed) { (*shoulderSpeedConverter)(speed); },
                                                 n)});
     namedJointMap.insert({"elbowPitch_joint", std::make_unique<Joint>(
                                                   "elbow",
-                                                  [elbowPositionMonitor]() -> double { return (*elbowPositionMonitor)(); },
+                                                  [elbowPositionMonitor=namedPositionMonitors.at("elbowPitch_joint")]() -> double { return (*elbowPositionMonitor)(); },
                                                   [elbowSpeedConverter](double speed) { (*elbowSpeedConverter)(speed); },
                                                   n)});
     namedJointMap.insert({"elbowRoll_joint", std::make_unique<Joint>(
                                                  "forearmRoll",
-                                                 [forearmRollPositionMonitor]() -> double { return (*forearmRollPositionMonitor)(); },
+                                                 [forearmRollPositionMonitor=namedPositionMonitors.at("elbowRoll_joint")]() -> double { return (*forearmRollPositionMonitor)(); },
                                                  [forearmRollSpeedConverter](double speed) { (*forearmRollSpeedConverter)(speed); },
                                                  n)});
     namedJointMap.insert({"wristPitch_joint", std::make_unique<Joint>(
                                                   "wristPitch",
-                                                  [wristPitchPositionMonitor]() -> double { return (*wristPitchPositionMonitor)(); },
+                                                  [wristPitchPositionMonitor=namedPositionMonitors.at("wristPitch_joint")]() -> double { return (*wristPitchPositionMonitor)(); },
                                                   [converter = differentialSpeedConverter](double speed) { converter->setPitchSpeed(speed); },
                                                   n)});
     namedJointMap.insert({"wristRoll_link", std::make_unique<Joint>(
                                                 "wristRoll",
-                                                [wristRollPositionMonitor]() -> double { return (*wristRollPositionMonitor)(); },
+                                                [wristRollPositionMonitor=namedPositionMonitors.at("wristRoll_link")]() -> double { return (*wristRollPositionMonitor)(); },
                                                 [converter = differentialSpeedConverter](double speed) { converter->setRollSpeed(speed); },
                                                 n)});
 
