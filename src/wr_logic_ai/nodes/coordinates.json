@@ -1,3 +1,9 @@
 [
-    {"lat":43.07225 , "long":-89.409875, "note": "EHall Entrance", "target_type": 0}
+    {"lat":0 , "long":0, "note": "EHall Entrance", "target_type": 0}, 
+    {"lat":1 , "long":1, "note": "EHall Entrance", "target_type": 0},
+    {"lat":2 , "long":2, "note": "EHall Entrance", "target_type": 0},
+    {"lat":3 , "long":3, "note": "EHall Entrance", "target_type": 0},
+    {"lat":4, "long":4, "note": "EHall Entrance", "target_type": 0},
+    {"lat":5 , "long":5, "note": "EHall Entrance", "target_type": 0},
+    {"lat":6 , "long":6, "note": "EHall Entrance", "target_type": 0}
 ]

@@ -1,29 +1,39 @@
 import json
 from pathlib import Path
 
-class Coordinate_manager:
+class CoordinateManager:
     coordinates = []
-    count = 0
+    ptr = 0
+    maxPtr = 0
 
     def __init__(self) -> None:
         pass
 
     @staticmethod
     def get_coordinate():
-        return Coordinate_manager.coordinates[Coordinate_manager.count]
+        print(CoordinateManager.ptr)
+        return CoordinateManager.coordinates[CoordinateManager.ptr]
         
+    @staticmethod
     def previous_line():
-        Coordinate_manager.count = Coordinate_manager.count - 1
+        print(CoordinateManager.ptr)
+        CoordinateManager.ptr = CoordinateManager.ptr - 1
+        print(CoordinateManager.ptr)
 
     @staticmethod
     def next_line():
-        Coordinate_manager.count = Coordinate_manager.count + 1
+        CoordinateManager.ptr = CoordinateManager.ptr + 1
+        CoordinateManager.maxPtr = max(CoordinateManager.ptr, CoordinateManager.maxPtr)
+
+    @staticmethod
+    def short_range_complete() -> bool:
+        return CoordinateManager.ptr < CoordinateManager.maxPtr
 
     @staticmethod
     def read_coordinates_file():
         dirname = Path(__file__).parents[1]
         file_name = Path.joinpath(dirname, 'coordinates.json')
         file = open(file_name, 'r').read()
-        Coordinate_manager.coordinates = json.loads(file)
+        CoordinateManager.coordinates = json.loads(file)
    
     

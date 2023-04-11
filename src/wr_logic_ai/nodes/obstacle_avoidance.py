@@ -129,12 +129,7 @@ def update_navigation(data) -> None:
         # Publish the DriveTrainCmd to the topic
         #print("Left Value: " + str(msg.left_value))
         #print("Right Value: " + str(msg.right_value))
-        if movement_complete:
-            complete_state_pub.publish(True)
-        else:
-            complete_state_pub.publish(False)
-            drive_pub.publish(msg)
-
+       
         # TESTING
         heading_msg.header.seq = frameCount
         heading_msg.header.stamp = rospy.get_rostime()

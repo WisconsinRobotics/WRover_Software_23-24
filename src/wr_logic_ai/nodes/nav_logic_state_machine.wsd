@@ -2,18 +2,13 @@
 hide empty description
 
 [*] -right-> Init
-Init -right-> LongRange
-LongRange -up-> LongRange : notComplete
-LongRange -down-> Error : error
-Error -down-> LR_Recovery
-LR_Recovery --> LR_Recovery : notComplete
-LR_Recovery --> Error : error
+Init -right-> LongRange : unconditional
+LongRange -down-> LR_Recovery : error
+LR_Recovery --> LR_Recovery : error
 LR_Recovery --> LongRange : success
 LongRange -right-> ShortRange : success
-ShortRange --> ShortRange : notComplete
 ShortRange -left-> LongRange : error
 ShortRange --> WaypointSuccess : success
-WaypointSuccess --> WaypointSuccess : waiting
 WaypointSuccess -up-> LongRange : notWaiting
 
 @enduml
