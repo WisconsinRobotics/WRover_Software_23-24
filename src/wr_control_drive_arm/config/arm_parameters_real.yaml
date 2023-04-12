@@ -2,7 +2,7 @@ arm_parameters:
   elbow:
     encoder_parameters:
       counts_per_rotation: 1850
-      offset: 546
+      offset: 675
     motor_parameters:
       gear_ratio: 3
   forearmRoll:
@@ -14,7 +14,7 @@ arm_parameters:
   shoulder:
     encoder_parameters:
       counts_per_rotation: 5550
-      offset: 1358
+      offset: 1600
     motor_parameters:
       gear_ratio: 9
   turntable:
