@@ -28,10 +28,10 @@ arm_parameters:
       counts_per_rotation: -1850
       offset: 886
     motor_parameters:
-      gear_ratio: 2
+      gear_ratio: 4.875
   wristRoll:
     encoder_parameters:
       counts_per_rotation: -1850
       offset: 981
     motor_parameters:
-      gear_ratio: 2
+      gear_ratio: 4.875
