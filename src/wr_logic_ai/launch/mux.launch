@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<!DOCTYPE launch SYSTEM "https://gist.githubusercontent.com/nalt/dfa2abc9d2e3ae4feb82ca5608090387/raw/roslaunch.dtd">
+
+<launch>
+    <arg name="run_in_mock" default="False"/>
+    <arg name="long_range_output" default="long_range_nav"/>
+    <arg name="short_range_output" default="short_range_nav"/>
+
+    <node pkg="wr_logic_ai" name="obstacle_avoidance" type="obstacle_avoidance.py" output="screen">
+        <remap from="/control/drive_system/cmd" to="$(arg long_range_output)"/>
+    </node>
+    <!-- <node pkg="wr_logic_ai" name="dead_reckoning" type="dead_reckoning.py" output="screen"/> -->
+    <node pkg="wr_logic_ai" name="testData" type="inputFakeData.py" output="screen">
+        <param name="run_in_mock" value="$(arg run_in_mock)"/>
+    </node>
+    <include file="$(find rplidar_ros)/launch/rplidar.launch"/>
+    <node pkg="rviz" name="$(anon rviz)" type="rviz" output="screen" args="-d $(find wr_logic_ai)/launch/obstacle_avoidance_mock.rviz" if="$(arg run_in_mock)"/>
+    <node pkg="rviz" name="$(anon rviz)" type="rviz" output="screen" args="-d $(find wr_logic_ai)/launch/obstacle_avoidance.rviz" unless="$(arg run_in_mock)"/>
+</launch>

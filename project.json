@@ -2,21 +2,21 @@
   "deps": [
     {
       "name": "wroboclaw",
-      "repo": "http://github.com/WisconsinRobotics/wroboclaw.git",
+      "repo": "ssh://git@wroboclaw.github.com/WisconsinRobotics/wroboclaw",
       "build": {
         "provider": "pip"
       }
     },
     {
       "name": "wready",
-      "repo": "http://github.com/WisconsinRobotics/wready.git",
+      "repo": "ssh://git@wready.github.com/WisconsinRobotics/wready.git",
       "build": {
         "provider": "pip"
       }
     },
     {
       "name": "wreadinput",
-      "repo": "http://github.com/WisconsinRobotics/wreadinput.git",
+      "repo": "ssh://git@wreadinput.github.com/WisconsinRobotics/wreadinput.git",
       "build": {
         "provider": "pip"
       }
