@@ -11,30 +11,41 @@ class NavStateMachine(StateMachine):
     stLongRangeRecovery = State()
     stShortRange = State()
     stWaypointSuccess = State()
+    #stComplete = State()
 
     evSuccess = (stLongRange.to(stShortRange) | stLongRangeRecovery.to(stLongRange) | stShortRange.to(stWaypointSuccess))
     evError = (stLongRange.to(stLongRangeRecovery) | stLongRangeRecovery.to(stLongRangeRecovery) | stShortRange.to(stLongRange))
     evNotWaiting = stWaypointSuccess.to(stLongRange)
     evUnconditional = stInit.to(stLongRange)
+    #evComplete = stLongRange.to(stComplete) | stWaypointSuccess.to(stComplete)
 
     def __init__(self, mgr: CoordinateManager) -> None:
         self._mgr = mgr
         rospy.Subscriber('/nav_state_msg', NavigationStateMsg, lambda msg: self.process_event(msg))
         super(NavStateMachine, self).__init__()
-
+        self.currentEvent = -1
 
     def process_event(self, data: NavigationStateMsg):
         print(data.nav_state_type)
         if data.nav_state_type == NavigationStateMsg.NAV_STATE_TYPE_SUCCESS:
             self.evSuccess()
+            self.currentEvent = NavigationStateMsg.NAV_STATE_TYPE_SUCCESS
         elif data.nav_state_type == NavigationStateMsg.NAV_STATE_TYPE_ERROR:
             self.evError()
+            self.currentEvent = NavigationStateMsg.NAV_STATE_TYPE_ERROR
+        #elif data.nav_state_type == NavigationStateMsg.NAV_STATE_TYPE_COMPLETE:
+            #self.evComplete()
+            pass
         else:
             raise TypeError
     
     def on_enter_stInit(self) -> None:
         print("\non enter stInit")
         self._mgr.read_coordinates_file()
+        self._mgr.next_line()
+        self._mgr.next_line()
+        self._mgr.next_line()
+        self._mgr.next_line()
         self.evUnconditional()
 
     def on_exit_stInit(self) -> None:
@@ -52,6 +63,7 @@ class NavStateMachine(StateMachine):
         pass
 
     def on_enter_stLongRangeRecovery(self) -> None:
+        
         print("\non enter stLongRangeRecovery")
         if self._mgr is None:
             raise ValueError
@@ -61,15 +73,25 @@ class NavStateMachine(StateMachine):
             #self.timer = rospy.Timer(rospy.Duration(0.2), self.publish)
             #self.pub_nav = rospy.Publisher('/target_coord', TargetMsg, queue_size=1)
             #rospy.spin()
+            
 
     def on_exit_stLongRangeRecovery(self) -> None:
         #self.timer.shutdown()
-        self._mgr.next_line()
+        if(self.currentEvent == NavigationStateMsg.NAV_STATE_TYPE_SUCCESS):
+            self._mgr.next_line()
+            self.leavingLRError = True
+        else:
+            self.leavingLRError = False
+        
             
     def on_enter_stShortRange(self) -> None:
         print("\non enter stShortRange")
         if CoordinateManager.short_range_complete() != True:
+            print("Short Range Not Complete")
             pass
+        else:
+            print("Short Range Complete")
+            self.evSuccess()
         
     def on_exit_stShortRange(self) -> None:
         pass
@@ -84,6 +106,9 @@ class NavStateMachine(StateMachine):
 
     def on_exit_stWaypointSuccess(self) -> None:
         pass #Frash lights that we are goint to next waypoint
+    
+    def on_enter_stComplete(self) -> None:
+        print("We finished, wooooo")
 
     def publish(self, timer):    
         # Publish to obstacle avoidance with the target coordinates

@@ -27,6 +27,7 @@ class CoordinateManager:
 
     @staticmethod
     def short_range_complete() -> bool:
+        print(str(CoordinateManager.ptr) + "     " + str(CoordinateManager.maxPtr))
         return CoordinateManager.ptr < CoordinateManager.maxPtr
 
     @staticmethod
