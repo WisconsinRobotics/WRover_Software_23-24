@@ -193,7 +193,7 @@ class BNO055:
 	def begin(self, mode=None):
 		if mode is None: mode = BNO055.OPERATION_MODE_NDOF
 		# Open I2C bus
-		self._bus = smbus.SMBus(1)
+		self._bus = smbus.SMBus(2)
 
 		# Make sure we have the right device
 		if self.readBytes(BNO055.BNO055_CHIP_ID_ADDR)[0] != BNO055.BNO055_ID:
