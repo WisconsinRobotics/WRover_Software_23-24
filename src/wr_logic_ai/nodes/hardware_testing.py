@@ -4,6 +4,7 @@ import rospy
 from BNO055 import BNO055
 from adafruit_gps import I2C,GPS_GtopI2C as GPS
 from std_msgs.msg import Float32
+import time
 
 ## Constants to vary
 f = 100     # Hz | Rate at which pose messages are published
@@ -18,12 +19,12 @@ if not sensor.begin(mode=BNO055.OPERATION_MODE_MAGONLY):
     raise RuntimeError("IMU Failed to initialize")
 sensor.setExternalCrystalUse(True)
 # Dump some initial IMU readings
-imuInitCounter = 0
-while((sensor.getVector(BNO055.VECTOR_EULER)[2] == 0.0)and
-        (imuInitCounter > 100)):
-    print(sensor.getVector(BNO055.VECTOR_EULER))
-    rate.sleep()
-    imuInitCounter+=1
+# imuInitCounter = 0
+# while((sensor.getVector(BNO055.VECTOR_EULER)[2] == 0.0)and
+#         (imuInitCounter > 100)):
+#     print(sensor.getVector(BNO055.VECTOR_EULER))
+#     rate.sleep()
+#     imuInitCounter+=1
 
 def init()-> None:
     while not rospy.is_shutdown():
@@ -41,9 +42,6 @@ def publish_heading():
     test_pub_heading.publish(get_heading())
 
 if __name__ == '__main__':
-    try:
-        # Make separate thread for gps
-        init()
-        rospy.spin()
-    except rospy.ROSInterruptException:
-        pass
+    while True:
+        print(f"{sensor.readBytes(BNO055.BNO055_MAG_DATA_X_LSB_ADDR, 2)}")
+        time.sleep(1)
