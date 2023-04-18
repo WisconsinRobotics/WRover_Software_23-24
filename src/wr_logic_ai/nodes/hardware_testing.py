@@ -58,5 +58,4 @@ def cb():
 
 if __name__ == '__main__':
     timer = rospy.Timer(rate.sleep_dur, lambda _: cb())
-    timer.start()
     rospy.spin()
