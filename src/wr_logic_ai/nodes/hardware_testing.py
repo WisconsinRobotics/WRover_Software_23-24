@@ -43,5 +43,7 @@ def publish_heading():
 
 if __name__ == '__main__':
     while True:
-        print(f"{sensor.readBytes(BNO055.BNO055_MAG_DATA_X_LSB_ADDR, 2)}")
+        print(f"mag_x = {int.from_bytes(sensor.readBytes(BNO055.BNO055_MAG_DATA_X_LSB_ADDR, 2), 'little')}")
+        print(f"mag_y = {int.from_bytes(sensor.readBytes(BNO055.BNO055_MAG_DATA_Y_LSB_ADDR, 2), 'little')}")
+        print(f"mag_z = {int.from_bytes(sensor.readBytes(BNO055.BNO055_MAG_DATA_Z_LSB_ADDR, 2), 'little')}")
         time.sleep(1)
