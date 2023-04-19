@@ -20,6 +20,6 @@ def cb(gps : GPS):
         pub_long.publish(gps.longitude)
 
 if __name__ == '__main__':
-    gps = GPS(i2c_bus=I2C(sda=5, scl=3))
+    gps = GPS(i2c_bus=I2C(sda=3, scl=2))
     timer = rospy.Timer(rate.sleep_dur, lambda _: cb())
     rospy.spin()
