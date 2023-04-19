@@ -1,0 +1,4 @@
+<launch>
+    <node name="imu" type="imu_testing.py" pkg="wr_logic_ai"/>
+    <node name="gps" type="gps_testing.py" pkg="wr_logic_ai"/>
+</launch>
