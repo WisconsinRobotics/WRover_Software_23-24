@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import rospy
-from src.BNO055 import BNO055
+from wr_hsi_sensing.src.BNO055 import BNO055
 from std_msgs.msg import Int32
 import time
 
