@@ -14,6 +14,14 @@ pub_x = rospy.Publisher('/mag_x', Int32, queue_size=1)
 pub_y = rospy.Publisher('/mag_y', Int32, queue_size=1)
 pub_z = rospy.Publisher('/mag_z', Int32, queue_size=1)
 
+pub_norm_x = rospy.Publisher('/norm_mag_x', Int32, queue_size=1)
+pub_norm_y = rospy.Publisher('/norm_mag_y', Int32, queue_size=1)
+
+min_x = float('inf')
+max_x = float('-inf')
+min_y = float('inf')
+max_y = float('-inf')
+
 # Create IMU Sensor object
 sensor = BNO055()
 if not sensor.begin(mode=BNO055.OPERATION_MODE_MAGONLY):
@@ -44,9 +52,22 @@ def cb():
     mag_y = mag_y if mag_y < 32768 else mag_y-65536
     mag_z = mag_z if mag_z < 32768 else mag_z-65536
 
-    # mag_x = mag_x if abs(mag_x) < 10000 else 0
-    # mag_y = mag_y if abs(mag_y) < 10000 else 0
-    # mag_z = mag_z if abs(mag_z) < 10000 else 0
+    # assuming that absolute readings are always less than 10000
+    if abs(mag_x) < 10000 and abs(mag_y) < 10000:
+        max_x = max(max_x, mag_x)
+        min_x = min(min_x, mag_x)
+        max_y = max(max_y, mag_y)
+        min_y = min(min_y, mag_y)
+
+        norm_x = mag_x - (max_x - min_x) / 2
+        norm_y = mag_y - (max_y - min_y) / 2
+        pub_norm_x.publish(int(norm_x))
+        pub_norm_y.publish(int(norm_y))
+    else:
+        mag_x = 0
+        mag_y = 0
+
+    mag_z = mag_z if abs(mag_z) < 10000 else 0
 
     pub_x.publish(mag_x)
     pub_y.publish(mag_y)
