@@ -11,14 +11,12 @@ f = 100     # Hz | Rate at which pose messages are published
 rospy.init_node('ai_hardware_testing', anonymous=False)
 rate = rospy.Rate(f)
 pub = rospy.Publisher('/gps_data', CoordinateMsg, queue_size=1)
-test_pub = rospy.Publisher('/gps_lat', Float64, queue_size=1)
 
 def cb(gps : GPS):
     gps.update()
     if gps.latitude is not None and gps.longitude is not None:
         msg = CoordinateMsg(latitude=gps.latitude, longitude=gps.longitude)
         pub.publish(msg)
-        test_pub.publish(gps.latitude)
 
 if __name__ == '__main__':
     gps = GPS(i2c_bus=I2C(sda=2, scl=3))
