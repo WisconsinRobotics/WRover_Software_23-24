@@ -20,6 +20,7 @@ if __name__ == '__main__':
         NavigationState.NAVIGATION_STATE_LONG_RANGE: rospy.get_param("~long_range_topic_name"),
         NavigationState.NAVIGATION_STATE_SHORT_RANGE: rospy.get_param("~short_range_topic_name")
     }
+    
     sub = rospy.Subscriber("/navigation_state",
                            NavigationState, lambda msg: state_call_back(msg, conversion, rospy.get_param("~mux_name")))
     rospy.spin()
