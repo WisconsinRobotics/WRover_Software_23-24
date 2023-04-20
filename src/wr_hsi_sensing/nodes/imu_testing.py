@@ -1,10 +1,5 @@
 #!/usr/bin/env python
 
-import sys
-
-
-print(f"{sys.path}")
-
 import rospy
 from wr_hsi_sensing.BNO055 import BNO055
 from std_msgs.msg import Int32
