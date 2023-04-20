@@ -48,7 +48,6 @@ def cb():
     mag_y = mag_y if abs(mag_y) < 10000 else 0
     mag_z = mag_z if abs(mag_z) < 10000 else 0
 
-
     pub_x.publish(mag_x)
     pub_y.publish(mag_y)
     pub_z.publish(mag_z)
