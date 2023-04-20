@@ -16,7 +16,7 @@ test_pub = rospy.Publisher('/gps_lat', Float64, queue_size=1)
 def cb(gps : GPS):
     gps.update()
     if gps.latitude is not None and gps.longitude is not None:
-        msg = CoordinateMsg(latitiude=gps.latitude, longitude=gps.longitude)
+        msg = CoordinateMsg(latitude=gps.latitude, longitude=gps.longitude)
         pub.publish(msg)
         test_pub.publish(gps.latitude)
 
