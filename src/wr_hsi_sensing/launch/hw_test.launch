@@ -1,0 +1,5 @@
+<launch>
+    <!-- <arg name="debug" default="false"/> -->
+    <node name="imu" type="imu_testing.py" pkg="wr_hsi_sensing"/>
+    <node name="gps" type="gps_testing.py" pkg="wr_hsi_sensing"/>
+</launch>

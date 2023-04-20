@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
 import rospy
-from BNO055 import BNO055
-from adafruit_gps import I2C,GPS_GtopI2C as GPS
+from src.BNO055 import BNO055
 from std_msgs.msg import Int32
 import time
 
@@ -28,10 +27,6 @@ sensor.setExternalCrystalUse(True)
 #     rate.sleep()
 #     imuInitCounter+=1
 
-def init()-> None:
-    while not rospy.is_shutdown():
-        publish_heading()
-
 ## Retrieve heading from IMU (Returns a float angle)
 def get_heading():
     # TODO: get actual obset from an absolute value ---- Build calibration method for startup.
@@ -39,9 +34,6 @@ def get_heading():
     # imu returns clockwise values, we need it counterclockwise
     relative_angle = 360 - sensor.getVector(BNO055.VECTOR_EULER)[0]
     return (offset_from_east + relative_angle) % 360
-
-def publish_heading():
-    test_pub_heading.publish(get_heading())
 
 def cb():
     mag_z = int.from_bytes(sensor.readBytes(BNO055.BNO055_MAG_DATA_Z_LSB_ADDR, 2), 'little')
@@ -51,6 +43,11 @@ def cb():
     mag_x = mag_x if mag_x < 32768 else mag_x-65536
     mag_y = mag_y if mag_y < 32768 else mag_y-65536
     mag_z = mag_z if mag_z < 32768 else mag_z-65536
+
+    mag_x = mag_x if abs(mag_x) < 10000 else 0
+    mag_y = mag_y if abs(mag_y) < 10000 else 0
+    mag_z = mag_z if abs(mag_z) < 10000 else 0
+
 
     pub_x.publish(mag_x)
     pub_y.publish(mag_y)
