@@ -2,8 +2,8 @@
 
 import rospy
 from wr_hsi_sensing.BNO055 import BNO055
-from std_msgs.msg import Int32
-import time
+from std_msgs.msg import Int32, Float64
+import math
 
 ## Constants to vary
 f = 100     # Hz | Rate at which pose messages are published
@@ -16,6 +16,7 @@ pub_z = rospy.Publisher('/mag_z', Int32, queue_size=1)
 
 pub_norm_x = rospy.Publisher('/norm_mag_x', Int32, queue_size=1)
 pub_norm_y = rospy.Publisher('/norm_mag_y', Int32, queue_size=1)
+pub_heading = rospy.Publisher('/heading', Float64, queue_size=1)
 
 MAG_NOISE_THRESH = 500
 
@@ -75,6 +76,9 @@ def cb():
         norm_y = mag_y - (max_y - min_y) / 2
         pub_norm_x.publish(int(norm_x))
         pub_norm_y.publish(int(norm_y))
+
+        heading = math.atan2(norm_y, norm_x)
+        pub_heading.publish(Float64(heading))
 
     mag_z = mag_z if abs(mag_z) < 10000 else 0
 
