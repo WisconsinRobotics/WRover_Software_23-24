@@ -100,10 +100,12 @@ def cb():
     prev_x = mag_x
     prev_y = mag_y
 
-    norm_x = mag_x - ((max_x - min_x) / 2 + min_x)
-    norm_y = mag_y - ((max_y - min_y) / 2 + min_y)
-    norm_x /= (max_x - min_x)
-    norm_y /= (max_y - min_y)
+    range_x = (max_x - min_x)
+    range_y = (max_y - min_y)
+    norm_x = mag_x - ( range_x / 2 + min_x)
+    norm_y = mag_y - ( range_y / 2 + min_y)
+    norm_x /= range_x if range_x != 0 else 1
+    norm_y /= range_y if range_y != 0 else 1
     pub_norm_x.publish(int(norm_x))
     pub_norm_y.publish(int(norm_y))
 
