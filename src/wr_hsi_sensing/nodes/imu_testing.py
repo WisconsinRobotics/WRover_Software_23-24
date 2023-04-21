@@ -44,6 +44,11 @@ def get_heading():
     return (offset_from_east + relative_angle) % 360
 
 def cb():
+    global max_x
+    global min_x
+    global max_y
+    global min_y
+
     mag_z = int.from_bytes(sensor.readBytes(BNO055.BNO055_MAG_DATA_Z_LSB_ADDR, 2), 'little')
     mag_x = int.from_bytes(sensor.readBytes(BNO055.BNO055_MAG_DATA_X_LSB_ADDR, 2), 'little')
     mag_y = int.from_bytes(sensor.readBytes(BNO055.BNO055_MAG_DATA_Y_LSB_ADDR, 2), 'little')
