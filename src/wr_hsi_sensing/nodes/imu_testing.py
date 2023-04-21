@@ -112,6 +112,8 @@ def cb():
     heading = math.atan2(norm_y, norm_x)
     pub_heading.publish(Float64(heading))
 
+    print(heading)
+
     mag_z = mag_z if abs(mag_z) < 10000 else 0
 
     pub_x.publish(mag_x)
