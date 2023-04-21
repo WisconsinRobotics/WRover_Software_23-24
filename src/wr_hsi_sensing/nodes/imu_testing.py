@@ -64,7 +64,8 @@ def cb():
     mag_y = mag_y if mag_y < 32768 else mag_y-65536
     mag_z = mag_z if mag_z < 32768 else mag_z-65536
 
-    if abs(mag_x - prev_x) < MAG_NOISE_THRESH and abs(mag_y - prev_y) < MAG_NOISE_THRESH:
+    # TODO: Consider differential noise filtering (prev_msg)
+    if abs(mag_x) < MAG_NOISE_THRESH and abs(mag_y) < MAG_NOISE_THRESH:
         max_x = max(max_x, mag_x)
         min_x = min(min_x, mag_x)
         max_y = max(max_y, mag_y)
@@ -72,8 +73,8 @@ def cb():
         prev_x = mag_x
         prev_y = mag_y
 
-        norm_x = mag_x - (max_x - min_x) / 2
-        norm_y = mag_y - (max_y - min_y) / 2
+        norm_x = mag_x - ((max_x - min_x) / 2 + min_x)
+        norm_y = mag_y - ((max_y - min_y) / 2 + min_y)
         pub_norm_x.publish(int(norm_x))
         pub_norm_y.publish(int(norm_y))
 
