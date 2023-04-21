@@ -18,7 +18,7 @@ pub_norm_x = rospy.Publisher('/norm_mag_x', Int32, queue_size=1)
 pub_norm_y = rospy.Publisher('/norm_mag_y', Int32, queue_size=1)
 pub_heading = rospy.Publisher('/heading', Float64, queue_size=1)
 
-MAG_NOISE_THRESH = 1000
+MAG_NOISE_THRESH = 500
 
 class MovingAverage:
     _AVERAGING_WINDOW_SIZE = 3
