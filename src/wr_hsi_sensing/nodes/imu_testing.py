@@ -64,7 +64,7 @@ def cb():
     mag_y = mag_y if mag_y < 32768 else mag_y-65536
     mag_z = mag_z if mag_z < 32768 else mag_z-65536
 
-    print(f"min/max x: {min_x}, {max_x}")
+    # print(f"min/max x: {min_x}, {max_x}")
 
     # TODO: Consider differential noise filtering (prev_msg) or absolute
     if abs(mag_x - prev_x) < MAG_NOISE_THRESH and abs(mag_y - prev_y) < MAG_NOISE_THRESH:
