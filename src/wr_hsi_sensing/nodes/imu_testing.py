@@ -86,5 +86,9 @@ def cb():
     pub_z.publish(mag_z)
 
 if __name__ == '__main__':
+    prev_x = int.from_bytes(sensor.readBytes(BNO055.BNO055_MAG_DATA_X_LSB_ADDR, 2), 'little')
+    prev_y = int.from_bytes(sensor.readBytes(BNO055.BNO055_MAG_DATA_Y_LSB_ADDR, 2), 'little')
+    prev_x = prev_x if maprev_xg_x < 32768 else prev_x-65536
+    prev_y = prev_y if prev_y < 32768 else prev_y-65536
     timer = rospy.Timer(rate.sleep_dur, lambda _: cb())
     rospy.spin()
