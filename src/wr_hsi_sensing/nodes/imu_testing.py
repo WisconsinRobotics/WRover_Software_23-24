@@ -17,7 +17,7 @@ pub_z = rospy.Publisher('/mag_z', Int32, queue_size=1)
 pub_norm_x = rospy.Publisher('/norm_mag_x', Int32, queue_size=1)
 pub_norm_y = rospy.Publisher('/norm_mag_y', Int32, queue_size=1)
 
-MAG_NOISE_THRESH = 100
+MAG_NOISE_THRESH = 500
 
 min_x = float('inf')
 max_x = float('-inf')
