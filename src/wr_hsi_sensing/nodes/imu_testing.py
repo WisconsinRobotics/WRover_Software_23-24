@@ -75,9 +75,6 @@ def cb():
         norm_y = mag_y - (max_y - min_y) / 2
         pub_norm_x.publish(int(norm_x))
         pub_norm_y.publish(int(norm_y))
-    else:
-        mag_x = 0
-        mag_y = 0
 
     mag_z = mag_z if abs(mag_z) < 10000 else 0
 
