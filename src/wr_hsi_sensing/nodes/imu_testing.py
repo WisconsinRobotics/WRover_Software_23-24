@@ -88,7 +88,7 @@ def cb():
     if abs(mag_y - prev_y) < MAG_NOISE_THRESH:
         y_filter.feed(mag_y)
 
-    print(f"min/max x: {min_x}, {max_x}")
+    # print(f"min/max x: {min_x}, {max_x}")
 
     mag_x = x_filter.get_value()
     mag_y = y_filter.get_value()
@@ -102,6 +102,8 @@ def cb():
 
     norm_x = mag_x - ((max_x - min_x) / 2 + min_x)
     norm_y = mag_y - ((max_y - min_y) / 2 + min_y)
+    norm_x /= (max_x - min_x)
+    norm_y /= (max_y - min_y)
     pub_norm_x.publish(int(norm_x))
     pub_norm_y.publish(int(norm_y))
 
