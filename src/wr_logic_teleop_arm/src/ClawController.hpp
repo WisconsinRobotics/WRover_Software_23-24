@@ -13,7 +13,7 @@ public:
     /**
      * @brief This method should open the claw, and should be called in the callbacks
      * of the A button
-     * 
+
      */
     void openClaw(const std_msgs::Bool::ConstPtr& msg);
 
@@ -27,17 +27,14 @@ public:
     void checkMessage();
 
 private:
-    // You may want to keep the speed ros::Publisher as a member variable to publish
-    // from the member methods
-    ros::Publisher openAPub;
+    ros::Publisher pub;
     ros::Subscriber openASub;
-    ros::Publisher closeBPub;
+
     ros::Subscriber closeBSub;
     bool aPressed;
     bool bPressed;
-    // If you store a publisher, you may want to construct that publisher in the
-    // constructor of the class
-    
+
+
 };
 
 #endif

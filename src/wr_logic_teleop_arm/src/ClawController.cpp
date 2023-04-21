@@ -15,56 +15,51 @@ constexpr int16_t openSpeed = 32767;
 constexpr int16_t closeSpeed = -32768;
 
 ClawController::ClawController(ros::NodeHandle& n) : 
-    openAPub(n.advertise<std_msgs::Int16>("/hsi/roboclaw/aux3/cmd/left", // TODO : This is the same as the closeBPub, so why not just have a single publisher?
-        MESSAGE_QUEUE_LENGTH)), 
-    openASub(n.subscribe("/hci/arm/gamepad/button/a", 
-        MESSAGE_QUEUE_LENGTH, &ClawController::openClaw, this)),
-    closeBPub(n.advertise<std_msgs::Int16>("/hsi/roboclaw/aux3/cmd/left", // TODO : This is the same as the openAPub, so why not just have a single publisher?
-        MESSAGE_QUEUE_LENGTH)), 
-    closeBSub(n.subscribe("/hci/arm/gamepad/button/b", 
-        MESSAGE_QUEUE_LENGTH, &ClawController::closeClaw, this)),
-    aPressed(false), bPressed(false) {} // TODO : I know the linter won't catch this, but use brace-initialization (rather than parenthesis-initialization)
+    pub{n.advertise<std_msgs::Int16>("/hsi/roboclaw/aux3/cmd/left", 
+        MESSAGE_QUEUE_LENGTH)}, 
+    openASub{n.subscribe("/hci/arm/gamepad/button/a", 
+        MESSAGE_QUEUE_LENGTH, &ClawController::openClaw, this)},
+    closeBSub{n.subscribe("/hci/arm/gamepad/button/b", 
+        MESSAGE_QUEUE_LENGTH, &ClawController::closeClaw, this)},
+    aPressed{false}, 
+    bPressed{false} {}
 
 void ClawController::openClaw(const std_msgs::Bool::ConstPtr& msg)
 {
     // This should open the claw
-    // ROS_INFO("I heard: [%s]", msg->data);
-    this->aPressed = (msg->data != 0U);
 
+    this->aPressed = (msg->data != 0U);
+    checkMessage();
 }
 
 void ClawController::closeClaw(const std_msgs::Bool::ConstPtr& msg)
 {
     // This should close the claw
-    // ROS_INFO("I heard: [%s]", msg->data.c_str());
+
     this->bPressed = (msg->data != 0U);
+    checkMessage();
 }
 
-void ClawController::checkMessage() // TODO : this function isn't called anywhere
+void ClawController::checkMessage()
 {
-    while (ros::ok()) // TODO : This doesn't need a ROS-OK loop.  This should be called by the subscriber callbacks, and if those are called, then ROS is ok.
+
+    if (aPressed && bPressed)
     {
-        if (aPressed && bPressed)
-        {
-            std_msgs::Int16 msgNA;
-            msgNA.data = 0;
-            openAPub.publish(msgNA);
-            closeBPub.publish(msgNA);
-            // ROS_INFO("%i", msgNA.data);
-        }
-        else if (aPressed)
-        {
-            std_msgs::Int16 msgA;
-            msgA.data = openSpeed;
-            openAPub.publish(msgA);
-            // ROS_INFO("%i", msgA.data);
-        }
-        else
-        {
-            std_msgs::Int16 msgB;
-            msgB.data = closeSpeed;
-            closeBPub.publish(msgB);
-            // ROS_INFO("%i", msgB.data);
-        }
+        std_msgs::Int16 msgNA;
+        msgNA.data = 0;
+        pub.publish(msgNA);
     }
+    else if (aPressed)
+    {
+        std_msgs::Int16 msgA;
+        msgA.data = openSpeed;
+        pub.publish(msgA);
+    }
+    else
+    {
+        std_msgs::Int16 msgB;
+        msgB.data = closeSpeed;
+        pub.publish(msgB);
+    }
+
 }
