@@ -11,7 +11,7 @@
 constexpr uint32_t MESSAGE_QUEUE_LENGTH = 1000;
 constexpr uint16_t pin = 6;
 std::ofstream file;
-std::ofstream fileExport;
+std::ofstream fileUnexport;
 
 
 SolenoidController::SolenoidController(ros::NodeHandle& n) : 
@@ -25,8 +25,8 @@ SolenoidController::SolenoidController(ros::NodeHandle& n) :
         std::cout << "Unable to open /sys/class/gpio/gpio6/value";
     }
 
-    fileExport.open("/sys/class/gpio/unexport");
-    if (!fileExport.is_open())
+    fileUnexport.open("/sys/class/gpio/unexport");
+    if (!fileUnexport.is_open())
     {
         std::cout << "Unable to open /sys/class/gpio/unexport";
     }
@@ -46,16 +46,16 @@ void SolenoidController::extendSolenoid(const std_msgs::Bool::ConstPtr& msg)
         file << 1;
         file.flush();
             
-        fileExport << pin;
-        fileExport.flush();
+        fileUnexport << pin;
+        fileUnexport.flush();
     }
     else
     {
         file << 0;
         file.flush();
 
-        fileExport << pin;
-        fileExport.flush();
+        fileUnexport << pin;
+        fileUnexport.flush();
     }
 }
 
