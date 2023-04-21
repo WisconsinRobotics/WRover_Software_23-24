@@ -52,6 +52,8 @@ def cb():
     global min_x
     global max_y
     global min_y
+    global prev_x
+    global prev_y
 
     mag_z = int.from_bytes(sensor.readBytes(BNO055.BNO055_MAG_DATA_Z_LSB_ADDR, 2), 'little')
     mag_x = int.from_bytes(sensor.readBytes(BNO055.BNO055_MAG_DATA_X_LSB_ADDR, 2), 'little')
