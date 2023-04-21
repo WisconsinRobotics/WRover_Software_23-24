@@ -10,4 +10,6 @@
     <param name="claw_ns_2" value="/hsi/roboclaw/aux2"/>
     <param name="claw_ns_3" value="/hsi/roboclaw/aux3"/>
   </node>
+  <node name="end_effector_driver" pkg="wr_logic_teleop_arm" type="end_effector_controller.py"
+        output="screen" />
 </launch>
