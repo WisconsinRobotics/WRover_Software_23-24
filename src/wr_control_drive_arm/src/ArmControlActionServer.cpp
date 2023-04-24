@@ -126,10 +126,10 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
             auto currJoint = goal->trajectory.joint_names.at(i);
 
             // The position monitor whose velocity is currently being scaled
-            auto currPosMtr = namedPositionMonitors.at(currJoint);
+            auto& currPosMtr = *namedPositionMonitors.at(currJoint);
 
             // Scale by counts per rotation and gear ratio
-            velocityCopies.at(i) *= abs(currPosMtr->getCountsPerRotation()*currPosMtr->getGearRatio());
+            velocityCopies.at(i) *= abs(currPosMtr.getCountsPerRotation()*currPosMtr.getGearRatio());
         }
 
         // Get the maximum velocity assigned to any joint

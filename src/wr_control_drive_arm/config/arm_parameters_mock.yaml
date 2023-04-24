@@ -4,34 +4,34 @@ arm_parameters:
       counts_per_rotation: 1000
       offset: 500
     motor_parameters:
-      gear_ratio: 3
+      gear_ratio: 1
   forearmRoll:
     encoder_parameters:
       counts_per_rotation: 1000
       offset: 500
     motor_parameters:
-      gear_ratio: 3
+      gear_ratio: 1
   shoulder:
     encoder_parameters:
       counts_per_rotation: 1000
       offset: 500
     motor_parameters:
-      gear_ratio: 9
+      gear_ratio: 1
   turntable:
     encoder_parameters:
       counts_per_rotation: 1000
       offset: 500
     motor_parameters:
-      gear_ratio: 3
+      gear_ratio: 1
   wristPitch:
     encoder_parameters:
       counts_per_rotation: 1000
       offset: 500
     motor_parameters:
-      gear_ratio: 2
+      gear_ratio: 1
   wristRoll:
     encoder_parameters:
       counts_per_rotation: 1000
       offset: 500
     motor_parameters:
-      gear_ratio: 2
+      gear_ratio: 1

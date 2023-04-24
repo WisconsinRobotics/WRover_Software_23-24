@@ -2,7 +2,6 @@
 #define DIRECT_JOINT_TO_MOTOR_SPEED_CONVERTER_H
 
 #include "Motor.hpp"
-#include "SingleEncoderJointPositionMonitor.hpp"
 #include <memory>
 
 enum class MotorSpeedDirection {
