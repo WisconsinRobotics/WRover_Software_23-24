@@ -8,9 +8,9 @@ from std_msgs.msg import Float64
 ## Constants to vary
 f = 100     # Hz | Rate at which pose messages are published
 
-rospy.init_node('ai_hardware_testing', anonymous=False)
+rospy.init_node('gps_testing', anonymous=False)
 rate = rospy.Rate(f)
-pub = rospy.Publisher('/gps_data', CoordinateMsg, queue_size=1)
+pub = rospy.Publisher('/gps_coord_data', CoordinateMsg, queue_size=1)
 
 def cb(gps : GPS):
     gps.update()

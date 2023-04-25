@@ -8,7 +8,7 @@ import math
 ## Constants to vary
 f = 100     # Hz | Rate at which pose messages are published
 
-rospy.init_node('ai_hardware_testing', anonymous=False)
+rospy.init_node('imu_testing', anonymous=False)
 rate = rospy.Rate(f)
 pub_x = rospy.Publisher('/mag_x', Int32, queue_size=1)
 pub_y = rospy.Publisher('/mag_y', Int32, queue_size=1)
@@ -16,12 +16,12 @@ pub_z = rospy.Publisher('/mag_z', Int32, queue_size=1)
 
 pub_norm_x = rospy.Publisher('/norm_mag_x', Int32, queue_size=1)
 pub_norm_y = rospy.Publisher('/norm_mag_y', Int32, queue_size=1)
-pub_heading = rospy.Publisher('/heading', Float64, queue_size=1)
+pub_heading = rospy.Publisher('/heading_data', Float64, queue_size=1)
 
 MAG_NOISE_THRESH = 500
 
 class MovingAverage:
-    _AVERAGING_WINDOW_SIZE = 3
+    _AVERAGING_WINDOW_SIZE = 5
     def __init__(self):
         self._values = []
 
