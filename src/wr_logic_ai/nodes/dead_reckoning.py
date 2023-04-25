@@ -40,14 +40,14 @@ def update_heading(data: Float64):
 
 def publish():
     msg_data_input[1] = TargetMsg()
-    msg_data_input[1].latitude = 0
-    msg_data_input[1].longitude = 0
+    msg_data_input[1].target_lat = 0
+    msg_data_input[1].target_long = 0
 
     if msg_data_input[0] is not None and msg_data_input[1] is not None and msg_data_input[2] is not None:
-        msg.cur_lat = msg_data_input[0].target_lat
-        msg.cur_long = msg_data_input[0].target_long
-        msg.tar_lat = msg_data_input[1].latitude
-        msg.tar_long = msg_data_input[1].longtide
+        msg.cur_lat = msg_data_input[0].latitude
+        msg.cur_long = msg_data_input[0].longitude
+        msg.tar_lat = msg_data_input[1].target_lat
+        msg.tar_long = msg_data_input[1].target_long
         msg.heading = msg_data_input[2]
         pub_nav.publish(msg)
 
