@@ -3,7 +3,7 @@
 import rospy
 from wr_logic_ai.msg import NavigationMsg, TargetMsg
 from std_msgs.msg import Float64
-from wr_hsi_sensing import CoordinateMsg
+from wr_hsi_sensing.msg import CoordinateMsg
 
 ## Constants to vary
 f = 100     # Hz | Rate at which pose messages are published
