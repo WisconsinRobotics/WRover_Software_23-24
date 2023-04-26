@@ -10,6 +10,7 @@
 #include "tf2/LinearMath/Vector3.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include <atomic>
+#include <boost/concept_check.hpp>
 #include <cmath>
 #include <cstdint>
 #include <moveit/move_group_interface/move_group_interface.h>
@@ -62,8 +63,8 @@ auto main(int argc, char **argv) -> int {
     float y_pos = HOME_Y;
     float z_pos = HOME_Z;
 
-    tf2::Quaternion orientation{sin(M_PI / 4), 0, 0, cos(-M_PI / 4)};
-    orientation = orientation;
+    const tf2::Quaternion homeOrientation{sin(M_PI / 4), 0, 0, cos(-M_PI / 4)};
+    tf2::Quaternion orientation{homeOrientation};
 
     const tf2::Quaternion SPIN_X{sin(2 * M_PI / 1000), 0, 0, cos(2 * M_PI / 1000)};
     const tf2::Quaternion SPIN_Y{0, sin(2 * M_PI / 1000), 0, cos(2 * M_PI / 1000)};
@@ -91,7 +92,6 @@ auto main(int argc, char **argv) -> int {
                                              if (abs(msg->data) >= JOYSTICK_DEADBAND) {
                                                  y_pos += msg->data * STEP_Y;
                                                  updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
-                                                 isNewPath.store(true);
                                              }
                                          }));
 
@@ -102,62 +102,46 @@ auto main(int argc, char **argv) -> int {
                                              if (abs(msg->data) >= JOYSTICK_DEADBAND) {
                                                  x_pos += msg->data * STEP_X;
                                                  updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
-                                                 isNewPath.store(true);
                                              }
                                          }));
 
     // y up
-    ros::Subscriber zUp = np.subscribe("/hci/arm/gamepad/button/shoulder_l",
+    ros::Subscriber zUp = np.subscribe("/hci/arm/gamepad/button/trigger_left",
                                        MESSAGE_QUEUE_LENGTH,
                                        static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
                                            if (msg->data) {
                                                z_pos += STEP_Y * step_mult;
                                                updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
-                                               isNewPath.store(true);
                                            }
                                        }));
 
     // y down
-    ros::Subscriber zDown = np.subscribe("/hci/arm/gamepad/button/shoulder_r",
+    ros::Subscriber zDown = np.subscribe("/hci/arm/gamepad/button/trigger_right",
                                          MESSAGE_QUEUE_LENGTH,
                                          static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
                                              if (msg->data) {
                                                  z_pos -= STEP_Y * step_mult;
                                                  updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
-                                                 isNewPath.store(true);
                                              }
                                          }));
 
-    // roll counter clockwise
-    ros::Subscriber rollUp = np.subscribe("/hci/arm/gamepad/button/y",
+    // roll
+    ros::Subscriber roll = np.subscribe("/hci/arm/gamepad/button/pov_x",
                                           MESSAGE_QUEUE_LENGTH,
                                           static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
                                               if (msg->data) {
                                                   orientation *= SPIN_Z * step_mult;
                                                   updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
-                                                  isNewPath.store(true);
                                               }
                                           }));
 
-    // roll clockwise
-    ros::Subscriber rollDown = np.subscribe("/hci/arm/gamepad/button/a",
-                                            MESSAGE_QUEUE_LENGTH,
-                                            static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
-                                                if (msg->data) {
-                                                    orientation *= SPIN_Z.inverse();
-                                                    updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
-                                                    isNewPath.store(true);
-                                                }
-                                            }));
-
     // pitch
-    ros::Subscriber pitch = np.subscribe("/hci/arm/gamepad/axis/stick_right_y",
+    ros::Subscriber pitch = np.subscribe("/hci/arm/gamepad/axis/pov_y",
                                          MESSAGE_QUEUE_LENGTH,
                                          static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
                                              if (abs(msg->data) >= 0.5) {
                                                  orientation *= (msg->data > 0 ? SPIN_Y : SPIN_Y.inverse());
                                                  updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
-                                                 isNewPath.store(true);
                                              }
                                          }));
 
@@ -168,26 +152,11 @@ auto main(int argc, char **argv) -> int {
                                            if (abs(msg->data) >= 0.5) {
                                                orientation *= (msg->data > 0 ? SPIN_X : SPIN_X.inverse());
                                                updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
-                                               isNewPath.store(true);
                                            }
                                        }));
 
-    ros::Subscriber speedUp = np.subscribe("/hci/arm/gamepad/axis/trigger_right",
-                                           MESSAGE_QUEUE_LENGTH,
-                                           static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
-                                               accel = msg->data;
-                                               step_mult = std::pow(10, accel - deaccel);
-                                           }));
-
-    ros::Subscriber speedDown = np.subscribe("/hci/arm/gamepad/axis/trigger_right",
-                                             MESSAGE_QUEUE_LENGTH,
-                                             static_cast<boost::function<void(Std_Float32)>>([&](Std_Float32 msg) -> void {
-                                                 deaccel = msg->data;
-                                                 step_mult = std::pow(10, accel - deaccel);
-                                             }));
-
     // override path execution
-    ros::Subscriber execPath = np.subscribe("/hci/arm/gamepad/button/x",
+    ros::Subscriber execPath = np.subscribe("/hci/arm/gamepad/button/start",
                                             MESSAGE_QUEUE_LENGTH,
                                             static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
                                                 if (msg->data) {
@@ -196,21 +165,25 @@ auto main(int argc, char **argv) -> int {
                                             }));
 
     // reset target/cancel path
-    ros::Subscriber resetPose = np.subscribe("/hci/arm/gamepad/button/start",
+    ros::Subscriber resetPose = np.subscribe("/hci/arm/gamepad/button/select",
                                              MESSAGE_QUEUE_LENGTH,
                                              static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
                                                  if (msg->data) {
-
-                                                     geometry_msgs::Pose pose = move.getCurrentPose().pose;
-                                                     x_pos = pose.position.x;
-                                                     y_pos = pose.position.y;
-                                                     z_pos = pose.position.z;
-                                                     tf2::convert(pose.orientation, orientation);
-                                                     updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
-
-                                                     isNewPath.store(true); // override path
+                                                     move.stop();
                                                  }
                                              }));
+
+    ros::Subscriber home = np.subscribe("/hci/arm/gamepad/button/mode",
+                                        MESSAGE_QUEUE_LENGTH,
+                                        static_cast<boost::function<void(Std_Bool)>>([&](Std_Bool msg) -> void {
+                                            if (msg->data) {
+                                                x_pos = HOME_X;
+                                                y_pos = HOME_Y;
+                                                z_pos = HOME_Z;
+                                                orientation = homeOrientation;
+                                                updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
+                                            }
+                                        }));
 
     while (ros::ok()) {
 
