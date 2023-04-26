@@ -1,0 +1,7 @@
+<!-- Launches the full robot system, configured for the URC extreme retrieval and delivery mission. -->
+<launch>
+
+  <include file="$(find wr_entry_point)/launch/comp/comp_init.launch"/>
+  
+  <include file="$(find wr_hci_hid)/launch/teleop_arm.launch"/>
+</launch>

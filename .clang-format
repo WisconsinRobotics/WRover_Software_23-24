@@ -1,0 +1,9 @@
+BasedOnStyle: LLVM
+IndentWidth: 4
+AccessModifierOffset: -4
+CommentPragmas: 'NOLINT'
+PackConstructorInitializers: CurrentLine
+AlignOperands: AlignAfterOperator
+AlignTrailingComments: true
+ColumnLimit: 0
+SeparateDefinitionBlocks: Always

@@ -6,37 +6,45 @@ claws:
     address: 0x80
     enc_left:
         enabled: true
-        max_speed: 300000000 # TODO probably don't actually need all these encoders
+        max_speed: 100 # TODO probably don't actually need all these encoders
+        offset: 500
     enc_right:
         enabled: true
-        max_speed: 300000000
+        max_speed: 100
+        offset: 500
   aux1: # arm elbow/forearm, science ?
     topic: '/hsi/roboclaw/aux1'
     address: 0x81
     enc_left:
         enabled: true
-        max_speed: 300000000
+        max_speed: 100
+        offset: 500
     enc_right:
         enabled: true
-        max_speed: 300000000
+        max_speed: 100
+        offset: 500
   aux2: # arm wrist, science ?
     topic: '/hsi/roboclaw/aux2'
     address: 0x82
     enc_left:
         enabled: true
-        max_speed: 300000000
+        max_speed: 100
+        offset: 500
     enc_right:
         enabled: true
-        max_speed: 300000000
+        max_speed: 100
+        offset: 500
   aux3: # arm manip, science ?
     topic: '/hsi/roboclaw/aux3'
     address: 0x83
     enc_left:
         enabled: true
-        max_speed: 300000000
+        max_speed: 100
+        offset: 500
     enc_right:
         enabled: true
-        max_speed: 300000000
+        max_speed: 100
+        offset: 500
   drive: # drive train
     topic: '/hsi/roboclaw/drive'
     address: 0x84
