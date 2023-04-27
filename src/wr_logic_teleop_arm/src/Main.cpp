@@ -5,13 +5,13 @@
 
 auto main(int argc, char **argv) -> int
 {
-    ros::init(argc, argv, "ClawAndSolenoidNode"); // TODO : May need more descriptive node name
+    ros::init(argc, argv, "ClawAndSolenoidNode");
 
-    ros::NodeHandle nHandCC;
-    std::unique_ptr<ClawController> claw = new ClawController{nHandCC};
-    
-    ros::NodeHandle nHandSC;
-    std::unique_ptr<SolenoidController> solenoid = new ClawController{nHandSC};
+    ros::NodeHandle nHand;
+    ClawController claw {nHand};
+    SolenoidController solenoid {nHand};
+
+    ros::spin();
 
     return 0;
 }

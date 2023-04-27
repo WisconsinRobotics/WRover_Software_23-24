@@ -61,5 +61,5 @@ void ClawController::checkMessage()
         msgB.data = closeSpeed;
         pub.publish(msgB);
     }
-
+    
 }

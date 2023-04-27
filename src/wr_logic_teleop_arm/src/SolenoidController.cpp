@@ -10,8 +10,7 @@
 
 constexpr uint32_t MESSAGE_QUEUE_LENGTH = 1000;
 constexpr uint16_t pin = 6;
-std::ofstream file;
-std::ofstream fileUnexport;
+
 
 
 SolenoidController::SolenoidController(ros::NodeHandle& n) : 
@@ -61,5 +60,7 @@ void SolenoidController::extendSolenoid(const std_msgs::Bool::ConstPtr& msg)
 
 SolenoidController::~SolenoidController()
 {
+    file.close();
+    fileUnexport.close();
     // TODO : (And take down the pin in the destructor "~SolenoidController()")
 }
