@@ -1,3 +1,0 @@
-<launch>
-    <node pkg="wr_logic_ai" name="hardware_testing" type="hardware_testing.py"/>
-</launch>
