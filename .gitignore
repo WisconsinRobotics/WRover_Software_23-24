@@ -35,3 +35,5 @@ compile_commands.json
 
 *.png
 *.data
+*.swp
+*.old
