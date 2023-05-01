@@ -5,10 +5,7 @@
 #include "std_msgs/Bool.h"
 #include "std_msgs/Int16.h"
 
-// Again, you may want a constructor here
-// For pass-by-value reasons, you may want to take the NodeHandle as an argument
-// And construct the Publisher in this constructor, rather that taking the Publisher as 
-// an argument.
+
 
 constexpr uint32_t MESSAGE_QUEUE_LENGTH = 1000;
 constexpr int16_t openSpeed = 32767;

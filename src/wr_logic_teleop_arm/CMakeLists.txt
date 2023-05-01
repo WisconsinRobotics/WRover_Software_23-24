@@ -129,7 +129,7 @@ include_directories(
 
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
-  src/ClawController.hpp src/SolenoidController.hpp # TODO : Use the *.cpp files here (required, currently there is a build error b/c of this)
+  src/ClawController.cpp src/SolenoidController.cpp # TODO : Use the *.cpp files here (required, currently there is a build error b/c of this)
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ${catkin_LIBRARIES})

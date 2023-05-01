@@ -29,8 +29,6 @@ SolenoidController::SolenoidController(ros::NodeHandle& n) :
     {
         std::cout << "Unable to open /sys/class/gpio/unexport";
     }
-
-    // TODO ; Make sure you set up the GPIO pin in the constructor!
 }
 
 void SolenoidController::extendSolenoid(const std_msgs::Bool::ConstPtr& msg)
