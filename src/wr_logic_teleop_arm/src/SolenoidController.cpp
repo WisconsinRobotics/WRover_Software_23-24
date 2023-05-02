@@ -60,5 +60,5 @@ SolenoidController::~SolenoidController()
 {
     file.close();
     fileUnexport.close();
-    // TODO : (And take down the pin in the destructor "~SolenoidController()")
+    
 }

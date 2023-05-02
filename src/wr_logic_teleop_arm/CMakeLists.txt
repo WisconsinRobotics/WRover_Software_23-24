@@ -129,7 +129,7 @@ include_directories(
 
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
-  src/ClawController.cpp src/SolenoidController.cpp # TODO : Use the *.cpp files here (required, currently there is a build error b/c of this)
+  src/ClawController.cpp src/SolenoidController.cpp
 )
 
 target_link_libraries(${PROJECT_NAME} PRIVATE ${catkin_LIBRARIES})
@@ -147,8 +147,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE ${catkin_LIBRARIES})
 add_executable(ArmTeleopLogic src/ArmTeleopLogic.cpp)
 target_link_libraries(ArmTeleopLogic ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
-add_executable(Main src/Main.cpp) # TODO : May want more descriptive target name
-target_link_libraries(Main ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${PROJECT_NAME})
+add_executable(ClawAndSolenoidCaller src/ClawAndSolenoidCaller.cpp)
+target_link_libraries(ClawAndSolenoidCaller ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${PROJECT_NAME})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
