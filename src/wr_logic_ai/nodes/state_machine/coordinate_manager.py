@@ -21,9 +21,13 @@ class CoordinateManager:
         print(CoordinateManager.ptr)
 
     @staticmethod
-    def next_line():
+    def next_line()->bool:
         CoordinateManager.ptr = CoordinateManager.ptr + 1
+        print("Coordinate Manager: " + str(CoordinateManager.ptr))
+        if(CoordinateManager.ptr >= len(CoordinateManager.coordinates)):
+            return True
         CoordinateManager.maxPtr = max(CoordinateManager.ptr, CoordinateManager.maxPtr)
+        return False
 
     @staticmethod
     def short_range_complete() -> bool:

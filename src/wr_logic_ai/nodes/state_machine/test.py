@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # from state_machine import StateMachine
 # from navigation_events import Event
 # from navigation_states import State

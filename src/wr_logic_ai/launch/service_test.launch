@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="wr_logic_ai" name="userInput" type="UserInput.py" output="screen"/>
+  <node pkg="wr_logic_ai" name="userInputClient" type="user_input_client.py" output="screen"/>
+</launch>
