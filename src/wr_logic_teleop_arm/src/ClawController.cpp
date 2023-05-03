@@ -7,9 +7,7 @@
 
 
 
-constexpr uint32_t MESSAGE_QUEUE_LENGTH = 1000;
-constexpr int16_t openSpeed = 32767;
-constexpr int16_t closeSpeed = -32768;
+
 
 ClawController::ClawController(ros::NodeHandle& n) : 
     pub{n.advertise<std_msgs::Int16>("/hsi/roboclaw/aux3/cmd/left", 

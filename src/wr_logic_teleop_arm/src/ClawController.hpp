@@ -34,7 +34,9 @@ private:
     bool aPressed;
     bool bPressed;
 
-
+    static constexpr uint32_t MESSAGE_QUEUE_LENGTH{1};
+    static constexpr int16_t openSpeed {32767};
+    static constexpr int16_t closeSpeed {-32768};
 };
 
 #endif
