@@ -19,12 +19,14 @@ public:
     auto operator=(SolenoidController&&) -> SolenoidController& = delete;
 
 private:
-
     ros::Subscriber extendYSub;
     bool yPressed;
 
     std::ofstream file;
     std::ofstream fileUnexport;
+
+    static constexpr uint32_t MESSAGE_QUEUE_LENGTH{1};
+    static constexpr uint16_t pin{6};
 };
 
 #endif
