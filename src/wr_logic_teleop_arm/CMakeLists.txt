@@ -14,8 +14,8 @@ find_package(catkin REQUIRED COMPONENTS
   moveit_ros_planning_interface
   moveit_msgs
   moveit_visual_tools
-  std_msgs # added by RM
-  message_generation # added by RM
+  std_msgs
+
 )
 
 ## System dependencies are found with CMake's conventions
@@ -148,7 +148,7 @@ add_executable(ArmTeleopLogic src/ArmTeleopLogic.cpp)
 target_link_libraries(ArmTeleopLogic ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_executable(ClawAndSolenoidCaller src/ClawAndSolenoidCaller.cpp)
-target_link_libraries(ClawAndSolenoidCaller ${catkin_LIBRARIES} ${Boost_LIBRARIES} ${PROJECT_NAME})
+target_link_libraries(ClawAndSolenoidCaller ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
