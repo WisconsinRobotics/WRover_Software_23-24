@@ -9,8 +9,6 @@
 class SolenoidController {
 public:
     explicit SolenoidController(ros::NodeHandle&);
-
-    void extendSolenoid(const std_msgs::Bool::ConstPtr& msg);
     
     ~SolenoidController();
     SolenoidController(const SolenoidController&) = delete;
@@ -23,10 +21,13 @@ private:
     bool yPressed;
 
     std::ofstream file;
+    std::ofstream fileExport;
     std::ofstream fileUnexport;
 
     static constexpr uint32_t MESSAGE_QUEUE_LENGTH{1};
     static constexpr uint16_t pin{6};
+
+    void extendSolenoid(const std_msgs::Bool::ConstPtr& msg);
 };
 
 #endif
