@@ -8,6 +8,7 @@ from wr_logic_ai.srv import EmptySrv
 import rospy
 
 class NavStateMachine(StateMachine):
+    # Defining states
     stInit = State(initial=True)
     stLongRange = State()
     stLongRangeRecovery = State()
@@ -15,6 +16,7 @@ class NavStateMachine(StateMachine):
     stWaypointSuccess = State()
     stComplete = State()
 
+    # Defining events and transitions
     evSuccess = (stLongRange.to(stShortRange) | stLongRangeRecovery.to(
         stLongRange) | stShortRange.to(stWaypointSuccess))
     evError = (stLongRange.to(stLongRangeRecovery) | stLongRangeRecovery.to(
@@ -102,10 +104,10 @@ class NavStateMachine(StateMachine):
         if self._mgr is None:
             raise ValueError
         else:
-            rospy.wait_for_service('user_input_service')
+            rospy.wait_for_service('wait_for_user_input_service')
             try:
-                wait_for_user = rospy.ServiceProxy('user_input_service', EmptySrv)
-                wait_for_user()
+                wait_for_user_input = rospy.ServiceProxy('wait_for_user_input_service', EmptySrv)
+                wait_for_user_input()
             except rospy.ServiceException as e:
                 print(e)
             if (self._mgr.next_line()):
