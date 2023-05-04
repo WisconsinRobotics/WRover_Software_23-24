@@ -47,7 +47,7 @@ class VisionNavigationGate(ShortrangeState):
         while not self.is_done:
             rospy.sleep(rate)
 
-        sub.unregisters()
+        sub.unregister()
         if self.success:
             return ShortrangeAIStates.SUCCESS
         return ShortrangeAIStates.FAIL

@@ -6,7 +6,6 @@ import rospy
 from std_msgs.msg import Float64
 
 from shortrange_util import ShortrangeAIStates, ShortrangeState
-from wr_logic_ai.src.shortrange_util import ShortrangeAIStates
 from wrevolution.srv import ResetEncoder
 
 # Base speed for robot to move at
