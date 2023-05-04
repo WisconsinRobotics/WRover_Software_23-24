@@ -1,15 +1,13 @@
 #!/usr/bin/env python
 
 from statemachine import StateMachine, State
-from coordinate_manager import CoordinateManager
+from wr_logic_ai.coordinate_manager import CoordinateManager
 from wr_logic_ai.msg import TargetMsg
 from wr_logic_ai.msg import NavigationStateMsg
-from wr_logic_ai.nodes.state_machine import waypoint_wait
+from wr_logic_ai.srv import EmptySrv
 import rospy
 
-
 class NavStateMachine(StateMachine):
-    rospy.init_node('nav_state_machine', anonymous=False)
     stInit = State(initial=True)
     stLongRange = State()
     stLongRangeRecovery = State()
@@ -33,18 +31,18 @@ class NavStateMachine(StateMachine):
         self.currentEvent = -1
 
     def process_event(self, data: NavigationStateMsg):
-        print(data.nav_state_type)
-        if data.nav_state_type == NavigationStateMsg.NAV_STATE_TYPE_SUCCESS:
-            self.evSuccess()
-            self.currentEvent = NavigationStateMsg.NAV_STATE_TYPE_SUCCESS
-        elif data.nav_state_type == NavigationStateMsg.NAV_STATE_TYPE_ERROR:
-            self.evError()
-            self.currentEvent = NavigationStateMsg.NAV_STATE_TYPE_ERROR
-        elif data.nav_state_type == NavigationStateMsg.NAV_STATE_TYPE_COMPLETE:
-            self.evComplete()
-            self.currentEvent = NavigationStateMsg.NAV_STATE_TYPE_COMPLETE
-        else:
-            raise TypeError
+        if self.current_state == self.stLongRange or self.current_state == self.stLongRangeRecovery or self.current_state == self.stShortRange: 
+            if data.nav_state_type == NavigationStateMsg.NAV_STATE_TYPE_SUCCESS:
+                self.evSuccess()
+                self.currentEvent = NavigationStateMsg.NAV_STATE_TYPE_SUCCESS
+            elif data.nav_state_type == NavigationStateMsg.NAV_STATE_TYPE_ERROR:
+                self.evError()
+                self.currentEvent = NavigationStateMsg.NAV_STATE_TYPE_ERROR
+            elif data.nav_state_type == NavigationStateMsg.NAV_STATE_TYPE_COMPLETE:
+                self.evComplete()
+                self.currentEvent = NavigationStateMsg.NAV_STATE_TYPE_COMPLETE
+            else:
+                raise TypeError
 
     def on_enter_stInit(self) -> None:
         print("\non enter stInit")
@@ -104,8 +102,12 @@ class NavStateMachine(StateMachine):
         if self._mgr is None:
             raise ValueError
         else:
-           #TODO Call wait for user input
             rospy.wait_for_service('user_input_service')
+            try:
+                wait_for_user = rospy.ServiceProxy('user_input_service', EmptySrv)
+                wait_for_user()
+            except rospy.ServiceException as e:
+                print(e)
             if (self._mgr.next_line()):
                 print("Should Enter event complete")
                 self.evComplete()
@@ -124,6 +126,5 @@ class NavStateMachine(StateMachine):
         target_coords.target_lat = self._mgr.get_coordinate()['lat']
         target_coords.target_long = self._mgr.get_coordinate()['long']
         target_coords.target_type = self._mgr.get_coordinate()['target_type']
-        print("publishing target coordinates")
         self.pub_nav.publish(target_coords)
         # TODO: Publish to topic /navigation_state

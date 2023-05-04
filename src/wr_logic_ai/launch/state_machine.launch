@@ -1,0 +1,4 @@
+<launch>
+  <node pkg="wr_logic_ai" name="userInput" type="UserInput.py" output="screen"/>
+  <node pkg="wr_logic_ai" name="nav_state_machine_driver" type="state_machine_driver.py" output="screen"/>
+</launch>
