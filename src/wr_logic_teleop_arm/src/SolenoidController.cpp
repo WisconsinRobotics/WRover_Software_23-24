@@ -17,6 +17,13 @@ SolenoidController::SolenoidController(ros::NodeHandle& n) :
         std::cout << "Unable to open /sys/class/gpio/gpio6/value";
     }
 
+    fileExport.open("/sys/class/gpio/export");
+    if (!fileExport.is_open())
+    {
+        std::cout << "Unable to open /sys/class/gpio/export";
+    }
+    fileExport << pin;
+
     fileUnexport.open("/sys/class/gpio/unexport");
     if (!fileUnexport.is_open())
     {
@@ -34,10 +41,15 @@ void SolenoidController::extendSolenoid(const std_msgs::Bool::ConstPtr& msg)
         file << 1;
         file.flush();
     }
+    else 
+    {
+        file << 0;
+        file.flush();
+    }
 }
 
 SolenoidController::~SolenoidController()
 {
+    file << 0;
     fileUnexport << pin;
-    fileUnexport.flush();
 }
