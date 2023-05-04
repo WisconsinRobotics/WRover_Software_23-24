@@ -37,8 +37,7 @@ void ClawController::closeClaw(const std_msgs::Bool::ConstPtr& msg)
 
 void ClawController::checkMessage()
 {
-
-    if (aPressed && bPressed)
+    if ((aPressed || !bPressed) && (!aPressed || bPressed))
     {
         std_msgs::Int16 msgNA;
         msgNA.data = 0;
