@@ -82,12 +82,9 @@
         "variant": "cpp"
     },
     "python.autoComplete.extraPaths": [
-        "/home/nomorenickels/Documents/WRover_Software/devel/lib/python3/dist-packages",
-        "/opt/ros/noetic/lib/python3/dist-packages"
     ],
     "python.analysis.extraPaths": [
-        "/home/nomorenickels/Documents/WRover_Software/devel/lib/python3/dist-packages",
-        "/opt/ros/noetic/lib/python3/dist-packages"
+        "./src/wr_hsi_sensing/src"
     ],
     "cmake.sourceDirectory": "${workspaceFolder}/src"
 }
