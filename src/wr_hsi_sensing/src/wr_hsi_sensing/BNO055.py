@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import smbus
 import time
 import struct

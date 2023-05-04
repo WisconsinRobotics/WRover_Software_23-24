@@ -1,0 +1,8 @@
+<launch>
+    <node name="ScienceTeleopScience" pkg="wr_logic_teleop_science" type="ScienceLogic" output="screen">
+        <rosparam file="$(find wr_logic_teleop_science)/config/scienceLogic.yaml"/>
+    </node>
+    <node name="TurnTablePID" pkg="wresponsecontrol" type="WResponseControl" output="screen">
+        <rosparam file="$(find wr_logic_teleop_science)/config/turnTablepid.yaml"/>
+    </node>
+</launch>
