@@ -8,10 +8,10 @@ import angle_to_drive_methods as angle_calc
 
 from sensor_msgs.msg import LaserScan
 
-from wr_logic_ai.msg import NavigationMsg
+from wr_hsi_sensing.msg import CoordinateMsg
 from wr_drive_msgs.msg import DriveTrainCmd
 from geometry_msgs.msg import PoseStamped
-from std_msgs.msg import Bool
+from std_msgs.msg import Float64
 
 import signal
 import sys
@@ -24,6 +24,9 @@ LIDAR_THRESH_DISTANCE = 5  # distance before obstacle avoidance logics is trigge
 NAV_THRESH_DISTANCE = 0.5 # distance before rover believes it has reached the target (in meters)
 
 # initialize target angle to move forward
+current_lat = 0
+current_long = 0
+heading = 0
 target_angle = 90
 target_sector = 0
 smoothing_constant = rospy.get_param("smoothing_constant", 3)
@@ -56,20 +59,29 @@ frameCount = 0
 
 
 def initialize() -> None:
+    # Subscribe to gps coordinate data
+    rospy.Subscriber('/gps_coord_data', CoordinateMsg, update_gps_coord)
 
-    # Subscribe to location data
-    rospy.Subscriber('/nav_data', NavigationMsg, update_heading_and_target)
+    # Subscribe to heading data
+    rospy.Subscriber('/heading_data', Float64, update_heading)
 
     # Subscribe to lidar data
     rospy.Subscriber('/scan', LaserScan, update_navigation)
 
     rospy.spin()
 
+def update_gps_coord(data: CoordinateMsg) -> None:
+    global current_lat
+    global current_long
+    current_lat = data.latitude
+    current_long = data.longitude
 
-HEADING = 0
+def update_heading(data: Float64) -> None:
+    global heading
+    heading = data
+
 # Calculate current heading and the planar target angle
-
-
+# TODO: this should now be part of a action server callback function
 def update_heading_and_target(data) -> None:
     global HEADING
     global movement_complete
