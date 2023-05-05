@@ -66,4 +66,3 @@ def estimate_distance_ft(corners: np.ndarray):
 
 def estimate_distance_m(corners: np.ndarray):
     return FT_TO_M * estimate_distance_ft(corners)
- 

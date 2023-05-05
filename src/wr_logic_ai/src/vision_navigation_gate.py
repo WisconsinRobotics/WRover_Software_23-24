@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
+from typing import Tuple
 import rospy
 
-from shortrange_util import ShortrangeAIStates, ShortrangeState, TargetCache
+from shortrange_util import ShortrangeStateEnum, ShortrangeState, TargetCache
 from wr_logic_ai.msg import TargetMsg
 from wr_drive_msgs.msg import DriveTrainCmd
+from wr_logic_ai.src.shortrange_util import ShortrangeStateEnum
 
 # TODO : Maybe use ROS params/remaps (low priority, can do later)
 vision_topic = rospy.get_param('vision_topic')
@@ -21,6 +23,7 @@ def drive(left: float, right: float):
 class VisionNavigationGate(ShortrangeState):
     def __init__(self) -> None:
         self.two_target_cache = {}
+        self.distance = 0
         self.is_done = False
         self.success = False
 
@@ -40,7 +43,7 @@ class VisionNavigationGate(ShortrangeState):
             # TODO search pattern
             drive(0, 0)
     
-    def run(self) -> ShortrangeAIStates:
+    def run(self) -> Tuple[ShortrangeStateEnum, int]:
         rate = rospy.Rate(10)
         sub = rospy.Subscriber(vision_topic, TargetCache, self.gate_callback)
         
@@ -49,5 +52,5 @@ class VisionNavigationGate(ShortrangeState):
 
         sub.unregister()
         if self.success:
-            return ShortrangeAIStates.SUCCESS
-        return ShortrangeAIStates.FAIL
+            return ShortrangeStateEnum.SUCCESS, self.distance
+        return ShortrangeStateEnum.FAIL, 0

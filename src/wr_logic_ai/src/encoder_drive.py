@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
 import math
+from typing import Tuple
 
 import rospy
 from std_msgs.msg import Float64
 
-from shortrange_util import ShortrangeAIStates, ShortrangeState
+from shortrange_util import ShortrangeStateEnum, ShortrangeState
+from wr_logic_ai.src.shortrange_util import ShortrangeStateEnum
 from wrevolution.srv import ResetEncoder
 
 # Base speed for robot to move at
@@ -35,32 +37,35 @@ def distance_to_encoder(meters: float) -> int:
 
 class EncoderDrive(ShortrangeState):
     def __init__(self, distance: float) -> None:
-        self.is_done = False
         self.setpoint = distance_to_encoder(distance)
+        self.is_done = [False] * 2
 
     def reset_encoder(self, srv_name: str):
         rospy.wait_for_service(srv_name)
         reset_encoder_srv = rospy.ServiceProxy(srv_name, ResetEncoder)
         reset_encoder_srv()
 
-    def encoder_callback(self, motor_pub: rospy.Publisher, setpoint: int, encoder: Float64):
+    def encoder_callback(self, motor_pub: rospy.Publisher, setpoint: int, done_idx: int, encoder: Float64):
         if (encoder.data < setpoint):
             motor_pub.publish(Float64(SPEED)) 
         else:
+            self.is_done[done_idx] = True
             motor_pub.publish(Float64(0))
 
-    def run(self) -> ShortrangeAIStates:
+    def run(self) -> Tuple[ShortrangeStateEnum, int]:
         rate = rospy.Rate(10)
 
         self.reset_encoder(left_encoder_reset_srv)
         self.reset_encoder(right_encoder_reset_srv)
-        sub_left = rospy.Subscriber(left_encoder_topic, Float64, lambda msg : self.encoder_callback(left_motor_pub, self.setpoint, msg))
-        sub_right = rospy.Subscriber(right_encoder_topic, Float64, lambda msg: self.encoder_callback(right_motor_pub, self.setpoint, msg))
+        sub_left = rospy.Subscriber(left_encoder_topic, Float64, lambda msg : self.encoder_callback(left_motor_pub, self.setpoint, 0, msg))
+        sub_right = rospy.Subscriber(right_encoder_topic, Float64, lambda msg: self.encoder_callback(right_motor_pub, self.setpoint, 1, msg))
 
-        while not self.is_done:
+        while not all(self.is_done):
             rospy.sleep(rate)
         
         sub_left.unregister()
         sub_right.unregister()
 
-        return ShortrangeAIStates.FAIL
+        if all(self.is_done):
+            return ShortrangeStateEnum.SUCCESS, 0
+        return ShortrangeStateEnum.FAIL, 0

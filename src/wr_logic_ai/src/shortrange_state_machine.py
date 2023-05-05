@@ -2,13 +2,16 @@
 
 import rospy
 import actionlib
+from actionlib_msgs.msg import GoalStatus
 
-from shortrange_util import ShortrangeAIGoal, ShortrangeAIStates, ShortrangeState
-# from vision_navigation_gate import VisionNavigationGate
-# from vision_navigation_post import VisionNavigationPost
+from shortrange_util import ShortrangeStateEnum, ShortrangeGoalEnum, ShortrangeState
+from encoder_drive import EncoderDrive
+from vision_navigation_gate import VisionNavigationGate
+from vision_navigation_post import VisionNavigationPost
 from wr_logic_ai.msg import ShortrangeAction, ShortrangeGoal
 
-class ShortrangeAIStateMachine:
+
+class ShortrangeStateMachine:
     """
     Shortrange State Machine
     """
@@ -26,22 +29,31 @@ class ShortrangeAIStateMachine:
 
     def shortrange_callback(self, goal: ShortrangeGoal):
         # Set initial state based on goal
-        if goal.target_type == ShortrangeAIGoal.NO_TARGET:
-            self.state = ShortrangeAIStates.SUCCESS
-        elif goal.target_type == ShortrangeAIGoal.ONE_TARGET:
-            self.state = ShortrangeAIStates.VISION_DRIVE_POST
-        elif goal.target_type == ShortrangeAIGoal.TWO_TARGETS:
-            self.state = ShortrangeAIStates.VISION_DRIVE_GATE
+        if goal.target_type == ShortrangeGoalEnum.NO_TARGET:
+            self.state = ShortrangeStateEnum.SUCCESS
+        elif goal.target_type == ShortrangeGoalEnum.ONE_TARGET:
+            self.state = ShortrangeStateEnum.VISION_DRIVE_POST
+        elif goal.target_type == ShortrangeGoalEnum.TWO_TARGETS:
+            self.state = ShortrangeStateEnum.VISION_DRIVE_GATE
         else:
             self.state = None
         
-        if self.state == ShortrangeAIStates.SUCCESS:
+        distance = 0
+        while self.state and self.state not in ShortrangeStateEnum.TERMINATING:
+            if self.state is ShortrangeStateEnum.VISION_DRIVE_POST:
+                self.state, _ = VisionNavigationPost().run()
+            elif self.state is ShortrangeStateEnum.VISION_DRIVE_GATE:
+                self.state, distance = VisionNavigationGate().run()
+            elif self.state is ShortrangeStateEnum.ENCODER_DRIVE:
+                self.state, _ = EncoderDrive(distance).run()
+
+        if self.state is ShortrangeStateEnum.SUCCESS:
             self._as.set_succeeded()
         else:
             self._as.set_aborted()
 
 
 if __name__ == "__main__":
-    rospy.init_node('shortrange_state_machine')
-    ShortrangeAIStateMachine('shortrange_action')
+    rospy.init_node('/wr_logic_ai/shortrange_ai/state_machine')
+    ShortrangeStateMachine('/wr_logic_ai/shortrange_ai/shortrange_action')
     rospy.spin()

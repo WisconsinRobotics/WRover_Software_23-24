@@ -2,13 +2,15 @@
 
 import math
 from enum import Enum
+from typing import Tuple
 
 import rospy
 from geometry_msgs.msg import PoseStamped
 
-from shortrange_util import ShortrangeAIStates, ShortrangeState, TargetCache
+from shortrange_util import ShortrangeStateEnum, ShortrangeState, TargetCache
 from wr_logic_ai.msg import TargetMsg
 from wr_drive_msgs.msg import DriveTrainCmd
+from wr_logic_ai.src.shortrange_util import ShortrangeStateEnum
 
 # TODO : Document/rename variables, I'm not sure what all of these are for
 # distance from target to stop at (in meters)
@@ -92,7 +94,7 @@ class VisionNavigationPost(ShortrangeState):
         else:
             drive(SPEED, -SPEED)
     
-    def run(self) -> ShortrangeAIStates:
+    def  run(self) -> Tuple[ShortrangeStateEnum, int]:
         rate = rospy.Rate(10)
 
         sub = rospy.Subscriber(vision_topic, TargetMsg, self.target_callback)
@@ -102,8 +104,8 @@ class VisionNavigationPost(ShortrangeState):
         
         sub.unregister()
         if self.success:
-            return ShortrangeAIStates.SUCCESS
-        return ShortrangeAIStates.FAIL
+            return ShortrangeStateEnum.SUCCESS, 0
+        return ShortrangeStateEnum.FAIL, 0
 
 
 

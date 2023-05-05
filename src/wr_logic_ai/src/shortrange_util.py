@@ -1,24 +1,26 @@
-from enum import Enum
+from enum import Enum, Flag
+from typing import Tuple
 
 from wr_logic_ai.msg import TargetMsg
 
 
-class ShortrangeAIGoal(Enum):
-    NO_TARGET = 0,
-    ONE_TARGET = 1,
+class ShortrangeGoalEnum(Enum):
+    NO_TARGET = 0
+    ONE_TARGET = 1
     TWO_TARGETS = 2
 
 
-class ShortrangeAIStates(Enum):
-    FAIL = 0,
-    SUCCESS = 1,
-    VISION_DRIVE_POST = 2,
-    VISION_DRIVE_GATE = 3,
-    ENCODER_DRIVE = 4
+class ShortrangeStateEnum(Flag):
+    FAIL = 1
+    SUCCESS = 2
+    VISION_DRIVE_POST = 4
+    VISION_DRIVE_GATE = 8
+    ENCODER_DRIVE = 16
+    TERMINATING = FAIL | SUCCESS
 
 
 class ShortrangeState:
-    def run(self) -> ShortrangeAIStates:
+    def run(self) -> Tuple[ShortrangeStateEnum, int]:
         raise NotImplementedError
 
 
