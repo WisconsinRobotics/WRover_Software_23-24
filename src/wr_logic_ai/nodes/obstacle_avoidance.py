@@ -13,12 +13,6 @@ from wr_drive_msgs.msg import DriveTrainCmd
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Float64
 
-import signal
-import sys
-import os
-import numpy as np
-
-
 # Navigation parameters
 LIDAR_THRESH_DISTANCE = 5  # distance before obstacle avoidance logics is triggered (in meters)
 NAV_THRESH_DISTANCE = 0.5 # distance before rover believes it has reached the target (in meters)
@@ -42,7 +36,6 @@ rospy.init_node('nav_autonomous', anonymous=False)
 # Publisher
 drive_pub = rospy.Publisher(
     '/control/drive_system/cmd', DriveTrainCmd, queue_size=1)
-state_machine_pub = rospy.Publisher('/state_machine', str , queue_size = 1)
 
 # TESING
 heading_pub = rospy.Publisher('/debug_heading', PoseStamped, queue_size=1)
@@ -82,27 +75,20 @@ def update_heading(data: Float64) -> None:
 
 # Calculate current heading and the planar target angle
 # TODO: this should now be part of a action server callback function
-def update_heading_and_target(data) -> None:
-    global HEADING
+def update_target(target_lat, target_long) -> bool:
     global movement_complete
 
-    HEADING = data.heading
-
     # Construct the planar target angle relative to east, accounting for curvature
-    imu = AngleCalculations(data.cur_lat, data.cur_long,
-                            data.tar_lat, data.tar_long)
+    imu = AngleCalculations(current_lat, current_long,
+                            target_lat, target_long)
     target_angle = imu.get_angle() % 360
-    last_movement_complete = movement_complete
-    movement_complete = imu.get_distance() < NAV_THRESH_DISTANCE
-    if last_movement_complete != movement_complete:
-        if(movement_complete):
-            #Publish success to state machine
-            state_machine_pub.publish("evSuccess")
-        else:
-            state_machine_pub.publish("evNotComplete")
     # TESTING
     print("Current heading: " + str(HEADING))
     print('Target angle: ' + str(target_angle))
+    if imu.get_distance() < NAV_THRESH_DISTANCE:
+        return True
+    else:
+        return False
 
 # t = 0
 # Update the robot's navigation and drive it towards the target angle

@@ -1,4 +1,5 @@
 <launch>
-  <node pkg="wr_logic_ai" name="userInput" type="UserInput.py" output="screen"/>
-  <node pkg="wr_logic_ai" name="nav_state_machine_driver" type="state_machine_driver.py" output="screen"/>
+  <!-- <node pkg="wr_logic_ai" name="wait_for_user_input" type="wait_for_user_input.py" output="screen"/> -->
+  <node pkg="wr_logic_ai" name="long_range_action_server" type="long_range_action_server.py" output="screen"/>
+  <!-- <node pkg="wr_logic_ai" name="nav_state_machine_driver" type="state_machine_driver.py" output="screen"/> -->
 </launch>
