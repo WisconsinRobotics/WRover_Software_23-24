@@ -52,14 +52,14 @@ class NavStateMachine(StateMachine):
         goal = LongRangeGoal(target_lat = self._mgr.get_coordinate()["lat"], target_long = self._mgr.get_coordinate()["long"])
         client.send_goal(goal)
         client.wait_for_result()
-        as_state = client.get_state
+        as_state = client.get_state()
         if as_state == GoalStatus.SUCCEEDED:
-            self.evComplete
+            self.evSuccess()
         elif as_state == GoalStatus.ABORTED:
-            self.evError
+            self.evError()
 
     def on_exit_stLongRange(self) -> None:
-        self.timer.shutdown()
+        print("Exting Long Range")
 
     def on_enter_stLongRangeRecovery(self) -> None:
 
@@ -68,19 +68,21 @@ class NavStateMachine(StateMachine):
             raise ValueError
         else:
             self._mgr.previous_line()
-            #print(self._mgr.get_coordinate())
-            print("Running Timer")
-            self.pub_nav = rospy.Publisher('/target_coord', TargetMsg, queue_size=1)
-            self.timer = rospy.Timer(rospy.Duration(0.2), self.publish) 
-            #rospy.spin()
+            print(self._mgr.get_coordinate())            
+            client = actionlib.SimpleActionClient("LongRangeActionServer", LongRangeAction)
+            client.wait_for_server()
+            goal = LongRangeGoal(target_lat = self._mgr.get_coordinate()["lat"], target_long = self._mgr.get_coordinate()["long"])
+            client.send_goal(goal)
+            client.wait_for_result()
+            as_state = client.get_state()
+            if as_state == GoalStatus.SUCCEEDED:
+                self.evSuccess()
+                self._mgr.next_line()
+            elif as_state == GoalStatus.ABORTED:
+                self.evError()
 
     def on_exit_stLongRangeRecovery(self) -> None:
-        self.timer.shutdown()
-        if (self.currentEvent == NavigationStateMsg.NAV_STATE_TYPE_SUCCESS): #TODO Implement with action Server
-            self._mgr.next_line()
-            self.leavingLRError = True
-        else:
-            self.leavingLRError = False
+        pass
 
     def on_enter_stShortRange(self) -> None:
         print("\non enter stShortRange")

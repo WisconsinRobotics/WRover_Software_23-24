@@ -15,7 +15,7 @@ class CoordinateManager:
         
     @staticmethod
     def previous_line():
-        CoordinateManager.ptr = CoordinateManager.ptr - 1
+        CoordinateManager.ptr = max(0,CoordinateManager.ptr - 1)
 
     @staticmethod
     def next_line() -> bool:
