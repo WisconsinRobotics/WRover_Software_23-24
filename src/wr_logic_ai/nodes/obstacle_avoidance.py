@@ -117,6 +117,7 @@ def update_navigation(data) -> None:
         print("Results: " + str(result))
 
         # Set the bounds of the speed multiplier
+        speed_factor = 0.3
         speed_factor = 0 if speed_factor < 0 else speed_factor
         speed_factor = 1 if speed_factor > 1 else speed_factor
         # Get the DriveTrainCmd relating to the heading of the robot and the resulting best navigation angle
