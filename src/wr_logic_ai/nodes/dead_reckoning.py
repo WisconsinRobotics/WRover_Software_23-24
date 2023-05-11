@@ -34,8 +34,8 @@ def update_target_coord(data : TargetMsg):
     msg_data_input[1] = data
     publish()
 
-def update_heading(data: Float64):
-    msg_data_input[2] = data
+def update_heading(msg: Float64):
+    msg_data_input[2] = msg.data
     publish()
 
 def publish():
