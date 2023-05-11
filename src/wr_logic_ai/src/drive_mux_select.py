@@ -11,8 +11,8 @@ class MUX:
         self.last_message = None
 
     def state_call_back(self, message: NavigationState, conversion_table: Dict[int, str], mux_name : str):
-        if (self.last_message != message):
-            self.last_message = message
+        if (self.last_message_state != message.state):
+            self.last_message_state = message.state
             rospy.wait_for_service(f"/{mux_name}/select")
             try:
                 proxy = rospy.ServiceProxy(f"/{mux_name}/select", MuxSelect)
