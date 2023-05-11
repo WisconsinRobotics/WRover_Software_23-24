@@ -3,9 +3,11 @@
 from statemachine import StateMachine, State
 from wr_logic_ai.coordinate_manager import CoordinateManager
 from wr_logic_ai.msg import TargetMsg
-from wr_logic_ai.msg import NavigationStateMsg
 from wr_logic_ai.srv import EmptySrv
 import rospy
+import actionlib
+from wr_logic_ai.msg import LongRangeAction, LongRangeGoal
+from actionlib_msgs.msg import GoalStatus
 
 class NavStateMachine(StateMachine):
     # Defining states
@@ -27,24 +29,8 @@ class NavStateMachine(StateMachine):
 
     def __init__(self, mgr: CoordinateManager) -> None:
         self._mgr = mgr
-        rospy.Subscriber('/nav_state_msg', NavigationStateMsg,
-                         lambda msg: self.process_event(msg))
         super(NavStateMachine, self).__init__()
         self.currentEvent = -1
-
-    def process_event(self, data: NavigationStateMsg):
-        if self.current_state == self.stLongRange or self.current_state == self.stLongRangeRecovery or self.current_state == self.stShortRange: 
-            if data.nav_state_type == NavigationStateMsg.NAV_STATE_TYPE_SUCCESS:
-                self.evSuccess()
-                self.currentEvent = NavigationStateMsg.NAV_STATE_TYPE_SUCCESS
-            elif data.nav_state_type == NavigationStateMsg.NAV_STATE_TYPE_ERROR:
-                self.evError()
-                self.currentEvent = NavigationStateMsg.NAV_STATE_TYPE_ERROR
-            elif data.nav_state_type == NavigationStateMsg.NAV_STATE_TYPE_COMPLETE:
-                self.evComplete()
-                self.currentEvent = NavigationStateMsg.NAV_STATE_TYPE_COMPLETE
-            else:
-                raise TypeError
 
     def on_enter_stInit(self) -> None:
         print("\non enter stInit")
@@ -57,11 +43,20 @@ class NavStateMachine(StateMachine):
 
     def on_enter_stLongRange(self) -> None:
         print("\non enter stLongRange")
-        print("Running Timer")
-        self.pub_nav = rospy.Publisher('/target_coord', TargetMsg, queue_size=1)
-        self.timer = rospy.Timer(rospy.Duration(0.2), self.publish)
-        # print(self._mgr.get_coordinate())
-        # rospy.spin()
+        # print("Running Timer")
+        # self.pub_nav = rospy.Publisher('/target_coord', TargetMsg, queue_size=1)
+        # self.timer = rospy.Timer(rospy.Duration(0.2), self.publish)
+        
+        client = actionlib.SimpleActionClient("LongRangeActionServer", LongRangeAction)
+        client.wait_for_server()
+        goal = LongRangeGoal(target_lat = self._mgr.get_coordinate()["lat"], target_long = self._mgr.get_coordinate()["long"])
+        client.send_goal(goal)
+        client.wait_for_result()
+        as_state = client.get_state
+        if as_state == GoalStatus.SUCCEEDED:
+            self.evComplete
+        elif as_state == GoalStatus.ABORTED:
+            self.evError
 
     def on_exit_stLongRange(self) -> None:
         self.timer.shutdown()
@@ -81,7 +76,7 @@ class NavStateMachine(StateMachine):
 
     def on_exit_stLongRangeRecovery(self) -> None:
         self.timer.shutdown()
-        if (self.currentEvent == NavigationStateMsg.NAV_STATE_TYPE_SUCCESS):
+        if (self.currentEvent == NavigationStateMsg.NAV_STATE_TYPE_SUCCESS): #TODO Implement with action Server
             self._mgr.next_line()
             self.leavingLRError = True
         else:
@@ -130,3 +125,8 @@ class NavStateMachine(StateMachine):
         target_coords.target_type = self._mgr.get_coordinate()['target_type']
         self.pub_nav.publish(target_coords)
         # TODO: Publish to topic /navigation_state
+
+if __name__ == "__main__":
+    rospy.init_node('nav_state_machine', anonymous=False)
+    statemachine = NavStateMachine(CoordinateManager())
+    rospy.spin()

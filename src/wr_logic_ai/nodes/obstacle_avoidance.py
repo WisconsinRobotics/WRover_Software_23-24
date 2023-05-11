@@ -23,35 +23,33 @@ current_long = 0
 heading = 0
 target_angle = 90
 target_sector = 0
-smoothing_constant = rospy.get_param("smoothing_constant", 3)
+smoothing_constant = 0
 # Get the speed multiplier of the current runtime for the obstacle_avoidance
 # 0.2 is bugged
-speed_factor = rospy.get_param("speed_factor", 0.3)
+speed_factor = 0
 is_active = False
 movement_complete = None
 
-# Initialize node
-rospy.init_node('nav_autonomous', anonymous=False)
-
-# Publisher
-drive_pub = rospy.Publisher(
-    '/control/drive_system/cmd', DriveTrainCmd, queue_size=1)
-
-# TESING
-heading_pub = rospy.Publisher('/debug_heading', PoseStamped, queue_size=1)
-heading_msg = PoseStamped()
-heading_msg.pose.position.x = 0
-heading_msg.pose.position.y = 0
-heading_msg.pose.position.z = 0
-heading_msg.pose.orientation.x = 0
-heading_msg.pose.orientation.y = 0
-heading_msg.header.frame_id = "laser"
-frameCount = 0
-
 # Start the tasks managed to drive autonomously
 
-
 def initialize() -> None:
+    global drive_pub
+    global smoothing_constant
+    global speed_factor
+    global heading_pub
+    global frameCount
+    global heading_msg
+
+    # Initialize node
+    rospy.init_node('nav_autonomous', anonymous=False)
+
+    # Initialize ros params
+    smoothing_constant = rospy.get_param("smoothing_constant", 3)
+    speed_factor = rospy.get_param("speed_factor", 0.3)
+
+    # Publisher
+    drive_pub = rospy.Publisher('/control/drive_system/cmd', DriveTrainCmd, queue_size=1)
+
     # Subscribe to gps coordinate data
     rospy.Subscriber('/gps_coord_data', CoordinateMsg, update_gps_coord)
 
@@ -61,7 +59,16 @@ def initialize() -> None:
     # Subscribe to lidar data
     rospy.Subscriber('/scan', LaserScan, update_navigation)
 
-    rospy.spin()
+    # TESING
+    heading_pub = rospy.Publisher('/debug_heading', PoseStamped, queue_size=1)
+    heading_msg = PoseStamped()
+    heading_msg.pose.position.x = 0
+    heading_msg.pose.position.y = 0
+    heading_msg.pose.position.z = 0
+    heading_msg.pose.orientation.x = 0
+    heading_msg.pose.orientation.y = 0
+    heading_msg.header.frame_id = "laser"
+    frameCount = 0
 
 def update_gps_coord(data: CoordinateMsg) -> None:
     global current_lat
@@ -83,8 +90,8 @@ def update_target(target_lat, target_long) -> bool:
                             target_lat, target_long)
     target_angle = imu.get_angle() % 360
     # TESTING
-    print("Current heading: " + str(HEADING))
-    print('Target angle: ' + str(target_angle))
+    # print("Current heading: " + str(heading))
+    # print('Target angle: ' + str(target_angle))
     if imu.get_distance() < NAV_THRESH_DISTANCE:
         return True
     else:
@@ -127,6 +134,7 @@ def update_navigation(data) -> None:
         # Publish the DriveTrainCmd to the topic
         #print("Left Value: " + str(msg.left_value))
         #print("Right Value: " + str(msg.right_value))
+        drive_pub.publish(msg)
        
         # TESTING
         heading_msg.header.seq = frameCount

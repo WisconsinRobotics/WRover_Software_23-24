@@ -82,6 +82,8 @@
         "variant": "cpp"
     },
     "python.autoComplete.extraPaths": [
+        "/home/arthur/WRover_Software/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages"
     ],
     "python.analysis.extraPaths": [
         "./src/wr_hsi_sensing/src"

@@ -22,8 +22,6 @@ class AngleCalculations:
     def latitude_to_distance(self, lat1: float, lat2:float) -> float:
         # Set the reference 'up' if the target is further north than the current location
         self.up = self.cur_lat < self.tar_lat
-        print("Current Latitude: " + str(self.cur_lat))
-        print("Target Latidue: " + str(self.tar_lat))
 
         # Uses Haversine calculations to compute the Great Circle distance between two latitudes
         deltaLatitude = math.radians(math.fabs(lat2 - lat1))

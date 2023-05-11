@@ -1,4 +1,0 @@
-uint8 nav_state_type
-uint8 NAV_STATE_TYPE_SUCCESS = 1
-uint8 NAV_STATE_TYPE_ERROR = 0
-uint8 NAV_STATE_TYPE_COMPLETE = 2
