@@ -4,12 +4,6 @@ from typing import Tuple
 from wr_logic_ai.msg import TargetMsg
 
 
-class ShortrangeGoalEnum(Enum):
-    NO_TARGET = 0
-    ONE_TARGET = 1
-    TWO_TARGETS = 2
-
-
 class ShortrangeStateEnum(Flag):
     FAIL = 1
     SUCCESS = 2

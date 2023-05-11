@@ -27,6 +27,7 @@ def process_corners(target_id: int, corners: np.ndarray) -> TargetMsg:
 def main():
     pub = rospy.Publisher(vision_topic, TargetMsg, queue_size=10)
     rospy.init_node('vision_target_detection')
+
     rate = rospy.Rate(10)
 
     stream_url = rospy.get_param('video_stream')
