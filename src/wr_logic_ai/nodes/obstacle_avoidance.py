@@ -28,7 +28,6 @@ smoothing_constant = 0
 # 0.2 is bugged
 speed_factor = 0
 is_active = False
-movement_complete = None
 
 # Start the tasks managed to drive autonomously
 
@@ -83,7 +82,7 @@ def update_heading(data: Float64) -> None:
 # Calculate current heading and the planar target angle
 # TODO: this should now be part of a action server callback function
 def update_target(target_lat, target_long) -> bool:
-    global movement_complete
+    global target_angle
 
     # Construct the planar target angle relative to east, accounting for curvature
     imu = AngleCalculations(current_lat, current_long,
