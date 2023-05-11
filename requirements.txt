@@ -3,3 +3,4 @@ rospkg==1.2.10
 adafruit-circuitpython-gps==3.10.7
 python-statemachine==2.0.0
 scipy
+rpi.gpio
