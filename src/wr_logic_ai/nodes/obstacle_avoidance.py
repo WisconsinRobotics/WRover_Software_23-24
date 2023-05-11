@@ -11,7 +11,7 @@ from sensor_msgs.msg import LaserScan
 from wr_logic_ai.msg import NavigationMsg
 from wr_drive_msgs.msg import DriveTrainCmd
 from geometry_msgs.msg import PoseStamped
-from std_msgs.msg import Bool
+from std_msgs.msg import Bool, String
 
 import signal
 import sys
@@ -39,7 +39,7 @@ rospy.init_node('nav_autonomous', anonymous=False)
 # Publisher
 drive_pub = rospy.Publisher(
     '/control/drive_system/cmd', DriveTrainCmd, queue_size=1)
-state_machine_pub = rospy.Publisher('/state_machine', str , queue_size = 1)
+state_machine_pub = rospy.Publisher('/state_machine', String, queue_size = 1)
 
 # TESING
 heading_pub = rospy.Publisher('/debug_heading', PoseStamped, queue_size=1)
