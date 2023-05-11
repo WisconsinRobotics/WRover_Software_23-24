@@ -11,8 +11,8 @@ claws:
     enc_right:
         enabled: true
         max_speed: 100
-    current_limit_left: 15
-    current_limit_right: 15
+    #current_limit_left: 15
+    #current_limit_right: 15
   aux1: # arm elbow/forearm, science ?
     topic: '/hsi/roboclaw/aux1'
     address: 0x81
@@ -23,8 +23,8 @@ claws:
     enc_right:
         enabled: true
         max_speed: 100
-    current_limit_left: 15
-    current_limit_right: 15
+    #current_limit_left: 15
+    #current_limit_right: 15
   aux2: # arm wrist, science ?
     topic: '/hsi/roboclaw/aux2'
     address: 0x82
@@ -35,8 +35,8 @@ claws:
     enc_right:
         enabled: true
         max_speed: 100
-    current_limit_left: 15
-    current_limit_right: 15
+    #current_limit_left: 15
+    #current_limit_right: 15
   aux3: # arm manip, science ?
     topic: '/hsi/roboclaw/aux3'
     address: 0x83
@@ -47,5 +47,5 @@ claws:
     enc_right:
         enabled: true
         max_speed: 300000000
-    current_limit_left: 15
-    current_limit_right: 15
+    #current_limit_left: 15
+    #current_limit_right: 15

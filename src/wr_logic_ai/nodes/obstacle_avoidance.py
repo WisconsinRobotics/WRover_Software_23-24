@@ -129,6 +129,7 @@ def update_navigation(data) -> None:
         # Publish the DriveTrainCmd to the topic
         #print("Left Value: " + str(msg.left_value))
         #print("Right Value: " + str(msg.right_value))
+        drive_pub.publish(msg)
        
         # TESTING
         heading_msg.header.seq = frameCount
