@@ -1,0 +1,5 @@
+<launch>
+    <node name="led_matrix" pkg="wr_led_matrix" type="led_matrix.py">
+		<rosparam file="$(find wr_led_matrix)/config/led_matrix.yaml"/>
+	</node>
+</launch>

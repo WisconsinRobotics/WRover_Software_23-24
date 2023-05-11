@@ -1,0 +1,6 @@
+<launch>
+    <!-- <arg name="debug" default="false"/> -->
+    <node name="imu" type="imu_testing.py" pkg="wr_hsi_sensing" output="screen"/>
+    <node name="gps" type="gps_testing.py" pkg="wr_hsi_sensing" output="screen"/>
+    <node name="dead_reckoning" type="dead_reckoning.py" pkg="wr_logic_ai" output="screen"/>
+</launch>

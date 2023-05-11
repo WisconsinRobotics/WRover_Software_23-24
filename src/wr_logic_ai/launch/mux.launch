@@ -11,14 +11,9 @@
     </node>
     <!-- <node pkg="wr_logic_ai" name="dead_reckoning" type="dead_reckoning.py" output="screen"/> -->
     <node pkg="wr_logic_ai" name="testData" type="inputFakeData.py" output="screen">
+        <param name="run_in_mock" value="$(arg run_in_mock)"/>
     </node>
     <include file="$(find rplidar_ros)/launch/rplidar.launch"/>
     <node pkg="rviz" name="$(anon rviz)" type="rviz" output="screen" args="-d $(find wr_logic_ai)/launch/obstacle_avoidance_mock.rviz" if="$(arg run_in_mock)"/>
     <node pkg="rviz" name="$(anon rviz)" type="rviz" output="screen" args="-d $(find wr_logic_ai)/launch/obstacle_avoidance.rviz" unless="$(arg run_in_mock)"/>
-
-    <node pkg="topic_tools" type="mux" name="nav_mux" args="/motor_output $(arg long_range_output) $(arg short_range_output)"/>
-    <node pkg="wr_logic_ai" name="navigation_mux" type="navigation_mux.py" output="screen">
-        <param name="long_range_output" value="$(arg long_range_output)"/>
-        <param name="short_range_output" value="$(arg short_range_output)"/>
-    </node>
 </launch>

@@ -1,0 +1,15 @@
+@startuml Navigation State Machine
+hide empty description
+
+[*] -right-> Init
+Init -right-> LongRange : unconditional
+LongRange -down-> LR_Recovery : error
+LR_Recovery --> LR_Recovery : error
+LR_Recovery --> LongRange : success
+LongRange -right-> ShortRange : success
+ShortRange -left-> LongRange : error
+ShortRange --> WaypointSuccess : success
+WaypointSuccess -up-> LongRange : notWaiting
+WaypointSuccess -down->Complete : everythingDone
+
+@enduml

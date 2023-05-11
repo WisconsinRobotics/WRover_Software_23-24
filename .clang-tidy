@@ -1,0 +1,10 @@
+Checks: "bugprone-*,performance-*,readability-*,modernize-*,hicpp-*,cppcoreguidelines-*,clang-analyzer-*,-readability-braces-around-statements,-hicpp-braces-around-statements,-cppcoreguidelines-non-private-member-variables-in-classes"
+WarningsAsErrors:    ''
+HeaderFilterRegex:   ''
+CheckOptions:
+  - key: readability-magic-numbers.IgnoredIntegerValues
+    value: '1;'
+  - key: hicpp-signed-bitwise.IgnorePositiveIntegerLiterals
+    value: 'true'
+  - key: readability-function-cognitive-complexity.IgnoreMacros
+    value: 'true'

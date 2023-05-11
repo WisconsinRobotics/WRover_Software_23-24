@@ -1,10 +1,10 @@
 <!-- Launches the real hardware interface for the roboclaws. -->
 <launch>
-  <arg name="use_encoders" default="false"/>
+  <arg name="use_encoders" default="true"/>
 
   <group ns="hsi">
     <group ns="roboclaw">
-      <node name="roboclaw" pkg="wroboclaw" type="drive_roboclaw.py" machine="wrover">
+      <node name="roboclaw" pkg="wroboclaw" type="drive_roboclaw.py">
         <rosparam file="$(find wr_hsi_roboclaw)/config/roboclaw_enc.yaml" if="$(arg use_encoders)"/>
         <rosparam file="$(find wr_hsi_roboclaw)/config/roboclaw_noenc.yaml" unless="$(arg use_encoders)"/>
       </node>

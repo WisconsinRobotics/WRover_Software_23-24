@@ -3,6 +3,7 @@ project(wr_control_drive_science)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
+set(CXX_STANDARD 14)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -11,6 +12,10 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
 )
+
+
+find_package(Boost REQUIRED COMPONENTS python)
+find_package(PythonLibs 2.7 REQUIRED)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -104,7 +109,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES wr_control_drive_science
-#  CATKIN_DEPENDS roscpp rospy
+   CATKIN_DEPENDS roscpp rospy
 #  DEPENDS system_lib
 )
 
@@ -117,12 +122,25 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
+  ${PYTHON_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
 #   src/${PROJECT_NAME}/wr_control_drive_science.cpp
 # )
+
+# add_library(testModule
+#   main.cpp
+# )
+
+# target_link_libraries(testModule ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
+# set_target_properties(testModule PROPERTIES
+#         PREFIX ""
+#         LIBRARY_OUTPUT_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_PYTHON_DESTINATION}
+#         )
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -132,7 +150,9 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/wr_control_drive_science_node.cpp)
+add_executable(ScienceControl src/TeleopScienceControl.cpp)
+target_link_libraries(ScienceControl ${catkin_LIBRARIES})
+add_dependencies(ScienceControl ${catkin_EXPORTED_TARGETS})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
