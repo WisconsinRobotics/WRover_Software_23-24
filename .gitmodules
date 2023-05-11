@@ -1,6 +1,3 @@
-[submodule "src/rplidar_ros"]
-	path = src/rplidar_ros
-	url = ssh://git@github.com/Slamtec/rplidar_ros
 [submodule "src/wroboclaw"]
 	path = src/wroboclaw
 	url = https://github.com/WisconsinRobotics/wroboclaw
@@ -13,3 +10,9 @@
 [submodule "src/wresponsecontrol"]
 	path = src/wresponsecontrol
 	url = https://github.com/WisconsinRobotics/wresponsecontrol
+[submodule "src/wrplidar_ros"]
+	path = src/wrplidar_ros
+	url = https://github.com/WisconsinRobotics/wrplidar_ros.git
+[submodule "src/wrevolution"]
+	path = src/wrevolution
+	url = https://github.com/WisconsinRobotics/wrevolution
