@@ -67,9 +67,11 @@ def get_valley(
 
     # rospy.loginfo(f"{data.ranges}")
     # hist = offset_lidar_data(gaussian_smooth.gaussian_filter1d(data.ranges, smoothing), sector_angle)
-    hist = offset_lidar_data(data.ranges, sector_angle)
+    # hist = offset_lidar_data(data.ranges, sector_angle)
     # For testing:
-    # hist = gaussian_smooth.gaussian_filter1d(data.ranges, smoothing)
+    #hist = gaussian_smooth.gaussian_filter1d(data.ranges, smoothing)
+    
+    hist = data.ranges
 
     # Write the sectors data to an output file for logging
     output_file = open('sectors.data', 'wb')

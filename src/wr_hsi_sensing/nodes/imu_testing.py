@@ -126,6 +126,7 @@ def cb():
     pub_norm_y.publish(Float64(norm_y))
 
     heading = math.atan2(norm_y, norm_x) + math.pi
+    heading = math.degrees(heading)
     pub_heading.publish(Float64(heading))
 
     print(heading)

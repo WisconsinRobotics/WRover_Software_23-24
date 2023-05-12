@@ -48,29 +48,33 @@ class AngleCalculations:
     # Get the planar angle relative to planar East as the straight-line trajectory towards the goal
     def get_angle(self) -> float:
         # Use the Great Circle distances of the spherical triangle legs to get the angle (-90,90) to the goal coordinates
-        if(self.cur_long != self.tar_long):
-            angle = math.atan(self.latitude_to_distance(self.cur_lat, self.tar_lat) / self.longitude_to_distance(self.cur_long, self.tar_long))
-            angle = math.degrees(angle)
-        else:
-            angle = 90
-            if self.cur_lat < self.tar_lat:
-                self.up = True
-            else:
-                self.up = False
+ 
+        angle = math.atan2(self.latitude_to_distance(self.cur_lat, self.tar_lat), self.longitude_to_distance(self.cur_long, self.tar_long)) #TODO: Why not use atan2?
+        angle = math.degrees(angle)
 
-        # Use the reference flags to move the angle to the right quadrant.
-        # Angle in Q II
-        if (not self.right and self.up):
-            print()
-            angle = 180.0 - angle
+        
+        # #Setting up in which quadrant we are
+        # if self.cur_lat < self.tar_lat:
+        #     self.up = True
+        # else:
+        #     self.up = False
+        # if self.cur_long < self.tar_long:
+        #     self.right = True
+        # else:
+        #     self.right = False
 
-        # Angle in Q III
-        elif (not self.right and not self.up):
-            angle = angle + 180.0
+        # # Use the reference flags to move the angle to the right quadrant.
+        # # Angle in Q II
+        # if (not self.right and self.up):
+        #     angle = 180.0 - angle
 
-        # Angle in Q IV
-        elif (self.right and not self.up):
-            angle = 360.0 - angle
+        # # Angle in Q III
+        # elif (not self.right and not self.up):
+        #     angle = angle + 180.0
+
+        # # Angle in Q IV
+        # elif (self.right and not self.up):
+        #     angle = 360.0 - angle
 
         return angle
 

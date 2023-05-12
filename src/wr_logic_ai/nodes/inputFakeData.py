@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import rospy
 from std_msgs.msg import Float64
-from sensor_msgs.msg import LaserScan 
-from wr_logic_ai.msg import NavigationMsg
+from sensor_msgs.msg import LaserScan
+from wr_hsi_sensing.msg import CoordinateMsg 
 
 from wr_drive_msgs.msg import DriveTrainCmd
 from geometry_msgs.msg import PoseStamped
@@ -21,10 +21,11 @@ def get_laser_ranges(t = 0):
         return inputData
 
 def run_mock_data() -> None:
-    global nav
+    global mock_heading
 
     distanceData = rospy.Publisher('/scan', LaserScan, queue_size=10)
-    navigation = rospy.Publisher('/nav_data', NavigationMsg, queue_size=10)
+    mock_heading_pub = rospy.Publisher('/heading_data', Float64, queue_size=10)
+    mock_gps_pub = rospy.Publisher('/gps_coord_data', CoordinateMsg, queue_size=10)
     zero_pub = rospy.Publisher('/debug_zero', PoseStamped, queue_size=10)
     zero_msg = PoseStamped()
     zero_msg.pose.position.x = 0
@@ -38,7 +39,7 @@ def run_mock_data() -> None:
     frameCount = 0
 
     #Testing publishers and subscribers
-    rospy.Subscriber('/control/drive_system/cmd', DriveTrainCmd, updateHeading)
+    #rospy.Subscriber('/control/drive_system/cmd', DriveTrainCmd, updateHeading)
 
     laser = LaserScan()
     #vara.intensities
@@ -54,14 +55,10 @@ def run_mock_data() -> None:
     laser.header.frame_id = "laser"
     laser.intensities = []
 
-    nav = NavigationMsg()
-
-    nav.cur_lat = 0
-    nav.cur_long = 0
-    nav.heading = 0
-
-    nav.tar_lat = 10
-    nav.tar_long = 0
+    mock_heading = 0
+    mock_gps = CoordinateMsg()
+    mock_gps.latitude = 0
+    mock_gps.longitude = 0
 
     print("sent fake nav data")
 
@@ -75,15 +72,16 @@ def run_mock_data() -> None:
         zero_msg.header.stamp = rospy.get_rostime()
         frameCount += 1
 
-        navigation.publish(nav) #send nav data to subscriber in obstacle avoidance
+        mock_heading_pub.publish(mock_heading)
+        mock_gps_pub.publish(mock_gps)
         zero_pub.publish(zero_msg)
         sleeper.sleep()
         t += 2
         t %= 360
 
 def updateHeading(data) -> None:
-    global nav
-    nav.heading = (nav.heading + (data.right_value - data.left_value)*10) % 360
+    global mock_heading
+    mock_heading = (mock_heading + (data.right_value - data.left_value)*10) % 360
 
 def display_data(data) -> None:
     rviz_data = deepcopy(data)
@@ -97,7 +95,7 @@ def run_real_data() -> None:
 if __name__ == '__main__':
     rospy.init_node('publish_fake_data', anonymous=False)
 
-    if rospy.get_param('~run_in_mock', False):
+    if rospy.get_param('~run_in_mock', True):
         # Run fake data
         run_mock_data()
     else:

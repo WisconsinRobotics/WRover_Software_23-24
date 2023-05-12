@@ -74,8 +74,14 @@ def update_gps_coord(msg: CoordinateMsg) -> None:
     current_long = msg.longitude
 
 def update_heading(msg: Float64) -> None:
-    global cur_heading
-    cur_heading = msg.data
+    global cur_heading #extected as 0-360 from  North (Clockwise)
+    cur_heading = (90-msg.data) % 360 #Shifting to East
+
+def angle_diff(heading1: float, heading2: float) -> float:
+    print(str(heading1) + "  " +str(heading2))
+    diff = (heading1 - heading2 + 360) % 360
+    print("DIFFFFF" + str(diff))
+    return (diff + 180) % 360 - 180
 
 # Calculate current heading and the planar target angle
 # TODO: this should now be part of a action server callback function
@@ -86,9 +92,10 @@ def update_target(target_lat, target_long) -> bool:
     imu = AngleCalculations(current_lat, current_long,
                             target_lat, target_long)
     target_angle = imu.get_angle() % 360
+    
     # TESTING
     # print("Current heading: " + str(heading))
-    # print('Target angle: ' + str(target_angle))
+    #print('Target angle: ' + str(target_angle))
     if imu.get_distance() < NAV_THRESH_DISTANCE:
         return True
     else:
@@ -108,14 +115,19 @@ def update_navigation(data) -> None:
     # data_avg is above 0.5 almost always, but result stays the same (?)
     if data_avg >= 0.5:
         # Gets best possible angle, considering obstacles
+        delta_heading = angle_diff(target_angle, cur_heading)
         result = get_navigation_angle(
-            (cur_heading - target_angle) / math.degrees(data.angle_increment),  # sector angle
+            ((((90 - delta_heading) % 360) + 360) % 360) / math.degrees(data.angle_increment),  # sector angle
             LIDAR_THRESH_DISTANCE,
             data,
             smoothing_constant)
 
         # TESTING
+        print("CUR_HEADING: " + str(cur_heading))
         print("Results: " + str(result))
+        print("FUNNY MATHS: " + str(((((90 - delta_heading) % 360) + 360) % 360)))
+        print("DELTA HEADING: " + str(delta_heading))
+        
         raw_heading_pub.publish(result)
 
         # Set the bounds of the speed multiplier
@@ -123,7 +135,7 @@ def update_navigation(data) -> None:
         speed_factor = 0 if speed_factor < 0 else speed_factor
         speed_factor = 1 if speed_factor > 1 else speed_factor
         # Get the DriveTrainCmd relating to the heading of the robot and the resulting best navigation angle
-        msg = angle_calc.piecewise_linear(result, 0)
+        msg = angle_calc.piecewise_linear(angle_diff(90, result), 0)
 #        t += 2
 #        if t > 90: # t for debugging purposes
 #            t = -90
