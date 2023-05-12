@@ -89,7 +89,8 @@ def cb():
     if abs(mag_y - prev_y) < MAG_NOISE_THRESH:
         y_filter.feed(mag_y)
 
-    # print(f"min/max x: {min_x}, {max_x}")
+    rospy.loginfo(f"min/max x: {min_x}, {max_x}")
+    rospy.loginfo(f"min/max y: {min_y}, {max_y}")
 
     mag_x = x_filter.get_value()
     mag_y = y_filter.get_value()
