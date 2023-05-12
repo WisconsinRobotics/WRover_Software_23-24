@@ -67,15 +67,15 @@ def initialize() -> None:
     frameCount = 0
     raw_heading_pub = rospy.Publisher('/debug_heading', Float64, queue_size=1)
 
-def update_gps_coord(data: CoordinateMsg) -> None:
+def update_gps_coord(msg: CoordinateMsg) -> None:
     global current_lat
     global current_long
-    current_lat = data.latitude
-    current_long = data.longitude
+    current_lat = msg.latitude
+    current_long = msg.longitude
 
-def update_heading(data: Float64) -> None:
+def update_heading(msg: Float64) -> None:
     global cur_heading
-    cur_heading = data
+    cur_heading = msg.data
 
 # Calculate current heading and the planar target angle
 # TODO: this should now be part of a action server callback function
