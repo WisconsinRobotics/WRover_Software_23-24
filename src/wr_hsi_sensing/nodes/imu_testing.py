@@ -10,12 +10,12 @@ f = 100     # Hz | Rate at which pose messages are published
 
 rospy.init_node('imu_testing', anonymous=False)
 rate = rospy.Rate(f)
-pub_x = rospy.Publisher('/mag_x', Int32, queue_size=1)
-pub_y = rospy.Publisher('/mag_y', Int32, queue_size=1)
-pub_z = rospy.Publisher('/mag_z', Int32, queue_size=1)
+pub_x = rospy.Publisher('/mag_x', Float64, queue_size=1)
+pub_y = rospy.Publisher('/mag_y', Float64, queue_size=1)
+pub_z = rospy.Publisher('/mag_z', Float64, queue_size=1)
 
-pub_norm_x = rospy.Publisher('/norm_mag_x', Int32, queue_size=1)
-pub_norm_y = rospy.Publisher('/norm_mag_y', Int32, queue_size=1)
+pub_norm_x = rospy.Publisher('/norm_mag_x', Float64, queue_size=1)
+pub_norm_y = rospy.Publisher('/norm_mag_y', Float64, queue_size=1)
 pub_heading = rospy.Publisher('/heading_data', Float64, queue_size=1)
 
 MAG_NOISE_THRESH = 500
@@ -106,8 +106,8 @@ def cb():
     norm_y = mag_y - ( range_y / 2 + min_y)
     norm_x /= range_x if range_x != 0 else 1
     norm_y /= range_y if range_y != 0 else 1
-    pub_norm_x.publish(int(norm_x))
-    pub_norm_y.publish(int(norm_y))
+    pub_norm_x.publish(Float64(norm_x))
+    pub_norm_y.publish(Float64(norm_y))
 
     heading = math.atan2(norm_y, norm_x)
     pub_heading.publish(Float64(heading))
@@ -118,7 +118,7 @@ def cb():
 
     pub_x.publish(mag_x)
     pub_y.publish(mag_y)
-    pub_z.publish(mag_z)
+    pub_z.publish(float(mag_z))
 
 if __name__ == '__main__':
     prev_x = int.from_bytes(sensor.readBytes(BNO055.BNO055_MAG_DATA_X_LSB_ADDR, 2), 'little')
