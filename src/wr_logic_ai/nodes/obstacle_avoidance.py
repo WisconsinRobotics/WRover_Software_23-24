@@ -20,7 +20,7 @@ NAV_THRESH_DISTANCE = 0.5 # distance before rover believes it has reached the ta
 # initialize target angle to move forward
 current_lat = 0
 current_long = 0
-heading = 0
+cur_heading = 0
 target_angle = 90
 target_sector = 0
 smoothing_constant = 0
@@ -74,8 +74,8 @@ def update_gps_coord(data: CoordinateMsg) -> None:
     current_long = data.longitude
 
 def update_heading(data: Float64) -> None:
-    global heading
-    heading = data
+    global cur_heading
+    cur_heading = data
 
 # Calculate current heading and the planar target angle
 # TODO: this should now be part of a action server callback function
@@ -109,7 +109,7 @@ def update_navigation(data) -> None:
     if data_avg >= 0.5:
         # Gets best possible angle, considering obstacles
         result = get_navigation_angle(
-            target_angle / math.degrees(data.angle_increment),  # sector angle
+            (cur_heading - target_angle) / math.degrees(data.angle_increment),  # sector angle
             LIDAR_THRESH_DISTANCE,
             data,
             smoothing_constant)
@@ -123,7 +123,7 @@ def update_navigation(data) -> None:
         speed_factor = 0 if speed_factor < 0 else speed_factor
         speed_factor = 1 if speed_factor > 1 else speed_factor
         # Get the DriveTrainCmd relating to the heading of the robot and the resulting best navigation angle
-        msg = angle_calc.piecewise_linear(heading if heading else 0, result)
+        msg = angle_calc.piecewise_linear(result, 0)
 #        t += 2
 #        if t > 90: # t for debugging purposes
 #            t = -90

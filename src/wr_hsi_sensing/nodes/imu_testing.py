@@ -21,7 +21,7 @@ pub_heading = rospy.Publisher('/heading_data', Float64, queue_size=1)
 MAG_NOISE_THRESH = 500
 
 class MovingAverage:
-    _AVERAGING_WINDOW_SIZE = 5
+    _AVERAGING_WINDOW_SIZE = 15
     def __init__(self):
         self._values = []
 
