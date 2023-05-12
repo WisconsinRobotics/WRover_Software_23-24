@@ -7,6 +7,7 @@ from std_srvs.srv import Empty
 import rospy
 import actionlib
 from actionlib_msgs.msg import GoalStatus
+from wr_drive_msgs.msg import DriveTrainCmd
 
 class NavStateMachine(StateMachine):
     # Defining states
@@ -39,6 +40,14 @@ class NavStateMachine(StateMachine):
     def on_enter_stInit(self) -> None:
         print("\non enter stInit")
         self._mgr.read_coordinates_file()
+
+        pub = rospy.Publisher("/control/drive_system/cmd", DriveTrainCmd, queue_size=1)
+        end = rospy.get_time() + rospy.Duration(secs=7)
+        while rospy.get_time() < end:
+            pub.publish(DriveTrainCmd(left_value=0.4, right_value=-0.4))
+            rospy.sleep(0.1)
+        pub.publish(DriveTrainCmd(left_value=0, right_value=0))
+
         self.evUnconditional()
 
     def on_exit_stInit(self) -> None:

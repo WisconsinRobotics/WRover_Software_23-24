@@ -109,7 +109,7 @@ def cb():
     pub_norm_x.publish(Float64(norm_x))
     pub_norm_y.publish(Float64(norm_y))
 
-    heading = math.atan2(norm_x, norm_y)
+    heading = math.atan2(norm_y, norm_x)
     pub_heading.publish(Float64(heading))
 
     print(heading)
