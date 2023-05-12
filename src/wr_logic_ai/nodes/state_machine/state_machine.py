@@ -2,11 +2,10 @@
 
 from statemachine import StateMachine, State
 from wr_logic_ai.coordinate_manager import CoordinateManager
-from wr_logic_ai.msg import TargetMsg
+from wr_logic_ai.msg import NavigationState, LongRangeAction, LongRangeGoal
 from wr_logic_ai.srv import EmptySrv
 import rospy
 import actionlib
-from wr_logic_ai.msg import LongRangeAction, LongRangeGoal
 from actionlib_msgs.msg import GoalStatus
 
 class NavStateMachine(StateMachine):
@@ -31,6 +30,11 @@ class NavStateMachine(StateMachine):
         self._mgr = mgr
         super(NavStateMachine, self).__init__()
         self.currentEvent = -1
+        self.mux_pub = rospy.Publisher("/navigation_state", NavigationState, queue_size=1)
+        self.mux_long_range = NavigationState()
+        self.mux_long_range.state = NavigationState.NAVIGATION_STATE_LONG_RANGE
+        self.mux_short_range = NavigationState()
+        self.mux_short_range.state = NavigationState.NAVIGATION_STATE_SHORT_RANGE
 
     def on_enter_stInit(self) -> None:
         print("\non enter stInit")
@@ -43,10 +47,7 @@ class NavStateMachine(StateMachine):
 
     def on_enter_stLongRange(self) -> None:
         print("\non enter stLongRange")
-        # print("Running Timer")
-        # self.pub_nav = rospy.Publisher('/target_coord', TargetMsg, queue_size=1)
-        # self.timer = rospy.Timer(rospy.Duration(0.2), self.publish)
-        
+        self.timer = rospy.Timer(rospy.Duration(0.2), lambda _: self.mux_pub.publish(self.mux_long_range)) 
         client = actionlib.SimpleActionClient("LongRangeActionServer", LongRangeAction)
         client.wait_for_server()
         goal = LongRangeGoal(target_lat = self._mgr.get_coordinate()["lat"], target_long = self._mgr.get_coordinate()["long"])
@@ -60,15 +61,16 @@ class NavStateMachine(StateMachine):
 
     def on_exit_stLongRange(self) -> None:
         print("Exting Long Range")
+        self.timer.shutdown()
 
     def on_enter_stLongRangeRecovery(self) -> None:
-
         print("\non enter stLongRangeRecovery")
         if self._mgr is None:
             raise ValueError
         else:
             self._mgr.previous_line()
-            print(self._mgr.get_coordinate())            
+            print(self._mgr.get_coordinate())  
+            self.timer = rospy.Timer(rospy.Duration(0.2), lambda _: self.mux_pub.publish(self.mux_long_range))           
             client = actionlib.SimpleActionClient("LongRangeActionServer", LongRangeAction)
             client.wait_for_server()
             goal = LongRangeGoal(target_lat = self._mgr.get_coordinate()["lat"], target_long = self._mgr.get_coordinate()["long"])
@@ -82,19 +84,19 @@ class NavStateMachine(StateMachine):
                 self.evError()
 
     def on_exit_stLongRangeRecovery(self) -> None:
-        pass
+        self.timer.shutdown()
 
     def on_enter_stShortRange(self) -> None:
         print("\non enter stShortRange")
         if CoordinateManager.short_range_complete() != True:
             print("Short Range Not Complete")
-            pass
+            self.timer = rospy.Timer(rospy.Duration(0.2), lambda _: self.mux_pub.publish(self.mux_short_range))
         else:
             print("Short Range Complete")
             self.evSuccess()
 
     def on_exit_stShortRange(self) -> None:
-        pass
+        self.timer.shutdown()
 
     def on_enter_stWaypointSuccess(self) -> None:
         print("\non enter stWaypointSuccess")
@@ -118,15 +120,6 @@ class NavStateMachine(StateMachine):
 
     def on_enter_stComplete(self) -> None:
         print("We finished, wooooo")
-
-    def publish(self, timer):
-        # Publish to obstacle avoidance with the target coordinates
-        target_coords = TargetMsg()
-        target_coords.target_lat = self._mgr.get_coordinate()['lat']
-        target_coords.target_long = self._mgr.get_coordinate()['long']
-        target_coords.target_type = self._mgr.get_coordinate()['target_type']
-        self.pub_nav.publish(target_coords)
-        # TODO: Publish to topic /navigation_state
 
 if __name__ == "__main__":
     rospy.init_node('nav_state_machine', anonymous=False)
