@@ -65,7 +65,7 @@ def initialize() -> None:
     heading_msg.pose.orientation.y = 0
     heading_msg.header.frame_id = "laser"
     frameCount = 0
-    raw_heading_pub = rospy.Publisher('/debug_heading', Float64, queue_size=1)
+    raw_heading_pub = rospy.Publisher('/target_heading_raw', Float64, queue_size=1)
 
 def update_gps_coord(msg: CoordinateMsg) -> None:
     global current_lat
