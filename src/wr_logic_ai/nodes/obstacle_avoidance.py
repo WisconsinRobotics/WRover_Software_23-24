@@ -38,6 +38,7 @@ def initialize() -> None:
     global heading_pub
     global frameCount
     global heading_msg
+    global raw_heading_pub
 
     # Initialize node
     rospy.init_node('nav_autonomous', anonymous=False)
@@ -64,6 +65,7 @@ def initialize() -> None:
     heading_msg.pose.orientation.y = 0
     heading_msg.header.frame_id = "laser"
     frameCount = 0
+    raw_heading_pub = rospy.Publisher('/debug_heading', Float64, queue_size=1)
 
 def update_gps_coord(data: CoordinateMsg) -> None:
     global current_lat
@@ -97,7 +99,6 @@ def update_target(target_lat, target_long) -> bool:
 
 
 def update_navigation(data) -> None:
-    global HEADING  # , t
     global frameCount
 
     data_avg = sum(cur_range for cur_range in data.ranges) / len(data.ranges)
@@ -115,13 +116,14 @@ def update_navigation(data) -> None:
 
         # TESTING
         print("Results: " + str(result))
+        raw_heading_pub.publish(result)
 
         # Set the bounds of the speed multiplier
         speed_factor = 0.3
         speed_factor = 0 if speed_factor < 0 else speed_factor
         speed_factor = 1 if speed_factor > 1 else speed_factor
         # Get the DriveTrainCmd relating to the heading of the robot and the resulting best navigation angle
-        msg = angle_calc.piecewise_linear(HEADING if HEADING else 0, result)
+        msg = angle_calc.piecewise_linear(heading if heading else 0, result)
 #        t += 2
 #        if t > 90: # t for debugging purposes
 #            t = -90
