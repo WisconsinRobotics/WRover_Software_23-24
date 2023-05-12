@@ -21,7 +21,7 @@ NAV_THRESH_DISTANCE = 0.5 # distance before rover believes it has reached the ta
 current_lat = 0
 current_long = 0
 cur_heading = 0
-target_angle = 90
+target_angle = 180
 target_sector = 0
 smoothing_constant = 0
 # Get the speed multiplier of the current runtime for the obstacle_avoidance
@@ -78,20 +78,18 @@ def update_heading(msg: Float64) -> None:
     cur_heading = (90-msg.data) % 360 #Shifting to East
 
 def angle_diff(heading1: float, heading2: float) -> float:
-    print(str(heading1) + "  " +str(heading2))
     diff = (heading1 - heading2 + 360) % 360
-    print("DIFFFFF" + str(diff))
     return (diff + 180) % 360 - 180
 
 # Calculate current heading and the planar target angle
 # TODO: this should now be part of a action server callback function
 def update_target(target_lat, target_long) -> bool:
-    global target_angle
+    # global target_angle
 
     # Construct the planar target angle relative to east, accounting for curvature
     imu = AngleCalculations(current_lat, current_long,
                             target_lat, target_long)
-    target_angle = imu.get_angle() % 360
+    #target_angle = imu.get_angle() % 360
     
     # TESTING
     # print("Current heading: " + str(heading))
@@ -117,7 +115,7 @@ def update_navigation(data) -> None:
         # Gets best possible angle, considering obstacles
         delta_heading = angle_diff(target_angle, cur_heading)
         result = get_navigation_angle(
-            ((((90 - delta_heading) % 360) + 360) % 360) / math.degrees(data.angle_increment),  # sector angle
+            ((((90 + delta_heading) % 360) + 360) % 360) / math.degrees(data.angle_increment),  # sector angle
             LIDAR_THRESH_DISTANCE,
             data,
             smoothing_constant)
