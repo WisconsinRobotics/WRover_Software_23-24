@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import rospy
-from wr_logic_ai.srv import EmptySrv, EmptySrvResponse
+from std_srvs import EmptySrv, EmptySrvResponse
 
 def wait_for_user_input(req):
     print("Service called")

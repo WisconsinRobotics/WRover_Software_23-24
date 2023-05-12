@@ -14,11 +14,11 @@ class CoordinateManager:
         return CoordinateManager.coordinates[CoordinateManager.ptr]
         
     @staticmethod
-    def previous_line():
+    def previous_coordinate():
         CoordinateManager.ptr = max(0,CoordinateManager.ptr - 1)
 
     @staticmethod
-    def next_line() -> bool:
+    def next_coordinate() -> bool:
         CoordinateManager.ptr = CoordinateManager.ptr + 1
         return CoordinateManager.ptr >= len(CoordinateManager.coordinates)
 

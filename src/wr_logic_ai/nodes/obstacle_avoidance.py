@@ -39,11 +39,11 @@ def initialize() -> None:
     global frameCount
     global heading_msg
 
-# Initialize node
-rospy.init_node('nav_autonomous', anonymous=False)
-
+    # Initialize node
+    rospy.init_node('nav_autonomous', anonymous=False)
+    
     # Publisher
-    drive_pub = rospy.Publisher('/control/drive_system/cmd', DriveTrainCmd, queue_size=1)
+    drive_pub = rospy.Publisher(rospy.get_param('~long_range_mux_arg'), DriveTrainCmd, queue_size=1)
 
     # Subscribe to gps coordinate data
     rospy.Subscriber('/gps_coord_data', CoordinateMsg, update_gps_coord)

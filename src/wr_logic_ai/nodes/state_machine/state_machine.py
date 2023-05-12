@@ -3,7 +3,7 @@
 from statemachine import StateMachine, State
 from wr_logic_ai.coordinate_manager import CoordinateManager
 from wr_logic_ai.msg import NavigationState, LongRangeAction, LongRangeGoal
-from wr_logic_ai.srv import EmptySrv
+from std_srvs import EmptySrv
 import rospy
 import actionlib
 from actionlib_msgs.msg import GoalStatus
@@ -42,7 +42,7 @@ class NavStateMachine(StateMachine):
         self.evUnconditional()
 
     def on_exit_stInit(self) -> None:
-        if (self._mgr.next_line()):
+        if (self._mgr.next_coordinate()):
             self.evComplete
 
     def on_enter_stLongRange(self) -> None:
@@ -51,9 +51,7 @@ class NavStateMachine(StateMachine):
         client = actionlib.SimpleActionClient("LongRangeActionServer", LongRangeAction)
         client.wait_for_server()
         goal = LongRangeGoal(target_lat = self._mgr.get_coordinate()["lat"], target_long = self._mgr.get_coordinate()["long"])
-        client.send_goal(goal)
-        client.wait_for_result()
-        as_state = client.get_state()
+        as_state = client.send_goal_and_wait(goal)
         if as_state == GoalStatus.SUCCEEDED:
             self.evSuccess()
         elif as_state == GoalStatus.ABORTED:
@@ -68,18 +66,16 @@ class NavStateMachine(StateMachine):
         if self._mgr is None:
             raise ValueError
         else:
-            self._mgr.previous_line()
+            self._mgr.previous_coordinate()
             print(self._mgr.get_coordinate())  
             self.timer = rospy.Timer(rospy.Duration(0.2), lambda _: self.mux_pub.publish(self.mux_long_range))           
             client = actionlib.SimpleActionClient("LongRangeActionServer", LongRangeAction)
             client.wait_for_server()
             goal = LongRangeGoal(target_lat = self._mgr.get_coordinate()["lat"], target_long = self._mgr.get_coordinate()["long"])
-            client.send_goal(goal)
-            client.wait_for_result()
-            as_state = client.get_state()
+            as_state = client.send_goal_and_wait(goal)
             if as_state == GoalStatus.SUCCEEDED:
                 self.evSuccess()
-                self._mgr.next_line()
+                self._mgr.next_coordinate()
             elif as_state == GoalStatus.ABORTED:
                 self.evError()
 
@@ -87,16 +83,18 @@ class NavStateMachine(StateMachine):
         self.timer.shutdown()
 
     def on_enter_stShortRange(self) -> None:
-        print("\non enter stShortRange")
-        if CoordinateManager.short_range_complete() != True:
-            print("Short Range Not Complete")
-            self.timer = rospy.Timer(rospy.Duration(0.2), lambda _: self.mux_pub.publish(self.mux_short_range))
-        else:
-            print("Short Range Complete")
-            self.evSuccess()
+        # print("\non enter stShortRange")
+        # if CoordinateManager.short_range_complete() != True:
+        #     print("Short Range Not Complete")
+        #     self.timer = rospy.Timer(rospy.Duration(0.2), lambda _: self.mux_pub.publish(self.mux_short_range))
+        # else:
+        #     print("Short Range Complete")
+        #     self.evSuccess()
+        self.evSuccess()
 
     def on_exit_stShortRange(self) -> None:
-        self.timer.shutdown()
+        # self.timer.shutdown()
+        pass
 
     def on_enter_stWaypointSuccess(self) -> None:
         print("\non enter stWaypointSuccess")
@@ -109,7 +107,7 @@ class NavStateMachine(StateMachine):
                 wait_for_user_input()
             except rospy.ServiceException as e:
                 print(e)
-            if (self._mgr.next_line()):
+            if (self._mgr.next_coordinate()):
                 print("Should Enter event complete")
                 self.evComplete()
             else:

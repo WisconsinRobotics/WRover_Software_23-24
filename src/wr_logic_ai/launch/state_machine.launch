@@ -2,4 +2,5 @@
   <node pkg="wr_logic_ai" name="wait_for_user_input" type="wait_for_user_input.py" output="screen"/>
   <node pkg="wr_logic_ai" name="long_range_action_server" type="long_range_action_server.py" output="screen"/>
   <node pkg="wr_logic_ai" name="nav_state_machine_driver" type="state_machine.py" output="screen"/>
+  <include file="$(find wr_logic_ai)/launch/mux_select.launch)">
 </launch>
