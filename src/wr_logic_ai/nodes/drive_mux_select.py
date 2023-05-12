@@ -8,7 +8,7 @@ from topic_tools.srv import MuxSelect
 current = -1
 class MUX:
     def __init__(self) -> None:
-        self.last_message = None
+        self.last_message_state = None
 
     def state_call_back(self, message: NavigationState, conversion_table: Dict[int, str], mux_name : str):
         if (self.last_message_state != message.state):
