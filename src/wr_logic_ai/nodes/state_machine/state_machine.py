@@ -28,13 +28,13 @@ class NavStateMachine(StateMachine):
 
     def __init__(self, mgr: CoordinateManager) -> None:
         self._mgr = mgr
-        super(NavStateMachine, self).__init__()
         self.currentEvent = -1
         self.mux_pub = rospy.Publisher("/navigation_state", NavigationState, queue_size=1)
         self.mux_long_range = NavigationState()
         self.mux_long_range.state = NavigationState.NAVIGATION_STATE_LONG_RANGE
         self.mux_short_range = NavigationState()
         self.mux_short_range.state = NavigationState.NAVIGATION_STATE_SHORT_RANGE
+        super(NavStateMachine, self).__init__()
 
     def on_enter_stInit(self) -> None:
         print("\non enter stInit")
