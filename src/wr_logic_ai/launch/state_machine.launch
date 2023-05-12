@@ -22,4 +22,6 @@
   <include file="$(find wr_logic_ai)/launch/long_range.launch)">
     <arg name="long_range_output" value = "$(arg long_range_output)" />
   </include>
+
+  <include file="$(find wrevolution)/launch/ros_control_test.launch" />
 </launch>

@@ -5,6 +5,5 @@
 
   <node pkg="rviz" name="$(anon rviz)" type="rviz" output="screen" machine="base_station"
     args="-d $(find wr_logic_ai)/launch/obstacle_avoidance.rviz" />
-  
-  <include file="$(find wrevolution)/launch/ros_control_test.launch" />
+
 </launch>
