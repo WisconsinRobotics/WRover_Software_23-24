@@ -1,15 +1,10 @@
 <launch>
-  <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" />
-  <include file="$(find wr_hsi_sensing)/launch/hw_test.launch" />
+  <node pkg="wr_logic_ai" name="obstacle_avoidance" type="obstacle_avoidance.py" output="screen">
+    <param name="motor_speeds" value="$(arg long_range_output)" />
+  </node>
 
-  <node pkg="wr_logic_ai" name="obstacle_avoidance" type="obstacle_avoidance.py" output="screen" long_range_mux_arg="$(arg long_range_output)"/>
-  
-  <include file="$(find rplidar_ros)/launch/rplidar.launch" />
-  
   <node pkg="rviz" name="$(anon rviz)" type="rviz" output="screen" machine="base_station"
     args="-d $(find wr_logic_ai)/launch/obstacle_avoidance.rviz" />
-  
-  <node name="control" pkg="wr_control_drive_ds" type="DriveTrainControlSystem" machine="wrover" />
   
   <include file="$(find wrevolution)/launch/ros_control_test.launch" />
 </launch>

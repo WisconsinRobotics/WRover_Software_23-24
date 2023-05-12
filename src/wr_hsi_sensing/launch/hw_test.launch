@@ -1,7 +1,5 @@
 <launch>
     <!-- <arg name="debug" default="false"/> -->
-    <include file="$(find wr_logic_ai)/launch/mux.launch" />
-    <include file="$(find wr_logic_ai)/launch/state_machine.launch" />
     <node name="imu" type="imu_testing.py" pkg="wr_hsi_sensing" output="screen"/>
     <node name="gps" type="gps_testing.py" pkg="wr_hsi_sensing" output="screen"/>
 </launch>
