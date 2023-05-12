@@ -27,7 +27,10 @@ class AngleCalculations:
         deltaLatitude = math.radians(math.fabs(lat2 - lat1))
         verticalDistance = math.sin(deltaLatitude / 2.0)**2
         angularDistance = 2 * math.atan2(math.sqrt(verticalDistance), math.sqrt(1.0 - verticalDistance))
-        return angularDistance * self.EARTH_RADIUS_METERS
+        if(self.up):
+            return angularDistance * self.EARTH_RADIUS_METERS
+        else:  
+            return -1*angularDistance * self.EARTH_RADIUS_METERS
 
     # Get the Great Circle distance between two longitudes
     def longitude_to_distance(self, lon1: float, lon2: float) -> float:
@@ -38,7 +41,10 @@ class AngleCalculations:
         deltaLongitude = math.radians(math.fabs(lon2 - lon1))
         lateralDistance = math.cos(math.radians(self.cur_lat)) * math.cos(math.radians(self.tar_lat)) * math.sin(deltaLongitude / 2.0)**2
         angularDistance = 2 * math.atan2(math.sqrt(lateralDistance), math.sqrt(1.0 - lateralDistance))
-        return angularDistance * self.EARTH_RADIUS_METERS
+        if(self.right):
+            return angularDistance * self.EARTH_RADIUS_METERS
+        else:  
+            return -1*angularDistance * self.EARTH_RADIUS_METERS
 
     # Get the Great Circle distance between this object's current and target locations
     def get_distance(self) -> float:
@@ -48,10 +54,9 @@ class AngleCalculations:
     # Get the planar angle relative to planar East as the straight-line trajectory towards the goal
     def get_angle(self) -> float:
         # Use the Great Circle distances of the spherical triangle legs to get the angle (-90,90) to the goal coordinates
- 
         angle = math.atan2(self.latitude_to_distance(self.cur_lat, self.tar_lat), self.longitude_to_distance(self.cur_long, self.tar_long)) #TODO: Why not use atan2?
         angle = math.degrees(angle)
-
+        angle = 180 - angle
         
         # #Setting up in which quadrant we are
         # if self.cur_lat < self.tar_lat:
