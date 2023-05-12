@@ -34,3 +34,6 @@ compile_commands.json
 .cache
 
 *.png
+*.data
+*.swp
+*.old

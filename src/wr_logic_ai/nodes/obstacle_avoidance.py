@@ -39,12 +39,8 @@ def initialize() -> None:
     global frameCount
     global heading_msg
 
-    # Initialize node
-    rospy.init_node('nav_autonomous', anonymous=False)
-
-    # Initialize ros params
-    smoothing_constant = rospy.get_param("smoothing_constant", 3)
-    speed_factor = rospy.get_param("speed_factor", 0.3)
+# Initialize node
+rospy.init_node('nav_autonomous', anonymous=False)
 
     # Publisher
     drive_pub = rospy.Publisher('/control/drive_system/cmd', DriveTrainCmd, queue_size=1)
@@ -102,6 +98,7 @@ def update_target(target_lat, target_long) -> bool:
 
 def update_navigation(data) -> None:
     global HEADING  # , t
+    global frameCount
 
     data_avg = sum(cur_range for cur_range in data.ranges) / len(data.ranges)
     #print("Data Avg: " + str(data_avg))
@@ -120,6 +117,7 @@ def update_navigation(data) -> None:
         print("Results: " + str(result))
 
         # Set the bounds of the speed multiplier
+        speed_factor = 0.3
         speed_factor = 0 if speed_factor < 0 else speed_factor
         speed_factor = 1 if speed_factor > 1 else speed_factor
         # Get the DriveTrainCmd relating to the heading of the robot and the resulting best navigation angle

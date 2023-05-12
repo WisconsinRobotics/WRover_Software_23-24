@@ -9,6 +9,8 @@ import pickle
 
 ROVER_WIDTH = 1
 
+scan_rviz_pub = rospy.Publisher("/scan_rviz", LaserScan, queue_size=10)
+
 def calculate_anti_window(d: float) -> int:
     return math.degrees(math.atan((ROVER_WIDTH / 2) / d))
     
@@ -59,9 +61,13 @@ def get_valley(
         smoothing: float = 3) -> List[int]:
     global prevData
 
-    # hist = offset_lidar_data(gaussian_smooth.gaussian_filter1d(data.ranges, smoothing), sector_angle)
+    rviz_data = deepcopy(data)
+    rviz_data.ranges = offset_lidar_data(data.ranges, sector_angle, is_rviz=True)
+    scan_rviz_pub.publish(rviz_data)
+
+    hist = offset_lidar_data(gaussian_smooth.gaussian_filter1d(data.ranges, smoothing), sector_angle)
     # For testing:
-    hist = gaussian_smooth.gaussian_filter1d(data.ranges, smoothing)
+    # hist = gaussian_smooth.gaussian_filter1d(data.ranges, smoothing)
 
     # Write the sectors data to an output file for logging
     output_file = open('sectors.data', 'wb')
