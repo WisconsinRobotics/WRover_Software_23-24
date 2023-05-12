@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from typing import Optional
 import rospy
 from wr_hsi_sensing.BNO055 import BNO055
 from std_msgs.msg import Int32, Float64
@@ -30,8 +31,8 @@ class MovingAverage:
         if len(self._values) > MovingAverage._AVERAGING_WINDOW_SIZE:
             self._values.pop()
     
-    def get_value(self) -> float:
-        return sum(self._values)/len(self._values) if len(self._values) > 0 else 0
+    def get_value(self) -> Optional[float]:
+        return sum(self._values)/len(self._values) if len(self._values) > 0 else None
 
 min_x = float('inf')
 max_x = float('-inf')
@@ -92,6 +93,9 @@ def cb():
 
     mag_x = x_filter.get_value()
     mag_y = y_filter.get_value()
+
+    if mag_x is None or mag_y is None:
+        return
     
     max_x = max(max_x, mag_x)
     min_x = min(min_x, mag_x)
