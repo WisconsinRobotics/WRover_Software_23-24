@@ -10,7 +10,7 @@ class ClawController:
     def __init__(self, topicName: str):
         self._open_pressed = False
         self._close_pressed = False
-        self._publisher = rospy.Publisher(topicName, std_msgs.Int16)
+        self._publisher = rospy.Publisher(topicName, std_msgs.Int16, queue_size=1)
 
     def open_claw(self, open):
         self._open_pressed = open
