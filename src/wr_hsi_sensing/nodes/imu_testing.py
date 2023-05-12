@@ -100,8 +100,8 @@ def cb():
     if abs(mag_y - prev_y) < MAG_NOISE_THRESH:
         y_filter.feed(mag_y)
 
-    rospy.loginfo(f"min/max x: {min_x}, {max_x}")
-    rospy.loginfo(f"min/max y: {min_y}, {max_y}")
+    # rospy.loginfo(f"min/max x: {min_x}, {max_x}")
+    # rospy.loginfo(f"min/max y: {min_y}, {max_y}")
 
     mag_x = x_filter.get_value()
     mag_y = y_filter.get_value()
@@ -125,7 +125,7 @@ def cb():
     pub_norm_x.publish(Float64(norm_x))
     pub_norm_y.publish(Float64(norm_y))
 
-    heading = math.atan2(norm_y, norm_x)
+    heading = math.atan2(norm_y, norm_x) + math.pi
     pub_heading.publish(Float64(heading))
 
     print(heading)
