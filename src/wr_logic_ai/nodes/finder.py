@@ -65,7 +65,7 @@ def get_valley(
     rviz_data.ranges = offset_lidar_data(data.ranges, sector_angle, is_rviz=True)
     scan_rviz_pub.publish(rviz_data)
 
-    print(f"{data.ranges}")
+    rospy.loginfo(f"{data.ranges}")
     hist = offset_lidar_data(gaussian_smooth.gaussian_filter1d(data.ranges, smoothing), sector_angle)
     # For testing:
     # hist = gaussian_smooth.gaussian_filter1d(data.ranges, smoothing)
