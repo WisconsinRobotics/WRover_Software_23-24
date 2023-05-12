@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 
 import rospy
-from std_srvs import EmptySrv, EmptySrvResponse
+from std_srvs.srv import Empty, EmptyResponse
 
 def wait_for_user_input(req):
     print("Service called")
     while True:
         if input("Enter c to continue: ") == "c":
-            return EmptySrvResponse()
+            return EmptyResponse()
 
 def wait_for_user_input_server():
     rospy.init_node("wait_for_user_input_server")
-    s = rospy.Service('wait_for_user_input_service', EmptySrv, wait_for_user_input)
+    s = rospy.Service('wait_for_user_input_service', Empty, wait_for_user_input)
     print("wait for user input server initialized")
     rospy.spin()
 

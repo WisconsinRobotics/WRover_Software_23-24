@@ -1,4 +1,7 @@
 <launch>
+
+  <arg name="long_range_output" />
+
   <node pkg="wr_logic_ai" name="obstacle_avoidance" type="obstacle_avoidance.py" output="screen">
     <param name="motor_speeds" value="$(arg long_range_output)" />
   </node>

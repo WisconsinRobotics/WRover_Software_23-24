@@ -3,7 +3,7 @@
 from statemachine import StateMachine, State
 from wr_logic_ai.coordinate_manager import CoordinateManager
 from wr_logic_ai.msg import NavigationState, LongRangeAction, LongRangeGoal
-from std_srvs import EmptySrv
+from std_srvs.srv import Empty
 import rospy
 import actionlib
 from actionlib_msgs.msg import GoalStatus
@@ -103,7 +103,7 @@ class NavStateMachine(StateMachine):
         else:
             rospy.wait_for_service('wait_for_user_input_service')
             try:
-                wait_for_user_input = rospy.ServiceProxy('wait_for_user_input_service', EmptySrv)
+                wait_for_user_input = rospy.ServiceProxy('wait_for_user_input_service', Empty)
                 wait_for_user_input()
             except rospy.ServiceException as e:
                 print(e)
