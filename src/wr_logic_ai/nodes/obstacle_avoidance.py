@@ -109,7 +109,7 @@ def update_navigation(data) -> None:
     if data_avg >= 0.5:
         # Gets best possible angle, considering obstacles
         result = get_navigation_angle(
-            (cur_heading - target_angle) / math.degrees(data.angle_increment),  # sector angle
+            (target_angle) / math.degrees(data.angle_increment),  # sector angle
             LIDAR_THRESH_DISTANCE,
             data,
             smoothing_constant)
