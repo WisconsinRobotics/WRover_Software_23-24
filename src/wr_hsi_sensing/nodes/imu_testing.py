@@ -42,6 +42,8 @@ prev_x = 0
 prev_y = 0
 x_filter = MovingAverage()
 y_filter = MovingAverage()
+x_has_init = False
+y_has_init = False
 
 # Create IMU Sensor object
 sensor = BNO055()
@@ -73,6 +75,8 @@ def cb():
     global prev_y
     global x_filter
     global y_filter
+    global x_has_init
+    global y_has_init
 
     mag_z = int.from_bytes(sensor.readBytes(BNO055.BNO055_MAG_DATA_Z_LSB_ADDR, 2), 'little')
     mag_x = int.from_bytes(sensor.readBytes(BNO055.BNO055_MAG_DATA_X_LSB_ADDR, 2), 'little')
@@ -81,6 +85,13 @@ def cb():
     mag_x = mag_x if mag_x < 32768 else mag_x-65536
     mag_y = mag_y if mag_y < 32768 else mag_y-65536
     mag_z = mag_z if mag_z < 32768 else mag_z-65536
+
+    if not x_has_init and mag_x == 0:
+        return
+    x_has_init = True
+    if not y_has_init and mag_y == 0:
+        return
+    y_has_init = True
 
     # TODO: Consider differential noise filtering (prev_msg) or absolute
     if abs(mag_x - prev_x) < MAG_NOISE_THRESH:
