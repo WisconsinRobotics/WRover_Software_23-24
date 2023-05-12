@@ -8,89 +8,89 @@ import angle_to_drive_methods as angle_calc
 
 from sensor_msgs.msg import LaserScan
 
-from wr_logic_ai.msg import NavigationMsg
+from wr_hsi_sensing.msg import CoordinateMsg
 from wr_drive_msgs.msg import DriveTrainCmd
 from geometry_msgs.msg import PoseStamped
-from std_msgs.msg import Bool, String
-
-import signal
-import sys
-import os
-import numpy as np
-
+from std_msgs.msg import Float64
 
 # Navigation parameters
 LIDAR_THRESH_DISTANCE = 5  # distance before obstacle avoidance logics is triggered (in meters)
 NAV_THRESH_DISTANCE = 0.5 # distance before rover believes it has reached the target (in meters)
 
 # initialize target angle to move forward
+current_lat = 0
+current_long = 0
+heading = 0
 target_angle = 90
 target_sector = 0
-smoothing_constant = rospy.get_param("smoothing_constant", 3)
+smoothing_constant = 0
 # Get the speed multiplier of the current runtime for the obstacle_avoidance
 # 0.2 is bugged
-speed_factor = rospy.get_param("speed_factor", 0.3)
+speed_factor = 0
 is_active = False
-movement_complete = None
-
-# Initialize node
-rospy.init_node('nav_autonomous', anonymous=False)
-
-# Publisher
-drive_pub = rospy.Publisher(
-    '/control/drive_system/cmd', DriveTrainCmd, queue_size=1)
-state_machine_pub = rospy.Publisher('/state_machine', String, queue_size = 1)
-
-# TESING
-heading_pub = rospy.Publisher('/debug_heading', PoseStamped, queue_size=1)
-heading_msg = PoseStamped()
-heading_msg.pose.position.x = 0
-heading_msg.pose.position.y = 0
-heading_msg.pose.position.z = 0
-heading_msg.pose.orientation.x = 0
-heading_msg.pose.orientation.y = 0
-heading_msg.header.frame_id = "laser"
-frameCount = 0
 
 # Start the tasks managed to drive autonomously
 
-
 def initialize() -> None:
+    global drive_pub
+    global smoothing_constant
+    global speed_factor
+    global heading_pub
+    global frameCount
+    global heading_msg
 
-    # Subscribe to location data
-    rospy.Subscriber('/nav_data', NavigationMsg, update_heading_and_target)
+    # Initialize node
+    rospy.init_node('nav_autonomous', anonymous=False)
+    
+    # Publisher
+    drive_pub = rospy.Publisher(rospy.get_param('~motor_speeds'), DriveTrainCmd, queue_size=1)
+
+    # Subscribe to gps coordinate data
+    rospy.Subscriber('/gps_coord_data', CoordinateMsg, update_gps_coord)
+
+    # Subscribe to heading data
+    rospy.Subscriber('/heading_data', Float64, update_heading)
 
     # Subscribe to lidar data
     rospy.Subscriber('/scan', LaserScan, update_navigation)
 
-    rospy.spin()
+    # TESING
+    heading_pub = rospy.Publisher('/debug_heading', PoseStamped, queue_size=1)
+    heading_msg = PoseStamped()
+    heading_msg.pose.position.x = 0
+    heading_msg.pose.position.y = 0
+    heading_msg.pose.position.z = 0
+    heading_msg.pose.orientation.x = 0
+    heading_msg.pose.orientation.y = 0
+    heading_msg.header.frame_id = "laser"
+    frameCount = 0
 
+def update_gps_coord(data: CoordinateMsg) -> None:
+    global current_lat
+    global current_long
+    current_lat = data.latitude
+    current_long = data.longitude
 
-HEADING = 0
+def update_heading(data: Float64) -> None:
+    global heading
+    heading = data
+
 # Calculate current heading and the planar target angle
-
-
-def update_heading_and_target(data) -> None:
-    global HEADING
-    global movement_complete
-
-    HEADING = data.heading
+# TODO: this should now be part of a action server callback function
+def update_target(target_lat, target_long) -> bool:
+    global target_angle
 
     # Construct the planar target angle relative to east, accounting for curvature
-    imu = AngleCalculations(data.cur_lat, data.cur_long,
-                            data.tar_lat, data.tar_long)
+    imu = AngleCalculations(current_lat, current_long,
+                            target_lat, target_long)
     target_angle = imu.get_angle() % 360
-    last_movement_complete = movement_complete
-    movement_complete = imu.get_distance() < NAV_THRESH_DISTANCE
-    if last_movement_complete != movement_complete:
-        if(movement_complete):
-            #Publish success to state machine
-            state_machine_pub.publish("evSuccess")
-        else:
-            state_machine_pub.publish("evNotComplete")
     # TESTING
-    print("Current heading: " + str(HEADING))
-    print('Target angle: ' + str(target_angle))
+    # print("Current heading: " + str(heading))
+    # print('Target angle: ' + str(target_angle))
+    if imu.get_distance() < NAV_THRESH_DISTANCE:
+        return True
+    else:
+        return False
 
 # t = 0
 # Update the robot's navigation and drive it towards the target angle

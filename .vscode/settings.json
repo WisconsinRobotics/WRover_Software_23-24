@@ -82,9 +82,12 @@
         "variant": "cpp"
     },
     "python.autoComplete.extraPaths": [
+        "${workspaceFolder}/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages"
     ],
     "python.analysis.extraPaths": [
-        "./src/wr_hsi_sensing/src"
+        "./src/wr_hsi_sensing/src",
+        "./src/wr_logic_ai/src"
     ],
     "cmake.sourceDirectory": "${workspaceFolder}/src"
 }

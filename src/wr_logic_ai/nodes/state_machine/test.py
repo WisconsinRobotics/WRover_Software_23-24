@@ -1,8 +1,10 @@
+#!/usr/bin/env python
+
 # from state_machine import StateMachine
 # from navigation_events import Event
 # from navigation_states import State
 # from coordinate_manager import Coordinate_manager
-# import rospy
+import rospy
 
 from statemachine import StateMachine, State
 from state_machine import NavStateMachine
@@ -68,5 +70,4 @@ if __name__ == "__main__":
     # print(Coordinate_manager.get_coordinate())
 
     statemachine = NavStateMachine(CoordinateManager())
-    while True:
-        pass
+    rospy.spin()

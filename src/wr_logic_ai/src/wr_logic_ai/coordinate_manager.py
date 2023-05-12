@@ -11,19 +11,16 @@ class CoordinateManager:
 
     @staticmethod
     def get_coordinate():
-        print(CoordinateManager.ptr)
         return CoordinateManager.coordinates[CoordinateManager.ptr]
         
     @staticmethod
-    def previous_line():
-        print(CoordinateManager.ptr)
-        CoordinateManager.ptr = CoordinateManager.ptr - 1
-        print(CoordinateManager.ptr)
+    def previous_coordinate():
+        CoordinateManager.ptr = max(0,CoordinateManager.ptr - 1)
 
     @staticmethod
-    def next_line():
+    def next_coordinate() -> bool:
         CoordinateManager.ptr = CoordinateManager.ptr + 1
-        CoordinateManager.maxPtr = max(CoordinateManager.ptr, CoordinateManager.maxPtr)
+        return CoordinateManager.ptr >= len(CoordinateManager.coordinates)
 
     @staticmethod
     def short_range_complete() -> bool:
@@ -31,7 +28,7 @@ class CoordinateManager:
 
     @staticmethod
     def read_coordinates_file():
-        dirname = Path(__file__).parents[1]
+        dirname = Path(__file__).parents[0]
         file_name = Path.joinpath(dirname, 'coordinates.json')
         file = open(file_name, 'r').read()
         CoordinateManager.coordinates = json.loads(file)
