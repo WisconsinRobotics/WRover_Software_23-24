@@ -42,7 +42,7 @@ class NavStateMachine(StateMachine):
         self._mgr.read_coordinates_file()
 
         pub = rospy.Publisher("/control/drive_system/cmd", DriveTrainCmd, queue_size=1)
-        end = rospy.get_time() + rospy.Duration(secs=7)
+        end = rospy.get_time() + 7
         while rospy.get_time() < end:
             pub.publish(DriveTrainCmd(left_value=0.4, right_value=-0.4))
             rospy.sleep(0.1)
