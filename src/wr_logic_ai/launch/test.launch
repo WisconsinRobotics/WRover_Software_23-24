@@ -6,4 +6,6 @@
   <include file="$(find rplidar_ros)/launch/rplidar.launch" />
   <node pkg="rviz" name="$(anon rviz)" type="rviz" output="screen" machine="base_station"
     args="-d $(find wr_logic_ai)/launch/obstacle_avoidance.rviz" />
+  <node name="control" pkg="wr_control_drive_ds" type="DriveTrainControlSystem" machine="wrover" />
+  <include file="$(find wrevolution)/launch/ros_control_test.launch" />
 </launch>
