@@ -6,7 +6,7 @@
   <group ns="HW" if ="$(eval env('WROVER_HW') == 'REAL')">
     <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" />
     <include file="$(find wr_hsi_sensing)/launch/hw_test.launch" />
-    <node name="control" pkg="wr_control_drive_ds" type="DriveTrainControlSystem" machine="wrover" />
+    <!-- <node name="control" pkg="wr_control_drive_ds" type="DriveTrainControlSystem" machine="wrover" /> -->
     <include file="$(find wrevolution)/launch/ros_control_test.launch" />
     <include file="$(find rplidar_ros)/launch/rplidar.launch" />
   </group>
