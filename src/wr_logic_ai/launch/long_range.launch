@@ -5,10 +5,10 @@
     <param name="motor_speeds" value="$(arg long_range_output)" />
   </node>
 
-  <!-- <node pkg="rviz" name="$(anon rviz)" type="rviz" output="screen" machine="base_station"
-    args="-d $(find wr_logic_ai)/launch/obstacle_avoidance.rviz"/> -->
+  <node pkg="rviz" name="$(anon rviz)" type="rviz" output="screen" machine="base_station"
+    args="-d $(find wr_logic_ai)/launch/obstacle_avoidance.rviz"/>
 
-  <node pkg="rviz" name="$(anon rviz)" type="rviz" output="screen"
-    args="-d $(find wr_logic_ai)/launch/obstacle_avoidance_mock.rviz"/>
+  <!-- <node pkg="rviz" name="$(anon rviz)" type="rviz" output="screen"
+    args="-d $(find wr_logic_ai)/launch/obstacle_avoidance_mock.rviz"/> -->
 
 </launch>
