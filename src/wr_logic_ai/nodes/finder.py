@@ -4,6 +4,7 @@ import scipy.ndimage as gaussian_smooth
 import rospy
 from sensor_msgs.msg import LaserScan 
 from copy import deepcopy
+import os
 
 import pickle
 
@@ -66,11 +67,13 @@ def get_valley(
     scan_rviz_pub.publish(rviz_data)
 
     # rospy.loginfo(f"{data.ranges}")
-    # hist = offset_lidar_data(gaussian_smooth.gaussian_filter1d(data.ranges, smoothing), sector_angle)
-    hist = offset_lidar_data(data.ranges, sector_angle)
+    if os.environ["WROVER_HW"] == "REAL":
+        # hist = offset_lidar_data(gaussian_smooth.gaussian_filter1d(data.ranges, smoothing), sector_angle)
+        hist = offset_lidar_data(data.ranges, sector_angle)
     # For testing:
-    # hist = gaussian_smooth.gaussian_filter1d(data.ranges, smoothing)
-    # hist = data.ranges
+    else:
+        # hist = gaussian_smooth.gaussian_filter1d(data.ranges, smoothing)
+        hist = data.ranges
 
     # Write the sectors data to an output file for logging
     output_file = open('sectors.data', 'wb')

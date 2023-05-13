@@ -92,13 +92,13 @@ class NavStateMachine(StateMachine):
         self.timer.shutdown()
 
     def on_enter_stShortRange(self) -> None:
-        # print("\non enter stShortRange")
-        # if CoordinateManager.short_range_complete() != True:
-        #     print("Short Range Not Complete")
-        #     self.timer = rospy.Timer(rospy.Duration(0.2), lambda _: self.mux_pub.publish(self.mux_short_range))
-        # else:
-        #     print("Short Range Complete")
-        #     self.evSuccess()
+        print("\non enter stShortRange")
+        if CoordinateManager.short_range_complete() != True:
+            print("Short Range Not Complete")
+            self.timer = rospy.Timer(rospy.Duration(0.2), lambda _: self.mux_pub.publish(self.mux_short_range))
+        else:
+            print("Short Range Complete")
+            self.evSuccess()
         self.evSuccess()
 
     def on_exit_stShortRange(self) -> None:

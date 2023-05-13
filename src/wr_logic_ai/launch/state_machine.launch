@@ -1,23 +1,19 @@
 <launch>
-  <!-- <env name="WROVER_HW" value="MOCK"/> -->
-
   <arg name="mux_name" default="nav_mux" />
   <arg name="long_range_output" default="/long_range_nav" />
   <arg name="short_range_output" default="/short_range_nav" />
 
-  <!-- <group ns="HW" if ="$(eval env('WROVER_HW') == 'REAL')"> -->
-  <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" />
-  <include file="$(find wr_hsi_sensing)/launch/hw_test.launch" />
-  <node name="control" pkg="wr_control_drive_ds" type="DriveTrainControlSystem" machine="wrover" />
-  <include file="$(find wrevolution)/launch/ros_control_test.launch" />
-  <include file="$(find rplidar_ros)/launch/rplidar.launch" />
-  <!-- </group> -->
+  <group ns="HW" if ="$(eval env('WROVER_HW') == 'REAL')">
+    <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" />
+    <include file="$(find wr_hsi_sensing)/launch/hw_test.launch" />
+    <node name="control" pkg="wr_control_drive_ds" type="DriveTrainControlSystem" machine="wrover" />
+    <include file="$(find wrevolution)/launch/ros_control_test.launch" />
+    <include file="$(find rplidar_ros)/launch/rplidar.launch" />
+  </group>
 
-  <!-- <node name="fake_data" pkg="wr_logic_ai" type="inputFakeData.py" output="screen"/> -->
+  <node name="fake_data" pkg="wr_logic_ai" type="inputFakeData.py" output="screen"/>
 
   <node pkg="wr_logic_ai" name="wait_for_user_input" type="wait_for_user_input.py" output="screen" />
-  <node pkg="wr_logic_ai" name="long_range_action_server" type="long_range_action_server.py"
-    output="screen" />
   <node pkg="wr_logic_ai" name="nav_state_machine_driver" type="state_machine.py" output="screen" />
 
   <include file="$(find wr_logic_ai)/launch/mux_select.launch">
@@ -28,7 +24,6 @@
 
   <include file="$(find wr_logic_ai)/launch/long_range.launch">
     <arg name="long_range_output" value="$(arg long_range_output)" />
-    <!-- <env name="WROVER_HW" value = "$(env WROVER_HW)"/> -->
   </include>
 
 

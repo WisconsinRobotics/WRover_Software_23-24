@@ -14,14 +14,14 @@ from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Float64
 
 # Navigation parameters
-LIDAR_THRESH_DISTANCE = 5  # distance before obstacle avoidance logics is triggered (in meters)
+LIDAR_THRESH_DISTANCE = 0  # distance before obstacle avoidance logics is triggered (in meters)
 NAV_THRESH_DISTANCE = 0.5 # distance before rover believes it has reached the target (in meters)
 
 # initialize target angle to move forward
 current_lat = 0
 current_long = 0
 cur_heading = 0
-target_angle = 180
+target_angle = 0
 target_sector = 0
 smoothing_constant = 0
 # Get the speed multiplier of the current runtime for the obstacle_avoidance
@@ -39,9 +39,6 @@ def initialize() -> None:
     global frameCount
     global heading_msg
     global raw_heading_pub
-
-    # Initialize node
-    rospy.init_node('nav_autonomous', anonymous=False)
     
     # Publisher
     drive_pub = rospy.Publisher(rospy.get_param('~motor_speeds'), DriveTrainCmd, queue_size=1)
@@ -84,16 +81,12 @@ def angle_diff(heading1: float, heading2: float) -> float:
 # Calculate current heading and the planar target angle
 # TODO: this should now be part of a action server callback function
 def update_target(target_lat, target_long) -> bool:
-    # global target_angle
+    global target_angle
 
     # Construct the planar target angle relative to east, accounting for curvature
     imu = AngleCalculations(current_lat, current_long,
                             target_lat, target_long)
-    #target_angle = imu.get_angle() % 360
-    
-    # TESTING
-    # print("Current heading: " + str(heading))
-    #print('Target angle: ' + str(target_angle))
+    target_angle = imu.get_angle() % 360
     if imu.get_distance() < NAV_THRESH_DISTANCE:
         return True
     else:
@@ -119,12 +112,6 @@ def update_navigation(data) -> None:
             LIDAR_THRESH_DISTANCE,
             data,
             smoothing_constant)
-
-        # TESTING
-        print("CUR_HEADING: " + str(cur_heading))
-        print("Results: " + str(result))
-        print("FUNNY MATHS: " + str(((((90 - delta_heading) % 360) + 360) % 360)))
-        print("DELTA HEADING: " + str(delta_heading))
         
         raw_heading_pub.publish(result)
 
