@@ -1,13 +1,13 @@
 [
     {
         "lat": 10,
-        "long": 12,
+        "long": 10,
         "note": "EHall Entrance",
         "target_type": 0
     },
     {
-        "lat": 10,
-        "long": 8,
+        "lat": 12,
+        "long": 10,
         "note": "EHall Entrance",
         "target_type": 0
     }
