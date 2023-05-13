@@ -17,7 +17,7 @@ class LongRangeActionServer(object):
 
     def execute_callback(self, goal: LongRangeGoal):
         start_time = rospy.get_rostime()
-        while rospy.get_rostime() - start_time < LONG_RANGE_TIMEOUT_TIME:
+        while rospy.get_rostime() - start_time < LONG_RANGE_TIMEOUT_TIME and not rospy.is_shutdown():
             if obstacle_avoidance.update_target(goal.target_lat, goal.target_long):
                 return self._as.set_succeeded()
         return self._as.set_aborted()
