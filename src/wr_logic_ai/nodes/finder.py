@@ -139,10 +139,10 @@ def get_valley(
         if obstacle_list[len(obstacle_list) - 1][1] < len(hist):
             window_list.append([obstacle_list[len(obstacle_list) - 1][1], len(hist)])
 
-    print("obstacle list:")
-    print(obstacle_list)
-    print("window list:")
-    print(window_list)
+    # print("obstacle list:")
+    # print(obstacle_list)
+    # print("window list:")
+    # print(window_list)
 
     # Initialize best valley array
     best_valley = []
@@ -179,7 +179,7 @@ def get_navigation_angle(
     if len(best_valley) == 0:
         return 0
     
-    print("best valley: " + str(best_valley[0]) + " " + str(best_valley[1]))
+    # print("best valley: " + str(best_valley[0]) + " " + str(best_valley[1]))
 
     # Define the difference between 'wide' and 'narrow' valleys
     # For wide valleys, we want to drive on the edge of the valley

@@ -55,7 +55,7 @@ def run_mock_data() -> None:
     laser.header.frame_id = "laser"
     laser.intensities = []
 
-    mock_heading = 0
+    mock_heading = 180
     mock_gps = CoordinateMsg()
     mock_gps.latitude = 0
     mock_gps.longitude = 0
