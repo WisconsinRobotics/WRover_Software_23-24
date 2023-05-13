@@ -57,8 +57,8 @@ def run_mock_data() -> None:
 
     mock_heading = 359
     mock_gps = CoordinateMsg()
-    mock_gps.latitude = 0
-    mock_gps.longitude = 0
+    mock_gps.latitude = 10
+    mock_gps.longitude = 10
 
     print("sent fake nav data")
 
