@@ -109,7 +109,7 @@ def update_navigation(data) -> None:
         # Gets best possible angle, considering obstacles
         delta_heading = angle_diff(target_angle, cur_heading)
         result = get_navigation_angle(
-            ((((90 + delta_heading) % 360) + 360) % 360) / math.degrees(data.angle_increment),  # sector angle
+            ((((90 - delta_heading) % 360) + 360) % 360) / math.degrees(data.angle_increment),  # sector angle
             LIDAR_THRESH_DISTANCE,
             data,
             smoothing_constant)
