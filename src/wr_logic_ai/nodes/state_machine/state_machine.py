@@ -39,6 +39,7 @@ class NavStateMachine(StateMachine):
 
     def on_enter_stInit(self) -> None:
         print("\non enter stInit")
+        rospy.loginfo("\non enter stInit")
         self._mgr.read_coordinates_file()
 
         pub = rospy.Publisher("/control/drive_system/cmd", DriveTrainCmd, queue_size=1)
@@ -56,6 +57,7 @@ class NavStateMachine(StateMachine):
 
     def on_enter_stLongRange(self) -> None:
         print("\non enter stLongRange")
+        rospy.loginfo("\non enter stLongRange")
         self.timer = rospy.Timer(rospy.Duration(0.2), lambda _: self.mux_pub.publish(self.mux_long_range)) 
         client = actionlib.SimpleActionClient("LongRangeActionServer", LongRangeAction)
         client.wait_for_server()
@@ -68,10 +70,12 @@ class NavStateMachine(StateMachine):
 
     def on_exit_stLongRange(self) -> None:
         print("Exting Long Range")
+        rospy.loginfo("Exting Long Range")
         self.timer.shutdown()
 
     def on_enter_stLongRangeRecovery(self) -> None:
         print("\non enter stLongRangeRecovery")
+        rospy.loginfo("\non enter stLongRangeRecovery")
         if self._mgr is None:
             raise ValueError
         else:
@@ -93,11 +97,14 @@ class NavStateMachine(StateMachine):
 
     def on_enter_stShortRange(self) -> None:
         print("\non enter stShortRange")
+        rospy.loginfo("\non enter stShortRange")
         if CoordinateManager.short_range_complete() != True:
             print("Short Range Not Complete")
+            rospy.loginfo("Short Range Not Complete")
             self.timer = rospy.Timer(rospy.Duration(0.2), lambda _: self.mux_pub.publish(self.mux_short_range))
         else:
             print("Short Range Complete")
+            rospy.loginfo("Short Range Complete")
             self.evSuccess()
         self.evSuccess()
 
