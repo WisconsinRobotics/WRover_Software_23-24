@@ -70,8 +70,8 @@ def update_gps_coord(msg: CoordinateMsg) -> None:
     current_lat = msg.latitude
     current_long = msg.longitude
 
-def update_heading(msg: Float64) -> None:
-    global cur_heading #extected as 0-360 from  North (Clockwise)
+def update_heading(msg: Float64) -> None: # extected as 0 to 360 from  North (Clockwise)
+    global cur_heading 
     cur_heading = (90-msg.data) % 360 #Shifting to East
 
 def angle_diff(heading1: float, heading2: float) -> float:

@@ -2,6 +2,7 @@
 # It already accounts for the curvature of the Earth.
 # The calculations have been verified by Yash.
 import math
+import rospy
 
 class AngleCalculations:
     EARTH_RADIUS_METERS = 6378100
@@ -57,6 +58,9 @@ class AngleCalculations:
         angle = math.atan2(self.latitude_to_distance(self.cur_lat, self.tar_lat), self.longitude_to_distance(self.cur_long, self.tar_long)) #TODO: Why not use atan2?
         angle = math.degrees(angle)
         angle = 180 - angle
+        rospy.loginfo(f"latitude to distance: {self.latitude_to_distance(self.cur_lat, self.tar_lat)}")
+        rospy.loginfo(f"longitude to distance: {self.longitude_to_distance(self.cur_long, self.tar_long)}")
+        rospy.loginfo(f"angle: {angle}")
         
         # #Setting up in which quadrant we are
         # if self.cur_lat < self.tar_lat:
