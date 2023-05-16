@@ -5,24 +5,28 @@
 
 #include <fcntl.h>
 #include <fstream>
+#include <chrono>
+#include <thread>
 
 SolenoidController::SolenoidController(ros::NodeHandle& n) : 
     extendYSub {n.subscribe("/hci/arm/gamepad/button/y", MESSAGE_QUEUE_LENGTH, 
         &SolenoidController::extendSolenoid, this)}, 
     yPressed {false}
 {
-    file.open("/sys/class/gpio/gpio6/value");
-    if (!file.is_open())
-    {
-        std::cout << "Unable to open /sys/class/gpio/gpio6/value";
-    }
-
     fileExport.open("/sys/class/gpio/export");
-    if (!fileExport.is_open())
-    {
+    if (!fileExport.is_open()) {
         std::cout << "Unable to open /sys/class/gpio/export";
     }
     fileExport << pin;
+
+    while (access("/sys/class/gpio/gpio6/value", F_OK) != 0) {
+        std::this_thread::sleep_for(std::chrono::milliseconds{100});
+    }
+    
+    file.open("/sys/class/gpio/gpio6/value");
+    if (!file.is_open()) {
+        std::cout << "Unable to open /sys/class/gpio/gpio6/value";
+    }
 
     fileUnexport.open("/sys/class/gpio/unexport");
     if (!fileUnexport.is_open())
