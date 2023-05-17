@@ -14,6 +14,8 @@ find_package(catkin REQUIRED COMPONENTS
   moveit_ros_planning_interface
   moveit_msgs
   moveit_visual_tools
+  std_msgs
+
 )
 
 ## System dependencies are found with CMake's conventions
@@ -110,6 +112,7 @@ catkin_package(
 #  LIBRARIES wr_logic_teleop_arm
 #  CATKIN_DEPENDS roscpp rospy
 #  DEPENDS system_lib
+  CATKIN_DEPENDS message_runtime # added by RM
 )
 
 ###########
@@ -125,9 +128,12 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/wr_logic_teleop_arm.cpp
-# )
+add_library(${PROJECT_NAME}
+  src/ClawController.cpp src/SolenoidController.cpp
+)
+
+target_link_libraries(${PROJECT_NAME} PRIVATE ${catkin_LIBRARIES})
+    add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -140,6 +146,9 @@ include_directories(
 # add_executable(${PROJECT_NAME}_node src/wr_logic_teleop_arm_node.cpp)
 add_executable(ArmTeleopLogic src/ArmTeleopLogic.cpp)
 target_link_libraries(ArmTeleopLogic ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+
+add_executable(ClawAndSolenoidCaller src/ClawAndSolenoidCaller.cpp)
+target_link_libraries(ClawAndSolenoidCaller ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
