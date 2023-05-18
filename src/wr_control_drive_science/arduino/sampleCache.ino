@@ -31,6 +31,8 @@ void loop() {
     // When a servo position is avaiable from serial, update the servo's position
     if(Serial.available()) {
         Serial.readBytes(&servoPos, 1);
+        // FIXME: This value needs to be restricted to the range [0, 180]
+        // Probably on the Pi side?
         scoopServo.write(servoPos);
     }
     else {
