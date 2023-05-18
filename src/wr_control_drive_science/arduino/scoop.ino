@@ -33,7 +33,8 @@ void loop() {
         Serial.readBytes(&servoPos, 1);
         scoopServo.write(servoPos);
     }
-    
-    // Wait just a little bit to prevent slow down looping just a bit
-    delay(2);
+    else {
+        // Wait to slow down looping just a bit
+        delay(2);
+    }
 }
