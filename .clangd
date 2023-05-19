@@ -1,2 +1,8 @@
 Diagnostics:
-    UnusedIncludes: Strict
+  UnusedIncludes: Strict
+---
+If:
+  PathMatch: ".*\\.ino"
+
+CompileFlags:
+  CompilationDatabase: build/arduino
