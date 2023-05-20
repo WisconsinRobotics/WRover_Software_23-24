@@ -5,7 +5,7 @@ import rospy
 from sensor_msgs.msg import LaserScan 
 from copy import deepcopy
 import os
-
+import pdb
 import pickle
 
 ROVER_WIDTH = 2
@@ -61,6 +61,8 @@ def get_valley(
         data: LaserScan,
         smoothing: float = 3) -> List[int]:
     global prevData
+
+    pdb.set_trace()
 
     rviz_data = deepcopy(data)
     rviz_data.ranges = offset_lidar_data(data.ranges, sector_angle, is_rviz=True)
