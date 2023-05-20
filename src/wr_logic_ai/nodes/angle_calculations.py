@@ -57,9 +57,9 @@ class AngleCalculations:
         # Use the Great Circle distances of the spherical triangle legs to get the angle (-90,90) to the goal coordinates
         angle = math.atan2(self.latitude_to_distance(self.cur_lat, self.tar_lat), self.longitude_to_distance(self.cur_long, self.tar_long)) #TODO: Why not use atan2?
         angle = math.degrees(angle)
-        rospy.loginfo(f"latitude to distance: {self.latitude_to_distance(self.cur_lat, self.tar_lat)}")
-        rospy.loginfo(f"longitude to distance: {self.longitude_to_distance(self.cur_long, self.tar_long)}")
-        rospy.loginfo(f"angle: {angle}")
+        # rospy.loginfo(f"latitude to distance: {self.latitude_to_distance(self.cur_lat, self.tar_lat)}")
+        # rospy.loginfo(f"longitude to distance: {self.longitude_to_distance(self.cur_long, self.tar_long)}")
+        # rospy.loginfo(f"angle: {angle}")
         
         # #Setting up in which quadrant we are
         # if self.cur_lat < self.tar_lat:
