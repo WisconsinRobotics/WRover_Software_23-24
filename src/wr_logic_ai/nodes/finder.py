@@ -146,7 +146,7 @@ def get_valley(
     # print("obstacle list:")
     # print(obstacle_list)
     rospy.logerr("window list:")
-    rospy.logerr(list(map(lambda window: [window[0] * sector_angle, window[1] * sector_angle], window_list)))
+    rospy.logerr(window_list)
 
     # Initialize best valley array
     best_valley = []
