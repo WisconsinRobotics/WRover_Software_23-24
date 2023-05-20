@@ -61,9 +61,7 @@ def get_valley(
         data: LaserScan,
         smoothing: float = 3) -> List[int]:
     global prevData
-
-    pdb.set_trace()
-
+    
     rviz_data = deepcopy(data)
     rviz_data.ranges = offset_lidar_data(data.ranges, sector_angle, is_rviz=True)
     scan_rviz_pub.publish(rviz_data)
