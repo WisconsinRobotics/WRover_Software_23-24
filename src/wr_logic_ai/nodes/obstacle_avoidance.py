@@ -99,7 +99,7 @@ def update_target(target_lat, target_long) -> bool:
 def update_navigation(data) -> None:
     global frameCount
 
-    rospy.loginfo(f"target angle: {target_angle}, current heading: {cur_heading}")
+    # rospy.loginfo(f"target angle: {target_angle}, current heading: {cur_heading}")
     data_avg = sum(cur_range for cur_range in data.ranges) / len(data.ranges)
     #print("Data Avg: " + str(data_avg))
     # TODO: data threshold might depend of lidar model, double check
@@ -115,7 +115,7 @@ def update_navigation(data) -> None:
             smoothing_constant)
         
         raw_heading_pub.publish(result)
-        rospy.loginfo(f"raw heading: {result}")
+        # rospy.loginfo(f"raw heading: {result}")
 
         # Set the bounds of the speed multiplier
         speed_factor = 0.3
@@ -123,7 +123,7 @@ def update_navigation(data) -> None:
         speed_factor = 1 if speed_factor > 1 else speed_factor
         # Get the DriveTrainCmd relating to the heading of the robot and the resulting best navigation angle
         msg = angle_calc.piecewise_linear(angle_diff(90, result), 0)
-        rospy.loginfo(f"left drive value: {msg.left_value}, right drive value: {msg.right_value}")
+        # rospy.loginfo(f"left drive value: {msg.left_value}, right drive value: {msg.right_value}")
 #        t += 2
 #        if t > 90: # t for debugging purposes
 #            t = -90

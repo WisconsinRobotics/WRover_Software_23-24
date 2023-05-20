@@ -10,13 +10,13 @@
     if="$(eval env('WROVER_HW') == 'REAL')" />
   <include file="$(find wr_hsi_sensing)/launch/hw_test.launch"
     if="$(eval env('WROVER_HW') == 'REAL')" />
-  <node name="control" pkg="wr_control_drive_ds" type="DriveTrainControlSystem"
-    machine="wrover" />
+  <!-- <node name="control" pkg="wr_control_drive_ds" type="DriveTrainControlSystem"
+    machine="wrover" /> -->
   <include file="$(find wrevolution)/launch/ros_control_test.launch"
     if="$(eval env('WROVER_HW') == 'REAL')" />
   <include file="$(find rplidar_ros)/launch/rplidar.launch" if="$(eval env('WROVER_HW') == 'REAL')" />
 
-  <node name="fake_data" pkg="wr_logic_ai" type="inputFakeData.py" output="screen" />
+  <!-- <node name="fake_data" pkg="wr_logic_ai" type="inputFakeData.py" output="screen" /> -->
 
   <node pkg="wr_logic_ai" name="wait_for_user_input" type="wait_for_user_input.py" output="screen" />
   <node pkg="wr_logic_ai" name="nav_state_machine_driver" type="state_machine.py" output="screen" />
