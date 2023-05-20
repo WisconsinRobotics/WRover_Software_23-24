@@ -11,10 +11,8 @@
     env-loader="/home/wiscrobo/WRover_Software/env_remote.sh" user="wiscrobo"
     default="true" unless="$(env WROVER_LOCAL)">
   </machine>
-</launch>
-<!-- env name="WROVER_LOCAL" value="false"/ -->
-<!-- env name="WROVER_HW" value="MOCK"/
-</machine>
+  <!-- env name="WROVER_LOCAL" value="false"/ -->
+  <!-- env name="WROVER_HW" value="MOCK"/ -->
   <machine name="wrover" address="localhost" env-loader="/opt/ros/noetic/env.sh" default="true"
-if="$(env WROVER_LOCAL)"/>
-</launch> -->
+    if="$(env WROVER_LOCAL)" />
+</launch> 
