@@ -8,7 +8,7 @@ import os
 
 import pickle
 
-ROVER_WIDTH = 1
+ROVER_WIDTH = 2
 
 scan_rviz_pub = rospy.Publisher("/scan_rviz", LaserScan, queue_size=10)
 
@@ -146,7 +146,7 @@ def get_valley(
     # print("obstacle list:")
     # print(obstacle_list)
     rospy.logerr("window list:")
-    rospy.logerr(window_list)
+    rospy.logerr(list(map(lambda window: [window[0] * sector_angle, window[1] * sector_angle], window_list)))
 
     # Initialize best valley array
     best_valley = []
