@@ -16,11 +16,11 @@ def piecewise_linear(heading: float, target_angle: float) -> DriveTrainCmd:
     if x < 0 and x > -180:
         return DriveTrainCmd(left_value = max(2/90*x+1,-1),right_value = 1)
     elif x < -180:
-        return DriveTrainCmd(left_value = 1, right_value = max(-2/90*x-7,-1))
+        return DriveTrainCmd(left_value = 1, right_value = max(-2/90*x-1,-1))
     elif x > 0 and x < 180:
         return DriveTrainCmd(left_value = 1, right_value = max(-2/90*x+1,-1))
     else: #X is greater than 180
-        return DriveTrainCmd(left_value = max(2/90*x-7,-1),right_value = 1)
+        return DriveTrainCmd(left_value = max(2/90*x-1,-1),right_value = 1)
 
     
 
