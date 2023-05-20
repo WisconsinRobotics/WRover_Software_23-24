@@ -9,10 +9,10 @@
 
   <node pkg="rviz" name="$(anon rviz)" type="rviz" output="screen" machine="base_station"
     args="-d $(find wr_logic_ai)/launch/obstacle_avoidance.rviz"
-    if="$(eval env('WROVER_HW') == 'REAL')" unless="$(env WROVER_LOCAL)" />
+    if="$(eval env('WROVER_HW') == 'REAL' and not env('WROVER_LOCAL'))" />
 
   <node pkg="rviz" name="$(anon rviz)" type="rviz" output="screen"
     args="-d $(find wr_logic_ai)/launch/obstacle_avoidance_mock.rviz"
-    if="$(eval env('WROVER_HW') == 'MOCK')" unless="$(env WROVER_LOCAL)" />
+    if="$(eval env('WROVER_HW') == 'MOCK' and not env('WROVER_LOCAL'))" />
 
 </launch>
