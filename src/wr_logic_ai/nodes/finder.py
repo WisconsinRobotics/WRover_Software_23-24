@@ -92,18 +92,17 @@ def get_valley(
         elif (len(one_obstacle) != 0):
             left_bound = len(hist)
             right_bound = 0
-            for i in range(0, math.floor(len(one_obstacle) / 2)):
+            for i in range(len(one_obstacle)):
                 # Calculate size of anti-window and add to obstacle bounds
-                initAngleToIncrease = calculate_anti_window(hist[one_obstacle[i]]) / sector_angle #pass in distance to target to caculate angle that allows robot to pass through
-                outitAngleToIncrease = calculate_anti_window(hist[one_obstacle[len(one_obstacle) - i - 1]]) / sector_angle
+                angleToIncrease = calculate_anti_window(hist[one_obstacle[i]]) / sector_angle #pass in distance to target to caculate angle that allows robot to pass through
                 
                 # Update left and right bound
-                left_bound = max(min(left_bound, one_obstacle[i]-initAngleToIncrease), 0)
-                right_bound = min(max(right_bound, one_obstacle[len(one_obstacle) - i - 1]+outitAngleToIncrease), len(hist))
+                left_bound = max(min(left_bound, one_obstacle[i]-angleToIncrease), 0)
+                right_bound = min(max(right_bound, one_obstacle[i]+angleToIncrease), len(hist))
             
-
-            if len(obstacle_list) > 0 and obstacle_list[len(obstacle_list) - 1][1] >= left_bound:
-                obstacle_list[len(obstacle_list) - 1][1] = right_bound
+            # Check to see if the obstacle we just found can actually be merged with a previous obstacle
+            if len(obstacle_list) > 0 and obstacle_list[-1][1] >= left_bound:
+                obstacle_list[-1][1] = right_bound
             else:
                 obstacle_list.append([left_bound, right_bound])
             one_obstacle.clear()
@@ -111,17 +110,17 @@ def get_valley(
     if (len(one_obstacle) != 0):
         left_bound = len(hist)
         right_bound = 0
-        for i in range(0, math.floor(len(one_obstacle) / 2)):
+        for i in range(len(one_obstacle)):
             # Calculate size of anti-window and add to obstacle bounds
-            initAngleToIncrease = calculate_anti_window(hist[one_obstacle[i]]) / sector_angle #pass in distance to target to caculate angle that allows robot to pass through
-            outitAngleToIncrease = calculate_anti_window(hist[one_obstacle[len(one_obstacle) - i - 1]]) / sector_angle
-                
-            # Update left and right bound
-            left_bound = max(min(left_bound, one_obstacle[i]-initAngleToIncrease), 0)
-            right_bound = min(max(right_bound, one_obstacle[len(one_obstacle) - i - 1]+outitAngleToIncrease), len(hist))
+            angleToIncrease = calculate_anti_window(hist[one_obstacle[i]]) / sector_angle #pass in distance to target to caculate angle that allows robot to pass through
             
-        if len(obstacle_list) > 0 and obstacle_list[len(obstacle_list) - 1][1] >= left_bound:
-            obstacle_list[len(obstacle_list) - 1][1] = right_bound
+            # Update left and right bound
+            left_bound = max(min(left_bound, one_obstacle[i]-angleToIncrease), 0)
+            right_bound = min(max(right_bound, one_obstacle[i]+angleToIncrease), len(hist))
+        
+        # Check to see if the obstacle we just found can actually be merged with a previous obstacle
+        if len(obstacle_list) > 0 and obstacle_list[-1][1] >= left_bound:
+            obstacle_list[-1][1] = right_bound
         else:
             obstacle_list.append([left_bound, right_bound])
         
