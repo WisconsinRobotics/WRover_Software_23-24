@@ -145,8 +145,8 @@ def get_valley(
 
     # print("obstacle list:")
     # print(obstacle_list)
-    # print("window list:")
-    # print(window_list)
+    print("window list:")
+    print(window_list)
 
     # Initialize best valley array
     best_valley = []
