@@ -22,5 +22,4 @@ def cb(gps : GPS):
 if __name__ == '__main__':
     gps = GPS(i2c_bus=I2C(sda=2, scl=3))
     timer = rospy.Timer(rate.sleep_dur, lambda _: cb(gps))
-    timer.start()
     rospy.spin()
