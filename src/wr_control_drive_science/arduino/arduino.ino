@@ -5,7 +5,7 @@
 #include <Servo.h>
 
 // Constants
-#define SCOOP_SERVO_PIN 9
+#define CACHE_SERVO_PIN 9
 constexpr uint8_t CODE_WORD{0xAA};
 
 constexpr int8_t DATA_PIN{12}; // A Guess
@@ -13,15 +13,15 @@ SDI12 sdi12Bus{DATA_PIN};
 
 // Globals
 uint8_t servoPos = 0;
-Servo scoopServo;
+Servo cacheServo;
 
 void setup() {
     // Initialize serial
     Serial.begin(115200);
 
     // Initialize servo
-    scoopServo.attach(SCOOP_SERVO_PIN);
-    scoopServo.write(0);
+    cacheServo.attach(CACHE_SERVO_PIN);
+    cacheServo.write(0);
 
     sdi12Bus.begin();
 
@@ -45,7 +45,7 @@ void loop() {
         Serial.readBytes(&servoPos, 1);
         // FIXME: This value needs to be restricted to the range [0, 180]
         // Probably on the Pi side?
-        scoopServo.write(servoPos);
+        cacheServo.write(servoPos);
     }
 
     if (iter % 100 == 0) {
