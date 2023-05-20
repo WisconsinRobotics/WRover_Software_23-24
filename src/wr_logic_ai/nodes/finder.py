@@ -181,6 +181,7 @@ def get_navigation_angle(
 
     # If the rover is completely surrounded by obstacles, we want to turn hard right
     if len(best_valley) == 0:
+        rospy.loginfo("Too many obstacles, must turn right")
         return 0
     
     # print("best valley: " + str(best_valley[0]) + " " + str(best_valley[1]))
@@ -203,6 +204,7 @@ def get_navigation_angle(
 
         # Report the current target angle; no adjustment needed
         #print("target * sector_angle = " + str(target * sector_angle))
+        rospy.loginfo("In target valley")
         return target * sector_angle
 
     # If the valley is wide...
@@ -220,6 +222,7 @@ def get_navigation_angle(
         border_sector = len(data.ranges) if border_sector > len(data.ranges) else border_sector
 
         # Aim for the center of this new max_valley valley (this helps avoid accidentally clipping an edge of the robot)
+        rospy.loginfo("Obstacle in the way, turning to wide valley")
         return ((nearest_sector + border_sector) / 2.0) * sector_angle
 
     # If the valley is narrow...
@@ -227,4 +230,5 @@ def get_navigation_angle(
         # Follow the probotcol as defined above for narrow valleys
         
         #Aim for the center of the valley
+        rospy.loginfo("Obstacle in the way, turning to narrow valley")
         return ((best_valley[0] + best_valley[1]) / 2.0) * sector_angle
