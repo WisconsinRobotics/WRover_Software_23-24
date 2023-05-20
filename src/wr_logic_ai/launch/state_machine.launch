@@ -10,8 +10,7 @@
     if="$(eval env('WROVER_HW') == 'REAL')" />
   <include file="$(find wr_hsi_sensing)/launch/hw_test.launch"
     if="$(eval env('WROVER_HW') == 'REAL')" />
-  <!-- <node name="control" pkg="wr_control_drive_ds" type="DriveTrainControlSystem"
-  machine="wrover" /> -->
+  <node name="control" pkg="wr_control_drive_ds" type="DriveTrainControlSystem" machine="wrover" />
   <include file="$(find wrevolution)/launch/ros_control_test.launch"
     if="$(eval env('WROVER_HW') == 'REAL')" />
   <include file="$(find rplidar_ros)/launch/rplidar.launch" if="$(eval env('WROVER_HW') == 'REAL')" />
