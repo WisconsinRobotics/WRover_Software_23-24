@@ -69,7 +69,7 @@ def get_valley(
     # rospy.loginfo(f"{data.ranges}")
     # TODO: remove dependency on this variable by making the mock script more like real hardware input
     if rospy.get_param("~wrover_hw") == "REAL":
-        # hist = offset_lidar_data(gaussian_smooth.gaussian_filter1d(data.ranges, smoothing), sector_angle)
+        hist = offset_lidar_data(gaussian_smooth.gaussian_filter1d(data.ranges, smoothing), sector_angle)
         hist = offset_lidar_data(data.ranges, sector_angle)
     # For testing:
     else:
