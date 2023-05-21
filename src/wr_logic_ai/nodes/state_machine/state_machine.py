@@ -10,6 +10,7 @@ import rospy
 import actionlib
 from actionlib_msgs.msg import GoalStatus
 from wr_drive_msgs.msg import DriveTrainCmd
+import threading
 
 COLOR_AUTONOMOUS = LEDMatrixRequest(RED = 0, GREEN = 0, BLUE = 255)
 COLOR_COMPLETE = LEDMatrixRequest(RED = 0, GREEN = 255, BLUE = 0)
@@ -52,20 +53,25 @@ class NavStateMachine(StateMachine):
         super(NavStateMachine, self).__init__()
 
     def init_calibrate(self, pub: rospy.Publisher, stop_time: float) -> None:
-        set_matrix_color(COLOR_AUTONOMOUS)
         if rospy.get_time() < stop_time:
             pub.publish(DriveTrainCmd(left_value=0.3, right_value=-0.3))
         else:
             pub.publish(DriveTrainCmd(left_value=0, right_value=0))
             self.evUnconditional()
 
+    def init_w_ros(self):
+
+        set_matrix_color(COLOR_AUTONOMOUS)
+
+        pub = rospy.Publisher("/control/drive_system/cmd", DriveTrainCmd, queue_size=1)
+        self._init_tmr = rospy.Timer(rospy.Duration.from_sec(0.1), lambda _: self.init_calibrate(pub, rospy.get_time() + 7))
+
     def on_enter_stInit(self) -> None:
         print("\non enter stInit")
         rospy.loginfo("\non enter stInit")
         self._mgr.read_coordinates_file()
 
-        pub = rospy.Publisher("/control/drive_system/cmd", DriveTrainCmd, queue_size=1)
-        self._init_tmr = rospy.Timer(rospy.Duration.from_sec(0.1), lambda _: self.init_calibrate(pub, rospy.get_time() + 7))
+        threading.Timer(1, lambda: self.init_w_ros())
 
     def on_exit_stInit(self) -> None:
         self._init_tmr.shutdown()
