@@ -9,6 +9,7 @@ import rospy
 import actionlib
 from actionlib_msgs.msg import GoalStatus
 from wr_drive_msgs.msg import DriveTrainCmd
+import threading
 
 COLOR_AUTONOMOUS = LEDMatrixRequest(RED = 0, GREEN = 0, BLUE = 255)
 COLOR_COMPLETE = LEDMatrixRequest(RED = 0, GREEN = 255, BLUE = 0)
@@ -169,5 +170,7 @@ class NavStateMachine(StateMachine):
 
 if __name__ == "__main__":
     rospy.init_node('nav_state_machine', anonymous=False)
+    threading.Thread(target=rospy.spin)
     statemachine = NavStateMachine(CoordinateManager())
-    rospy.spin()
+    while not rospy.is_shutdown():
+        rospy.sleep(0.1)
