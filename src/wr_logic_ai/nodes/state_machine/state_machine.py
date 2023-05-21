@@ -23,7 +23,7 @@ def set_matrix_color(color: LEDMatrixRequest) -> None:
     matrix_srv = rospy.ServiceProxy("/led_matrix", LEDMatrix)
     matrix_srv.wait_for_service()
     matrix_srv.call(COLOR_NONE)
-    rospy.sleep(0.5)
+    time.sleep(0.5)
     matrix_srv.call(color)
 
 class NavStateMachine(StateMachine):
@@ -63,8 +63,9 @@ class NavStateMachine(StateMachine):
 
     def init_w_ros(self):
 
-        pub = rospy.Publisher("/control/drive_system/cmd", DriveTrainCmd, queue_size=1)
         set_matrix_color(COLOR_AUTONOMOUS)
+
+        pub = rospy.Publisher("/control/drive_system/cmd", DriveTrainCmd, queue_size=1)
         stop_time = rospy.get_time() + 7
         self._init_tmr = rospy.Timer(rospy.Duration.from_sec(0.1), lambda _: self.init_calibrate(pub, stop_time))
 
