@@ -105,7 +105,7 @@ def update_navigation(data: LaserScan) -> None:
     # TODO: data threshold might depend of lidar model, double check
             #Change if units/lidar changes
     # data_avg is above 0.5 almost always, but result stays the same (?)
-    if data_avg >= 0.5:
+    if True:
         # Gets best possible angle, considering obstacles
         delta_heading = angle_diff(target_angle, cur_heading)
         result = get_navigation_angle(
