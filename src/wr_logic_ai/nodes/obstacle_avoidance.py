@@ -96,7 +96,7 @@ def update_target(target_lat, target_long) -> bool:
 # Update the robot's navigation and drive it towards the target angle
 
 
-def update_navigation(data) -> None:
+def update_navigation(data: LaserScan) -> None:
     global frameCount
 
     # rospy.loginfo(f"target angle: {target_angle}, current heading: {cur_heading}")
