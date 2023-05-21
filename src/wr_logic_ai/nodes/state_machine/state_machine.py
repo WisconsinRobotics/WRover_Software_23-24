@@ -3,11 +3,24 @@
 from statemachine import StateMachine, State
 from wr_logic_ai.coordinate_manager import CoordinateManager
 from wr_logic_ai.msg import NavigationState, LongRangeAction, LongRangeGoal
+from wr_led_matrix.srv import led_matrix as LEDMatrix, led_matrixRequest as LEDMatrixRequest
 from std_srvs.srv import Empty
 import rospy
 import actionlib
 from actionlib_msgs.msg import GoalStatus
 from wr_drive_msgs.msg import DriveTrainCmd
+
+COLOR_AUTONOMOUS = LEDMatrixRequest(RED = 0, GREEN = 0, BLUE = 255)
+COLOR_COMPLETE = LEDMatrixRequest(RED = 0, GREEN = 255, BLUE = 0)
+COLOR_ERROR = LEDMatrixRequest(RED = 255, GREEN = 0, BLUE = 0)
+COLOR_NONE = LEDMatrixRequest(RED = 0, GREEN = 0, BLUE = 0)
+
+def set_matrix_color(color: LEDMatrixRequest) -> None:
+    matrix_srv = rospy.ServiceProxy("/led_matrix", LEDMatrix)
+    matrix_srv.wait_for_service()
+    matrix_srv.call(COLOR_NONE)
+    rospy.sleep(0.5)
+    matrix_srv.call(color)
 
 class NavStateMachine(StateMachine):
     # Defining states
@@ -42,6 +55,8 @@ class NavStateMachine(StateMachine):
         rospy.loginfo("\non enter stInit")
         self._mgr.read_coordinates_file()
 
+        set_matrix_color(COLOR_AUTONOMOUS)
+
         pub = rospy.Publisher("/control/drive_system/cmd", DriveTrainCmd, queue_size=1)
         end = rospy.get_time() + 7
         while rospy.get_time() < end:
@@ -59,6 +74,10 @@ class NavStateMachine(StateMachine):
         print("\non enter stLongRange")
         rospy.loginfo("\non enter stLongRange")
         self.timer = rospy.Timer(rospy.Duration(0.2), lambda _: self.mux_pub.publish(self.mux_long_range)) 
+        
+        # enter autonomous mode
+        set_matrix_color(COLOR_AUTONOMOUS)
+
         client = actionlib.SimpleActionClient("LongRangeActionServer", LongRangeAction)
         client.wait_for_server()
         goal = LongRangeGoal(target_lat = self._mgr.get_coordinate()["lat"], target_long = self._mgr.get_coordinate()["long"])
@@ -76,6 +95,9 @@ class NavStateMachine(StateMachine):
     def on_enter_stLongRangeRecovery(self) -> None:
         print("\non enter stLongRangeRecovery")
         rospy.loginfo("\non enter stLongRangeRecovery")
+
+        set_matrix_color(COLOR_ERROR)
+
         if self._mgr is None:
             raise ValueError
         else:
@@ -98,6 +120,9 @@ class NavStateMachine(StateMachine):
     def on_enter_stShortRange(self) -> None:
         print("\non enter stShortRange")
         rospy.loginfo("\non enter stShortRange")
+
+        set_matrix_color(COLOR_AUTONOMOUS)
+
         if CoordinateManager.short_range_complete() != True:
             print("Short Range Not Complete")
             rospy.loginfo("Short Range Not Complete")
@@ -114,6 +139,9 @@ class NavStateMachine(StateMachine):
 
     def on_enter_stWaypointSuccess(self) -> None:
         print("\non enter stWaypointSuccess")
+
+        set_matrix_color(COLOR_COMPLETE)
+
         if self._mgr is None:
             raise ValueError
         else:
