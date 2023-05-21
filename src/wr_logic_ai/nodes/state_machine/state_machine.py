@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
+from __future__ import annotations
 from statemachine import StateMachine, State
 from wr_logic_ai.coordinate_manager import CoordinateManager
-from wr_logic_ai.msg import NavigationState, LongRangeAction, LongRangeGoal
+from wr_logic_ai.msg import NavigationState, LongRangeAction, LongRangeGoal, LongRangeActionResult
 from wr_led_matrix.srv import led_matrix as LEDMatrix, led_matrixRequest as LEDMatrixRequest
 from std_srvs.srv import Empty
 import rospy
@@ -24,13 +25,12 @@ def set_matrix_color(color: LEDMatrixRequest) -> None:
 
 class NavStateMachine(StateMachine):
     # Defining states
-    stInit = State()
+    stInit = State(initial=True)
     stLongRange = State()
     stLongRangeRecovery = State()
     stShortRange = State()
     stWaypointSuccess = State()
     stComplete = State()
-    stKickoff = State(initial=True) # Req'd to let rospy spin before initialization
 
     # Defining events and transitions
     evSuccess = (stLongRange.to(stShortRange) | stLongRangeRecovery.to(
@@ -38,7 +38,7 @@ class NavStateMachine(StateMachine):
     evError = (stLongRange.to(stLongRangeRecovery) | stLongRangeRecovery.to(
         stLongRangeRecovery) | stShortRange.to(stLongRange))
     evNotWaiting = stWaypointSuccess.to(stLongRange)
-    evUnconditional = stInit.to(stLongRange) | stKickoff.to(stInit)
+    evUnconditional = stInit.to(stLongRange)
     evComplete = stWaypointSuccess.to(stComplete)
 
     def __init__(self, mgr: CoordinateManager) -> None:
@@ -51,8 +51,12 @@ class NavStateMachine(StateMachine):
         self.mux_short_range.state = NavigationState.NAVIGATION_STATE_SHORT_RANGE
         super(NavStateMachine, self).__init__()
 
-    def on_enter_stKickoff(self) -> None:
-        self.evUnconditional()
+    def init_calibrate(self, pub: rospy.Publisher, stop_time: float) -> None:
+        if rospy.get_time() < stop_time:
+            pub.publish(DriveTrainCmd(left_value=0.3, right_value=-0.3))
+        else:
+            pub.publish(DriveTrainCmd(left_value=0, right_value=0))
+            self.evUnconditional()
 
     def on_enter_stInit(self) -> None:
         print("\non enter stInit")
@@ -62,17 +66,19 @@ class NavStateMachine(StateMachine):
         set_matrix_color(COLOR_AUTONOMOUS)
 
         pub = rospy.Publisher("/control/drive_system/cmd", DriveTrainCmd, queue_size=1)
-        end = rospy.get_time() + 7
-        while rospy.get_time() < end:
-            pub.publish(DriveTrainCmd(left_value=0.4, right_value=-0.4))
-            rospy.sleep(0.1)
-        pub.publish(DriveTrainCmd(left_value=0, right_value=0))
-
-        self.evUnconditional()
+        self._init_tmr = rospy.Timer(rospy.Duration.from_sec(0.1), lambda _: self.init_calibrate(pub, rospy.get_time() + 7))
 
     def on_exit_stInit(self) -> None:
+        self._init_tmr.shutdown()
         if (self._mgr.next_coordinate()):
             self.evComplete()
+
+    def longRangeActionComplete(self, state: GoalStatus, _: LongRangeActionResult, sm: NavStateMachine) -> None:
+        if state == GoalStatus.SUCCEEDED:
+            sm.evSuccess()
+        elif state == GoalStatus.ABORTED:
+            sm.evError()
+            
 
     def on_enter_stLongRange(self) -> None:
         print("\non enter stLongRange")
@@ -85,16 +91,21 @@ class NavStateMachine(StateMachine):
         client = actionlib.SimpleActionClient("LongRangeActionServer", LongRangeAction)
         client.wait_for_server()
         goal = LongRangeGoal(target_lat = self._mgr.get_coordinate()["lat"], target_long = self._mgr.get_coordinate()["long"])
-        as_state = client.send_goal_and_wait(goal)
-        if as_state == GoalStatus.SUCCEEDED:
-            self.evSuccess()
-        elif as_state == GoalStatus.ABORTED:
-            self.evError()
+        client.send_goal(goal, done_cb= \
+                         lambda status, result: \
+                            self.longRangeActionComplete(status, result, self))
+        
 
     def on_exit_stLongRange(self) -> None:
         print("Exting Long Range")
         rospy.loginfo("Exting Long Range")
         self.timer.shutdown()
+
+    def longRangeRecoveryActionComplete(self, state: GoalStatus, _: LongRangeActionResult, sm: NavStateMachine) -> None:
+        if state == GoalStatus.SUCCEEDED:
+            sm.evSuccess()
+        elif state == GoalStatus.ABORTED:
+            sm.evError()
 
     def on_enter_stLongRangeRecovery(self) -> None:
         print("\non enter stLongRangeRecovery")
@@ -111,12 +122,9 @@ class NavStateMachine(StateMachine):
             client = actionlib.SimpleActionClient("LongRangeActionServer", LongRangeAction)
             client.wait_for_server()
             goal = LongRangeGoal(target_lat = self._mgr.get_coordinate()["lat"], target_long = self._mgr.get_coordinate()["long"])
-            as_state = client.send_goal_and_wait(goal)
-            if as_state == GoalStatus.SUCCEEDED:
-                self.evSuccess()
-                self._mgr.next_coordinate()
-            elif as_state == GoalStatus.ABORTED:
-                self.evError()
+            client.send_goal(goal, done_cb= \
+                             lambda status, result: \
+                                self.longRangeRecoveryActionComplete(status, result, self))
 
     def on_exit_stLongRangeRecovery(self) -> None:
         self.timer.shutdown()
