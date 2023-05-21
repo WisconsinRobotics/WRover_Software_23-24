@@ -43,11 +43,6 @@ void loop() {
     }
 
     setColor();
-
-    // Flush any extra bytes
-    while(Serial.available() != 0) {
-      Serial.read();
-    }
   }
 
   if(++pass % 1000 > 500){
