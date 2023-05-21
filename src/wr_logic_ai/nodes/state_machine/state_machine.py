@@ -71,7 +71,7 @@ class NavStateMachine(StateMachine):
         rospy.loginfo("\non enter stInit")
         self._mgr.read_coordinates_file()
 
-        threading.Timer(1, lambda: self.init_w_ros())
+        threading.Timer(1, lambda: self.init_w_ros()).start()
 
     def on_exit_stInit(self) -> None:
         self._init_tmr.shutdown()
