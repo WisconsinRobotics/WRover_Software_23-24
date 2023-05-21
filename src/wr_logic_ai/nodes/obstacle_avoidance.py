@@ -23,7 +23,7 @@ current_long = 0
 cur_heading = 0
 target_angle = 0
 target_sector = 0
-smoothing_constant = 0
+smoothing_constant = 3
 # Get the speed multiplier of the current runtime for the obstacle_avoidance
 # 0.2 is bugged
 speed_factor = 0

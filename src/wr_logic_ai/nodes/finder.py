@@ -63,7 +63,8 @@ def get_valley(
     global prevData
 
     rviz_data = deepcopy(data)
-    rviz_data.ranges = offset_lidar_data(data.ranges, sector_angle, is_rviz=True)
+    rviz_data.ranges = gaussian_smooth.gaussian_filter1d(rviz_data.ranges, smoothing)
+    rviz_data.ranges = offset_lidar_data(rviz_data.ranges, sector_angle, is_rviz=True)
     scan_rviz_pub.publish(rviz_data)
 
     # rospy.loginfo(f"{data.ranges}")
@@ -101,10 +102,11 @@ def get_valley(
                 right_bound = min(max(right_bound, one_obstacle[i]+angleToIncrease), len(hist))
             
             # Check to see if the obstacle we just found can actually be merged with a previous obstacle
-            if len(obstacle_list) > 0 and obstacle_list[-1][1] >= left_bound:
-                obstacle_list[-1][1] = right_bound
-            else:
-                obstacle_list.append([left_bound, right_bound])
+            while len(obstacle_list) > 0 and obstacle_list[-1][1] >= left_bound:
+                left_bound = min(left_bound, obstacle_list[-1][0])
+                right_bound = max(right_bound, obstacle_list[-1][1])
+                del obstacle_list[-1]            
+            obstacle_list.append([left_bound, right_bound])
             one_obstacle.clear()
             
     if (len(one_obstacle) != 0):
@@ -119,10 +121,12 @@ def get_valley(
             right_bound = min(max(right_bound, one_obstacle[i]+angleToIncrease), len(hist))
         
         # Check to see if the obstacle we just found can actually be merged with a previous obstacle
-        if len(obstacle_list) > 0 and obstacle_list[-1][1] >= left_bound:
-            obstacle_list[-1][1] = right_bound
-        else:
-            obstacle_list.append([left_bound, right_bound])
+        while len(obstacle_list) > 0 and obstacle_list[-1][1] >= left_bound:
+            left_bound = min(left_bound, obstacle_list[-1][0])
+            right_bound = max(right_bound, obstacle_list[-1][1])
+            del obstacle_list[-1]            
+        obstacle_list.append([left_bound, right_bound])
+        one_obstacle.clear()
         
     # At this point we make an inverse list of the obstacles to have a 2d list of all 
     # the places that we can drive through (our windows)
