@@ -1,5 +1,7 @@
 // Code to translate serial data to led panel ouput
 
+#include "Arduino.h"
+#include "pins_arduino.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_NeoMatrix.h>
 #include <Adafruit_NeoPixel.h>
@@ -11,35 +13,50 @@ Adafruit_NeoMatrix matrix = Adafruit_NeoMatrix(8, 8, PIN,
   NEO_MATRIX_ROWS + NEO_MATRIX_ZIGZAG,
   NEO_GRB           + NEO_KHZ800);
 
-const uint16_t colors[] = {
-  matrix.Color(255, 0, 0), matrix.Color(0, 255, 0), matrix.Color(0, 0, 255) };
-
 void setup() {
   Serial.begin(9600);
  
   matrix.begin();
+  matrix.clear();
+  matrix.show();
   matrix.setBrightness(255);
+
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(500);
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(500);
 }
 
-int x    = matrix.width();
-int pass = 0;
-uint8_t serial_input[3];
+unsigned int pass = 0;
+uint8_t serial_input[3]{0,0,0};
+
+void setColor();
 
 void loop() {
   // Wait for color
-  while(Serial.available() < 3) {delay(0.1);};
+  if(Serial.available() >= 3) {
 
-  // Read color into byte array
-  for (int i=0; i<3; i++) {
-    serial_input[i] = Serial.read();
+    // Read color into byte array
+    for (unsigned char & color_repr : serial_input) {
+      color_repr = Serial.read();
+    }
+
+    setColor();
+
+    // Flush any extra bytes
+    while(Serial.available() != 0) {
+      Serial.read();
+    }
   }
 
-  setColor();
-
-  // Flush any extra bytes
-  while(Serial.available()) {
-    Serial.read();
+  if(++pass % 1000 > 500){
+    digitalWrite(LED_BUILTIN, LOW);
+  }else{
+    digitalWrite(LED_BUILTIN, HIGH);
   }
+
+  delay(1);
 }
 
 void setColor() {

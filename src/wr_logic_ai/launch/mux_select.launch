@@ -1,0 +1,16 @@
+<launch>
+    <arg name="mux_name" default="nav_mux"/>
+    <arg name="long_range_output" default="/long_range_nav"/>
+    <arg name="short_range_output" default="/short_range_nav"/>
+
+    <node pkg="wr_logic_ai" type="drive_mux_select.py" name="mux_select" output="screen">
+        <param name="long_range_topic_name" value="$(arg long_range_output)"/>
+        <param name="short_range_topic_name" value="$(arg short_range_output)"/>
+        <param name="mux_name" value = "$(arg mux_name)"/>
+    </node>
+    
+    <node pkg="topic_tools" type="mux" name="$(arg mux_name)" args="/control/drive_system/cmd $(arg long_range_output) $(arg short_range_output)">
+        <param name="initial_topic" value="__none"/>
+        <remap from="/mux" to="/$(arg mux_name)"/>
+    </node>
+</launch>

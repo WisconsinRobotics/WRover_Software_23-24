@@ -1,0 +1,7 @@
+<!--Launches the logic for Freefal's AI. It is probably incomplete, please check -->
+<launch>
+  <node pkg="wr_logic_ai" name="obstacle_avoidance" type="obstacle_avoidance.py" output="screen" />
+  <node pkg="wr_logic_ai" name="dead_reckoning" type="dead_reckoning.py" output="screen"/>
+
+ <!--  <node pkg="wr_logic_ai" name="play_navigation" type="play_navigation.py" output="screen"/> -->
+</launch>

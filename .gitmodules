@@ -1,0 +1,18 @@
+[submodule "src/wroboclaw"]
+	path = src/wroboclaw
+	url = https://github.com/WisconsinRobotics/wroboclaw
+[submodule "src/wreadinput"]
+	path = src/wreadinput
+	url = https://github.com/WisconsinRobotics/wreadinput
+[submodule "src/wready"]
+	path = src/wready
+	url = https://github.com/WisconsinRobotics/wready
+[submodule "src/wresponsecontrol"]
+	path = src/wresponsecontrol
+	url = https://github.com/WisconsinRobotics/wresponsecontrol
+[submodule "src/wrplidar_ros"]
+	path = src/wrplidar_ros
+	url = https://github.com/WisconsinRobotics/wrplidar_ros.git
+[submodule "src/wrevolution"]
+	path = src/wrevolution
+	url = https://github.com/WisconsinRobotics/wrevolution
