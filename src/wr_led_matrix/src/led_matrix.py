@@ -27,7 +27,7 @@ if __name__=="__main__":
     baud = rospy.get_param("~baud")
     port = rospy.get_param("~com_port")
 
-    with serial.Serial(port, baud) as s:
+    with serial.Serial(port, baud, dsrdtr=None) as s:
         #ROS Spin indefinitely (the heavy lifting is in the service callback)
         rospy.loginfo("Serial port open, starting spin")
         rospy.spin()
