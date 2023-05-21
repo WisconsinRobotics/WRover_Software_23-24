@@ -64,6 +64,7 @@ class NavStateMachine(StateMachine):
     def init_w_ros(self):
 
         set_matrix_color(COLOR_AUTONOMOUS)
+        set_matrix_color(COLOR_AUTONOMOUS)
 
         pub = rospy.Publisher("/control/drive_system/cmd", DriveTrainCmd, queue_size=1)
         stop_time = rospy.get_time() + 7
