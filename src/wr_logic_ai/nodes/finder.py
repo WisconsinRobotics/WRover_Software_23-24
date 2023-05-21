@@ -13,7 +13,7 @@ ROVER_WIDTH = 2
 scan_rviz_pub = rospy.Publisher("/scan_rviz", LaserScan, queue_size=10)
 
 def calculate_anti_window(d: float) -> int:
-    return math.degrees(math.atan((ROVER_WIDTH / 2) / d))
+    return math.degrees(2*math.atan((ROVER_WIDTH / 2) / d))
     
 # Returns angular distance (in degrees) from sector parameter to target
 # Returns 0 if sector parameter contains target
