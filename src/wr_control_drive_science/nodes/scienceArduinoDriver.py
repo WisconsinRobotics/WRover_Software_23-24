@@ -9,7 +9,7 @@ import std_msgs.msg as std_msgs
 
 # bytepackage format
 SERVO_SERIAL_PACKET_FORMAT = "B"
-MOISTURE_SENSOR_PACKET_FORMAT = "I"
+MOISTURE_SENSOR_PACKET_FORMAT = "!I"
 
 # Storage for the most recent servo command
 servo_position = 0
@@ -54,6 +54,7 @@ def arduinoSerialProcessing(ser: Serial) -> None:
 def ros_subscriber_servo(msg: std_msgs.UInt8) -> None:
     global servo_position
     global servo_position_lock
+    # Ensure that the publisher's data is in the range [0,180]
     with servo_position_lock:
         servo_position = msg.data
 
@@ -86,7 +87,7 @@ def initialize() -> None:
                 lambda _: ros_publish_moisture(moisture_publisher))
 
     # Arduino comms loop
-    rospy.Timer(rospy.Duration.form_sec(0.1),
+    rospy.Timer(rospy.Duration.from_sec(0.1),
                 lambda _: arduinoSerialProcessing(ser))
 
 
