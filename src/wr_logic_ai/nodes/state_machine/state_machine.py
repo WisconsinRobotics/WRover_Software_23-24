@@ -52,6 +52,7 @@ class NavStateMachine(StateMachine):
         super(NavStateMachine, self).__init__()
 
     def init_calibrate(self, pub: rospy.Publisher, stop_time: float) -> None:
+        set_matrix_color(COLOR_AUTONOMOUS)
         if rospy.get_time() < stop_time:
             pub.publish(DriveTrainCmd(left_value=0.3, right_value=-0.3))
         else:
@@ -62,8 +63,6 @@ class NavStateMachine(StateMachine):
         print("\non enter stInit")
         rospy.loginfo("\non enter stInit")
         self._mgr.read_coordinates_file()
-
-        set_matrix_color(COLOR_AUTONOMOUS)
 
         pub = rospy.Publisher("/control/drive_system/cmd", DriveTrainCmd, queue_size=1)
         self._init_tmr = rospy.Timer(rospy.Duration.from_sec(0.1), lambda _: self.init_calibrate(pub, rospy.get_time() + 7))
