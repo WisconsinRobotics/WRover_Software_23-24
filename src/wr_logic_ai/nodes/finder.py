@@ -63,18 +63,18 @@ def get_valley(
     global prevData
 
     rviz_data = deepcopy(data)
-    rviz_data.ranges = gaussian_smooth.gaussian_filter1d(rviz_data.ranges, smoothing)
+    #rviz_data.ranges = gaussian_smooth.gaussian_filter1d(rviz_data.ranges, smoothing)
     rviz_data.ranges = offset_lidar_data(rviz_data.ranges, sector_angle, is_rviz=True)
     scan_rviz_pub.publish(rviz_data)
 
     # rospy.loginfo(f"{data.ranges}")
     # TODO: remove dependency on this variable by making the mock script more like real hardware input
     if rospy.get_param("~wrover_hw") == "REAL":
-        hist = offset_lidar_data(gaussian_smooth.gaussian_filter1d(data.ranges, smoothing), sector_angle)
+        #hist = offset_lidar_data(gaussian_smooth.gaussian_filter1d(data.ranges, smoothing), sector_angle)
         hist = offset_lidar_data(data.ranges, sector_angle)
     # For testing:
     else:
-        hist = gaussian_smooth.gaussian_filter1d(data.ranges, smoothing)
+        #hist = gaussian_smooth.gaussian_filter1d(data.ranges, smoothing)
         hist = data.ranges
 
     # Write the sectors data to an output file for logging
