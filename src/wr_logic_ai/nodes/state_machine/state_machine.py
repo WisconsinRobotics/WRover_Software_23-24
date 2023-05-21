@@ -24,12 +24,13 @@ def set_matrix_color(color: LEDMatrixRequest) -> None:
 
 class NavStateMachine(StateMachine):
     # Defining states
-    stInit = State(initial=True)
+    stInit = State()
     stLongRange = State()
     stLongRangeRecovery = State()
     stShortRange = State()
     stWaypointSuccess = State()
     stComplete = State()
+    stKickoff = State(initial=True) # Req'd to let rospy spin before initialization
 
     # Defining events and transitions
     evSuccess = (stLongRange.to(stShortRange) | stLongRangeRecovery.to(
@@ -37,7 +38,7 @@ class NavStateMachine(StateMachine):
     evError = (stLongRange.to(stLongRangeRecovery) | stLongRangeRecovery.to(
         stLongRangeRecovery) | stShortRange.to(stLongRange))
     evNotWaiting = stWaypointSuccess.to(stLongRange)
-    evUnconditional = stInit.to(stLongRange)
+    evUnconditional = stInit.to(stLongRange) | stKickoff.to(stInit)
     evComplete = stWaypointSuccess.to(stComplete)
 
     def __init__(self, mgr: CoordinateManager) -> None:
@@ -49,6 +50,9 @@ class NavStateMachine(StateMachine):
         self.mux_short_range = NavigationState()
         self.mux_short_range.state = NavigationState.NAVIGATION_STATE_SHORT_RANGE
         super(NavStateMachine, self).__init__()
+
+    def on_enter_stKickoff(self) -> None:
+        self.evUnconditional()
 
     def on_enter_stInit(self) -> None:
         print("\non enter stInit")
@@ -68,7 +72,7 @@ class NavStateMachine(StateMachine):
 
     def on_exit_stInit(self) -> None:
         if (self._mgr.next_coordinate()):
-            self.evComplete
+            self.evComplete()
 
     def on_enter_stLongRange(self) -> None:
         print("\non enter stLongRange")
