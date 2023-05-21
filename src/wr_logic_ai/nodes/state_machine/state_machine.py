@@ -73,11 +73,11 @@ class NavStateMachine(StateMachine):
         if (self._mgr.next_coordinate()):
             self.evComplete()
 
-    def longRangeActionComplete(self, state: GoalStatus, _: LongRangeActionResult, sm: NavStateMachine) -> None:
+    def longRangeActionComplete(self, state: GoalStatus, _: LongRangeActionResult) -> None:
         if state == GoalStatus.SUCCEEDED:
-            sm.evSuccess()
+            self.evSuccess()
         elif state == GoalStatus.ABORTED:
-            sm.evError()
+            self.evError()
             
 
     def on_enter_stLongRange(self) -> None:
@@ -93,7 +93,7 @@ class NavStateMachine(StateMachine):
         goal = LongRangeGoal(target_lat = self._mgr.get_coordinate()["lat"], target_long = self._mgr.get_coordinate()["long"])
         client.send_goal(goal, done_cb= \
                          lambda status, result: \
-                            self.longRangeActionComplete(status, result, self))
+                            self.longRangeActionComplete(status, result))
         
 
     def on_exit_stLongRange(self) -> None:
@@ -101,11 +101,11 @@ class NavStateMachine(StateMachine):
         rospy.loginfo("Exting Long Range")
         self.timer.shutdown()
 
-    def longRangeRecoveryActionComplete(self, state: GoalStatus, _: LongRangeActionResult, sm: NavStateMachine) -> None:
+    def longRangeRecoveryActionComplete(self, state: GoalStatus, _: LongRangeActionResult) -> None:
         if state == GoalStatus.SUCCEEDED:
-            sm.evSuccess()
+            self.evSuccess()
         elif state == GoalStatus.ABORTED:
-            sm.evError()
+            self.evError()
 
     def on_enter_stLongRangeRecovery(self) -> None:
         print("\non enter stLongRangeRecovery")
@@ -124,7 +124,7 @@ class NavStateMachine(StateMachine):
             goal = LongRangeGoal(target_lat = self._mgr.get_coordinate()["lat"], target_long = self._mgr.get_coordinate()["long"])
             client.send_goal(goal, done_cb= \
                              lambda status, result: \
-                                self.longRangeRecoveryActionComplete(status, result, self))
+                                self.longRangeRecoveryActionComplete(status, result))
 
     def on_exit_stLongRangeRecovery(self) -> None:
         self.timer.shutdown()
