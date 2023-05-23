@@ -1,2 +1,2 @@
 baud: 9600
-com_port: "/dev/ttyUSB1"
+com_port: "/dev/ttyUSB0"

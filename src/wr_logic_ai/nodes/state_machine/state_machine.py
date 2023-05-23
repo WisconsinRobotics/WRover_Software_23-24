@@ -14,10 +14,11 @@ import threading
 import time
 import pdb
 
-COLOR_AUTONOMOUS = LEDMatrixRequest(RED = 0, GREEN = 0, BLUE = 255)
-COLOR_COMPLETE = LEDMatrixRequest(RED = 0, GREEN = 255, BLUE = 0)
-COLOR_ERROR = LEDMatrixRequest(RED = 255, GREEN = 0, BLUE = 0)
-COLOR_NONE = LEDMatrixRequest(RED = 0, GREEN = 0, BLUE = 0)
+COLOR_AUTONOMOUS = LEDMatrixRequest(RED=0, GREEN=0, BLUE=255)
+COLOR_COMPLETE = LEDMatrixRequest(RED=0, GREEN=255, BLUE=0)
+COLOR_ERROR = LEDMatrixRequest(RED=255, GREEN=0, BLUE=0)
+COLOR_NONE = LEDMatrixRequest(RED=0, GREEN=0, BLUE=0)
+
 
 def set_matrix_color(color: LEDMatrixRequest) -> None:
     matrix_srv = rospy.ServiceProxy("/led_matrix", LEDMatrix)
@@ -25,6 +26,7 @@ def set_matrix_color(color: LEDMatrixRequest) -> None:
     matrix_srv.call(COLOR_NONE)
     time.sleep(0.5)
     matrix_srv.call(color)
+
 
 class NavStateMachine(StateMachine):
     # Defining states
@@ -47,7 +49,8 @@ class NavStateMachine(StateMachine):
     def __init__(self, mgr: CoordinateManager) -> None:
         self._mgr = mgr
         self.currentEvent = -1
-        self.mux_pub = rospy.Publisher("/navigation_state", NavigationState, queue_size=1)
+        self.mux_pub = rospy.Publisher(
+            "/navigation_state", NavigationState, queue_size=1)
         self.mux_long_range = NavigationState()
         self.mux_long_range.state = NavigationState.NAVIGATION_STATE_LONG_RANGE
         self.mux_short_range = NavigationState()
@@ -64,11 +67,12 @@ class NavStateMachine(StateMachine):
     def init_w_ros(self):
 
         set_matrix_color(COLOR_AUTONOMOUS)
-        set_matrix_color(COLOR_AUTONOMOUS)
 
-        pub = rospy.Publisher("/control/drive_system/cmd", DriveTrainCmd, queue_size=1)
+        pub = rospy.Publisher("/control/drive_system/cmd",
+                              DriveTrainCmd, queue_size=1)
         stop_time = rospy.get_time() + 7
-        self._init_tmr = rospy.Timer(rospy.Duration.from_sec(0.1), lambda _: self.init_calibrate(pub, stop_time))
+        self._init_tmr = rospy.Timer(rospy.Duration.from_sec(
+            0.1), lambda _: self.init_calibrate(pub, stop_time))
 
     def on_enter_stInit(self) -> None:
         print("\non enter stInit")
@@ -87,23 +91,23 @@ class NavStateMachine(StateMachine):
             self.evSuccess()
         elif state == GoalStatus.ABORTED:
             self.evError()
-            
 
     def on_enter_stLongRange(self) -> None:
         print("\non enter stLongRange")
         rospy.loginfo("\non enter stLongRange")
-        self.timer = rospy.Timer(rospy.Duration(0.2), lambda _: self.mux_pub.publish(self.mux_long_range)) 
-        
+        self.timer = rospy.Timer(rospy.Duration(
+            0.2), lambda _: self.mux_pub.publish(self.mux_long_range))
+
         # enter autonomous mode
         set_matrix_color(COLOR_AUTONOMOUS)
 
-        client = actionlib.SimpleActionClient("LongRangeActionServer", LongRangeAction)
+        client = actionlib.SimpleActionClient(
+            "LongRangeActionServer", LongRangeAction)
         client.wait_for_server()
-        goal = LongRangeGoal(target_lat = self._mgr.get_coordinate()["lat"], target_long = self._mgr.get_coordinate()["long"])
-        client.send_goal(goal, done_cb= \
-                         lambda status, result: \
-                            self.longRangeActionComplete(status, result))
-        
+        goal = LongRangeGoal(target_lat=self._mgr.get_coordinate()[
+                             "lat"], target_long=self._mgr.get_coordinate()["long"])
+        client.send_goal(goal, done_cb=lambda status, result:
+                         self.longRangeActionComplete(status, result))
 
     def on_exit_stLongRange(self) -> None:
         print("Exting Long Range")
@@ -126,14 +130,16 @@ class NavStateMachine(StateMachine):
             raise ValueError
         else:
             self._mgr.previous_coordinate()
-            print(self._mgr.get_coordinate())  
-            self.timer = rospy.Timer(rospy.Duration(0.2), lambda _: self.mux_pub.publish(self.mux_long_range))           
-            client = actionlib.SimpleActionClient("LongRangeActionServer", LongRangeAction)
+            print(self._mgr.get_coordinate())
+            self.timer = rospy.Timer(rospy.Duration(
+                0.2), lambda _: self.mux_pub.publish(self.mux_long_range))
+            client = actionlib.SimpleActionClient(
+                "LongRangeActionServer", LongRangeAction)
             client.wait_for_server()
-            goal = LongRangeGoal(target_lat = self._mgr.get_coordinate()["lat"], target_long = self._mgr.get_coordinate()["long"])
-            client.send_goal(goal, done_cb= \
-                             lambda status, result: \
-                                self.longRangeRecoveryActionComplete(status, result))
+            goal = LongRangeGoal(target_lat=self._mgr.get_coordinate()[
+                                 "lat"], target_long=self._mgr.get_coordinate()["long"])
+            client.send_goal(goal, done_cb=lambda status, result:
+                             self.longRangeRecoveryActionComplete(status, result))
 
     def on_exit_stLongRangeRecovery(self) -> None:
         self.timer.shutdown()
@@ -147,7 +153,8 @@ class NavStateMachine(StateMachine):
         if CoordinateManager.short_range_complete() != True:
             print("Short Range Not Complete")
             rospy.loginfo("Short Range Not Complete")
-            self.timer = rospy.Timer(rospy.Duration(0.2), lambda _: self.mux_pub.publish(self.mux_short_range))
+            self.timer = rospy.Timer(rospy.Duration(
+                0.2), lambda _: self.mux_pub.publish(self.mux_short_range))
         else:
             print("Short Range Complete")
             rospy.loginfo("Short Range Complete")
@@ -168,7 +175,8 @@ class NavStateMachine(StateMachine):
         else:
             rospy.wait_for_service('wait_for_user_input_service')
             try:
-                wait_for_user_input = rospy.ServiceProxy('wait_for_user_input_service', Empty)
+                wait_for_user_input = rospy.ServiceProxy(
+                    'wait_for_user_input_service', Empty)
                 wait_for_user_input()
             except rospy.ServiceException as e:
                 print(e)
@@ -183,6 +191,7 @@ class NavStateMachine(StateMachine):
 
     def on_enter_stComplete(self) -> None:
         print("We finished, wooooo")
+
 
 if __name__ == "__main__":
     rospy.init_node('nav_state_machine', anonymous=False)
