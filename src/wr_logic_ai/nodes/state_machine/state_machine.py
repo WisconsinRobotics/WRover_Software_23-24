@@ -165,29 +165,36 @@ class NavStateMachine(StateMachine):
         # self.timer.shutdown()
         pass
 
+    def _blink_complete(self) -> None:
+        # Blinks the color off for 0.5 sec, the other 0.5 sec we sleep
+        set_matrix_color(COLOR_COMPLETE)
+
+    def _wait_for_user_input(self) -> None:
+        rospy.wait_for_service('wait_for_user_input_service')
+        try:
+            wait_for_user_input = rospy.ServiceProxy(
+                'wait_for_user_input_service', Empty)
+            wait_for_user_input()
+        except rospy.ServiceException as e:
+            print(e)
+        if (self._mgr.next_coordinate()):
+            print("Should Enter event complete")
+            self.evComplete()
+        else:
+            self.evNotWaiting()
+
     def on_enter_stWaypointSuccess(self) -> None:
         print("\non enter stWaypointSuccess")
 
-        set_matrix_color(COLOR_COMPLETE)
+        self._complete_blinker = rospy.Timer(
+            rospy.Duration.from_sec(1), lambda _: self._blink_complete())
 
-        if self._mgr is None:
-            raise ValueError
-        else:
-            rospy.wait_for_service('wait_for_user_input_service')
-            try:
-                wait_for_user_input = rospy.ServiceProxy(
-                    'wait_for_user_input_service', Empty)
-                wait_for_user_input()
-            except rospy.ServiceException as e:
-                print(e)
-            if (self._mgr.next_coordinate()):
-                print("Should Enter event complete")
-                self.evComplete()
-            else:
-                self.evNotWaiting()
+        self._check_input = rospy.Timer(
+            rospy.Duration.from_sec(0.5), lambda _: self._wait_for_user_input(), oneshot=True)
 
     def on_exit_stWaypointSuccess(self) -> None:
-        pass  # Frash lights that we are goint to next waypoint
+        self._complete_blinker.shutdown()
+        self._check_input.shutdown()
 
     def on_enter_stComplete(self) -> None:
         print("We finished, wooooo")
