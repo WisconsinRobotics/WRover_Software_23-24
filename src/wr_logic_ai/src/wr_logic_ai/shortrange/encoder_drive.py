@@ -9,6 +9,7 @@ from std_msgs.msg import Float64
 from shortrange_util import ShortrangeStateEnum, ShortrangeState
 from wr_logic_ai.shortrange.shortrange_util import ShortrangeStateEnum
 from wrevolution.srv import ResetEncoder
+from wr_drive_msgs.msg import DriveTrainCmd
 
 # Base speed for robot to move at
 SPEED = 0.1
@@ -18,17 +19,19 @@ ROBOT_WHEEL_DIAMETER = 1
 ENCODER_COUNTS_PER_ROTATION = 2048
 
 
-left_encoder_reset_srv = ''
-right_encoder_reset_srv = ''
+left_encoder_reset_srv = '/left/reset_encoder'
+right_encoder_reset_srv = '/right/reset_encoder'
 
-left_motor_topic = ''
-right_motor_topic = ''
+left_encoder_topic = '/left/encoder'
+right_encoder_topic = '/right/encoder'
 
-left_encoder_topic = ''
-right_encoder_topic = ''
+# TODO (@bennowotny @co-li ) This should be consolidated with gate navigation to avoid duplication
+drivetrain_topic = rospy.get_param("~motor_speeds")
+drivetrain_pub = rospy.Publisher(drivetrain_topic, DriveTrainCmd, queue_size=1)
 
-left_motor_pub = rospy.Publisher(left_motor_topic, Float64)
-right_motor_pub = rospy.Publisher(right_motor_topic, Float64)
+
+def drive(left: float, right: float):
+    drivetrain_pub.publish(left, right)
 
 
 def distance_to_encoder(meters: float) -> int:
@@ -40,18 +43,27 @@ class EncoderDrive(ShortrangeState):
     def __init__(self, distance: float) -> None:
         self.setpoint = distance_to_encoder(distance)
         self.is_done = [False] * 2
+        self._cached_left_spd = 0
+        self._cached_right_spd = 0
 
     def reset_encoder(self, srv_name: str):
         rospy.wait_for_service(srv_name)
         reset_encoder_srv = rospy.ServiceProxy(srv_name, ResetEncoder)
         reset_encoder_srv()
 
-    def encoder_callback(self, motor_pub: rospy.Publisher, setpoint: int, done_idx: int, encoder: Float64):
+    def encoder_callback(self, setpoint: int, done_idx: int, encoder: Float64):
         if (encoder.data < setpoint):
-            motor_pub.publish(Float64(SPEED))
+            if done_idx == 0:
+                self._cached_left_spd = SPEED
+            else:
+                self._cached_right_spd = SPEED
         else:
             self.is_done[done_idx] = True
-            motor_pub.publish(Float64(0))
+            if done_idx == 0:
+                self._cached_left_spd = 0
+            else:
+                self._cached_right_spd = 0
+        drive(self._cached_left_spd, self._cached_right_spd)
 
     def run(self) -> Tuple[ShortrangeStateEnum, int]:
         rate = rospy.Rate(10)
@@ -59,11 +71,11 @@ class EncoderDrive(ShortrangeState):
         self.reset_encoder(left_encoder_reset_srv)
         self.reset_encoder(right_encoder_reset_srv)
         sub_left = rospy.Subscriber(left_encoder_topic, Float64, lambda msg: self.encoder_callback(
-            left_motor_pub, self.setpoint, 0, msg))
+            self.setpoint, 0, msg))
         sub_right = rospy.Subscriber(right_encoder_topic, Float64, lambda msg: self.encoder_callback(
-            right_motor_pub, self.setpoint, 1, msg))
+            self.setpoint, 1, msg))
 
-        while not all(self.is_done):
+        while not all(self.is_done) and not rospy.is_shutdown():
             rospy.sleep(rate)
 
         sub_left.unregister()

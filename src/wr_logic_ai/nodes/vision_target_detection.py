@@ -3,12 +3,12 @@
 import rospy
 import cv2 as cv
 import numpy as np
-import aruco_lib
+import wr_logic_ai.shortrange.aruco_lib as aruco_lib
 from wr_logic_ai.msg import VisionTarget
 
 CAMERA_WIDTH = 1280
 CAMERA_HEIGHT = 720
-vision_topic = rospy.get_param('vision_topic')
+vision_topic = rospy.get_param('~vision_topic')
 
 
 def process_corners(target_id: int, corners: np.ndarray) -> VisionTarget:
@@ -30,7 +30,7 @@ def main():
 
     rate = rospy.Rate(10)
 
-    stream_url = rospy.get_param('video_stream')
+    stream_url = rospy.get_param('~video_stream')
     if stream_url is not None and stream_url != '':
         cap = cv.VideoCapture(stream_url)
     else:
