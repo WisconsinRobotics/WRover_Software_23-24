@@ -14,8 +14,10 @@ from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Float64
 
 # Navigation parameters
-LIDAR_THRESH_DISTANCE = 5  # distance before obstacle avoidance logics is triggered (in meters)
-NAV_THRESH_DISTANCE = 0.5 # distance before rover believes it has reached the target (in meters)
+# distance before obstacle avoidance logics is triggered (in meters)
+LIDAR_THRESH_DISTANCE = 5
+# distance before rover believes it has reached the target (in meters)
+NAV_THRESH_DISTANCE = 0.5
 
 # initialize target angle to move forward
 current_lat = 0
@@ -31,6 +33,7 @@ is_active = False
 
 # Start the tasks managed to drive autonomously
 
+
 def initialize() -> None:
     global drive_pub
     global smoothing_constant
@@ -39,9 +42,10 @@ def initialize() -> None:
     global frameCount
     global heading_msg
     global raw_heading_pub
-    
+
     # Publisher
-    drive_pub = rospy.Publisher(rospy.get_param('~motor_speeds'), DriveTrainCmd, queue_size=1)
+    drive_pub = rospy.Publisher(rospy.get_param(
+        '~motor_speeds'), DriveTrainCmd, queue_size=1)
 
     # Subscribe to gps coordinate data
     rospy.Subscriber('/gps_coord_data', CoordinateMsg, update_gps_coord)
@@ -62,7 +66,9 @@ def initialize() -> None:
     heading_msg.pose.orientation.y = 0
     heading_msg.header.frame_id = "laser"
     frameCount = 0
-    raw_heading_pub = rospy.Publisher('/target_heading_raw', Float64, queue_size=1)
+    raw_heading_pub = rospy.Publisher(
+        '/target_heading_raw', Float64, queue_size=1)
+
 
 def update_gps_coord(msg: CoordinateMsg) -> None:
     global current_lat
@@ -70,9 +76,12 @@ def update_gps_coord(msg: CoordinateMsg) -> None:
     current_lat = msg.latitude
     current_long = msg.longitude
 
-def update_heading(msg: Float64) -> None: # extected as 0 to 360 from  North (Clockwise)
-    global cur_heading 
-    cur_heading = (90-msg.data) % 360 #Shifting to East
+
+# extected as 0 to 360 from  North (Clockwise)
+def update_heading(msg: Float64) -> None:
+    global cur_heading
+    cur_heading = (90-msg.data) % 360  # Shifting to East
+
 
 def angle_diff(heading1: float, heading2: float) -> float:
     diff = (heading1 - heading2 + 360) % 360
@@ -80,6 +89,8 @@ def angle_diff(heading1: float, heading2: float) -> float:
 
 # Calculate current heading and the planar target angle
 # TODO: this should now be part of a action server callback function
+
+
 def update_target(target_lat, target_long) -> bool:
     global target_angle
 
@@ -103,17 +114,19 @@ def update_navigation(data: LaserScan) -> None:
     data_avg = sum(cur_range for cur_range in data.ranges) / len(data.ranges)
     #print("Data Avg: " + str(data_avg))
     # TODO: data threshold might depend of lidar model, double check
-            #Change if units/lidar changes
+    # Change if units/lidar changes
     # data_avg is above 0.5 almost always, but result stays the same (?)
+    # TODO (@bennowotny ): This depended on data_avg, why?
     if True:
         # Gets best possible angle, considering obstacles
         delta_heading = angle_diff(target_angle, cur_heading)
         result = get_navigation_angle(
-            ((((90 + delta_heading) % 360) + 360) % 360) / math.degrees(data.angle_increment),  # sector angle
+            ((((90 + delta_heading) % 360) + 360) % 360) /
+            math.degrees(data.angle_increment),  # sector angle
             LIDAR_THRESH_DISTANCE,
             data,
             smoothing_constant)
-        
+
         raw_heading_pub.publish(result)
         # rospy.loginfo(f"raw heading: {result}")
 
@@ -134,7 +147,7 @@ def update_navigation(data: LaserScan) -> None:
         #print("Left Value: " + str(msg.left_value))
         #print("Right Value: " + str(msg.right_value))
         drive_pub.publish(msg)
-       
+
         # TESTING
         heading_msg.header.seq = frameCount
         heading_msg.header.stamp = rospy.get_rostime()
