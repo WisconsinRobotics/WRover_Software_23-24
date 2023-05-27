@@ -111,6 +111,8 @@ def get_valley(
     for i in range(len(hist)):
         if(hist[i] < threshold):
             one_obstacle.append(i)
+        # This prevents single noisy points from blocking out large portions of the drive window
+        # TODO (@bennowotny ): This 'obstacle too small' magic number should be a named constant
         elif (len(one_obstacle) > 1):
             left_bound = len(hist)
             right_bound = 0
