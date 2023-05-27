@@ -14,9 +14,9 @@ import threading
 import time
 import pdb
 
-COLOR_AUTONOMOUS = LEDMatrixRequest(RED=0, GREEN=0, BLUE=1)
-COLOR_COMPLETE = LEDMatrixRequest(RED=0, GREEN=1, BLUE=0)
-COLOR_ERROR = LEDMatrixRequest(RED=1, GREEN=0, BLUE=0)
+COLOR_AUTONOMOUS = LEDMatrixRequest(RED=0, GREEN=0, BLUE=255)
+COLOR_COMPLETE = LEDMatrixRequest(RED=0, GREEN=255, BLUE=0)
+COLOR_ERROR = LEDMatrixRequest(RED=255, GREEN=0, BLUE=0)
 COLOR_NONE = LEDMatrixRequest(RED=0, GREEN=0, BLUE=0)
 
 
