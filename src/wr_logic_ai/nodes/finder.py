@@ -121,7 +121,6 @@ def get_valley(
                 # pass in distance to target to caculate angle that allows robot to pass through
                 angleToIncrease = calculate_anti_window(
                     hist[one_obstacle[i]]) / sector_angle
-                print(f"angle to increase: {angleToIncrease}")
 
                 # Update left and right bound
                 left_bound = max(
