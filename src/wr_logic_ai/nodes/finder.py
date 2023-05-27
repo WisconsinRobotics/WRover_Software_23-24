@@ -142,8 +142,7 @@ def get_valley(
         for i in range(len(one_obstacle)):
             # Calculate size of anti-window and add to obstacle bounds
             # pass in distance to target to caculate angle that allows robot to pass through
-            # angleToIncrease = calculate_anti_window(hist[one_obstacle[i]]) / sector_angle
-            angleToIncrease = 0
+            angleToIncrease = calculate_anti_window(hist[one_obstacle[i]]) / sector_angle
 
             # Update left and right bound
             left_bound = max(
