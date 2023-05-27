@@ -158,8 +158,6 @@ def get_valley(
         obstacle_list.append([left_bound, right_bound])
         one_obstacle.clear()
 
-    print("obstacle list:")
-    print(obstacle_list)
 
     # At this point we make an inverse list of the obstacles to have a 2d list of all
     # the places that we can drive through (our windows)
