@@ -13,9 +13,10 @@
     machine="wrover" />
   <include file="$(find wrevolution)/launch/ros_control_test.launch"
     if="$(eval env('WROVER_HW') == 'REAL')" />
-  <include file="$(find rplidar_ros)/launch/rplidar.launch" />
+  <include file="$(find rplidar_ros)/launch/rplidar.launch" if="$(eval env('WROVER_HW') == 'REAL')" />
 
-  <node name="fake_data" pkg="wr_logic_ai" type="inputFakeData.py" output="screen" />
+  <node name="fake_data" pkg="wr_logic_ai" type="inputFakeData.py" output="screen"
+    unless="$(eval env('WROVER_HW') == 'REAL')" />
 
   <node pkg="wr_logic_ai" name="wait_for_user_input" type="wait_for_user_input.py" output="screen" />
   <node pkg="wr_logic_ai" name="nav_state_machine_driver" type="state_machine.py" output="screen" />
