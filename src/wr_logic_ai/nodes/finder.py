@@ -9,7 +9,7 @@ import os
 import pdb
 import pickle
 
-ROVER_WIDTH = 0.5
+ROVER_WIDTH = 2
 
 scan_rviz_pub = rospy.Publisher("/scan_rviz", LaserScan, queue_size=10)
 window_pub = rospy.Publisher("/lidar_windows", PoseArray, queue_size=1)
