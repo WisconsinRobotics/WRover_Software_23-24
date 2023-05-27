@@ -134,8 +134,6 @@ def get_valley(
                 right_bound = max(right_bound, obstacle_list[-1][1])
                 del obstacle_list[-1]
             obstacle_list.append([left_bound, right_bound])
-            print("one_obstacle")
-            print(one_obstacle)
             one_obstacle.clear()
 
     if (len(one_obstacle) != 0):
