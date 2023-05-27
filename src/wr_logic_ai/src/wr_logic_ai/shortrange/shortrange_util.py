@@ -20,7 +20,7 @@ class ShortrangeState:
 
 class TargetCache:
     """
-    Class that contains a TargetMsg and timestamp
+    Class that contains a VisionTarget and timestamp
     """
 
     def __init__(self, timestamp: float, msg: VisionTarget):

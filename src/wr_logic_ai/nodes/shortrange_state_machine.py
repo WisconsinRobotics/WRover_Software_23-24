@@ -56,6 +56,6 @@ class ShortrangeStateMachine:
 
 
 if __name__ == "__main__":
-    rospy.init_node('/wr_logic_ai/shortrange_ai/state_machine')
-    ShortrangeStateMachine('/wr_logic_ai/shortrange_ai/shortrange_action')
+    rospy.init_node('shortrange_state_machine')
+    ShortrangeStateMachine('ShortRangeActionServer')
     rospy.spin()

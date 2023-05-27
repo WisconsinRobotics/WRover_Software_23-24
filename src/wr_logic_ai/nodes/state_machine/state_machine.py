@@ -4,6 +4,7 @@ from __future__ import annotations
 from statemachine import StateMachine, State
 from wr_logic_ai.coordinate_manager import CoordinateManager
 from wr_logic_ai.msg import NavigationState, LongRangeAction, LongRangeGoal, LongRangeActionResult
+from wr_logic_ai.msg import ShortRangeAction, ShortRangeGoal, ShortRangeActionResult
 from wr_led_matrix.srv import led_matrix as LEDMatrix, led_matrixRequest as LEDMatrixRequest
 from std_srvs.srv import Empty
 import rospy
@@ -86,10 +87,10 @@ class NavStateMachine(StateMachine):
         if (self._mgr.next_coordinate()):
             self.evComplete()
 
-    def longRangeActionComplete(self, state: GoalStatus, _: LongRangeActionResult) -> None:
+    def _longRangeActionComplete(self, state: GoalStatus, _: LongRangeActionResult) -> None:
         if state == GoalStatus.SUCCEEDED:
             self.evSuccess()
-        elif state == GoalStatus.ABORTED:
+        else:
             self.evError()
 
     def on_enter_stLongRange(self) -> None:
@@ -101,23 +102,23 @@ class NavStateMachine(StateMachine):
         # enter autonomous mode
         set_matrix_color(COLOR_AUTONOMOUS)
 
-        client = actionlib.SimpleActionClient(
+        self._client = actionlib.SimpleActionClient(
             "LongRangeActionServer", LongRangeAction)
-        client.wait_for_server()
+        self._client.wait_for_server()
         goal = LongRangeGoal(target_lat=self._mgr.get_coordinate()[
                              "lat"], target_long=self._mgr.get_coordinate()["long"])
-        client.send_goal(goal, done_cb=lambda status, result:
-                         self.longRangeActionComplete(status, result))
+        self._client.send_goal(goal, done_cb=lambda status, result:
+                               self._longRangeActionComplete(status, result))
 
     def on_exit_stLongRange(self) -> None:
         print("Exting Long Range")
         rospy.loginfo("Exting Long Range")
         self.timer.shutdown()
 
-    def longRangeRecoveryActionComplete(self, state: GoalStatus, _: LongRangeActionResult) -> None:
+    def _longRangeRecoveryActionComplete(self, state: GoalStatus, _: LongRangeActionResult) -> None:
         if state == GoalStatus.SUCCEEDED:
             self.evSuccess()
-        elif state == GoalStatus.ABORTED:
+        else:
             self.evError()
 
     def on_enter_stLongRangeRecovery(self) -> None:
@@ -133,33 +134,43 @@ class NavStateMachine(StateMachine):
             print(self._mgr.get_coordinate())
             self.timer = rospy.Timer(rospy.Duration(
                 0.2), lambda _: self.mux_pub.publish(self.mux_long_range))
-            client = actionlib.SimpleActionClient(
+            self._client = actionlib.SimpleActionClient(
                 "LongRangeActionServer", LongRangeAction)
-            client.wait_for_server()
+            self._client.wait_for_server()
             goal = LongRangeGoal(target_lat=self._mgr.get_coordinate()[
                                  "lat"], target_long=self._mgr.get_coordinate()["long"])
-            client.send_goal(goal, done_cb=lambda status, result:
-                             self.longRangeRecoveryActionComplete(status, result))
+            self._client.send_goal(goal, done_cb=lambda status, result:
+                                   self._longRangeRecoveryActionComplete(status, result))
 
     def on_exit_stLongRangeRecovery(self) -> None:
         self.timer.shutdown()
+
+    def _shortRangeActionComplete(self, state: GoalStatus, _: ShortRangeActionResult) -> None:
+        if state == GoalStatus.SUCCEEDED:
+            self.evSuccess()
+        else:
+            self.evError()
 
     def on_enter_stShortRange(self) -> None:
         print("\non enter stShortRange")
         rospy.loginfo("\non enter stShortRange")
 
         set_matrix_color(COLOR_AUTONOMOUS)
+        self.timer = rospy.Timer(rospy.Duration(
+            0.2), lambda _: self.mux_pub.publish(self.mux_short_range))
 
-        if CoordinateManager.short_range_complete() != True:
-            print("Short Range Not Complete")
-            rospy.loginfo("Short Range Not Complete")
-            self.timer = rospy.Timer(rospy.Duration(
-                0.2), lambda _: self.mux_pub.publish(self.mux_short_range))
-        else:
-            print("Short Range Complete")
-            rospy.loginfo("Short Range Complete")
-            self.evSuccess()
-        self.evSuccess()
+        self._client = actionlib.SimpleActionClient(
+            "ShortRangeActionServer", ShortRangeAction)
+        self._client.wait_for_server()
+        TARGET_TYPE_MAPPING = [
+            ShortRangeGoal.TARGET_TYPE_GPS_ONLY,  # 0 Vision markers
+            ShortRangeGoal.TARGET_TYPE_SINGLE_MARKER,  # 1 Vision marker
+            ShortRangeGoal.TARGET_TYPE_GATE,  # 2 Vision markers
+        ]
+        goal = ShortRangeGoal(
+            target_type=TARGET_TYPE_MAPPING[self._mgr.get_coordinate()["num_vision_posts"]])
+        self._client.send_goal(goal, done_cb=lambda status, result:
+                               self._shortRangeActionComplete(status, result))
 
     def on_exit_stShortRange(self) -> None:
         # self.timer.shutdown()

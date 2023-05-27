@@ -3,12 +3,12 @@
         "lat": 10,
         "long": 10,
         "note": "EHall Entrance",
-        "target_type": 0
+        "num_vision_posts": 0
     },
     {
         "lat": 11,
         "long": 10,
         "note": "EHall Entrance",
-        "target_type": 0
+        "num_vision_posts": 0
     }
 ]
