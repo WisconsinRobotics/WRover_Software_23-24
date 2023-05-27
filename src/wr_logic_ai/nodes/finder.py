@@ -16,7 +16,7 @@ window_pub = rospy.Publisher("/lidar_windows", PoseArray, queue_size=1)
 
 
 def calculate_anti_window(d: float) -> int:
-    return math.degrees(2*math.atan((ROVER_WIDTH / 2) / d))
+    return math.degrees(math.atan((ROVER_WIDTH / 2) / d))
 
 # Returns angular distance (in degrees) from sector parameter to target
 # Returns 0 if sector parameter contains target
