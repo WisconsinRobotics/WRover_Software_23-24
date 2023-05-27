@@ -15,7 +15,7 @@ from std_msgs.msg import Float64
 
 # Navigation parameters
 # distance before obstacle avoidance logics is triggered (in meters)
-LIDAR_THRESH_DISTANCE = 2
+LIDAR_THRESH_DISTANCE = 5
 # distance before rover believes it has reached the target (in meters)
 NAV_THRESH_DISTANCE = 0.5
 
