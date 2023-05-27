@@ -8,9 +8,9 @@ import rospy
 from geometry_msgs.msg import PoseStamped
 
 from shortrange_util import ShortrangeStateEnum, ShortrangeState, TargetCache
-from wr_logic_ai.msg import TargetMsg
+from wr_logic_ai.msg import VisionTarget
 from wr_drive_msgs.msg import DriveTrainCmd
-from wr_logic_ai.src.shortrange_util import ShortrangeStateEnum
+from wr_logic_ai.shortrange.shortrange_util import ShortrangeStateEnum
 
 # TODO : Document/rename variables, I'm not sure what all of these are for
 
@@ -41,7 +41,7 @@ class VisionNavigationPost(ShortrangeState):
         self.success = False
         self.target_cache: Union[TargetCache, None] = None
 
-    def target_callback(self, msg: TargetMsg):
+    def target_callback(self, msg: VisionTarget):
         if msg.valid:
             self.target_cache = TargetCache(rospy.get_time(), msg)
         if self.target_cache is not None and rospy.get_time() - self.target_cache.timestamp < CACHE_EXPIRY_SECS:
@@ -57,15 +57,16 @@ class VisionNavigationPost(ShortrangeState):
             drive(SPEED + turn, SPEED - turn)
         else:
             drive(SPEED, -SPEED)
-    
+
     def run(self) -> Tuple[ShortrangeStateEnum, int]:
         rate = rospy.Rate(10)
 
-        sub = rospy.Subscriber(vision_topic, TargetMsg, self.target_callback)
+        sub = rospy.Subscriber(
+            vision_topic, VisionTarget, self.target_callback)
 
         while not self.is_done:
             rospy.sleep(rate)
-        
+
         sub.unregister()
         if self.success:
             return ShortrangeStateEnum.SUCCESS, 0

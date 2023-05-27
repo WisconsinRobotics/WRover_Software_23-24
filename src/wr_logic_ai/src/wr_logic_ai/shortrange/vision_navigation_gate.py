@@ -4,9 +4,9 @@ from typing import Dict, Tuple
 import rospy
 
 from shortrange_util import ShortrangeStateEnum, ShortrangeState, TargetCache
-from wr_logic_ai.msg import TargetMsg
+from wr_logic_ai.msg import VisionTarget
 from wr_drive_msgs.msg import DriveTrainCmd
-from wr_logic_ai.src.shortrange_util import ShortrangeStateEnum
+from wr_logic_ai.shortrange.shortrange_util import ShortrangeStateEnum
 
 # distance from target to stop at (in meters)
 STOP_DISTANCE_M = 3
@@ -34,7 +34,7 @@ class VisionNavigationGate(ShortrangeState):
         self.distance = 0
         self.two_target_cache: Dict[int, TargetCache] = {}
 
-    def gate_callback(self, msg: TargetMsg):
+    def gate_callback(self, msg: VisionTarget):
         if msg.valid:
             self.two_target_cache[msg.id] = TargetCache(rospy.get_time(), msg)
         if self.two_target_cache:
@@ -62,11 +62,11 @@ class VisionNavigationGate(ShortrangeState):
         else:
             # TODO search pattern
             drive(SPEED, -SPEED)
-    
+
     def run(self) -> Tuple[ShortrangeStateEnum, int]:
         rate = rospy.Rate(10)
         sub = rospy.Subscriber(vision_topic, TargetCache, self.gate_callback)
-        
+
         while not self.is_done:
             rospy.sleep(rate)
 

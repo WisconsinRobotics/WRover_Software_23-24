@@ -1,7 +1,7 @@
 from enum import Enum, Flag
 from typing import Tuple
 
-from wr_logic_ai.msg import TargetMsg
+from wr_logic_ai.msg import VisionTarget
 
 
 class ShortrangeStateEnum(Flag):
@@ -22,6 +22,7 @@ class TargetCache:
     """
     Class that contains a TargetMsg and timestamp
     """
-    def __init__(self, timestamp: float, msg: TargetMsg):
+
+    def __init__(self, timestamp: float, msg: VisionTarget):
         self.timestamp = timestamp
         self.msg = msg

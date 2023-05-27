@@ -4,14 +4,14 @@ import rospy
 import cv2 as cv
 import numpy as np
 import aruco_lib
-from wr_logic_ai.msg import TargetMsg
+from wr_logic_ai.msg import VisionTarget
 
 CAMERA_WIDTH = 1280
 CAMERA_HEIGHT = 720
 vision_topic = rospy.get_param('vision_topic')
 
 
-def process_corners(target_id: int, corners: np.ndarray) -> TargetMsg:
+def process_corners(target_id: int, corners: np.ndarray) -> VisionTarget:
     side_lengths = []
     min_x = corners[0][0]
     max_x = corners[0][0]
@@ -21,11 +21,11 @@ def process_corners(target_id: int, corners: np.ndarray) -> TargetMsg:
         max_x = max(max_x, corners[i][0])
     x_offset = (min_x + max_x - CAMERA_WIDTH) / 2
     distance_estimate = aruco_lib.estimate_distance_m(corners)
-    return TargetMsg(target_id, x_offset, distance_estimate, True)
+    return VisionTarget(target_id, x_offset, distance_estimate, True)
 
 
 def main():
-    pub = rospy.Publisher(vision_topic, TargetMsg, queue_size=10)
+    pub = rospy.Publisher(vision_topic, VisionTarget, queue_size=10)
     rospy.init_node('vision_target_detection')
 
     rate = rospy.Rate(10)
@@ -52,7 +52,7 @@ def main():
                 for i, target_id in enumerate(ids):
                     pub.publish(process_corners(target_id[0], corners[i][0]))
             else:
-                pub.publish(TargetMsg(0, 0, 0, False))
+                pub.publish(VisionTarget(0, 0, 0, False))
         rate.sleep()
 
     cap.release()

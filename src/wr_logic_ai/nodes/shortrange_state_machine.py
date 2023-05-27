@@ -6,10 +6,10 @@ import rospy
 import actionlib
 from actionlib_msgs.msg import GoalStatus
 
-from shortrange_util import ShortrangeStateEnum, ShortrangeState
-from encoder_drive import EncoderDrive
-from vision_navigation_gate import VisionNavigationGate
-from vision_navigation_post import VisionNavigationPost
+from wr_logic_ai.shortrange.shortrange_util import ShortrangeStateEnum, ShortrangeState
+from wr_logic_ai.shortrange.encoder_drive import EncoderDrive
+from wr_logic_ai.shortrange.vision_navigation_gate import VisionNavigationGate
+from wr_logic_ai.shortrange.vision_navigation_post import VisionNavigationPost
 from wr_logic_ai.msg import ShortrangeAction, ShortrangeGoal
 
 
@@ -27,7 +27,7 @@ class ShortrangeStateMachine:
             auto_start=False
         )
         self._as.start()
-        self.state: Union[ShortrangeStateEnum, None]  = None
+        self.state: Union[ShortrangeStateEnum, None] = None
 
     def shortrange_callback(self, goal: ShortrangeGoal):
         # Set initial state based on goal
@@ -39,7 +39,7 @@ class ShortrangeStateMachine:
             self.state = ShortrangeStateEnum.VISION_DRIVE_GATE
         else:
             self.state = None
-        
+
         distance = 0
         while self.state and self.state not in ShortrangeStateEnum.TERMINATING:
             if self.state is ShortrangeStateEnum.VISION_DRIVE_POST:
