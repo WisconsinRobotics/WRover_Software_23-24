@@ -12,6 +12,7 @@ import pickle
 ROVER_WIDTH = 2
 
 scan_rviz_pub = rospy.Publisher("/scan_rviz", LaserScan, queue_size=10)
+# TODO (@bennowotny ) This should be disable-able for bandwidth
 window_pub = rospy.Publisher("/lidar_windows", PoseArray, queue_size=1)
 
 
@@ -91,8 +92,8 @@ def get_valley(
         #hist = gaussian_smooth.gaussian_filter1d(data.ranges, smoothing)
         hist = data.ranges
 
-    # This is to prevent expanding constant obstacles from behind the robot, which can 
-    # inadvertently and unpredictably (due to sensor noise) block out most of the view 
+    # This is to prevent expanding constant obstacles from behind the robot, which can
+    # inadvertently and unpredictably (due to sensor noise) block out most of the view
     # frame due to obstacle expansion
     del hist[int(len(hist)/2):]
 
@@ -136,13 +137,15 @@ def get_valley(
             obstacle_list.append([left_bound, right_bound])
             one_obstacle.clear()
 
+    # TODO (@bennowotny ): This code is the same as what's in the loop, so it should be abstracted out to its own function
     if (len(one_obstacle) != 0):
         left_bound = len(hist)
         right_bound = 0
         for i in range(len(one_obstacle)):
             # Calculate size of anti-window and add to obstacle bounds
             # pass in distance to target to caculate angle that allows robot to pass through
-            angleToIncrease = calculate_anti_window(hist[one_obstacle[i]]) / sector_angle
+            angleToIncrease = calculate_anti_window(
+                hist[one_obstacle[i]]) / sector_angle
 
             # Update left and right bound
             left_bound = max(
@@ -157,7 +160,6 @@ def get_valley(
             del obstacle_list[-1]
         obstacle_list.append([left_bound, right_bound])
         one_obstacle.clear()
-
 
     # At this point we make an inverse list of the obstacles to have a 2d list of all
     # the places that we can drive through (our windows)
