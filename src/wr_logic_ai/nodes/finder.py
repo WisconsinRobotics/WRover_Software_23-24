@@ -181,8 +181,6 @@ def get_valley(
 
     # print("obstacle list:")
     # print(obstacle_list)
-    print("window list:")
-    print(window_list)
 
     # TODO (Ben Nowotny) Remove, probably a little laggy
     window_msg = PoseArray()
