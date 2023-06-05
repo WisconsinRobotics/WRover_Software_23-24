@@ -1,14 +1,10 @@
 <?xml version="1.0"?>
 <!DOCTYPE launch SYSTEM "https://gist.githubusercontent.com/nalt/dfa2abc9d2e3ae4feb82ca5608090387/raw/roslaunch.dtd">
 <launch>
-    <node name="ScienceControl" pkg="wr_control_drive_science" type="ScienceControl" output="screen">
-        <rosparam file="$(find wr_control_drive_science)/config/scienceControl.yaml" />
-    </node>
-
     <node name="ScienceArduinoDriver" pkg="wr_control_drive_science" type="scienceArduinoDriver.py"
         output="screen">
         <!-- TODO (Ben Nowotny): This is probably not correct, needs to be tuned -->
-        <param name="serial_name" value="/dev/ttyAMA0" />
+        <param name="serial_name" value="/dev/ttyACM0" />
         <param name="serial_baud" value="115200" />
     </node>
 </launch>

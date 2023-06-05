@@ -9,7 +9,7 @@ import os
 import pdb
 import pickle
 
-ROVER_WIDTH = 2
+ROVER_WIDTH = 0.5
 
 scan_rviz_pub = rospy.Publisher("/scan_rviz", LaserScan, queue_size=10)
 # TODO (@bennowotny ) This should be disable-able for bandwidth
