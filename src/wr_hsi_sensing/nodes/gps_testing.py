@@ -40,6 +40,7 @@ def cb(gps : GPS):
         msg = CoordinateMsg(latitude=gps.latitude, longitude=gps.longitude)
         pub.publish(msg)
 
+        # TODO (@Tzanccc): either remove the heading calculation from GPS code entirely, or move it elsewhere
         # Find heading from the change in latitude and longitude
         X = math.cos(gps.latitude) * math.sin(gps.longitude - last_long)
         Y = math.cos(last_lat) * math.sin(gps.latitude) \
