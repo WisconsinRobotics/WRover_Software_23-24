@@ -1,3 +1,5 @@
+
+// TODO(@bennowotny): ROSserial?
 #include <Servo.h>
 
 // Constants
@@ -17,25 +19,25 @@ void setup() {
     scoopServo.write(0);
 
     // Wait for code word from Pi so that we know it has booted
-    while(true) {
-        if(Serial.available()) {
+    while (true) {
+        if (Serial.available()) {
             Serial.readBytes(&servoPos, 1);
-            
+
             // Break when the code word is received
-            if(servoPos == CODE_WORD) break;
+            if (servoPos == CODE_WORD)
+                break;
         }
     }
 }
 
 void loop() {
     // When a servo position is avaiable from serial, update the servo's position
-    if(Serial.available()) {
+    if (Serial.available()) {
         Serial.readBytes(&servoPos, 1);
         // FIXME: This value needs to be restricted to the range [0, 180]
         // Probably on the Pi side?
         scoopServo.write(servoPos);
-    }
-    else {
+    } else {
         // Wait to slow down looping just a bit
         delay(2);
     }

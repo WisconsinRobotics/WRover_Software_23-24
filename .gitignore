@@ -22,6 +22,7 @@ src/wrosout
 src/wresponsecontrol
 
 # external lib destination dirs
+# TODO (@bennowotny): We aren't really using these ignores
 src/drive/lib
 src/manager/lib
 src/science/lib
