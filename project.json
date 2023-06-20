@@ -2,30 +2,47 @@
   "deps": [
     {
       "name": "wroboclaw",
-      "repo": "ssh://git@github.com/WisconsinRobotics/wroboclaw.git",
       "build": {
         "provider": "pip"
       }
     },
     {
       "name": "wready",
-      "repo": "ssh://git@github.com/WisconsinRobotics/wready.git",
       "build": {
         "provider": "pip"
       }
     },
     {
       "name": "wreadinput",
-      "repo": "ssh://git@github.com/WisconsinRobotics/wreadinput.git",
       "build": {
         "provider": "pip"
       }
     },
     {
       "name": "wresponsecontrol",
-      "repo": "ssh://git@github.com/WisconsinRobotics/wresponsecontrol.git",
       "build": {
         "provider": "noop"
+      }
+    },
+    {
+      "name": "moveit",
+      "build": {
+        "package": "ros-noetic-moveit",
+        "provider": "apt"
+      }
+    },
+    {
+      "name": "canutils",
+      "build": {
+        "package": "can-utils",
+        "provider": "apt"
+      }
+    },
+    {
+      "name": "moveit-visual-tools",
+      "build": {
+        "package": "ros-noetic-moveit-visual-tools",
+        "provider": "apt"
       }
     }
   ]

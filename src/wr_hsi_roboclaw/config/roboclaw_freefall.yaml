@@ -1,0 +1,6 @@
+com_port: '/dev/ttyTHS1'
+baud: 115200
+claws:
+  drive: # arm turntable/shoulder, science ?
+    topic: '/hsi/roboclaw/drive'
+    address: 0x80

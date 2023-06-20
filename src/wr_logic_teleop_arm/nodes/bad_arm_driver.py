@@ -63,7 +63,7 @@ def main():
     pub_forearm = rospy.Publisher(f'{claw_ns_1}/cmd/right', Int16, queue_size=4)
     pub_wrist_a = rospy.Publisher(f'{claw_ns_2}/cmd/left', Int16, queue_size=4)
     pub_wrist_b = rospy.Publisher(f'{claw_ns_2}/cmd/right', Int16, queue_size=4)
-    pub_eef = rospy.Publisher(f'{claw_ns_3}/cmd/left', Int16, queue_size=4)
+    # pub_eef = rospy.Publisher(f'{claw_ns_3}/cmd/left', Int16, queue_size=4)
 
     # main loop
     sleeper = rospy.Rate(spin_rate)
@@ -82,9 +82,9 @@ def main():
                 if bumper_l.data:
                     if bumper_r.data:
                         pub_forearm.publish(Int16(0))
-                    pub_forearm.publish(Int16(16384))
+                    pub_forearm.publish(Int16(32767))
                 elif bumper_r.data:
-                    pub_forearm.publish(Int16(-16384))
+                    pub_forearm.publish(Int16(-32768))
                 else:
                     pub_forearm.publish(Int16(0))
             
@@ -106,15 +106,15 @@ def main():
                 pub_wrist_a.publish(Int16(24576 * wrist_spd_a))
                 pub_wrist_b.publish(Int16(-24576 * wrist_spd_b))
 
-            if btn_a.data is not None and btn_b.data is not None:
-                if btn_a.data:
-                    if btn_b.data:
-                        pub_eef.publish(Int16(0))
-                    pub_eef.publish(Int16(24576))
-                elif btn_b.data:
-                    pub_eef.publish(Int16(-24576))
-                else:
-                    pub_eef.publish(Int16(0))
+            # if btn_a.data is not None and btn_b.data is not None:
+            #     if btn_a.data:
+            #         if btn_b.data:
+            #             pub_eef.publish(Int16(0))
+            #         pub_eef.publish(Int16(24576))
+            #     elif btn_b.data:
+            #         pub_eef.publish(Int16(-24576))
+            #     else:
+            #         pub_eef.publish(Int16(0))
         else:
             pub_turntable.publish(Int16(0))
             pub_shoulder.publish(Int16(0))
@@ -122,7 +122,7 @@ def main():
             pub_forearm.publish(Int16(0))
             pub_wrist_a.publish(Int16(0))
             pub_wrist_b.publish(Int16(0))
-            pub_eef.publish(Int16(0))
+            # pub_eef.publish(Int16(0))
         sleeper.sleep()
 
 if __name__ == '__main__':

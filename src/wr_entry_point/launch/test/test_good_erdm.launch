@@ -1,0 +1,6 @@
+<launch>
+    <!-- TODO (@bennowotny): Make this the normal ERDM, we want sensors-->
+    <!-- <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" /> -->
+    <include file="$(find wr_entry_point)/launch/erdm.launch" />
+    <include file="$(find wr_hsi_sensing)/launch/hw_test.launch" />
+</launch>

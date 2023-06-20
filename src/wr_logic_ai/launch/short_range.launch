@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!DOCTYPE launch SYSTEM "https://gist.githubusercontent.com/nalt/dfa2abc9d2e3ae4feb82ca5608090387/raw/roslaunch.dtd">
+<launch>
+  <arg name="short_range_output" />
+  <arg name="vision_topic" default="/logic/vision_target" />
+
+  <node pkg="wr_logic_ai" name="short_range_action_server" type="shortrange_state_machine.py">
+    <param name="motor_speeds" value="$(arg short_range_output)" />
+    <param name="vision_topic" value="$(arg vision_topic)" />
+  </node>
+
+  <node pkg="wr_logic_ai" name="short_range_vision_detection" type="vision_target_detection.py">
+    <param name="video_stream" value="rtsp://localhost:8554/mastCam" />
+    <param name="vision_topic" value="$(arg vision_topic)" />
+  </node>
+</launch>
