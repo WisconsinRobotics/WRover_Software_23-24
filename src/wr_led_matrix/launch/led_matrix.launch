@@ -1,4 +1,5 @@
 <launch>
+	<!-- TODO (@bennowotny) Re-enable mocking-->
 	<node name="led_matrix" pkg="wr_led_matrix" type="led_matrix.py"> <!-- if="$(eval
 		env('WROVER_HW') == 'REAL')"> -->
 		<rosparam file="$(find wr_led_matrix)/config/led_matrix.yaml" />

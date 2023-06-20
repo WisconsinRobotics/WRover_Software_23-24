@@ -1,5 +1,7 @@
 // Code to translate serial data to led panel ouput
 
+// TODO(@bennowotny): ROSserial?
+
 #include "Arduino.h"
 #include "pins_arduino.h"
 #include <Adafruit_GFX.h>

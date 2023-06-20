@@ -3,6 +3,8 @@ from typing import Tuple
 
 from wr_logic_ai.msg import VisionTarget
 
+# TODO(@bennowotny @co-li ): Check for correctness ("in" operator)
+
 
 class ShortrangeStateEnum(Flag):
     FAIL = 1

@@ -8,7 +8,7 @@ import rospy
 
 from statemachine import StateMachine, State
 from state_machine import NavStateMachine
-from coordinate_manager import CoordinateManager
+from wr_logic_ai.coordinate_manager import CoordinateManager
 import time
 # class test_a(State):
 #     def __init__(self) -> None:
@@ -23,7 +23,7 @@ import time
 # class test_b(State):
 #     def __init__(self) -> None:
 #         super().__init__()
-    
+
 #     def enter(self) -> None:
 #         print("entered state b")
 
@@ -37,6 +37,7 @@ import time
 # class b_to_a(Event):
 #     def __init__(self) -> None:
 #         super().__init__()
+
 
 class TestStateMachine(StateMachine):
     test_a = State(initial=True)
@@ -54,12 +55,13 @@ class TestStateMachine(StateMachine):
         print("on test b")
         self.event()
 
+
 if __name__ == "__main__":
     # stateMachine = StateMachine()
     # stateMachine.add_transition(test_a, a_to_b, test_b)
     # stateMachine.add_transition(test_b, b_to_a, test_a)
     # stateMachine.start(test_a())
-    
+
     # while True:
     #     stateMachine.process_event(a_to_b)
     #     stateMachine.process_event(b_to_a)
