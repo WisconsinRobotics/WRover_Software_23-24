@@ -38,3 +38,6 @@ compile_commands.json
 *.data
 *.swp
 *.old
+
+# documentation
+docs/doxygen
