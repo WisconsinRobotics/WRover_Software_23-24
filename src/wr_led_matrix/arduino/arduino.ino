@@ -2,19 +2,37 @@
 
 // TODO(@bennowotny): ROSserial?
 
+/**
+ * @file arduino.ino
+ * @defgroup wr_led_matrix
+ * @{
+ * @defgroup wr_led_matrix_arduino LED Matrix Arduino
+ * @brief Arduino code to interpret serial messages from the ROS service and control the LED matrix
+ *
+ * This code sits on the other end of the serial line and reboots when the serial port is opened.  The communication from here to the physical LED Matrix is handled by the Arduino Neopixel library.
+ * @{
+ */
+
 #include "Arduino.h"
 #include "pins_arduino.h"
 #include <Adafruit_GFX.h>
 #include <Adafruit_NeoMatrix.h>
 #include <Adafruit_NeoPixel.h>
 
+/// Data pin for the NeoMatrix
 #define PIN 6
 
+/// Representation of control for the NeoPixel matrix
 Adafruit_NeoMatrix matrix{8, 8, PIN,
                           NEO_MATRIX_BOTTOM + NEO_MATRIX_LEFT +
                               NEO_MATRIX_ROWS + NEO_MATRIX_ZIGZAG,
                           NEO_GRB + NEO_KHZ800};
 
+/**
+ * @brief Runs once on Arduino boot.
+ *
+ * Responsible for initializing the NeoPixel matrix, clearing out the serial buffer, and synchronizing with the ROS service by sending the magic word.
+ */
 void setup() {
     Serial.begin(9600);
 
@@ -46,11 +64,25 @@ void setup() {
     Serial.write(data, 8);
 }
 
+/// Used to control the blinky LED
+/**
+ * The blinky LED is a practice in embedded systems to dedicate an LED pin to soley toggling an LED over time.  This acts as feedback to the developers that something has halted the processor if the light stops blinking.  This is especially important on systems like Arduinos, since if there was a fault, there is no common logging available in a production run to make the error visible.
+ */
 unsigned int pass = 0;
+/// Stores the RGB values sent over serial
 uint8_t serial_input[3]{0, 0, 0};
 
+/**
+ * @brief Set the color of the physical LED panel based on the stored values in the serial_input variable
+ *
+ */
 void setColor();
 
+/**
+ * @brief Is called in a loop during the Arduino runtime after setup().
+ *
+ * Is responsible for reading in messages off of serial, computing the CRC, and, if appropriate, dispatching the color to the LED matrix.  Also toggles the blinkly LED at ~0.5Hz.
+ */
 void loop() {
     // Wait for color
     if (Serial.available() >= 4) {
@@ -98,3 +130,5 @@ void setColor() {
     matrix.fill(color);
     matrix.show();
 }
+
+/// @} @}
