@@ -1,0 +1,9 @@
+# ros build output
+build/
+devel/
+
+# python env
+/venv/
+
+# ide
+/.vscode/*
