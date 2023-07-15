@@ -21,3 +21,5 @@ RUN usermod -aG sudo devcontainer
 RUN echo "devcontainer ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers
 
 USER devcontainer
+
+ENV SHELL /bin/bash
