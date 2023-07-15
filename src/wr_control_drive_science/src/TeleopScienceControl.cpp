@@ -1,14 +1,15 @@
 /**
+ * @addtogroup wr_control_drive_science
+ * @{
+ * @defgroup wr_control_drive_science_deprecated Deprecated Science Code
+ * @{
+ */
+
+/**
  * @file TeleopScienceControl.cpp
  * @author Ben Nowotny
  * @brief Deprecated science control system
  *
- */
-
-/**
- * @addtogroup wr_control_drive_science
- * @{
- * @defgroup
  */
 
 #include "ros/assert.h"
@@ -24,16 +25,27 @@
 #include <string>
 #include <termios.h>
 
+/// How many messages to cache for ROS entities
 constexpr std::uint32_t MESSAGE_CACHE_SIZE = 10;
+/// How many samples are stored in one serial reading
 constexpr int SAMPLES_PER_READING = 3;
+/// How often to publish moisture data (in seconds)
 constexpr float TIMER_CALLBACK_DURATION = 5;
+/// How many characters of data to read from serial
 constexpr int NUM_CHARS_READ = SAMPLES_PER_READING * sizeof(float);
 
+/// The file handle to the serial line
 //NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 int fileHandle;
+/// An array of publishers to publish individual samples of different data
 //NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables)
 std::array<ros::Publisher, SAMPLES_PER_READING> sensorPublishers;
 
+/**
+ * @brief The callback for ROS to trigger a moisture sensor reading
+ *
+ * @param timerEvent ROS timer parameters
+ */
 void moistureCallback(const ros::TimerEvent &timerEvent) {
     std::array<float, SAMPLES_PER_READING> buf{};
     /* Flush anything already in the serial buffer */
@@ -49,8 +61,21 @@ void moistureCallback(const ros::TimerEvent &timerEvent) {
     }
 }
 
+/**
+ * @brief Set up the global file handle in @ref fileHandle
+ *
+ * @param fileName The file path to the serial connection
+ * @param baud The baud rate for the serial connection
+ */
 void setupFileHandle(const std::string &fileName, int baud);
 
+/**
+ * @brief The main executable for the node
+ *
+ * @param argc The number of command line arguments
+ * @param argv The command line arguments
+ * @return int The return code of the node on exit
+ */
 auto main(int argc, char **argv) -> int {
     ros::init(argc, argv, "Science Teleop Control");
 
@@ -116,11 +141,25 @@ auto main(int argc, char **argv) -> int {
     ros::spin();
 }
 
+/**
+ * @brief Set a flag on an object using bitwise-OR notation
+ *
+ * @tparam T The type of the flag-holding object
+ * @param ref The flag-holding object
+ * @param value The bitflags to set
+ */
 template <typename T>
 constexpr void setFlag(T &ref, unsigned int value) {
     ref |= value;
 }
 
+/**
+ * @brief Unset a flag on an object using bitwise-OR negation notation
+ *
+ * @tparam T The type of the flag-holding object
+ * @param ref The flag-holding object
+ * @param value The bitflags to unset
+ */
 template <typename T>
 constexpr void unsetFlag(T &ref, unsigned int value) {
     ref &= ~value;
@@ -179,3 +218,6 @@ void setupFileHandle(const std::string &fileName, int baud) {
     /* commit the options */
     tcsetattr(fileHandle, TCSANOW, &toptions);
 }
+
+///@}
+///@}
