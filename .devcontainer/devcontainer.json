@@ -16,26 +16,43 @@
 	// "forwardPorts": [],
 
 	// Uncomment the next line to run commands after the container is created.
-	"postCreateCommand": "sudo chown -R devcontainer /workspaces/WRover_Software",
+	// "postCreateCommand": "sudo chown -R devcontainer /workspaces/WRover_Software",
+	"postCreateCommand": "./docker_start.sh",
 
 	// Configure tool-specific properties.
 	"customizations": {
 		// Configure properties specific to VS Code.
 		"vscode": {
 			// Set *default* container specific settings.json values on container create.
-			"settings": {},
+			"settings": {
+				"C_Cpp.intelliSenseEngine": "disabled"
+			},
 			"extensions": [
+				"ms-vscode.cpptools",
+				"ms-vscode.cpptools-themes",
 				"llvm-vs-code-extensions.vscode-clangd",
-				"ms-iot.vscode-ros",
-        		"ms-python.python",
-				"ms-python.vscode-pylance",
+				"twxs.cmake",
 				"ms-vscode.cmake-tools",
-        		"ms-vscode.cpptools",
-        		"ms-vscode.cpptools-themes"
+				"cschlosse.doxdocgen",
+				"ms-python.vscode-pylance",
+				"ms-python.python",
+				"ms-vscode-remote.remote-ssh-edit",
+				"ms-iot.vscode-ros",
+				"njpwerner.autodocstring",
+				"ms-vsliveshare.vsliveshare",
+				"jeff-hykin.better-cpp-syntax",
+				"ms-vscode-remote.remote-containers"
 			]
 		}
 	},
 
 	// Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
-	"remoteUser": "devcontainer"
+	"remoteUser": "devcontainer",
+
+	// Docker arguments
+	"runArgs": [
+		"--env=DISPLAY",
+		"--env=QT_X11_NO_MITSHM=1",
+		"--volume=/tmp/.X11-unix:/tmp/.X11-unix:rw"
+	]
 }
