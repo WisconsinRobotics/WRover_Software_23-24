@@ -19,7 +19,7 @@
 	"postCreateCommand": "sudo chown -R devcontainer /workspaces/WRover_Software",
 
 	// Run commands after the container is attatched.
-	"postAttachCommand": "./docker_attach.sh",
+	"postStartCommand": "/workspaces/WRover_Software/docker_attach.sh",
 
 	// Configure tool-specific properties.
 	"customizations": {
@@ -53,6 +53,6 @@
 	"runArgs": [
 		"--env=DISPLAY",
 		"--env=QT_X11_NO_MITSHM=1",
-		"--volume=/tmp/.X11-unix:/tmp/.X11-unix:rw"
+		// "--volume=/tmp/.X11-unix:/tmp/.X11-unix:rw"
 	]
 }

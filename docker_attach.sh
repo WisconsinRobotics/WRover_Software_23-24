@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd /workspaces/WRover_Software
+
 # Setup ROS environment
 source "/opt/ros/$ROS_DISTRO/setup.bash"
 
@@ -7,6 +9,3 @@ source "/opt/ros/$ROS_DISTRO/setup.bash"
 
 source setup.sh
 ./assemble.py build
-
-echo "source \"/opt/ros/$ROS_DISTRO/setup.bash\"" >> ~/.bashrc
-echo "source \"$(pwd)/setup.sh\"" >> ~/.bashrc

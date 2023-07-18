@@ -20,6 +20,9 @@ RUN useradd -m devcontainer
 RUN usermod -aG sudo devcontainer
 RUN echo "devcontainer ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers
 
+RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> home/devcontainer/.bashrc
+RUN echo "source /workspaces/WRover_Software/setup.sh" >> home/devcontainer/.bashrc
+
 USER devcontainer
 
 ENV SHELL /bin/bash
