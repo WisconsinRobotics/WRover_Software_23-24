@@ -2,7 +2,7 @@
 
 @defgroup wr_control_drive_science wr_control_drive_science
 
-## Hardware Description (move me to wr_control_drive_science)
+## Hardware Description
 
 The science box contains:
 
