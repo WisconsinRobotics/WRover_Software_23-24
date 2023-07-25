@@ -6,6 +6,20 @@ DOXYGEN_PATH="$DOXYGEN_TAR_UNPACK_LOCAL/bin/doxygen"
 
 export PROJECT_VERSION=$(git describe --tags)
 
+if ! $(which plantuml >&/dev/null); then
+    echo -e "\e[32mplantuml not present, installing...\e[0m"
+    echo -e "\e[32mIf prompted, please enter your password to continue the installation\e[0m"
+    echo
+    sudo apt install plantuml -y
+fi
+
+echo -e "\e[32mGenerating PlantUML (*.puml) images...\e[0m"
+PUML_FILES=$(find * -name *.puml)
+mkdir -p docs/generated-images
+plantuml -o $(realpath docs/generated-images) $PUML_FILES
+# export twice to get mkdown to look nice
+plantuml $PUML_FILES
+
 if ! $(which curl >&/dev/null); then
     echo -e "\e[32mcurl not present, installing...\e[0m"
     echo -e "\e[32mIf prompted, please enter your password to continue the installation\e[0m"
