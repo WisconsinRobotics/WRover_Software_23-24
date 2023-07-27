@@ -5,7 +5,7 @@ RUN apt-get update && apt-get install -y python3-pip
 RUN pip install virtualenv
 
 # install dependencies from project.json
-RUN apt-get install -y can-utils ros-noetic-moveit ros-noetic-moveit-visual-tools 
+RUN apt-get install -y can-utils ros-noetic-moveit ros-noetic-moveit-visual-tools bash-completion
 
 # install g++10
 RUN apt-get install -y g++-10
