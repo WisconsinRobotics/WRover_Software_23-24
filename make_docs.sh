@@ -13,17 +13,22 @@ if ! $(which plantuml >&/dev/null); then
     sudo apt install plantuml -y
 fi
 
+mkdir -p docs/generated-images
+# copy images that are not PlantUML
+echo -e "\e[32mCopying non-PlantUML images...\e[0m"
+find src \( -name *.png -or -name *.jpg -or -name *.bmp \) -exec /bin/bash -c 'echo "Copying '{}' to docs/generated-images/$(basename "{}")"; cp "{}" "docs/generated-images/$(basename "{}")";' \;
+# Generate PlantUML
 echo -e "\e[32mGenerating PlantUML (*.puml) images...\e[0m"
 PUML_FILES=$(find * -name *.puml)
-mkdir -p docs/generated-images
-plantuml -o $(realpath docs/generated-images) $PUML_FILES
+java -jar -Djava.awt.headless=true -Djava.net.useSystemProxies=true /usr/share/plantuml/plantuml.jar -o $(realpath docs/generated-images) $PUML_FILES
 # export twice to get mkdown to look nice
-plantuml $PUML_FILES
+java -jar -Djava.awt.headless=true -Djava.net.useSystemProxies=true /usr/share/plantuml/plantuml.jar $PUML_FILES
 
 if ! $(which curl >&/dev/null); then
     echo -e "\e[32mcurl not present, installing...\e[0m"
     echo -e "\e[32mIf prompted, please enter your password to continue the installation\e[0m"
     echo
+    sudo apt update
     sudo apt install curl -y
 fi
 
