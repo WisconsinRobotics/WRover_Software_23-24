@@ -17,6 +17,8 @@ The same restrictions apply to services and actions, where applicable.
 Each node in the system belongs to exactly one abstraction layer and should only interface with intra-layer topics in that layer or with inter-layer topics on adjacent abstraction barriers.
 Similar restrictions apply to interfacing with services and actions, where applicable.
 
+This is typically a tenet of clean design.  However, this abstraction is currently broken in the current state of the code.
+
 The four layers are as follows:
 
 * **Human-Computer Interaction (HCI)** -- This is the highest level of abstraction. The nodes here handle interaction with human operators, including HUDs, input devices, and such. This layer is also unique in that all code here will be running on the driver station rather than on the robot. Information is received from and operator commands are sent to the logic layer.
@@ -43,8 +45,8 @@ Under each root namespace should be a set of namespaces representing particular 
 For instance, the AI subsystem might be contained in the namespace `/logic/ai`.
 All organization below this level is left to the discretion of the implementer; it is encouraged for implementers to spend some time designing a good organizational structure.
 
-Inter-layer topics should be placed directly under the root namespace that is on the **receiving** end.
-For instance, a topic relaying drive commands between the high-level logic and control systems layers might be called `/control/drive_cmd`.
+Inter-layer topics should be placed directly under the root namespace **corresponding to the type of data being sent**.
+For instance, a node may subscribe to joystick data from `/hci/joystick/left` and publish to `/control/drive_cmd` for abstract motor speeds.  Even though the node itself might be categorized to be on the logic layer, none of the data it's using is really logic-layer data.
 
 The organization of services and actions should follow the same rules as topics, where applicable.
 Parameters should be confined to a node's local namespace if possible; otherwise, there are no strong rules concerning the organization of parameters.
