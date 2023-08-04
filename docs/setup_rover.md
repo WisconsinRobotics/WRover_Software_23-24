@@ -9,29 +9,29 @@ If the hardware is already configured (i.e. the rover is already put together), 
 To begin with, you'll want to procure a Mars rover.
 The rover should have roughly the following hardware subsystems:
 
-* A Jetson Nano running Ubuntu 20.04
-* A tank drive train, with both sides controlled by a single Basicmicro RoboClaw
-* A central camera mast with an RSTP-compatible IP camera
+* A Raspberry Pi running Ubuntu 20.04
+* A tank drive train, driven by Falcon 500 motors.
+* A central camera mast with a USB camera
 * A GPS unit (TODO: get exact gps model)
 * An inertial measurement unit (TODO: get exact imu model)
 * A radio system (e.g. an antenna) for communicating with the base station radio
 * A swappable module for the robotic arm, which includes:
   * A 6-DOF robotic arm driven by continuous motors controled by RoboClaws
     * (TODO: describe the exact motor/encoder configurations on the arm)
-  * Two IP cameras pointed at the end effector
+  * Two USB cameras pointed at the end effector
   * A mechanical gripper driven by a linear actuator
 * A swappable module for autonomous navigation, which includes:
-  * A SICK LIDAR unit (TODO: get exact lidar model)
+  * A LIDAR unit (TODO: get exact lidar model)
 * A swappable module for the planetary science analysis suite, which includes:
   * (TODO: describe science module)
 
-## Preparing the Jetson Nano
+## Preparing the Raspberry Pi
 
 ### Flashing Ubuntu 20.04
 
-You'll want to start by flashing the Jetson Nano's SD card with Ubuntu 20.04 "Focal Fossa".
-Because NVIDIA only officially supports Ubuntu 18.04 on the Jetson Nano, you'll have to use a [custom third-party image built for 20.04](https://forums.developer.nvidia.com/t/xubuntu-20-04-focal-fossa-l4t-r32-3-1-custom-image-for-the-jetson-nano/121768).
-Once you've downloaded the image, you can use a tool such as [balenaEtcher](https://www.balena.io/etcher/) to flash it to the SD card.
+You'll want to start by flashing the Raspberry Pi's SD card with Ubuntu 20.04 "Focal Fossa".
+
+Canonical distributes server versions of Ubuntu 20.04, these can be deloyed to an SD card via the Raspberry Pi.
 
 After re-inserting the SD card, you'll want to boot up the Jetson Nano and complete the first-time setup for Xubuntu, which can be done with an external monitor and keyboard.
 Make sure you set the user account's name to `wiscrobo`!
@@ -85,6 +85,8 @@ You'll also have to configure public key authentication for any base station mac
 
 ### Setting Up mDNS/zeroconf
 
+This section does not work reliably in practice.  Consider the time cost of setting this up/debugging, and don't fall for the sunk-cost fallacy.
+
 The software system uses mDNS/zeroconf to find the rover on the network.
 To allow for this, you'll need to install an mDNS service on the rover which responds to name resolution requests.
 Ubuntu should already ship with the Avahi daemon, a popular mDNS implementation, but if not, you can install it with:
@@ -114,7 +116,14 @@ $ ping wrover-nano.local
 
 ### Setting Up IP Cameras
 
-TODO: instructions on setting hostname mappings for ip cameras
+Use GStreamer/similar to convert the USB cameras to RTSP streams.  Then, use the `simple-rtsp-server` program found online to act as a transmission manager for the RTSP streams and serve cameras to the base station.
+
+The cameras typically involve a lot of tuning to get optimal streaming characteristics.  The CPU load incurred by the cameras may cause the team to use a separate camera co-processor to alliviate load from the main CPU.  Good camera characteristics would probably be:
+
+* Low-latency
+* High quality
+
+These needn't be achieved at the same time, but if they aren't, the swap should be quick.
 
 ## Getting the WRover Code
 
@@ -126,3 +135,5 @@ $ ./assemble.py init  # initialize the catkin workspace + venv
 $ source setup.sh     # acquire the workspace environment
 $ ./assemble.py build # build dependencies + workspace
 ```
+
+Then, continue setting up the WRover environment according to [the Developer Setup Instructions](setup_dev.md).  Keep in mind that the WRover is a shared machine, so be careful adding things like GitHub SSH keys.  You will have to locally build the code to get the executables and message definitions needed to run the code.
