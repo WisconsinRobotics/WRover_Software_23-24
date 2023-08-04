@@ -7,21 +7,19 @@ This includes the base station, as well as any other machine (e.g. a team member
 
 You'll need various software tools before you can start working on the WR software system.
 
-### Installing Linux
+As of 2023, the dependencies are built-in to a Docker container.  This container is *not* deployed to hardware, but facilitates developer work.
 
-You will need to install a Linux distribution that supports ROS Noetic.
-Ubuntu 20.04 ("Focal Fossa") is recommended, as this is the officially-supported OS for ROS Noetic.
-Usually, it is recommended that it be installed natively, either [on a dedicated machine](https://help.ubuntu.com/community/Installation) or [as a dual-booted OS](https://help.ubuntu.com/community/WindowsDualBoot).
-If necessary, it can also be installed as a virtual machine on Windows or macOS via software such as [VirtualBox](https://www.virtualbox.org/), although this comes at the cost of performance.
+### Installing Linux ('Prefer Docker')
 
-In theory, [the Windows Subsystem for Linux (WSL)](https://docs.microsoft.com/en-us/windows/wsl/about) can also run ROS, but it has some problems.
-Most notably, the lack of PCI passthrough makes it difficult to interface with hardware devices, which may pose a problem while trying to develop software that interacts with rover hardware.
-If you go this route, you may want to [recompile the WSL kernel](https://gist.github.com/cerebrate/d40c89d3fa89594e1b1538b2ce9d2720) to enable the kernel modules related to interfacing with hardware.
-This is very tedious, and so WSL is usually not recommended.
+This is done automatically as part of the Docker container.  The following steps are useful if you have to do it manually.
+
+You could use a software to emulate Ubuntu 20.04 (i.e. VirtualBox, VMWare, Parallels, WSL (in rare circumstances for hardware)).  This is typically less efficient than using native hardware, but provides a fairly complete emulation.  This, however, is largely unnecessary.  Developers typically work with simulation or manual ROS manipulation to exercise their code.  This does not require direct hardware interaction, and a tighter development cycle would lead to faster development.  Virtualizing hardware or integrating the hardware to the developer machine often duplicates work when integrating with the WRover.  The Docker container handles the setup of the development system and leaves specific hardware configuration for the WRover.
 
 From here onwards, it is assumed that you have some flavour of Ubuntu 20.04 installed.
 
 ### Installing Python 3
+
+This is done automatically as part of the Docker container.  The following steps are useful if you have to do it manually (on hardware):
 
 A significant portion of the WRover software system is built on Python 3, so you'll need to ensure that it, as well as some necessary packages, are installed.
 Most Ubuntu 20.04 distributions should come with Python 3 by default, and you can check this using the command:
@@ -47,6 +45,9 @@ $ python3 -m pip install -U virtualenv
 
 ### Installing ROS
 
+This is done automatically as part of the Docker container.  The following steps are useful if you have to do it manually (on hardware):
+
+
 The WRover software system is built using the Robotics Operating System (ROS) framework, which you'll need to install.
 See [the official instructions on the ROS wiki](http://wiki.ros.org/noetic/Installation/Ubuntu) for more details.
 You can check that everything has installed properly using the commands:
@@ -57,6 +58,8 @@ $ export | grep ROS # should print various env vars related to ROS
 ```
 
 ## Setting Up the Workspace
+
+This is done automatically as part of the Docker container.  The following steps are useful if you have to do it manually (on hardware):
 
 This repository consists of the ROS catkin workspace for the WRover software system.
 You'll want to clone the repo to wherever you wish to store your workspaces (conventionally, this would be `~/catkin_ws`).
@@ -91,6 +94,8 @@ Alternatively, you can do this automatically in your `.bashrc` if you don't anti
 ## Working in the Workspace
 
 ### Sourcing `setup.sh`
+
+This is done automatically as part of the Docker container.  The following steps are useful if you have to do it manually (on hardware):
 
 When working on the software system, you'll want to ensure that your terminal window is configured to work in the catkin workspace.
 This is done by sourcing the `setup.sh` script, which is done using one of the commands:
