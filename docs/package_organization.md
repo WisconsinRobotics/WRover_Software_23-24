@@ -7,7 +7,7 @@ There are three types of ROS packages that we will consider:
 
 * **Subsystem packages** -- These packages represent one specific robot subsystem and any nodes related to that subsystem. Most nodes will live in subsystem packages.
 * **Global packages** -- These packages provide some kind of data (e.g. message definitions or launch files) that is independent of any specific robot subsystem.
-* **Dependency packages** -- These are packages that have been downloaded and built by the build script. These are generally less organizationally constrained, but are treated as global packages otherwise.
+* **Dependency packages** -- These are packages that have been downloaded and built by the build script or included as submodules. These are generally less organizationally constrained, but are treated as global packages otherwise.
 
 Within each package, the [standard ROS conventions](http://wiki.ros.org/Packages) should be followed.
 

@@ -42,13 +42,13 @@ You'll need Python 3 to run the ROS-based robot software, as well as a couple to
 To install Python 3 and the `pip` package management tool, you can use the command:
 
 ```sh
-$ sudo apt install python3 python3-pip
+sudo apt install python3 python3-pip
 ```
 
 Then, you can use `pip` to install the `virtualenv` package:
 
 ```sh
-$ python3 -m pip install virtualenv
+python3 -m pip install virtualenv
 ```
 
 ### Installing ROS
@@ -63,7 +63,7 @@ For the base station (and any other remote machine) to interact with the rover, 
 The recommended implementation is the OpenSSH server daemon `sshd`, which can be installed with the command:
 
 ```sh
-$ sudo apt install openssh-server
+sudo apt install openssh-server
 ```
 
 Now, you'll want to modify the configuration to allow for public key authentication.
@@ -76,8 +76,8 @@ PubkeyAuthentication yes
 Then, to start up the server, you can enable the SSH service with the commands:
 
 ```sh
-$ sudo systemctl enable ssh
-$ sudo systemctl start ssh
+sudo systemctl enable ssh
+sudo systemctl start ssh
 ```
 
 You could now test to see if it's possible to SSH to the rover from a remote machine.
@@ -92,7 +92,7 @@ To allow for this, you'll need to install an mDNS service on the rover which res
 Ubuntu should already ship with the Avahi daemon, a popular mDNS implementation, but if not, you can install it with:
 
 ```sh
-$ sudo apt install avahi-daemon
+sudo apt install avahi-daemon
 ```
 
 Now, you'll need to do is update the rover's mDNS hostname to `wrover-nano` in the Avahi configuration file `/etc/avahi/avahi-daemon.conf`:
@@ -105,13 +105,13 @@ host-name=wrover-nano
 Once this is done, you can restart the Avahi daemon using the command:
 
 ```sh
-$ sudo systemctl restart avahi-daemon
+sudo systemctl restart avahi-daemon
 ```
 
 To make sure this worked correctly, you can try pinging the rover by hostname from the base station:
 
 ```sh
-$ ping wrover-nano.local
+ping wrover-nano.local
 ```
 
 ### Setting Up IP Cameras
@@ -131,9 +131,9 @@ You'll want to start by cloning this repository to `/home/wiscrobo/catkin_ws/WRo
 Next, navigate into the repository and run the commands:
 
 ```sh
-$ ./assemble.py init  # initialize the catkin workspace + venv
-$ source setup.sh     # acquire the workspace environment
-$ ./assemble.py build # build dependencies + workspace
+./assemble.py init  # initialize the catkin workspace + venv
+source setup.sh     # acquire the workspace environment
+./assemble.py build # build dependencies + workspace
 ```
 
 Then, continue setting up the WRover environment according to [the Developer Setup Instructions](setup_dev.md).  Keep in mind that the WRover is a shared machine, so be careful adding things like GitHub SSH keys.  You will have to locally build the code to get the executables and message definitions needed to run the code.
