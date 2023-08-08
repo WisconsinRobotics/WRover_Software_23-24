@@ -1,5 +1,7 @@
 # HCI/Logic Transsection
 
+@defgroup wr_system WRover System
+
 * `/logic/example: std_msgs/String`
   
   This topic allows information to flow from the HCI layer down to the high-level logic layer.

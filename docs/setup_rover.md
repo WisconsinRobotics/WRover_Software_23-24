@@ -1,5 +1,7 @@
 # Setup: WRover
 
+@defgroup wr_system WRover System
+
 This document describes the setup process for the rover.
 
 ## Hardware Configuration

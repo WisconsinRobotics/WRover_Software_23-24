@@ -1,5 +1,7 @@
 # Package Organization
 
+@defgroup wr_system WRover System
+
 This document describes the way ROS packages should be organized in this repository.
 You should read `ros_abstraction_overview.md` first, if you haven't already.
 

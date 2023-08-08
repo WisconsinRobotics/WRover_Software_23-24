@@ -1,5 +1,7 @@
 # ROS Abstraction Overview
 
+@defgroup wr_system WRover System
+
 This document serves as an overview of the ROS-level abstractions that govern the software system at large.
 
 ## Four Layers of Abstraction
