@@ -4,7 +4,7 @@
 @defgroup wr_system_topics Topics
 @ingroup wr_system
 @defgroup wr_system_ctrl_hsi Control/HSI Transsection
-@ingroup
+@ingroup wr_system_topics
 
 * `/hsi/example: std_msgs/String`
   
