@@ -1,6 +1,8 @@
 # Setup: Development Environment
 
 @defgroup wr_system WRover System
+@defgroup wr_system_setup_dev Developer Setup
+@ingroup wr_system
 
 This document describes the setup process for a development environment machine.
 This includes the base station, as well as any other machine (e.g. a team member's laptop) which is used for ROS development.

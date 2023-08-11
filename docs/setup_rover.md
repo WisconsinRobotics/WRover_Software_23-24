@@ -1,6 +1,8 @@
 # Setup: WRover
 
 @defgroup wr_system WRover System
+@defgroup wr_system_setup_wrover WRover Setup
+@ingroup wr_system
 
 This document describes the setup process for the rover.
 

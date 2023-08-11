@@ -1,6 +1,8 @@
 # Build Tools
 
 @defgroup wr_system WRover System
+@defgroup wr_system_build_tools Build Tools
+@ingroup wr_system
 
 Wisconsin Robotics uses a custom build script called `assemble.py`, which handles dependencies and delegates to catkin as necessary.
 This document provides an overview of its functionality.

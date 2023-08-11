@@ -1,6 +1,8 @@
 # ROS Abstraction Overview
 
 @defgroup wr_system WRover System
+@defgroup wr_system_ros_architecture ROS Architecture
+@ingroup wr_system
 
 This document serves as an overview of the ROS-level abstractions that govern the software system at large.
 
