@@ -69,7 +69,7 @@ Each dependency object should have a unique name.
 The `repo` entry is only necessary if the dependency is to be built from a git repository, and can be omitted for dependencies obtained from other channels (e.g. the `apt` package manager).
 The build provider describes how the dependency should be obtained and built; the existing ones are listed below:
 
-### `cmake`
+### CMake
 
 This provider uses `cmake` to build code in a git repository, then copies the resulting artifacts to the `/lib` subdirectory of dependent ROS packages.
 The build provider configuration is as follows:
@@ -89,7 +89,7 @@ The build provider configuration is as follows:
 }
 ```
 
-### `pip`
+### pip
 
 This provider uses `pip` to install dependencies of a Python project in a git repository.
 Dependencies should be defined in a `requirements.txt` file in the root of the git repository.
@@ -99,7 +99,7 @@ This build provider does not need a configuration.
 Note that this is not how global pip dependencies are defined!
 Global pip dependencies should be declared in a `requirements.txt` file in the root of the software system (i.e. this) repository.
 
-### `apt`
+### APT
 
 This provider simply uses the `apt` package manager to install a dependency.
 The build provider configuration is as follows:
