@@ -1,6 +1,10 @@
 # HCI/Logic Transsection
 
 @defgroup wr_system WRover System
+@defgroup wr_system_topics Topics
+@ingroup wr_system
+@defgroup wr_system_hci_logic HCI/Logic Transsection
+@ingroup wr_system_topics
 
 * `/logic/example: std_msgs/String`
   
