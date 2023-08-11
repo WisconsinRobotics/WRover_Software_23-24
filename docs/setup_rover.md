@@ -37,7 +37,7 @@ You'll want to start by flashing the Raspberry Pi's SD card with Ubuntu 20.04 "F
 
 Canonical distributes server versions of Ubuntu 20.04, these can be deloyed to an SD card via the Raspberry Pi.
 
-After re-inserting the SD card, you'll want to boot up the Jetson Nano and complete the first-time setup for Xubuntu, which can be done with an external monitor and keyboard.
+After re-inserting the SD card, you'll want to boot up the Raspberry Pi and complete the first-time setup for Ubuntu, which can be done with an external monitor and keyboard.
 Make sure you set the user account's name to `wiscrobo`!
 
 ### Setting Up Python 3
@@ -84,7 +84,18 @@ sudo systemctl enable ssh
 sudo systemctl start ssh
 ```
 
-You could now test to see if it's possible to SSH to the rover from a remote machine.
+You could now test to see if it's possible to SSH to the rover from a remote machine.  Get the WRover's IP address by running this command on the WRover:
+
+```sh
+ifconfig
+```
+
+Look for an ethernet address, and substitute it in for this command on the base station.
+
+```sh
+ssh wiscrobo@<ip-of-wrover>
+```
+
 You'll also have to configure public key authentication for any base station machines; see `setup_dev.md` for more details on this.
 
 ### Setting Up mDNS/zeroconf
@@ -99,11 +110,11 @@ Ubuntu should already ship with the Avahi daemon, a popular mDNS implementation,
 sudo apt install avahi-daemon
 ```
 
-Now, you'll need to do is update the rover's mDNS hostname to `wrover-nano` in the Avahi configuration file `/etc/avahi/avahi-daemon.conf`:
+Now, you'll need to do is update the rover's mDNS hostname to `wrover-pi` in the Avahi configuration file `/etc/avahi/avahi-daemon.conf`:
 
 ```ini
 [server]
-host-name=wrover-nano
+host-name=wrover-pi
 ```
 
 Once this is done, you can restart the Avahi daemon using the command:
@@ -115,7 +126,7 @@ sudo systemctl restart avahi-daemon
 To make sure this worked correctly, you can try pinging the rover by hostname from the base station:
 
 ```sh
-ping wrover-nano.local
+ping wrover-pi.local
 ```
 
 ### Setting Up IP Cameras
@@ -131,7 +142,7 @@ These needn't be achieved at the same time, but if they aren't, the swap should 
 
 ## Getting the WRover Code
 
-You'll want to start by cloning this repository to `/home/wiscrobo/catkin_ws/WRover21_Software`.
+You'll want to start by cloning this repository to `/home/wiscrobo/WRover_Software`.
 Next, navigate into the repository and run the commands:
 
 ```sh

@@ -127,10 +127,8 @@ Using `assemble.py`, you would run one of:
 ./assemble.py build -f # delete and re-download all dependencies, then build
 ```
 
+The offline and force modes cannot be used simultaneously.
+
 The `build` task of `assemble.py` checks dependencies, then delegates to `catkin_make`.
 If you don't want to bother with dependencies, you can just invoke `catkin_make` directly.
 For more info on `assemble.py`, check out the `build_tools.md` document.
-
-## Connecting to the Rover
-
-TODO: stuff about public key auth
