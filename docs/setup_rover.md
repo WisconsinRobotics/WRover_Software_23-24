@@ -14,20 +14,21 @@ To begin with, you'll want to procure a Mars rover.
 The rover should have roughly the following hardware subsystems:
 
 * A Raspberry Pi running Ubuntu 20.04
-* A tank drive train, driven by Falcon 500 motors.
+* A tank drive train
 * A central camera mast with a USB camera
-* A GPS unit (TODO: get exact gps model)
+* A GPS unit
 * An inertial measurement unit (TODO: get exact imu model)
 * A radio system (e.g. an antenna) for communicating with the base station radio
 * A swappable module for the robotic arm, which includes:
   * A 6-DOF robotic arm driven by continuous motors controled by RoboClaws
-    * (TODO: describe the exact motor/encoder configurations on the arm)
   * Two USB cameras pointed at the end effector
   * A mechanical gripper driven by a linear actuator
 * A swappable module for autonomous navigation, which includes:
-  * A LIDAR unit (TODO: get exact lidar model)
+  * A LIDAR unit
 * A swappable module for the planetary science analysis suite, which includes:
-  * (TODO: describe science module)
+  * A soil collection mechanism
+  * Ground cameras
+  * A soil sensor
 
 ## Preparing the Raspberry Pi
 

@@ -96,7 +96,7 @@ Alternatively, you can do this automatically in your `.bashrc` if you don't anti
 
 ## Working in the Workspace
 
-### Sourcing `setup.sh`
+### Sourcing setup.sh
 
 When working on the software system, you'll want to ensure that your terminal window is configured to work in the catkin workspace.
 This is done by sourcing the `setup.sh` script, which is done using one of the commands:
