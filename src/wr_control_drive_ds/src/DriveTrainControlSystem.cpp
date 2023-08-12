@@ -1,13 +1,29 @@
+/**
+* @file
+* @author Ben Nowotny
+*/
+
+/**
+* @ingroup wr_control_drive_ds
+*/
+
 #include "ros/init.h"
 #include "ros/publisher.h"
 #include "ros/node_handle.h"
 #include "std_msgs/Float64.h"
 #include "wr_drive_msgs/DriveTrainCmd.h"
+#include <cstdlib>
 
-// Main program
+/**
+ * @brief The main executable of the node
+ * 
+ * @param argc Number of program arguments
+ * @param argv The program arguments
+ * @return int The return code of the program
+ */
 auto main(int argc, char **argv) -> int {
 
-  /// Number of messages to queue in publishing/subscribing
+  // Number of messages to queue in publishing/subscribing
   static constexpr std::uint32_t MESSAGE_CACHE_SIZE = 10;
 
   // Initialize the node in ROS
@@ -45,4 +61,6 @@ auto main(int argc, char **argv) -> int {
       republishSpeed)};
 
   ros::spin();
+
+  return EXIT_SUCCESS;
 }
