@@ -13,7 +13,7 @@ It also inverts the right drivetrain speed since if both motors spin the same wa
 
 ## Camera Mast Control
 
-This listens to logical rotation speeds for the camera mast and outputs hardware speeds for the camera mast.  This still does the Roboclaw conversion.
+This listens to logical rotation speeds for the camera mast and outputs hardware speeds for the camera mast.
 
 ## Roboclaw Conversion
 
