@@ -1,10 +1,13 @@
 /**
-* @file
-* @author Ben Nowotny
+* @defgroup wr_control_drive_ds_drive Drive Speed Translation
+* @brief Translates logical drive speeds to hardware power values
+* @ingroup wr_control_drive_ds
+* @{
 */
 
 /**
-* @ingroup wr_control_drive_ds
+* @file
+* @author Ben Nowotny
 */
 
 #include "ros/init.h"
@@ -64,3 +67,5 @@ auto main(int argc, char **argv) -> int {
 
   return EXIT_SUCCESS;
 }
+
+/// @}
