@@ -36,7 +36,7 @@ Ideas for this node have gone through several iterations.  None of the following
     * Few/no layers of extra support required between operator and WRover
     * No GUI work
   * Cons:
-    * Operator must be *extremely* proficient in ROS/`bash`/filesystems/networks
+    * Operator must be ***extremely*** proficient in ROS/`bash`/filesystems/networks
       * No assistance/recovery available if something goes wrong
     * Hard to visualize large number of subsystems at once
     * Slow to operate
