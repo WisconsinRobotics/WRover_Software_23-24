@@ -20,3 +20,14 @@ There are a few objects described in the diagram below that relate to both the l
 For most joints, there is a 1:1:1 correspondence from Joints to Motors to Encoders.  However, there is an outlier for the wrist of the arm, which has a 2:2:2 ratio.  The Encoders are 1:1 on the Joints, but the Motors are 2:2 on the Joints, since you need both motors to spin one axis.  To spin both axes, both motors needs to agree on how to spin both axes simultaneously, which necessitates the difference between a `DirectJointToMotor` controller and a `Differential` controller.
 
 ![Class Diagram of wr_control_drive_arm](Structure.png)
+
+## Sequencing
+
+Using the objects in the [Object Model](#object-model), we can diagram the flow of data from MoveIt to/from the `wroboclaw` motor drivers.
+
+Some extra actors:
+
+* `ActionServer`: A ROS abstraction for a callable, parameterizable action (similar to a service) that's intended to run for a significant amout of time or wait on physical inputs.  The 'action' in this context is the execution of the path of the arm.
+* `PID Loop`: A control loop program that computes the power required to drive each `Joint` to its setpoint using the [PID algorithm](https://en.wikipedia.org/wiki/Proportional%E2%80%93integral%E2%80%93derivative_controller).
+
+![Sequencing of wr_control_drive_arm](seq.png)
