@@ -1,9 +1,15 @@
 /**
+ * @ingroup wr_control_drive_arm
+ * @{
+ */
+
+/**
  * @file ArmControlActionServer.cpp
  * @author Ben Nowotny
  * @brief The exeutable file to run the Arm Control Action Server
  * @date 2022-12-05
  */
+
 #include "DifferentialJointToMotorSpeedConverter.hpp"
 #include "DirectJointToMotorSpeedConverter.hpp"
 #include "Joint.hpp"
@@ -33,53 +39,37 @@
 
 using XmlRpc::XmlRpcValue;
 
-/**
- * @brief Refresh rate of ros::Rate
- */
-constexpr float CLOCK_RATE{50};
+/// Tick rate of the action server
+constexpr float CLOCK_RATE_HZ{50};
 
-constexpr double IK_WARN_RATE{1.0 / 2};
+/// Delay when publishing IK warnings
+constexpr double IK_WARN_PERIOD_SEC{1.0 / 2};
 
+/// Max speed for a joint (motor power) when moving between setpoints
 constexpr double JOINT_SAFETY_MAX_SPEED{0.5};
+/// Max speed for a joint (motor power) when it has reached a setpoint
 constexpr double JOINT_SAFETY_HOLD_SPEED{0.3};
 
-/**
- * @brief Nessage cache size of publisher
- */
+/// Message cache size of publisher
 constexpr std::uint32_t MESSAGE_CACHE_SIZE{10};
 
-/**
- * @brief Period between timer callback
- */
-constexpr float TIMER_CALLBACK_DURATION{1.0 / 50.0};
+/// Period between timer callbacks when checking overcurrent errors
+constexpr float OVERCURRENT_TIMEOUT_PERIOD_SEC{1.0 / 50.0};
 
-/**
- * @brief Defines space for all Joint references
- */
+/// Map of joint names to @ref Joint objects
 std::unordered_map<std::string, std::unique_ptr<Joint>> namedJointMap;
 
-/**
- * @brief Defines space for all joint position monitor references
- */
+/// Map of joint names to position monitors
 std::unordered_map<std::string, std::shared_ptr<SingleEncoderJointPositionMonitor>> namedPositionMonitors;
 
-/**
- * @brief Simplify the SimpleActionServer reference name
- */
+/// Simplify actionserver namespace/templatization
 using Server = actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction>;
 
-/**
- * @brief The service server for enabling IK
- */
+/// Service to enable IK if it has been disabled for some reason
 ros::ServiceServer enableServiceServer;
-/**
- * @brief The status of IK program
- */
+
+/// Enabled status of the IK program
 std::atomic_bool IKEnabled{true};
-/**
- * @brief The service client for disabling IK
- */
-ros::ServiceClient enableServiceClient;
 
 /**
  * @brief Perform the given action as interpreted as moving the arm joints to
@@ -90,14 +80,17 @@ ros::ServiceClient enableServiceClient;
  */
 void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
              Server *server) {
+
+    // If IK is disabled, don't do anything and report status
     if (!IKEnabled) {
         server->setAborted();
-        ROS_WARN_THROTTLE( // NOLINT(hicpp-no-array-decay,hicpp,hicpp-vararg,cppcoreguidelines-pro-bounds-array-to-pointer-decay, cppcoreguidelines-pro-type-vararg)
-            IK_WARN_RATE,
+        ROS_WARN_THROTTLE( // NOLINT; ROS macro excuse
+            IK_WARN_PERIOD_SEC,
             "IK is disabled");
         return;
     }
 
+    // DEBUGGING, not required to execute trajectory
     for (const auto &jointName : goal->trajectory.joint_names) {
         std::cout << jointName << "\t";
     }
@@ -109,17 +102,20 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
         std::cout << std::endl;
     }
 
+    // The path is broken up into smaller waypoints serving as intermediate targets
+    // For each waypoint in the path...
     for (const auto &currTargetPosition : goal->trajectory.points) {
 
+        // If IK is disabled during the program, report fault and exit
         if (!IKEnabled) {
             server->setAborted();
             std::cout << "Over current fault!" << std::endl;
             return;
         }
 
-        // Copy of the velocities received from MoveIt
         std::vector<double> velocityCopies{currTargetPosition.velocities};
 
+        // Scale joint speeds by gear ratio of the joint
         for (uint32_t i = 0; i < goal->trajectory.joint_names.size(); ++i) {
 
             // The joint that is currently being scaled
@@ -138,6 +134,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
             velocityCopies.end(),
             [](double lhs, double rhs) -> bool { return abs(lhs) < abs(rhs); }));
 
+        // Scale joint speeds so that none is greater than JOINT_SAFETY_MAX_SPEED
         for (uint32_t i = 0; i < goal->trajectory.joint_names.size(); ++i) {
             // Set joint to hold speed in case the greatest velocity comes through as 0
             auto jointVelocity{JOINT_SAFETY_HOLD_SPEED};
@@ -152,20 +149,28 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
     }
 
     auto waypointComplete{false};
-    ros::Rate updateRate{CLOCK_RATE};
+    ros::Rate updateRate{CLOCK_RATE_HZ};
 
+    // While...
+    // The waypoint is not complete
+    // ROS has not stopped, and
+    // There isn't a newer target available
     while (!waypointComplete && ros::ok() && !server->isNewGoalAvailable()) {
 
+        // If IK is disabled during the program, report fault and exit
         if (!IKEnabled) {
             server->setAborted();
             std::cout << "Over current fault!" << std::endl;
             return;
         }
 
+        // A waypoint is complete if every joint has reached its target
         waypointComplete = true;
         for (const auto &[_, joint] : namedJointMap) {
             waypointComplete &= joint->hasReachedTarget();
         }
+
+        // Wait to update
         updateRate.sleep();
     }
 
@@ -178,15 +183,35 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
     std::cout << "Action Complete!" << std::endl;
 }
 
+/**
+ * @brief Get the Encoder Config from ROS Params
+ * 
+ * @param params The dictionary of ROS parameters
+ * @param jointName The name of the joint requested
+ * @return EncoderConfiguration The encoder configuration of that joint
+ */
 auto getEncoderConfigFromParams(const XmlRpcValue &params, const std::string &jointName) -> EncoderConfiguration {
     return {.countsPerRotation = static_cast<int32_t>(params[jointName]["encoder_parameters"]["counts_per_rotation"]),
             .offset = static_cast<int32_t>(params[jointName]["encoder_parameters"]["offset"])};
 }
 
+/**
+ * @brief Get the Motor Config from ROS Params
+ * 
+ * @param params The dictionary of ROS parameters
+ * @param jointName The name of the joint requested
+ * @return MotorConfiguration The motor configuration of that joint
+ */
 auto getMotorConfigFromParams(const XmlRpcValue &params, const std::string &jointName) -> MotorConfiguration {
     return {.gearRatio = static_cast<double>(params[jointName]["motor_configurations"]["gear_ratio"])};
 }
 
+/**
+ * @brief ROS timed callback to check if motors are overcurrent.  
+ * IK is disabled if an overcurrent fault happens
+ * 
+ * @param motors The list of motors to check
+ */
 void checkOverCurrentFaults(const std::vector<std::shared_ptr<Motor>> &motors){
     for(const auto& motor : motors){
         if (motor->isOverCurrent()) {
@@ -348,10 +373,7 @@ auto main(int argc, char **argv) -> int {
                 return true;
             }));
 
-    enableServiceClient =
-        n.serviceClient<std_srvs::Trigger>("PLACEHOLDER_NAME");
-
-    ros::Timer currentTimer = n.createTimer(ros::Duration{TIMER_CALLBACK_DURATION}, [&motors](const ros::TimerEvent& event) { checkOverCurrentFaults(motors); });
+    ros::Timer currentTimer = n.createTimer(ros::Duration{OVERCURRENT_TIMEOUT_PERIOD_SEC}, [&motors](const ros::TimerEvent& event) { checkOverCurrentFaults(motors); });
 
     std::cout << "entering ROS spin..." << std::endl;
     // ROS spin for communication with other nodes
@@ -359,3 +381,4 @@ auto main(int argc, char **argv) -> int {
     // Return 0 on exit (successful exit)
     return 0;
 }
+/// @}
