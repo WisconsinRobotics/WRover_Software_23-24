@@ -249,9 +249,7 @@ auto main(int argc, char **argv) -> int {
     // and reference to the current node
     std::cout << "init motors" << std::endl;
 
-    /**
-     * @brief The list of motors
-     */
+    // Setup the list of motors
     std::vector<std::shared_ptr<Motor>> motors{};
 
     using std::literals::string_literals::operator""s;
@@ -270,6 +268,7 @@ auto main(int argc, char **argv) -> int {
     motors.push_back(wristLeftMotor);
     motors.push_back(wristRightMotor);
 
+    // Create/name the encoders
     namedPositionMonitors.insert({"turntable_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
                                                             "aux0"s,
                                                             RoboclawChannel::A,
@@ -312,13 +311,15 @@ auto main(int argc, char **argv) -> int {
                                                             getMotorConfigFromParams(armParams, "wristRoll"),
                                                             n)});
 
+    // Create the speed converters
+
     const auto turntableSpeedConverter{std::make_shared<DirectJointToMotorSpeedConverter>(turntableMotor, MotorSpeedDirection::REVERSE)};
     const auto shoulderSpeedConverter{std::make_shared<DirectJointToMotorSpeedConverter>(shoulderMotor, MotorSpeedDirection::REVERSE)};
     const auto elbowSpeedConverter{std::make_shared<DirectJointToMotorSpeedConverter>(elbowMotor, MotorSpeedDirection::REVERSE)};
     const auto forearmRollSpeedConverter{std::make_shared<DirectJointToMotorSpeedConverter>(forearmRollMotor, MotorSpeedDirection::REVERSE)};
     const auto differentialSpeedConverter{std::make_shared<DifferentialJointToMotorSpeedConverter>(wristLeftMotor, wristRightMotor)};
 
-    // Initialize all Joints
+    // Initialize/name all the Joints
 
     std::cout << "init joints" << std::endl;
 
@@ -361,19 +362,20 @@ auto main(int argc, char **argv) -> int {
     server.start();
     std::cout << "server started" << std::endl;
 
-    enableServiceServer = n.advertiseService(
+    // Create a service to re-enable IK if it gets disabled
+    enableServiceServer = n.advertiseService<std_srvs::Trigger>(
         "start_IK",
-        static_cast<boost::function<bool(std_srvs::Trigger::Request &,
-                                         std_srvs::Trigger::Response &)>>(
-            [](std_srvs::Trigger::Request &req,
-               std_srvs::Trigger::Response &res) -> bool {
-                IKEnabled = true;
-                res.message = "Arm IK Enabled";
-                res.success = static_cast<unsigned char>(true);
-                return true;
-            }));
+        [](std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res) -> bool {
+            IKEnabled = true;
+            res.message = "Arm IK Enabled";
+            res.success = static_cast<unsigned char>(true);
+            return true;
+        });
 
-    ros::Timer currentTimer = n.createTimer(ros::Duration{OVERCURRENT_TIMEOUT_PERIOD_SEC}, [&motors](const ros::TimerEvent& event) { checkOverCurrentFaults(motors); });
+    // Periodically check if overrucrrent faults have occurred
+    ros::Timer currentTimer = n.createTimer(
+        ros::Duration{OVERCURRENT_TIMEOUT_PERIOD_SEC}, 
+        [&motors](const ros::TimerEvent& event) { checkOverCurrentFaults(motors); });
 
     std::cout << "entering ROS spin..." << std::endl;
     // ROS spin for communication with other nodes
