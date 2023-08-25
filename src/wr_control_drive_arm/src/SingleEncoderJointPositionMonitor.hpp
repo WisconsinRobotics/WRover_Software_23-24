@@ -20,7 +20,7 @@ struct MotorConfiguration {
 class SingleEncoderJointPositionMonitor {
 public:
     SingleEncoderJointPositionMonitor(const std::string &controllerName, RoboclawChannel channel, EncoderConfiguration eConfig, MotorConfiguration mConfig, ros::NodeHandle node);
-    auto operator()() -> double;
+    auto operator()() const -> double;
 
     SingleEncoderJointPositionMonitor(const SingleEncoderJointPositionMonitor &);
     auto operator=(const SingleEncoderJointPositionMonitor &) -> SingleEncoderJointPositionMonitor & = delete;
@@ -36,9 +36,9 @@ private:
 
     std::atomic<double> position;
     std::shared_ptr<ros::Subscriber> encoderSubscriber;
-    const int32_t countsPerRotation;
-    const int32_t offset;
-    const double gearRatio;
+    int32_t countsPerRotation;
+    int32_t offset;
+    double gearRatio;
 };
 
 #endif

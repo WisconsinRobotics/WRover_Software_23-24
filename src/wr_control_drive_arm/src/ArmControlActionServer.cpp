@@ -22,6 +22,7 @@
 #include <actionlib/server/simple_action_server.h>
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <chrono>
 #include <cmath>
 #include <control_msgs/FollowJointTrajectoryAction.h>
@@ -53,23 +54,13 @@ constexpr double JOINT_SAFETY_HOLD_SPEED{0.3};
 /// Message cache size of publisher
 constexpr std::uint32_t MESSAGE_CACHE_SIZE{10};
 
-/// Period between timer callbacks when checking overcurrent errors
-constexpr float OVERCURRENT_TIMEOUT_PERIOD_SEC{1.0 / 50.0};
-
-/// Map of joint names to @ref Joint objects
-std::unordered_map<std::string, std::unique_ptr<Joint>> namedJointMap;
-
-/// Map of joint names to position monitors
-std::unordered_map<std::string, std::shared_ptr<SingleEncoderJointPositionMonitor>> namedPositionMonitors;
+/**
+ * @brief Period between timer callback
+ */
+constexpr float TIMER_CALLBACK_DURATION{1.0 / 50.0};
 
 /// Simplify actionserver namespace/templatization
 using Server = actionlib::SimpleActionServer<control_msgs::FollowJointTrajectoryAction>;
-
-/// Service to enable IK if it has been disabled for some reason
-ros::ServiceServer enableServiceServer;
-
-/// Enabled status of the IK program
-std::atomic_bool IKEnabled{true};
 
 /**
  * @brief Perform the given action as interpreted as moving the arm joints to
@@ -79,12 +70,13 @@ std::atomic_bool IKEnabled{true};
  * @param as The Action Server this is occuring on
  */
 void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
-             Server *server) {
-
-    // If IK is disabled, don't do anything and report status
+             Server *server,
+             std::atomic_bool &IKEnabled,
+             const std::unordered_map<std::string, const std::unique_ptr<Joint>> &namedJointMap,
+             const std::unordered_map<std::string, const std::shared_ptr<const SingleEncoderJointPositionMonitor>> &namedPositionMonitors) {
     if (!IKEnabled) {
         server->setAborted();
-        ROS_WARN_THROTTLE( // NOLINT; ROS macro excuse
+        ROS_WARN_THROTTLE( // NOLINT
             IK_WARN_PERIOD_SEC,
             "IK is disabled");
         return;
@@ -122,10 +114,10 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
             auto currJoint = goal->trajectory.joint_names.at(i);
 
             // The position monitor whose velocity is currently being scaled
-            auto currPosMtr = namedPositionMonitors.at(currJoint);
+            const auto &currPosMtr = namedPositionMonitors.at(currJoint);
 
             // Scale by counts per rotation and gear ratio
-            velocityCopies.at(i) *= abs(currPosMtr->getCountsPerRotation()*currPosMtr->getGearRatio());
+            velocityCopies.at(i) *= abs(currPosMtr->getCountsPerRotation() * currPosMtr->getGearRatio());
         }
 
         // Get the maximum velocity assigned to any joint
@@ -185,7 +177,7 @@ void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
 
 /**
  * @brief Get the Encoder Config from ROS Params
- * 
+ *
  * @param params The dictionary of ROS parameters
  * @param jointName The name of the joint requested
  * @return EncoderConfiguration The encoder configuration of that joint
@@ -197,7 +189,7 @@ auto getEncoderConfigFromParams(const XmlRpcValue &params, const std::string &jo
 
 /**
  * @brief Get the Motor Config from ROS Params
- * 
+ *
  * @param params The dictionary of ROS parameters
  * @param jointName The name of the joint requested
  * @return MotorConfiguration The motor configuration of that joint
@@ -207,20 +199,23 @@ auto getMotorConfigFromParams(const XmlRpcValue &params, const std::string &join
 }
 
 /**
- * @brief ROS timed callback to check if motors are overcurrent.  
+ * @brief ROS timed callback to check if motors are overcurrent.
  * IK is disabled if an overcurrent fault happens
- * 
+ *
  * @param motors The list of motors to check
  */
-void checkOverCurrentFaults(const std::vector<std::shared_ptr<Motor>> &motors){
-    for(const auto& motor : motors){
-        if (motor->isOverCurrent()) {
-            IKEnabled = false;
-            std::cout << "Over current fault!" << std::endl;
-
-            for (const auto& joint : namedJointMap) {
-                joint.second->stop();
+void checkOverCurrentFaults(const std::vector<std::shared_ptr<Motor>> &motors,
+                            std::atomic_bool &IKEnabled) {
+    for (const auto &motor : motors) {
+        const auto currentIKEnabled{IKEnabled.load()};
+        if (!currentIKEnabled || motor->isOverCurrent()) {
+            if (currentIKEnabled) {
+                IKEnabled = false;
+                std::cout << "Over current fault!" << std::endl;
             }
+
+            for (const auto &motor : motors)
+                motor->setSpeed(0);
         }
         // TODO:  arbitrate control to old arm driver
     }
@@ -239,11 +234,11 @@ auto main(int argc, char **argv) -> int {
     // Initialize the current node as ArmControlSystem
     ros::init(argc, argv, "ArmControlActionServer");
     // Create the NodeHandle to the current ROS node
-    ros::NodeHandle n;
-    ros::NodeHandle pn{"~"};
+    ros::NodeHandle nodeHandle;
+    ros::NodeHandle privateNodeHandle{"~"};
 
     XmlRpcValue armParams;
-    pn.getParam("arm_parameters", armParams);
+    privateNodeHandle.getParam("arm_parameters", armParams);
 
     // Initialize all motors with their MoveIt name, WRoboclaw initialization,
     // and reference to the current node
@@ -254,12 +249,12 @@ auto main(int argc, char **argv) -> int {
 
     using std::literals::string_literals::operator""s;
 
-    const auto turntableMotor{std::make_shared<Motor>("aux0"s, RoboclawChannel::A, n)};
-    const auto shoulderMotor{std::make_shared<Motor>("aux0"s, RoboclawChannel::B, n)};
-    const auto elbowMotor{std::make_shared<Motor>("aux1"s, RoboclawChannel::A, n)};
-    const auto forearmRollMotor{std::make_shared<Motor>("aux1"s, RoboclawChannel::B, n)};
-    const auto wristLeftMotor{std::make_shared<Motor>("aux2"s, RoboclawChannel::A, n)};
-    const auto wristRightMotor{std::make_shared<Motor>("aux2"s, RoboclawChannel::B, n)};
+    const auto turntableMotor{std::make_shared<Motor>("aux0"s, RoboclawChannel::A, nodeHandle)};
+    const auto shoulderMotor{std::make_shared<Motor>("aux0"s, RoboclawChannel::B, nodeHandle)};
+    const auto elbowMotor{std::make_shared<Motor>("aux1"s, RoboclawChannel::A, nodeHandle)};
+    const auto forearmRollMotor{std::make_shared<Motor>("aux1"s, RoboclawChannel::B, nodeHandle)};
+    const auto wristLeftMotor{std::make_shared<Motor>("aux2"s, RoboclawChannel::A, nodeHandle)};
+    const auto wristRightMotor{std::make_shared<Motor>("aux2"s, RoboclawChannel::B, nodeHandle)};
 
     motors.push_back(turntableMotor);
     motors.push_back(shoulderMotor);
@@ -268,48 +263,50 @@ auto main(int argc, char **argv) -> int {
     motors.push_back(wristLeftMotor);
     motors.push_back(wristRightMotor);
 
-    // Create/name the encoders
-    namedPositionMonitors.insert({"turntable_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
-                                                            "aux0"s,
-                                                            RoboclawChannel::A,
-                                                            getEncoderConfigFromParams(armParams, "turntable"),
-                                                            getMotorConfigFromParams(armParams, "turntable"),
-                                                            n)});
+    const std::unordered_map<std::string, const std::shared_ptr<const SingleEncoderJointPositionMonitor>> namedPositionMonitors{
+        {"turntable_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
+                                "aux0",
+                                RoboclawChannel::A,
+                                getEncoderConfigFromParams(armParams, "turntable"),
+                                getMotorConfigFromParams(armParams, "turntable"),
+                                nodeHandle)},
 
-    namedPositionMonitors.insert({"shoulder_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
-                                                            "aux0"s,
-                                                            RoboclawChannel::B,
-                                                            getEncoderConfigFromParams(armParams, "shoulder"),
-                                                            getMotorConfigFromParams(armParams, "shoulder"),
-                                                            n)});
+        {"shoulder_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
+                               "aux0",
+                               RoboclawChannel::B,
+                               getEncoderConfigFromParams(armParams, "shoulder"),
+                               getMotorConfigFromParams(armParams, "shoulder"),
+                               nodeHandle)},
 
-    namedPositionMonitors.insert({"elbowPitch_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
-                                                            "aux1"s,
-                                                            RoboclawChannel::A,
-                                                            getEncoderConfigFromParams(armParams, "elbow"),
-                                                            getMotorConfigFromParams(armParams, "elbow"),
-                                                            n)});
+        {"elbowPitch_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
+                                 "aux1",
+                                 RoboclawChannel::A,
+                                 getEncoderConfigFromParams(armParams, "elbow"),
+                                 getMotorConfigFromParams(armParams, "elbow"),
+                                 nodeHandle)},
 
-    namedPositionMonitors.insert({"elbowRoll_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
-                                                            "aux1"s,
-                                                            RoboclawChannel::B,
-                                                            getEncoderConfigFromParams(armParams, "forearmRoll"),
-                                                            getMotorConfigFromParams(armParams, "forearmRoll"),
-                                                            n)});
+        {"elbowRoll_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
+                                "aux1",
+                                RoboclawChannel::B,
+                                getEncoderConfigFromParams(armParams, "forearmRoll"),
+                                getMotorConfigFromParams(armParams, "forearmRoll"),
+                                nodeHandle)},
 
-    namedPositionMonitors.insert({"wristPitch_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
-                                                            "aux2"s,
-                                                            RoboclawChannel::A,
-                                                            getEncoderConfigFromParams(armParams, "wristPitch"),
-                                                            getMotorConfigFromParams(armParams, "wristPitch"),
-                                                            n)});
+        {"wristPitch_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
+                                 "aux2",
+                                 RoboclawChannel::A,
+                                 getEncoderConfigFromParams(armParams, "wristPitch"),
+                                 getMotorConfigFromParams(armParams, "wristPitch"),
+                                 nodeHandle)},
 
-    namedPositionMonitors.insert({"wristRoll_link", std::make_shared<SingleEncoderJointPositionMonitor>(
-                                                            "aux2"s,
-                                                            RoboclawChannel::B,
-                                                            getEncoderConfigFromParams(armParams, "wristRoll"),
-                                                            getMotorConfigFromParams(armParams, "wristRoll"),
-                                                            n)});
+        {"wristRoll_link", std::make_shared<SingleEncoderJointPositionMonitor>(
+                               "aux2",
+                               RoboclawChannel::B,
+                               getEncoderConfigFromParams(armParams, "wristRoll"),
+                               getMotorConfigFromParams(armParams, "wristRoll"),
+                               nodeHandle)}};
+
+    // Create the speed converters
 
     // Create the speed converters
 
@@ -323,59 +320,79 @@ auto main(int argc, char **argv) -> int {
 
     std::cout << "init joints" << std::endl;
 
-    namedJointMap.insert({"turntable_joint", std::make_unique<Joint>(
-                                                 "turntable"s,
-                                                 [turntablePositionMonitor=namedPositionMonitors.at("turntable_joint")]() -> double { return (*turntablePositionMonitor)(); },
-                                                 [turntableSpeedConverter](double speed) { (*turntableSpeedConverter)(speed); },
-                                                 n)});
-    namedJointMap.insert({"shoulder_joint", std::make_unique<Joint>(
-                                                "shoulder",
-                                                [shoulderPositionMonitor=namedPositionMonitors.at("shoulder_joint")]() -> double { return (*shoulderPositionMonitor)(); },
-                                                [shoulderSpeedConverter](double speed) { (*shoulderSpeedConverter)(speed); },
-                                                n)});
-    namedJointMap.insert({"elbowPitch_joint", std::make_unique<Joint>(
-                                                  "elbow",
-                                                  [elbowPositionMonitor=namedPositionMonitors.at("elbowPitch_joint")]() -> double { return (*elbowPositionMonitor)(); },
-                                                  [elbowSpeedConverter](double speed) { (*elbowSpeedConverter)(speed); },
-                                                  n)});
-    namedJointMap.insert({"elbowRoll_joint", std::make_unique<Joint>(
-                                                 "forearmRoll",
-                                                 [forearmRollPositionMonitor=namedPositionMonitors.at("elbowRoll_joint")]() -> double { return (*forearmRollPositionMonitor)(); },
-                                                 [forearmRollSpeedConverter](double speed) { (*forearmRollSpeedConverter)(speed); },
-                                                 n)});
-    namedJointMap.insert({"wristPitch_joint", std::make_unique<Joint>(
-                                                  "wristPitch",
-                                                  [wristPitchPositionMonitor=namedPositionMonitors.at("wristPitch_joint")]() -> double { return (*wristPitchPositionMonitor)(); },
-                                                  [converter = differentialSpeedConverter](double speed) { converter->setPitchSpeed(speed); },
-                                                  n)});
-    namedJointMap.insert({"wristRoll_link", std::make_unique<Joint>(
-                                                "wristRoll",
-                                                [wristRollPositionMonitor=namedPositionMonitors.at("wristRoll_link")]() -> double { return (*wristRollPositionMonitor)(); },
-                                                [converter = differentialSpeedConverter](double speed) { converter->setRollSpeed(speed); },
-                                                n)});
+    const std::unordered_map<std::string, const std::unique_ptr<Joint>> namedJointMap{
+        [&]() {
+            std::unordered_map<std::string, const std::unique_ptr<Joint>> namedJointMap{};
+            namedJointMap.insert(std::make_pair("turntable_joint", std::make_unique<Joint>(
+                                                                       "turntable"s,
+                                                                       [turntablePositionMonitor = namedPositionMonitors.at("turntable_joint")]() -> double { return (*turntablePositionMonitor)(); },
+                                                                       [turntableSpeedConverter](double speed) { (*turntableSpeedConverter)(speed); },
+                                                                       nodeHandle)));
+
+            namedJointMap.insert(std::make_pair("shoulder_joint", std::make_unique<Joint>(
+                                                                      "shoulder",
+                                                                      [shoulderPositionMonitor = namedPositionMonitors.at("shoulder_joint")]() -> double { return (*shoulderPositionMonitor)(); },
+                                                                      [shoulderSpeedConverter](double speed) { (*shoulderSpeedConverter)(speed); },
+                                                                      nodeHandle)));
+
+            namedJointMap.insert(std::make_pair("elbowPitch_joint", std::make_unique<Joint>(
+                                                                        "elbow",
+                                                                        [elbowPositionMonitor = namedPositionMonitors.at("elbowPitch_joint")]() -> double { return (*elbowPositionMonitor)(); },
+                                                                        [elbowSpeedConverter](double speed) { (*elbowSpeedConverter)(speed); },
+                                                                        nodeHandle)));
+
+            namedJointMap.insert(std::make_pair("elbowRoll_joint", std::make_unique<Joint>(
+                                                                       "forearmRoll",
+                                                                       [forearmRollPositionMonitor = namedPositionMonitors.at("elbowRoll_joint")]() -> double { return (*forearmRollPositionMonitor)(); },
+                                                                       [forearmRollSpeedConverter](double speed) { (*forearmRollSpeedConverter)(speed); },
+                                                                       nodeHandle)));
+
+            namedJointMap.insert(std::make_pair("wristPitch_joint", std::make_unique<Joint>(
+                                                                        "wristPitch",
+                                                                        [wristPitchPositionMonitor = namedPositionMonitors.at("wristPitch_joint")]() -> double { return (*wristPitchPositionMonitor)(); },
+                                                                        [converter = differentialSpeedConverter](double speed) { converter->setPitchSpeed(speed); },
+                                                                        nodeHandle)));
+
+            namedJointMap.insert(std::make_pair("wristRoll_link", std::make_unique<Joint>(
+                                                                      "wristRoll",
+                                                                      [wristRollPositionMonitor = namedPositionMonitors.at("wristRoll_link")]() -> double { return (*wristRollPositionMonitor)(); },
+                                                                      [converter = differentialSpeedConverter](double speed) { converter->setRollSpeed(speed); },
+                                                                      nodeHandle)));
+            return namedJointMap;
+        }()};
+
+    /// The enabled status of IK
+    std::atomic_bool IKEnabled{true};
 
     // Initialize the Action Server
     Server server(
-        n, "/arm_controller/follow_joint_trajectory",
-        [&server](auto goal) { execute(goal, &server); }, false);
+        nodeHandle, "/arm_controller/follow_joint_trajectory",
+        [&server, &IKEnabled, &namedJointMap, &namedPositionMonitors](auto goal) mutable {
+            execute(goal, &server, IKEnabled, namedJointMap, namedPositionMonitors);
+        },
+        false);
     // Start the Action Server
     server.start();
     std::cout << "server started" << std::endl;
 
-    // Create a service to re-enable IK if it gets disabled
-    enableServiceServer = n.advertiseService<std_srvs::Trigger>(
-        "start_IK",
-        [](std_srvs::Trigger::Request &req, std_srvs::Trigger::Response &res) -> bool {
-            IKEnabled = true;
-            res.message = "Arm IK Enabled";
-            res.success = static_cast<unsigned char>(true);
-            return true;
-        });
+    // Service to enable IK if it is disabled
 
-    // Periodically check if overrucrrent faults have occurred
-    ros::Timer currentTimer = n.createTimer(
-        ros::Duration{OVERCURRENT_TIMEOUT_PERIOD_SEC}, 
-        [&motors](const ros::TimerEvent& event) { checkOverCurrentFaults(motors); });
+    using std_srvs::Trigger;
+    auto enableServiceServer{
+        nodeHandle.advertiseService<Trigger::Request, Trigger::Response>(
+            "start_IK",
+            [&IKEnabled](const Trigger::Request &req, Trigger::Response &res) -> bool {
+                IKEnabled = true;
+                res.message = "Arm IK Enabled";
+                res.success = static_cast<unsigned char>(true);
+                return true;
+            })};
+
+    ros::Timer currentTimer = nodeHandle.createTimer(
+        ros::Duration{TIMER_CALLBACK_DURATION},
+        [&motors, &IKEnabled](const ros::TimerEvent &event) {
+            checkOverCurrentFaults(motors, IKEnabled);
+        });
 
     std::cout << "entering ROS spin..." << std::endl;
     // ROS spin for communication with other nodes
@@ -383,4 +400,5 @@ auto main(int argc, char **argv) -> int {
     // Return 0 on exit (successful exit)
     return 0;
 }
+
 /// @}

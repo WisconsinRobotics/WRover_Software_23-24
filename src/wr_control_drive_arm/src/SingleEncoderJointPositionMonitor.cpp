@@ -39,7 +39,7 @@ SingleEncoderJointPositionMonitor::SingleEncoderJointPositionMonitor(
       encoderSubscriber{std::move(other.encoderSubscriber)},
       position{other.position.load()} {}
 
-auto SingleEncoderJointPositionMonitor::operator()() -> double {
+auto SingleEncoderJointPositionMonitor::operator()() const -> double {
     return position;
 }
 
