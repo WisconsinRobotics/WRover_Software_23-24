@@ -1,5 +1,5 @@
 /**
- * @ingroup wr_control_drive_arm
+ * @addtogroup wr_control_drive_arm
  * @{
  */
 
@@ -67,7 +67,10 @@ using Server = actionlib::SimpleActionServer<control_msgs::FollowJointTrajectory
  * specified positions
  *
  * @param goal The goal state given
- * @param as The Action Server this is occuring on
+ * @param server The Action Server this is occuring on
+ * @param IKEnabled Whether or not IK is enabled
+ * @param namedJointMap The map of joint names to @ref Joint objects
+ * @param namedPositionMonitors The map of joint names to Position Monitors
  */
 void execute(const control_msgs::FollowJointTrajectoryGoalConstPtr &goal,
              Server *server,
@@ -203,6 +206,7 @@ auto getMotorConfigFromParams(const XmlRpcValue &params, const std::string &join
  * IK is disabled if an overcurrent fault happens
  *
  * @param motors The list of motors to check
+ * @param IKEnabled The enable state of IK
  */
 void checkOverCurrentFaults(const std::vector<std::shared_ptr<Motor>> &motors,
                             std::atomic_bool &IKEnabled) {

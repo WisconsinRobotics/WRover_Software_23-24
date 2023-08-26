@@ -1,3 +1,14 @@
+/**
+ * @addtogroup wr_control_drive_arm
+ * @{
+ */
+
+/**
+ * @file
+ * @author Ben Nowotny
+ * @brief Header to define @ref DifferentialJointToMotorSpeedConverter objects
+ */
+
 #include "DifferentialJointToMotorSpeedConverter.hpp"
 #include <mutex>
 
@@ -20,8 +31,8 @@ DifferentialJointToMotorSpeedConverter::DifferentialJointToMotorSpeedConverter(
     DifferentialJointToMotorSpeedConverter &&other) noexcept
     : cachedPitchSpeed{other.cachedPitchSpeed.load()},
       cachedRollSpeed{other.cachedRollSpeed.load()},
-      leftMotor{other.leftMotor},
-      rightMotor{other.rightMotor} {}
+      leftMotor{std::move(other.leftMotor)},
+      rightMotor{std::move(other.rightMotor)} {}
 
 void DifferentialJointToMotorSpeedConverter::setPitchSpeed(double speed) {
     cachedPitchSpeed = speed;
@@ -41,3 +52,5 @@ void DifferentialJointToMotorSpeedConverter::dispatchDifferentialSpeed() {
     rightMotor->setSpeed(m2Speed);
     // std::cout << "ptch: " << cachedPitchSpeed.load() << "\troll: " << cachedRollSpeed.load() << "\tlspd: " << m1Speed << "\trspd: " << m2Speed << std::endl;
 }
+
+/// @}

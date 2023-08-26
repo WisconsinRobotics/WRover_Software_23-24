@@ -1,3 +1,14 @@
+/**
+ * @addtogroup wr_control_drive_arm
+ * @{
+ */
+
+/**
+ * @file
+ * @author Ben Nowotny
+ * @brief Source to define @ref DirectJointToMotorSpeedConverter objects
+ */
+
 #include "DirectJointToMotorSpeedConverter.hpp"
 
 DirectJointToMotorSpeedConverter::DirectJointToMotorSpeedConverter(std::shared_ptr<Motor> outputMotor, MotorSpeedDirection direction)
@@ -16,3 +27,5 @@ void DirectJointToMotorSpeedConverter::operator()(double speed) {
     }
     outputMotor->setSpeed(actualSpeed);
 }
+
+/// @}
