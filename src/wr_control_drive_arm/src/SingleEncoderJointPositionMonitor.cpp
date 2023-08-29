@@ -1,3 +1,15 @@
+/**
+ * @addtogroup wr_control_drive_arm
+ * @{
+ */
+
+/**
+ * @file
+ * @author Ben Nowotny
+ * @brief Definitions for the model of a JointPositionMonitors and required setup objects
+ *
+ */
+
 #include "SingleEncoderJointPositionMonitor.hpp"
 #include "MathUtil.hpp"
 #include "RoboclawChannel.hpp"
@@ -17,7 +29,7 @@ SingleEncoderJointPositionMonitor::SingleEncoderJointPositionMonitor(
       gearRatio{mConfig.gearRatio},
       position{0},
       encoderSubscriber{
-          std::make_shared<ros::Subscriber>(node.subscribe(
+          std::make_shared<ros::Subscriber>(node.subscribe( // TODO(@ben.nowotny): I don't remember how this is supposed to work, and I marvel that it does
               "/hsi/roboclaw/"s + controllerName + "/enc/" + (channel == RoboclawChannel::A ? "left" : "right"),
               1,
               &SingleEncoderJointPositionMonitor::onEncoderReceived,
@@ -56,3 +68,5 @@ auto SingleEncoderJointPositionMonitor::getCountsPerRotation() const -> int32_t 
 auto SingleEncoderJointPositionMonitor::getGearRatio() const -> double {
     return this->gearRatio;
 }
+
+/// @}
