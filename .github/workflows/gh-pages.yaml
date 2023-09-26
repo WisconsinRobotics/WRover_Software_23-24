@@ -38,14 +38,13 @@ jobs:
           doxyfile-path: './Doxyfile'
       - name: Compress to Tar file
         run: |
-          tar -czvf artifact.tar.gz ./docs/doxygen/html
+          tar -czvf github-pages.tar ./docs/doxygen/html
       - name: Setup Pages
         uses: actions/configure-pages@v3
-      - name: Upload artifact
+      - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v2
         with:
-          # Upload entire repository
-          path: './artifact.tar.gz'
+          path: '.'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
