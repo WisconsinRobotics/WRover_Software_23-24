@@ -38,7 +38,7 @@ jobs:
         run: sudo apt-get install graphviz
         shell: bash
       - name: Generate Doxygen Documentation
-        run: doxygen
+        run: ./make_docs.sh
         shell: bash
       - name: Setup Pages
         uses: actions/configure-pages@v3
