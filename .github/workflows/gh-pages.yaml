@@ -31,11 +31,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Setup Doxygen
-        uses: mattnotmitt/doxygen-action@v1.9.5
-        with:
-          working-directory: '.'
-          doxyfile-path: 'Doxyfile'
+      - name: Install Doxygen
+        run: sudo apt-get install doxygen -y
+        shell: bash
+      - name: Generate Doxygen Documentation
+        run: doxygen
+        shell: bash
       - name: Setup Pages
         uses: actions/configure-pages@v3
       - name: Upload Pages Artifact
