@@ -23,6 +23,8 @@ COL_WARN = '\033[93m'
 COL_FATAL = '\033[31m'
 COL_CLEAR = '\033[0m'
 
+CATKIN_MAKE_ARGS = [ '-DCMAKE_EXPORT_COMPILE_COMMANDS=ON' ]
+
 ############
 # FUNCTIONS
 ############
@@ -332,7 +334,9 @@ class BuildActionBuild(BuildAction):
 
         # invoke catkin
         print_section('Delegating remainder of build to catkin...\n')
-        fork_cmd(['catkin_make'], root_dir)
+        catkin = ['catkin_make']
+        catkin.extend(CATKIN_MAKE_ARGS)
+        fork_cmd(catkin, root_dir)
         print()
 
     def get_help(self) -> str:

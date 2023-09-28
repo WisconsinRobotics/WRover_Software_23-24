@@ -19,29 +19,33 @@
 	"postCreateCommand": "sudo chown -R devcontainer /workspaces/WRover_Software",
 
 	// Run commands after the container is attatched.
-	"postStartCommand": "/workspaces/WRover_Software/docker_attach.sh",
+	"postAttachCommand": "/workspaces/WRover_Software/docker_attach.sh",
 
 	// Configure tool-specific properties.
 	"customizations": {
 		// Configure properties specific to VS Code.
 		"vscode": {
 			// Set *default* container specific settings.json values on container create.
-			"settings": {},
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "bash",
+				"C_Cpp.intelliSenseEngine": "disabled",
+				"cmake.languageSupport.dotnetPath": "/usr/share/dotnet/dotnet"
+			},
 			"extensions": [
 				"ms-vscode.cpptools",
-				"ms-vscode.cpptools-themes",
 				"llvm-vs-code-extensions.vscode-clangd",
-				"twxs.cmake",
-				"ms-vscode.cmake-tools",
-				"cschlosse.doxdocgen",
-				"ms-python.vscode-pylance",
-				"ms-python.python",
-				"ms-vscode-remote.remote-ssh-edit",
-				"ms-iot.vscode-ros",
-				"njpwerner.autodocstring",
-				"ms-vsliveshare.vsliveshare",
 				"jeff-hykin.better-cpp-syntax",
-				"ms-vscode-remote.remote-containers"
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"ms-iot.vscode-ros",
+				"twxs.cmake",
+				"ms-vscode.cmake-tools",				
+				"josetr.cmake-language-support-vscode",
+				"ms-vscode-remote.remote-containers",
+				"ms-vscode-remote.remote-ssh-edit",
+				"ms-vsliveshare.vsliveshare",
+				"cschlosse.doxdocgen",
+				"njpwerner.autodocstring"
 			]
 		}
 	},
@@ -51,8 +55,8 @@
 
 	// Docker arguments
 	"runArgs": [
-		"--env=DISPLAY",
-		"--env=QT_X11_NO_MITSHM=1",
-		// "--volume=/tmp/.X11-unix:/tmp/.X11-unix:rw"
+		"--network=host",
+		"-e DISPLAY",
+		"--env=QT_X11_NO_MITSHM=1"
 	]
 }
