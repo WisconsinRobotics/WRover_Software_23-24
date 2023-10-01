@@ -7,7 +7,7 @@
 Wisconsin Robotics uses a custom build script called `assemble.py`, which handles dependencies and delegates to catkin as necessary.
 This document provides an overview of its functionality.
 
-As of 2023, Wisconsin Roboitcs also uses [git submodules](# git-submodules).  If you are not developing the submodules themselves and are just using them, the command you want to run is:
+As of 2023, Wisconsin Roboitcs also uses [git submodules](#git-submodules).  If you are not developing the submodules themselves and are just using them, the command you want to run is:
 
 ```bash
 git submodule update --init --recursive
