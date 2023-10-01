@@ -152,4 +152,4 @@ source setup.sh     # acquire the workspace environment
 ./assemble.py build # build dependencies + workspace
 ```
 
-Then, continue setting up the WRover environment according to [the Developer Setup Instructions](setup_dev.md).  Keep in mind that the WRover is a shared machine, so be careful adding things like GitHub SSH keys.  You will have to locally build the code to get the executables and message definitions needed to run the code.
+Then, continue setting up the WRover environment according to [the Developer Setup Instructions](@ref wr_system_setup_dev).  Keep in mind that the WRover is a shared machine, so be careful adding things like GitHub SSH keys.  You will have to locally build the code to get the executables and message definitions needed to run the code.
