@@ -31,21 +31,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      # - name: Install Doxygen
-      #   run: sudo apt-get install doxygen
-      #   shell: bash
-      # - name: Install Graphviz
-      #   run: sudo apt-get install graphviz
-      #   shell: bash
+        with:
+          submodules: 'recursive'
+
       - name: Generate Doxygen Documentation
         run: ./make_docs.sh
         shell: bash
+
       - name: Setup Pages
         uses: actions/configure-pages@v3
+
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v2
         with:
           path: 'docs/doxygen/html/'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
