@@ -1,7 +1,17 @@
 # Build Tools
 
+@defgroup wr_system WRover System
+@defgroup wr_system_build_tools Build Tools
+@ingroup wr_system
+
 Wisconsin Robotics uses a custom build script called `assemble.py`, which handles dependencies and delegates to catkin as necessary.
 This document provides an overview of its functionality.
+
+As of 2023, Wisconsin Roboitcs also uses [git submodules](#git-submodules).  If you are not developing the submodules themselves and are just using them, the command you want to run is:
+
+```bash
+git submodule update --init --recursive
+```
 
 ## Usage
 
@@ -9,7 +19,7 @@ First, you'll need to have Python 3.8.x+ and the `pip` and `virtualenv` modules 
 The script is invoked from the command line as follows:
 
 ```shell
-$ ./assemble.py [args...]
+./assemble.py [args...]
 ```
 
 Running the script with no arguments gives a brief help message.
@@ -59,7 +69,7 @@ Each dependency object should have a unique name.
 The `repo` entry is only necessary if the dependency is to be built from a git repository, and can be omitted for dependencies obtained from other channels (e.g. the `apt` package manager).
 The build provider describes how the dependency should be obtained and built; the existing ones are listed below:
 
-### `cmake`
+### CMake
 
 This provider uses `cmake` to build code in a git repository, then copies the resulting artifacts to the `/lib` subdirectory of dependent ROS packages.
 The build provider configuration is as follows:
@@ -79,7 +89,7 @@ The build provider configuration is as follows:
 }
 ```
 
-### `pip`
+### pip
 
 This provider uses `pip` to install dependencies of a Python project in a git repository.
 Dependencies should be defined in a `requirements.txt` file in the root of the git repository.
@@ -89,7 +99,7 @@ This build provider does not need a configuration.
 Note that this is not how global pip dependencies are defined!
 Global pip dependencies should be declared in a `requirements.txt` file in the root of the software system (i.e. this) repository.
 
-### `apt`
+### APT
 
 This provider simply uses the `apt` package manager to install a dependency.
 The build provider configuration is as follows:
@@ -102,6 +112,16 @@ The build provider configuration is as follows:
 ```
 
 These dependencies should be used with care, since they install the dependency system-wide rather than just in the catkin workspace!
+
+## git submodules
+
+`git submodules` are a version-controlled way to include a git repository in another git repository.  In a repository using git submodules, you can think of each sub-repository as tracked by the commit hash as a pointer to a version of the other project.  If you want to change which version of a submodule you use, you simply update the pointer to point to the version you want.  Then, when developers check out the project, the pointer expands (with some prodding) into the other project at that version.
+
+Unless you are doing some scripting or complicated work-arounds with submodules, here are your most frequent commands:
+
+* `git submodule init` - Sets up the parent repository to contain submodules.  git needs to add extra files for this to work, so this command adds such files.
+* `git submodule add [repo-url] [path-to-checkout]` - Clones the repository at `[repo-url]` to the path `[path-to-checkout]`, and adding the repository as a submodule of the parent project.
+* `git submodule update` - Checks out the version of the submodule that is tracked by the project.  This is typically used with the flags `--init` (to checkout submodules that haven't been yet) and `--recursive` (checkout the submodules of submodules).
 
 ## Other Notes
 
