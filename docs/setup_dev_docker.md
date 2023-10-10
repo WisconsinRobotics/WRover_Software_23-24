@@ -8,11 +8,11 @@ This document describes the setup process for a developing with a ROS environmen
 
 Follow the instructions according to your platform:
 
-* [Linux](@ref linux)
-* [macOS](@ref macos)
-* [Windows](@ref windows)
+* [Linux](@ref Linux)
+* [macOS](@ref macOS)
+* [Windows](@ref Windows)
 
-## Linux
+## Linux {#Linux}
 
 ### Tools
 
@@ -36,7 +36,7 @@ These instructions are written for Ubuntu, steps may vary if using a different d
 
 ### Troubleshooting
 
-**NOTE**: Please do not commit [`devcontainer.json`](./.devcontainer/devcontainer.json) if you need to modify it according to the following troubleshooting steps.
+**NOTE**: Please do not commit `.devcontainer/devcontainer.json` if you need to modify it according to the following troubleshooting steps.
 
 * After trying to run a GUI app, the following error is encountered: `Authorization required, but no authorization protocol specified`.
 To fix this, try `xhost +localhost`, and see if the issue is resolved.
@@ -46,11 +46,11 @@ Since these command allow connections to your local X server, you may want to re
 The workaround is running `chcon -Rt svirt_sandbox_file_t /path/to/WRoverPlayground`.
 Documented here: https://github.com/microsoft/vscode-remote-release/issues/1333
 * After trying to run a GUI app, a SELinux AVC denial is encountered.
-To fix this, add `"--security-opt=label=type:container_runtime_t"` to the `runArgs` in [`devcontainer.json`](./.devcontainer/devcontainer.json).
-* If you are using Podman as a replacement for Docker, you will need to add `"--userns=keep-id"`  to the `runArgs` in [`devcontainer.json`](./.devcontainer/devcontainer.json).
+To fix this, add `"--security-opt=label=type:container_runtime_t"` to the `runArgs` in `devcontainer.json`.
+* If you are using Podman as a replacement for Docker, you will need to add `"--userns=keep-id"`  to the `runArgs` in `devcontainer.json`.
 Podman is not officially supported.
 
-## macOS
+## macOS {#macOS}
 
 ### Tools
 
@@ -87,10 +87,10 @@ Apple Silicon Mac users should upgrade to macOS Ventura or newer.
     2. Go to Settings (top right corner)
     3. Go to "Features in Development"
     4. Scroll down and check "Use Rosetta for x86/amd64 emulation on Apple Silicon"
-    5. Press "Apply and Restart
+    5. Click "Apply and Restart"
 * X11 forwarding instructions: https://gist.github.com/sorny/969fe55d85c9b0035b0109a31cbcb088
 
-## Windows
+## Windows {#Windows}
 
 ### Tools
 

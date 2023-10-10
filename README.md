@@ -2,7 +2,11 @@
 
 ## Setting Up the Software System
 
+To set up the software system on a dev machine using Docker, see [`/docs/setup_dev_docker.md`](@ref wr_system_setup_dev_docker).
+This is the recommended method for dev machines.
+
 To set up the software system on a base station or dev machine, see [`/docs/setup_dev.md`](@ref wr_system_setup_dev).
+
 To set up the software system on a rover, see [`docs/setup_rover.md`](@ref wr_system_setup_wrover).
 
 ## Booting the Full Robot System
