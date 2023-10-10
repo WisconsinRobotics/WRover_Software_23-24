@@ -1,5 +1,9 @@
 # Setup: Development Environment using Docker
 
+@defgroup wr_system WRover System
+@defgroup wr_system_setup_dev_docker Developer Setup using Docker
+@ingroup wr_system
+
 This document describes the setup process for a developing with a ROS environment Docker container.
 
 Follow the instructions according to your platform:

@@ -1,13 +1,36 @@
-#include "ros/ros.h"
-#include "std_msgs/Float32.h"
+/**
+ * @file TeleopScienceLogic.cpp
+ * @author Ben Nowotny
+ * @brief The high-level logic layer for a deprecated science system
+ * @version 0.1
+ * @date 2023-07-10
+ *
+ */
+
+/**
+ * @addtogroup wr_logic_teleop_science
+ * @{
+ */
+
+#include "ros/node_handle.h"
 #include "std_msgs/Bool.h"
-#include "std_msgs/UInt32.h"
+#include "std_msgs/Float32.h"
 #include "std_msgs/Float64.h"
 #include <array>
+#include <cstdlib>
 
+// TODO (@bennowotny): This can almost certainly be local to the function or static
+/// The number of messages to cache for ROS
 constexpr std::uint32_t MESSAGE_CACHE_SIZE = 10;
 
-auto main(int argc, char** argv) -> int {
+/**
+ * @brief The entrypoint of the program
+ *
+ * @param argc The number of program arguments
+ * @param argv The value of the program arugments
+ * @return int The return code of the program
+ */
+auto main(int argc, char **argv) -> int {
     ros::init(argc, argv, "Science Teleop Logic");
 
     ros::NodeHandle nodeHandle;
@@ -17,58 +40,64 @@ auto main(int argc, char** argv) -> int {
     bool canListenL = true;
     bool canListenR = true;
     unsigned long setpoint = 0;
-     
+
+    /* PUBLISHERS */
     auto screwLiftMsg = nodeHandle.advertise<std_msgs::Float32>("/logic/science/screwLift", MESSAGE_CACHE_SIZE);
     auto turnTableMsg = nodeHandle.advertise<std_msgs::Float64>("/logic/science/turnTable", MESSAGE_CACHE_SIZE);
     auto linearActuatorMsg = nodeHandle.advertise<std_msgs::Float32>("/logic/science/linearActuator", MESSAGE_CACHE_SIZE);
     auto clawMsg = nodeHandle.advertise<std_msgs::Float32>("/logic/science/claw", MESSAGE_CACHE_SIZE);
 
+    /* SUBSCRIBERS */
     auto screwLiftControl = nodeHandle.subscribe("/hci/science/gamepad/axis/pov_y", MESSAGE_CACHE_SIZE,
-            static_cast<boost::function<void(const std_msgs::Float32::ConstPtr&)>>(
-                [&screwLiftMsg](const std_msgs::Float32::ConstPtr& msg) {
-                    screwLiftMsg.publish(msg);
-                }
-    ));
-    auto turnTableControlL = nodeHandle.subscribe("/hci/science/gamepad/axis/shoulder_l", MESSAGE_CACHE_SIZE,
-            static_cast<boost::function<void(const std_msgs::Bool::ConstPtr&)>>(
-                [&turnTableMsg, &turnTablePositions, &canListenL, &setpoint](const std_msgs::Bool::ConstPtr& msg) {
-                    if(static_cast<bool>(msg->data) && canListenL) {
-                        setpoint = (setpoint + turnTablePositions.size() - 1) % turnTablePositions.size();
-                        std_msgs::Float64 outMsg{};
-                        outMsg.data = turnTablePositions.at(setpoint);
-                        turnTableMsg.publish(outMsg);
-                        canListenL = false;
-                    } else {
-                    canListenL = true;
-                    }
-                }
-    ));
-    auto turnTableControlR = nodeHandle.subscribe("/hci/science/gamepad/axis/shoulder_r", MESSAGE_CACHE_SIZE,
-            static_cast<boost::function<void(const std_msgs::Bool::ConstPtr&)>>(
-                [&turnTableMsg, &turnTablePositions, &canListenR, &setpoint](const std_msgs::Bool::ConstPtr& msg) {
-                    if(static_cast<bool>(msg->data) && canListenR) {
-                        setpoint = (setpoint + turnTablePositions.size() + 1) % turnTablePositions.size();
-                        std_msgs::Float64 outMsg{};
-                        outMsg.data = turnTablePositions.at(setpoint);
-                        turnTableMsg.publish(outMsg);
-                        canListenR = false;
-                    } else {
-                    canListenR = true;
-                    }
-                }
-    )); 
-    auto linearActuatorControl = nodeHandle.subscribe("hci/science/gamepad/axis/stick_left_y", MESSAGE_CACHE_SIZE,
-            static_cast<boost::function<void(const std_msgs::Float32::ConstPtr&)>>(
-                [&linearActuatorMsg](const std_msgs::Float32::ConstPtr& msg) {
-                    linearActuatorMsg.publish(msg);
-                }
-    ));
-    auto clawControl = nodeHandle.subscribe("hci/science/gamepad/axis/stick_right_y", MESSAGE_CACHE_SIZE,
-            static_cast<boost::function<void(const std_msgs::Float32::ConstPtr&)>>(
-                [&clawMsg](const std_msgs::Float32::ConstPtr& msg) {
-                    clawMsg.publish(msg);
-                }
-    ));
+                                                 static_cast<boost::function<void(const std_msgs::Float32::ConstPtr &)>>(
+                                                     [&screwLiftMsg](const std_msgs::Float32::ConstPtr &msg) {
+                                                         screwLiftMsg.publish(msg);
+                                                     }));
 
+    auto turnTableControlL = nodeHandle.subscribe("/hci/science/gamepad/axis/shoulder_l", MESSAGE_CACHE_SIZE,
+                                                  static_cast<boost::function<void(const std_msgs::Bool::ConstPtr &)>>(
+                                                      [&turnTableMsg, &turnTablePositions, &canListenL, &setpoint](const std_msgs::Bool::ConstPtr &msg) {
+                                                          if (static_cast<bool>(msg->data) && canListenL) {
+                                                              setpoint = (setpoint + turnTablePositions.size() - 1) % turnTablePositions.size();
+                                                              std_msgs::Float64 outMsg{};
+                                                              outMsg.data = turnTablePositions.at(setpoint);
+                                                              turnTableMsg.publish(outMsg);
+                                                              canListenL = false;
+                                                          } else {
+                                                              canListenL = true;
+                                                          }
+                                                      }));
+
+    auto turnTableControlR = nodeHandle.subscribe("/hci/science/gamepad/axis/shoulder_r", MESSAGE_CACHE_SIZE,
+                                                  static_cast<boost::function<void(const std_msgs::Bool::ConstPtr &)>>(
+                                                      [&turnTableMsg, &turnTablePositions, &canListenR, &setpoint](const std_msgs::Bool::ConstPtr &msg) {
+                                                          if (static_cast<bool>(msg->data) && canListenR) {
+                                                              setpoint = (setpoint + turnTablePositions.size() + 1) % turnTablePositions.size();
+                                                              std_msgs::Float64 outMsg{};
+                                                              outMsg.data = turnTablePositions.at(setpoint);
+                                                              turnTableMsg.publish(outMsg);
+                                                              canListenR = false;
+                                                          } else {
+                                                              canListenR = true;
+                                                          }
+                                                      }));
+
+    auto linearActuatorControl = nodeHandle.subscribe("hci/science/gamepad/axis/stick_left_y", MESSAGE_CACHE_SIZE,
+                                                      static_cast<boost::function<void(const std_msgs::Float32::ConstPtr &)>>(
+                                                          [&linearActuatorMsg](const std_msgs::Float32::ConstPtr &msg) {
+                                                              linearActuatorMsg.publish(msg);
+                                                          }));
+
+    auto clawControl = nodeHandle.subscribe("hci/science/gamepad/axis/stick_right_y", MESSAGE_CACHE_SIZE,
+                                            static_cast<boost::function<void(const std_msgs::Float32::ConstPtr &)>>(
+                                                [&clawMsg](const std_msgs::Float32::ConstPtr &msg) {
+                                                    clawMsg.publish(msg);
+                                                }));
+
+    // Spin indefinitely, let ROS handle the callbacks and shutdown
     ros::spin();
+
+    return EXIT_SUCCESS;
 }
+
+/// @}

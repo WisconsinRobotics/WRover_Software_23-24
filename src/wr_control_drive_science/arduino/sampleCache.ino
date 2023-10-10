@@ -1,4 +1,12 @@
 
+/**
+ * @file
+ * @author Ben Nowotny
+ * @brief This file is deprecated.
+ * @details Due to constraints in building Arudino code in VSCode, the main file must be arduino.ino.
+ * Please see @ref wr_control_drive_science/arduino/arduino.ino "arduino.ino (science)".
+ */
+
 // TODO(@bennowotny): ROSserial?
 #include <Servo.h>
 

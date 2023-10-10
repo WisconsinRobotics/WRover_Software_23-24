@@ -1,5 +1,9 @@
 # Package Organization
 
+@defgroup wr_system WRover System
+@defgroup wr_system_package_org Package Organization
+@ingroup wr_system
+
 This document describes the way ROS packages should be organized in this repository.
 You should read `ros_abstraction_overview.md` first, if you haven't already.
 
@@ -7,7 +11,7 @@ There are three types of ROS packages that we will consider:
 
 * **Subsystem packages** -- These packages represent one specific robot subsystem and any nodes related to that subsystem. Most nodes will live in subsystem packages.
 * **Global packages** -- These packages provide some kind of data (e.g. message definitions or launch files) that is independent of any specific robot subsystem.
-* **Dependency packages** -- These are packages that have been downloaded and built by the build script. These are generally less organizationally constrained, but are treated as global packages otherwise.
+* **Dependency packages** -- These are packages that have been downloaded and built by the build script or included as submodules. These are generally less organizationally constrained, but are treated as global packages otherwise.
 
 Within each package, the [standard ROS conventions](http://wiki.ros.org/Packages) should be followed.
 
@@ -19,7 +23,7 @@ Furthermore, subsystem packages should not provide any message definitions that 
 
 These packages should be named as follows:
 
-```
+```sh
 wr_[layer]_[description]
 ```
 
@@ -35,7 +39,7 @@ The only restriction on global packages is that they may not contain any data th
 
 These packages should be named as follows:
 
-```
+```sh
 wr_[description]
 ```
 
