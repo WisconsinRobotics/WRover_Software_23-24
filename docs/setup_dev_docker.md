@@ -8,9 +8,9 @@ This document describes the setup process for a developing with a ROS environmen
 
 Follow the instructions according to your platform:
 
-* [Linux](#linux)
-* [macOS](#macos)
-* [Windows](#windows)
+* [Linux](@ref linux)
+* [macOS](@ref macos)
+* [Windows](@ref windows)
 
 ## Linux
 
@@ -70,7 +70,7 @@ Apple Silicon Mac users should upgrade to macOS Ventura or newer.
 5. Apple Silicon users, follow the troubleshooting steps below to configure Docker for running ROS C++ programs
 6. Install XQuartz: https://www.xquartz.org
 7. Open XQuartz, and select XQuartz > Preferences
-8. Under the "Security" tab, check ""Allow connections from network clients"
+8. Under the "Security" tab, check "Allow connections from network clients"
 9. Restart your Mac and open XQuartz
 10. In the terminal, run `xhost +`. You may need to rerun this every time you open XQuartz.
 11. Set up SSH keys: https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent?platform=mac
