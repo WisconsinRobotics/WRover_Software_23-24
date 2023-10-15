@@ -29,7 +29,9 @@
 			"settings": {
 				"terminal.integrated.defaultProfile.linux": "bash",
 				"C_Cpp.intelliSenseEngine": "disabled",
-				"cmake.languageSupport.dotnetPath": "/usr/share/dotnet/dotnet"
+				"cmake.languageSupport.dotnetPath": "/usr/share/dotnet/dotnet",
+				"python.defaultInterpreterPath": "${workspaceFolder}/venv/bin/python",
+				"python.terminal.activateEnvironment": false
 			},
 			"extensions": [
 				"ms-vscode.cpptools",
