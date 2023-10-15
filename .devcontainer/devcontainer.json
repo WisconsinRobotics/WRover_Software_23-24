@@ -1,0 +1,64 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-dockerfile
+{
+	"name": "WRover_Software Dockerfile",
+	"build": {
+		// Sets the run context to one level up instead of the .devcontainer folder.
+		"context": "..",
+		// Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
+		"dockerfile": "../Dockerfile"
+	},
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {},
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Uncomment the next line to run commands after the container is created.
+	"postCreateCommand": "sudo chown -R devcontainer /workspaces/WRover_Software",
+
+	// Run commands after the container is attatched.
+	"postAttachCommand": "/workspaces/WRover_Software/docker_attach.sh",
+
+	// Configure tool-specific properties.
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+			// Set *default* container specific settings.json values on container create.
+			"settings": {
+				"terminal.integrated.defaultProfile.linux": "bash",
+				"C_Cpp.intelliSenseEngine": "disabled",
+				"cmake.languageSupport.dotnetPath": "/usr/share/dotnet/dotnet",
+				"python.defaultInterpreterPath": "${workspaceFolder}/venv/bin/python",
+				"python.terminal.activateEnvironment": false
+			},
+			"extensions": [
+				"ms-vscode.cpptools",
+				"llvm-vs-code-extensions.vscode-clangd",
+				"jeff-hykin.better-cpp-syntax",
+				"ms-python.python",
+				"ms-python.vscode-pylance",
+				"ms-iot.vscode-ros",
+				"twxs.cmake",
+				"ms-vscode.cmake-tools",				
+				"josetr.cmake-language-support-vscode",
+				"ms-vscode-remote.remote-containers",
+				"ms-vscode-remote.remote-ssh-edit",
+				"ms-vsliveshare.vsliveshare",
+				"cschlosse.doxdocgen",
+				"njpwerner.autodocstring"
+			]
+		}
+	},
+
+	// Uncomment to connect as an existing user other than the container default. More info: https://aka.ms/dev-containers-non-root.
+	"remoteUser": "devcontainer",
+
+	// Docker arguments
+	"runArgs": [
+		"--network=host",
+		"-e DISPLAY",
+		"--env=QT_X11_NO_MITSHM=1"
+	]
+}

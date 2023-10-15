@@ -7,6 +7,7 @@
         "./src/wr_hsi_sensing/src",
         "./src/wr_logic_ai/src"
     ],
+	"C_Cpp.intelliSenseEngine": "disabled",
     "cmake.sourceDirectory": "${workspaceFolder}/src",
     "[python]": {
         "editor.defaultFormatter": "ms-python.black-formatter"

@@ -1,5 +1,7 @@
 Diagnostics:
   UnusedIncludes: Strict
+CompileFlags:
+  CompilationDatabase: build/
 ---
 If:
   PathMatch: ".*\\.ino"
