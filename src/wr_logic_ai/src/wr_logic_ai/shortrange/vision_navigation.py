@@ -36,7 +36,7 @@ def drive(left: float, right: float):
     drivetrain_pub.publish(left, right)
 
 
-class VisionNavigationPost(ShortrangeState):
+class VisionNavigation(ShortrangeState):
     def __init__(self) -> None:
         self.is_done = False
         self.success = False
