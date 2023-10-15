@@ -1,5 +1,14 @@
 #!/usr/bin/env python
 
+## @file
+# @brief Node for state machine that drives the autonomous nagivation code
+# @defgroup wr_logic_ai_state_machine State_Machine
+# @ingroup wr_logic_ai
+# @details The autonomous navigation code is driven by the state machine below. This node uses the statemachine python library to 
+# handle the setup of the state machine, including initializing states and events, handling state transitions, executing the state 
+# loop, and more. Here, we only need to define our states and events as well as behavior upon entering or leaving states. 
+# @{
+
 from __future__ import annotations
 from statemachine import StateMachine, State
 from wr_logic_ai.coordinate_manager import CoordinateManager
@@ -15,39 +24,68 @@ import threading
 import time
 import pdb
 
+## LED matrix color for when the rover is navigating towards the target using autonomous navigation
 COLOR_AUTONOMOUS = LEDMatrixRequest(RED=0, GREEN=0, BLUE=255)
+## LED matrix color for when the rover has reached its target
 COLOR_COMPLETE = LEDMatrixRequest(RED=0, GREEN=255, BLUE=0)
+## LED matrix color for when the rover has encountered an error while executing autonomous navigation
 COLOR_ERROR = LEDMatrixRequest(RED=255, GREEN=0, BLUE=0)
+## Initial LED matrix color
 COLOR_NONE = LEDMatrixRequest(RED=0, GREEN=0, BLUE=0)
 
-
 def set_matrix_color(color: LEDMatrixRequest) -> None:
+    """Helper function for setting the LED matrix color
+
+    @param color The color to set the LED matrix to
+    """
     matrix_srv = rospy.ServiceProxy("/led_matrix", LEDMatrix)
     matrix_srv.wait_for_service()
     matrix_srv.call(COLOR_NONE)
     time.sleep(0.5)
     matrix_srv.call(color)
 
-
 class NavStateMachine(StateMachine):
+    """This class implements the state machine used in autonomous navigation
+
+    Args:
+        StateMachine (StateMachine): The StateMachine class imported from the statemachine python library, required to declare 
+        this class as a state machine
+    """
+
     # Defining states
+    ## Starter state of the state machine
     stInit = State(initial=True)
+    ## State representing that the robot is running in long range mode
     stLongRange = State()
+    ## State representing that the robot is recovering from a error state
     stLongRangeRecovery = State()
+    ## State representing that the robot is running in short range mode
     stShortRange = State()
+    ## State representing that the robot has completed a task at a waypoint
     stWaypointSuccess = State()
+    ## State representing that the robot has completed all autonomous navigation tasks
     stComplete = State()
 
     # Defining events and transitions
+    ## Event representing a successful task execution
     evSuccess = (stLongRange.to(stShortRange) | stLongRangeRecovery.to(
         stLongRange) | stShortRange.to(stWaypointSuccess))
+    ## Event representing an error condition being raised
     evError = (stLongRange.to(stLongRangeRecovery) | stLongRangeRecovery.to(
         stLongRangeRecovery) | stShortRange.to(stLongRange))
+    ## Event representing a shortcircuit state transition from WaypointSuccess to LongRange
     evNotWaiting = stWaypointSuccess.to(stLongRange)
+    ## Event representing an unconditional state transition from Init to LongRange
     evUnconditional = stInit.to(stLongRange)
+    ## Event representing all tasks are complete
     evComplete = stWaypointSuccess.to(stComplete)
 
     def __init__(self, mgr: CoordinateManager) -> None:
+        """Initializes the state machine
+
+        Args:
+            mgr (CoordinateManager): Helper class for retrieving target waypoint GPS coordinates
+        """
         self._mgr = mgr
         self.currentEvent = -1
         self.mux_pub = rospy.Publisher(
@@ -215,3 +253,5 @@ if __name__ == "__main__":
     rospy.init_node('nav_state_machine', anonymous=False)
     statemachine = NavStateMachine(CoordinateManager())
     rospy.spin()
+
+## @}
