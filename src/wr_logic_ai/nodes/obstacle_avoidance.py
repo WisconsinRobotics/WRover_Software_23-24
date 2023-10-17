@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+
+"""@file
+@brief placeholder
+@addtogroup wr_logic_ai_longrange_ai
+@details placeholder
+@{
+"""
+
 import math
 import rospy
 import time
@@ -178,3 +186,5 @@ if __name__ == '__main__':
         msg_stop.right_value = 0
         drive_pub.publish(msg_stop)
         time.sleep(0.1)
+
+## @}

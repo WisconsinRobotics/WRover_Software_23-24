@@ -4,6 +4,13 @@
 import math
 import rospy
 
+"""@file
+@brief Helper class for angle calculation
+@addtogroup wr_logic_ai_longrange_ai
+@details placeholder
+@{
+"""
+
 class AngleCalculations:
     EARTH_RADIUS_METERS = 6378100
 
@@ -96,3 +103,4 @@ class AngleCalculations:
         # TODO: Is the ternary operator taken care of by Python modulo?
         return angle - heading if angle >= heading else (360 - heading) + angle
 
+## @}
