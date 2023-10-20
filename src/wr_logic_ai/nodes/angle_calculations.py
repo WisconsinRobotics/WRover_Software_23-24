@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 """@file
 @defgroup wr_logic_ai_longrange_ai
 @{

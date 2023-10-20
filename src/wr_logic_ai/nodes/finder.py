@@ -1,3 +1,12 @@
+"""@file
+@defgroup wr_logic_ai_longrange_ai
+@{
+@defgroup wr_logic_ai_longrange_ai_finder Finder
+@brief Calculates the optimal LiDAR/heading to drive towards, taking obstacle avoidance into account
+@details 
+@{
+"""
+
 from typing import List
 import math
 import scipy.ndimage as gaussian_smooth
@@ -9,6 +18,7 @@ import os
 import pdb
 import pickle
 
+## Width of the rover (in meters)
 ROVER_WIDTH = 0.5
 
 scan_rviz_pub = rospy.Publisher("/scan_rviz", LaserScan, queue_size=10)
@@ -17,14 +27,35 @@ window_pub = rospy.Publisher("/lidar_windows", PoseArray, queue_size=1)
 
 
 def calculate_anti_window(d: float) -> int:
+    """
+    Assuming an obstacle exists at a given distance away from the rover, calculate the additional 
+    angle required to clear that obstacle
+
+    Args:
+        d (float): A given distance (in meters)
+
+    Returns:
+        int: Angle (in degrees) required to clear the obstacle
+    """
+
     return math.degrees(math.atan((ROVER_WIDTH / 2) / d))
 
-# Returns angular distance (in degrees) from sector parameter to target
-# Returns 0 if sector parameter contains target
-# TODO: Is there a cleaner way to write the logic?
-
-
 def get_target_distance(sector_i: int, sector_f: int, target: int, sector_angle: float) -> float:
+    """
+    Returns angular distance (in degrees) from sector parameter to target. Returns 0 if sector 
+    parameter contains target.
+
+    Args:
+        sector_i (int): Starting sector (left boundary)
+        sector_f (int): Ending sector (right boundary)
+        target (int): The sector that the target heading falls in
+        sector_angle (float): The angle (in degrees) contained within a sector
+
+    Returns:
+        float: The angle (in degrees) to turn by to head towards the target (negative is 
+        counterclockwise, positive is clockwise)
+    """
+
     # Compute if the target is under the starting sector
     if target < sector_i:
         # Return angular distance between target and starting sector
@@ -37,17 +68,36 @@ def get_target_distance(sector_i: int, sector_f: int, target: int, sector_angle:
     # Angular distance is then 0
     return 0
 
-# Returns whether or not a valley is as wide or wider than the recommended max valley size
-
-
 def is_wide_valley(sector_i: int, sector_f: int, max_valley: int) -> bool:
+    """
+    Returns whether or not a valley is as wide or wider than the recommended max valley size
+
+    Args:
+        sector_i (int): Starting sector (left boundary)
+        sector_f (int): Ending sector (right boundary)
+        max_valley (int): The maximum amount of sectors that can be contained in a narrow valley
+
+    Returns:
+        bool: True if the given range qualifies as a wide valley, false otherwise
+    """
+
     # TODO: Cleaner way to write this?
     return 1 + sector_f - sector_i > max_valley
 
-# Transforms the raw lidar data from compass coordinates (0 at north, clockwise) to math coordinates (0 at east, counterclockwise)
-
-
 def offset_lidar_data(data, sector_angle, is_rviz=False):
+    """
+    Transforms the raw lidar data from compass coordinates (0 at north, clockwise) to math 
+    coordinates (0 at east, counterclockwise)
+
+    Args:
+        data (_type_): _description_
+        sector_angle (_type_): _description_
+        is_rviz (bool, optional): _description_. Defaults to False.
+
+    Returns:
+        _type_: _description_
+    """
+
     offset_data = [0] * len(data)
     if is_rviz:
         for i in range(len(data)):
@@ -288,3 +338,6 @@ def get_navigation_angle(
         # Aim for the center of the valley
         rospy.loginfo("Obstacle in the way, turning to narrow valley")
         return ((best_valley[0] + best_valley[1]) / 2.0) * sector_angle
+
+## @}
+## @}

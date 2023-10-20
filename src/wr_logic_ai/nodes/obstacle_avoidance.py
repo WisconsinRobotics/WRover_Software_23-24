@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
 """@file
-@brief placeholder
-@addtogroup wr_logic_ai_longrange_ai
-@details placeholder
+@defgroup wr_logic_ai_longrange_ai
+@{
+@defgroup wr_logic_ai_longrange_ai_obstacle_avoidance Obstacle Avoidance
+@brief Placeholder
+@details Placeholder
 @{
 """
 
@@ -22,9 +24,9 @@ from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Float64
 
 # Navigation parameters
-# distance before obstacle avoidance logics is triggered (in meters)
+## distance before obstacle avoidance logics is triggered (in meters)
 LIDAR_THRESH_DISTANCE = 1
-# distance before rover believes it has reached the target (in meters)
+## distance before rover believes it has reached the target (in meters)
 NAV_THRESH_DISTANCE = 0.5
 
 # initialize target angle to move forward
@@ -85,8 +87,13 @@ def update_gps_coord(msg: CoordinateMsg) -> None:
     current_long = msg.longitude
 
 
-# extected as 0 to 360 from  North (Clockwise)
 def update_heading(msg: Float64) -> None:
+    """
+    Extected as 0 to 360 from  North (Clockwise)
+
+    Args:
+        msg (Float64): Heading value received
+    """
     global cur_heading
     cur_heading = (90-msg.data) % 360  # Shifting to East
 
@@ -111,11 +118,14 @@ def update_target(target_lat, target_long) -> bool:
     else:
         return False
 
-# t = 0
-# Update the robot's navigation and drive it towards the target angle
-
-
 def update_navigation(data: LaserScan) -> None:
+    """
+    Update the robot's navigation and drive it towards the target angle
+
+    Args:
+        data (LaserScan): LiDAR data received
+    """
+
     global frameCount
 
     # rospy.loginfo(f"target angle: {target_angle}, current heading: {cur_heading}")
@@ -187,4 +197,5 @@ if __name__ == '__main__':
         drive_pub.publish(msg_stop)
         time.sleep(0.1)
 
+## @}
 ## @}
