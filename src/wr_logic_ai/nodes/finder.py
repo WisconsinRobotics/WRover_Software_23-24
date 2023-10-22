@@ -21,8 +21,10 @@ import pickle
 ## Width of the rover (in meters)
 ROVER_WIDTH = 0.5
 
+## Publisher for LiDAR data for debugging on rviz
 scan_rviz_pub = rospy.Publisher("/scan_rviz", LaserScan, queue_size=10)
 # TODO (@bennowotny ) This should be disable-able for bandwidth
+## Publisher for obstacle avoidance heading for debugging on rviz
 window_pub = rospy.Publisher("/lidar_windows", PoseArray, queue_size=1)
 
 
@@ -49,7 +51,7 @@ def get_target_distance(sector_i: int, sector_f: int, target: int, sector_angle:
         sector_i (int): Starting sector (left boundary)
         sector_f (int): Ending sector (right boundary)
         target (int): The sector that the target heading falls in
-        sector_angle (float): The angle (in degrees) contained within a sector
+        sector_angle (float): The number of degrees contained within one sector
 
     Returns:
         float: The angle (in degrees) to turn by to head towards the target (negative is 
@@ -90,12 +92,13 @@ def offset_lidar_data(data, sector_angle, is_rviz=False):
     coordinates (0 at east, counterclockwise)
 
     Args:
-        data (_type_): _description_
-        sector_angle (_type_): _description_
-        is_rviz (bool, optional): _description_. Defaults to False.
+        data (_type_): The LiDAR data
+        sector_angle (float): The number of degrees contained within one sector
+        is_rviz (bool, optional): If the returned data is graphed in rviz or not. This is done as 
+        rviz processes data different compare to the rest of our code. Defaults to False.
 
     Returns:
-        _type_: _description_
+        _type_: The offsetted LiDAR data
     """
 
     offset_data = [0] * len(data)
@@ -109,21 +112,31 @@ def offset_lidar_data(data, sector_angle, is_rviz=False):
                         len(data)] = data[i]
     return offset_data
 
-# represent a valley as an ordered pair as in (start sector, end sector)
-# iterate through sector array to add valleys to new candidate valleys list
-# from candidate valleys choose the one that is closest to the target sector
-# valleys of any length should be valid since they can only come from smoothing function of adjacent areas
-# and correct thresholding
-
-# Get the 'best' valley from the LIDAR data.  The valley is formatted as [Start Sector, End Sector]
-
-
 def get_valley(
         target: int,
         sector_angle: float,
         threshold: float,
         data: LaserScan,
         smoothing: float = 3) -> List[int]:
+    """
+    Get the 'best' valley from the LIDAR data. Iterate through data array to add valleys to new 
+    candidate valleys list. From there, choose the one that is closest to the target sector. Valleys 
+    of any length should be valid since they can only come from smoothing function of adjacent areas
+    and correct thresholding.
+
+    Args:
+        target (int): The index of the sector that the target heading falls into
+        sector_angle (float): The number of degrees contained within one sector
+        threshold (float): The threshold distance which triggers obstacle avoidance (in meters)
+        data (LaserScan): The LiDAR reading data
+        smoothing (float, optional): The smoothing factor used when applying a gaussian filter to 
+        smooth out the LiDAR reading. Defaults to 3.
+
+    Returns:
+        List[int]: The best valley for navigating to the target. The valley is formatted as 
+        [Start Sector, End Sector]
+    """
+
     global prevData
 
     rviz_data = deepcopy(data)
@@ -265,14 +278,25 @@ def get_valley(
             best_distance = dist
     return best_valley
 
-# Gets the best angle to navigate to
-
-
 def get_navigation_angle(
         target: int,
         threshold: float,
         data: LaserScan,
         smoothing_constant: float = 3) -> float:
+    """
+    Gets the best angle to navigate to.
+
+    Args:
+        target (int): The index of the sector that the target heading falls into
+        threshold (float): The threshold distance which triggers obstacle avoidance (in meters)
+        data (LaserScan): The LiDAR reading data
+        smoothing_constant (float, optional): The smoothing factor used when applying a gaussian 
+        filter to smooth out the LiDAR reading. Defaults to 3.
+
+    Returns:
+        float: The angle to navigate towards after applying obstacle avoidance. The range of this value 
+        is 0 to 180, where 0 is straight left, 90 is center, and 180 is straight right
+    """
 
     sector_angle = math.degrees(data.angle_increment)
 
