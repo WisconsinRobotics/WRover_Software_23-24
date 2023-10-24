@@ -38,6 +38,7 @@ def piecewise_linear(heading: float, target_angle: float) -> DriveTrainCmd:
     Returns:
         DriveTrainCmd: Message object that contains the calculated drive powers
     """
+    #TODO: Flip iputs and flip x
 
     x = get_x(heading, target_angle)
 

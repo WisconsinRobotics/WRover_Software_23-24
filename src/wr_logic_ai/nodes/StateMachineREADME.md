@@ -87,9 +87,3 @@ Additional methods handle transitions, LED matrix color changes, and user input.
 ## Running the Navigation State Machine
 
 To run the navigation state machine, the script initializes a `NavStateMachine` instance and sets up ROS. The state machine is then started, and the script enters the ROS spin loop to listen for events and manage state transitions.
-
-## License
-
-This code may be subject to licensing terms and agreements. Ensure compliance with any applicable licenses when using or modifying this code for your own purposes.
-
-Please note that this README provides an overview of the code's structure and purpose. For more in-depth details, consult the code and any relevant documentation or comments within the script.

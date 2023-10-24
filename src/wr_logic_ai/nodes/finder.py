@@ -97,7 +97,7 @@ def offset_lidar_data(data, sector_angle, is_rviz=False):
     Returns:
         _type_: _description_
     """
-
+    #TODO: Run the code to check if coordinate system is good.
     offset_data = [0] * len(data)
     if is_rviz:
         for i in range(len(data)):
