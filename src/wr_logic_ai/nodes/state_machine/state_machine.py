@@ -11,7 +11,7 @@ loop, and more. Here, we need to define our states and events as well as behavio
 
 State: This will determine what the robot is currently doing
 
-++++++Every state will have a function for when running, entering, and exiting
+Every state will have a function for when running, entering, and exiting
 
 Event: Most events will be either a success or error. This will indicate which state to go to next depending on the event and state it is at.
 
@@ -56,13 +56,11 @@ def set_matrix_color(color: LEDMatrixRequest) -> None:
     matrix_srv.call(color)
 
 class NavStateMachine(StateMachine):
-    """(Click in More... for detailed info on state machine)
-    
+    """
     This class implements the state machine used in autonomous navigation
         
-        Args:
-            StateMachine (StateMachine): The StateMachine class imported from the statemachine python library, required to declare 
-        this class as a state machine
+    @param StateMachine (StateMachine): The StateMachine class imported from the statemachine python library, required to declare 
+    this class as a state machine
     """
 
     # Defining states
@@ -94,9 +92,10 @@ class NavStateMachine(StateMachine):
     evComplete = stWaypointSuccess.to(stComplete)
 
     def __init__(self, mgr: CoordinateManager) -> None:
-        """Initializes the state machine
+        """
+        Initializes the state machine
 
-            @param mgr (CoordinateManager): Helper class for retrieving target waypoint GPS coordinates
+        @param mgr (CoordinateManager): Helper class for retrieving target waypoint GPS coordinates
         """
         #Get coordinates into self._mgr
         self._mgr = mgr
@@ -116,10 +115,11 @@ class NavStateMachine(StateMachine):
 
     
     def init_calibrate(self, pub: rospy.Publisher, stop_time: float) -> None:
-        """Function to spin the robot for a certain time. The IMU (N,E,S,W) needs to be spinned to be correct.
+        """
+        Function to spin the robot for a certain time. The IMU (N,E,S,W) needs to be spinned to be correct.
 
-            @param stop_time Time when the robot should stop
-            @param pub (rospy.Publisher): Publishes drive values to motors
+        @param stop_time Time when the robot should stop
+        @param pub (rospy.Publisher): Publishes drive values to motors
         """
         if rospy.get_time() < stop_time:
             pub.publish(DriveTrainCmd(left_value=0.3, right_value=-0.3))
