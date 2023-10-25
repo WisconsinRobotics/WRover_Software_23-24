@@ -36,11 +36,10 @@ class MUX:
         """
         Switches the output source of the mux according to the given NavigationState message
 
-        Args:
-            message (NavigationState): Output source for the mux (either long-range or short-range)
-            conversion_table (Dict[int, str]): Converts the message content to either long-range or 
-            short-range's output topic name
-            mux_name (str): This mux node's output topic name
+        @param message (NavigationState): Output source for the mux (either long-range or short-range)
+        @param conversion_table (Dict[int, str]): Converts the message content to either long-range or 
+        @param short-range's output topic name
+        @param mux_name (str): This mux node's output topic name
         """
         if (self.last_message_state != message.state):
             self.last_message_state = message.state

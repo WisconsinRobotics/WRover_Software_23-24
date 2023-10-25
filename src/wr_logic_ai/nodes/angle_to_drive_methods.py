@@ -31,13 +31,11 @@ def piecewise_linear(heading: float, target_angle: float) -> DriveTrainCmd:
     Creates a DriveTrainCmd using piecewise linear functions that are linear on the domain [-90, 0] 
     or [0, 90] (depending on the side) and extend 1 and -1 outside of that domain
 
-    Args:
-        heading (float): Current heading of the rover
-        target_angle (float): Target heading of the destination
-
-    Returns:
-        DriveTrainCmd: Message object that contains the calculated drive powers
+    @param heading (float): Current heading of the rover
+    @param target_angle (float): Target heading of the destination
+    @return DriveTrainCmd: Message object that contains the calculated drive powers
     """
+    #TODO: Flip iputs and flip x
 
     x = get_x(heading, target_angle)
 
@@ -59,12 +57,9 @@ def logistic(heading: float, target_angle: float) -> DriveTrainCmd:
     Creates a DriveTrainCmd using sigmoid functions that are approximately linear on the domain 
     [-90, 0] or [0, 90] (depending on the side) on the range (-1,1)
 
-    Args:
-        heading (float): Current heading of the rover
-        target_angle (float): Target heading of the destination
-
-    Returns:
-        DriveTrainCmd: Message object that contains the calculated drive powers
+    @param heading (float): Current heading of the rover
+    @param target_angle (float): Target heading of the destination
+    @return DriveTrainCmd: Message object that contains the calculated drive powers
     """
 
     x = get_x(heading, target_angle)
@@ -75,13 +70,10 @@ def rounded_logistic(heading: float, target_angle: float, prec: int = 2) -> Driv
     Uses the logistic(float, float) function to create a DriveTrainCmd rounded to a specified 
     precision to produce the sigmoid shape without the messy numbers
 
-    Args:
-        heading (float): Current heading of the rover
-        target_angle (float): Target heading of the destination
-        prec (int, optional): Precision value. Defaults to 2.
-
-    Returns:
-        DriveTrainCmd: Message object that contains the calculated drive powers
+    @param heading (float): Current heading of the rover
+    @param target_angle (float): Target heading of the destination
+    @pram prec (int, optional): Precision value. Defaults to 2.
+    @return DriveTrainCmd: Message object that contains the calculated drive powers
     """
 
     raw = logistic(heading, target_angle)
@@ -95,12 +87,9 @@ def piecewise_sinusoidal(heading: float, target_angle: float) -> DriveTrainCmd:
     Creates a DriveTrainCmd using piecewise sinusoids (sine function) on the domain [-90, 0] or 
     [0, 90] (depending on the side) and extend 1 and -1 outside of that domain
 
-    Args:
-        heading (float): Current heading of the rover
-        target_angle (float): Target heading of the destination
-
-    Returns:
-        DriveTrainCmd: Message object that contains the calculated drive powers
+    @param heading (float): Current heading of the rover
+    @param target_angle (float): Target heading of the destination
+    @return DriveTrainCmd: Message object that contains the calculated drive powers
     """
 
     x = get_x(heading, target_angle)

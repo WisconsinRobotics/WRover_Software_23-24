@@ -32,9 +32,14 @@ NAV_THRESH_DISTANCE = 0.5
 # initialize target angle to move forward
 current_lat = 0
 current_long = 0
+
+##Value robot is heading currently. East is 0. (Counterclockwise). Extected as a value from 0 to 360.
 cur_heading = 0
+##Gives target angle relative to East (counter-clockwise)
 target_angle = 0
-target_sector = 0
+
+#target_sector = 0
+##Used to smooth over lidar data
 smoothing_constant = 3
 # Get the speed multiplier of the current runtime for the obstacle_avoidance
 # 0.2 is bugged
@@ -45,6 +50,21 @@ is_active = False
 
 
 def initialize() -> None:
+    """Initialize publisher and subscribers for nodes
+    
+    Publishers:
+        
+        drive_pub: Sends motor speeds to robot
+        raw_heading_pug: Publishes data of our current heading relative to the right of the robot. (90 Degrees is where the robot is pointing)
+        heading_pub: Data from heading is transformed to be worked with rviz tester.
+
+    Subscriber:
+        
+        gps_coord_data: gets lat and long coordinates from GPS
+        heading_data: Gets data of our heading with East beign 0.
+        scan: Get values from lidar scan
+
+    """
     global drive_pub
     global smoothing_constant
     global speed_factor
@@ -89,16 +109,23 @@ def update_gps_coord(msg: CoordinateMsg) -> None:
 
 def update_heading(msg: Float64) -> None:
     """
-    Extected as 0 to 360 from  North (Clockwise)
+    Shifted from compass coordinates to math coordinates.
 
-    Args:
-        msg (Float64): Heading value received
+    @param msg (Float64): Heading value received as value from 0 to 360. North is 0 clockwise.
+    @param cur_heading East is 0. (Counterclockwise). Extected as a value from 0 to 360. 
     """
     global cur_heading
     cur_heading = (90-msg.data) % 360  # Shifting to East
 
 
 def angle_diff(heading1: float, heading2: float) -> float:
+    """
+    Returns relative angle difference from heading of robot to heading of target
+
+    @param heading1 (float): Value of target relative to East (Counter-clockwise)
+    @param heading2 (float): Value of heading relative to East (Counter-clockwise)
+    @return float: Value from -180 to 180. Starting from bottom of robot (Counter-Clockwise)
+    """
     diff = (heading1 - heading2 + 360) % 360
     return (diff + 180) % 360 - 180
 
@@ -107,6 +134,13 @@ def angle_diff(heading1: float, heading2: float) -> float:
 
 
 def update_target(target_lat, target_long) -> bool:
+    """ 
+    Updates target_angle with values from IMU which use gps coords
+
+    @param target_angle: Gives target angle relative to East (counter-clockwise)
+    @param imu An object that creates a planar target angle relative to east, accounting for curvature of Earth    
+    @return bool: If we have arrived to the destination, based on our current and target coords
+    """
     global target_angle
 
     # Construct the planar target angle relative to east, accounting for curvature
@@ -120,10 +154,12 @@ def update_target(target_lat, target_long) -> bool:
 
 def update_navigation(data: LaserScan) -> None:
     """
-    Update the robot's navigation and drive it towards the target angle
-
-    Args:
-        data (LaserScan): LiDAR data received
+    Update the robot's navigation and drive it towards the target angle 
+    
+    @param delta_heading: Relative value of target from robot from -180 to 180. Starting from bottom of robot (Counter-Clockwise)
+    @param result: Angle to drive to based on target angle, current heading, and obstacles. Value given as a sector angle with right of robot being 0 (Counterclockwise).
+    @param msg: Get the DriveTrainCmd(motor values) relating to the heading of the robot and the resulting best navigation angle
+    @param data: Lidar data received
     """
 
     global frameCount
@@ -136,11 +172,12 @@ def update_navigation(data: LaserScan) -> None:
     # data_avg is above 0.5 almost always, but result stays the same (?)
     # TODO (@bennowotny ): This depended on data_avg, why?
     if True:
-        # Gets best possible angle, considering obstacles
+        ## Gets best possible angle, considering obstacles
         delta_heading = angle_diff(target_angle, cur_heading)
+
         result = get_navigation_angle(
             ((((90 + delta_heading) % 360) + 360) % 360) /
-            math.degrees(data.angle_increment),  # sector angle
+            math.degrees(data.angle_increment),  # sector angle, #Changes delta_heading to be based on the right of the robot as 0 (Counter-clockwise), and go in increments of sector angle.
             LIDAR_THRESH_DISTANCE,
             data,
             smoothing_constant)
@@ -153,6 +190,7 @@ def update_navigation(data: LaserScan) -> None:
         speed_factor = 0 if speed_factor < 0 else speed_factor
         speed_factor = 1 if speed_factor > 1 else speed_factor
         # Get the DriveTrainCmd relating to the heading of the robot and the resulting best navigation angle
+        # Reason we do 90 - result is to get a value where 0 is up, + is clockwise, and - is counterclockwise
         msg = angle_calc.piecewise_linear(angle_diff(90, result), 0)
         # rospy.loginfo(f"left drive value: {msg.left_value}, right drive value: {msg.right_value}")
 #        t += 2
