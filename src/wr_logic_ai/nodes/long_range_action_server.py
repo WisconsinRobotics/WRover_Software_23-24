@@ -1,15 +1,31 @@
 #!/usr/bin/env python3
 
+"""@file
+@defgroup wr_logic_ai_longrange_ai
+@{
+@defgroup wr_logic_ai_longrange_ai_action_server Long Range Action Server
+@brief 
+@details 
+@{
+"""
+
 import rospy
 import actionlib
 from wr_logic_ai.msg import LongRangeAction, LongRangeGoal
 import obstacle_avoidance
 
 # TODO: check timeout time length validity
+## Timeout time for when we declare a long range navigation as failed
 LONG_RANGE_TIMEOUT_TIME = rospy.Duration(1000)
 
 
 class LongRangeActionServer(object):
+    """
+    
+
+    @param object (_type_): Unused
+    """
+
     def __init__(self, name) -> None:
         self._action_name = name
         obstacle_avoidance.initialize()
@@ -29,3 +45,6 @@ if __name__ == "__main__":
     rospy.init_node("long_range_action_server")
     server = LongRangeActionServer("LongRangeActionServer")
     rospy.spin()
+
+## }
+## }
