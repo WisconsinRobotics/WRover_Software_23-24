@@ -108,24 +108,23 @@ def update_gps_coord(msg: CoordinateMsg) -> None:
 
 
 def update_heading(msg: Float64) -> None:
-    """Shifted from compass coordinates to math coordinates.
-    Args:
-        @param msg (Float64): Heading value received as value from 0 to 360. North is 0 clockwise.
-        @param cur_heading East is 0. (Counterclockwise). Extected as a value from 0 to 360. 
+    """
+    Shifted from compass coordinates to math coordinates.
+
+    @param msg (Float64): Heading value received as value from 0 to 360. North is 0 clockwise.
+    @param cur_heading East is 0. (Counterclockwise). Extected as a value from 0 to 360. 
     """
     global cur_heading
     cur_heading = (90-msg.data) % 360  # Shifting to East
 
 
 def angle_diff(heading1: float, heading2: float) -> float:
-    """Returns relative angle difference from heading of robot to heading of target
-    Args:
-        @param heading1 (float): Value of target relative to East (Counter-clockwise)
-        @param heading2 (float): Value of heading relative to East (Counter-clockwise)
+    """
+    Returns relative angle difference from heading of robot to heading of target
 
-    Returns:
-        
-        float: Value from -180 to 180. Starting from bottom of robot (Counter-Clockwise)
+    @param heading1 (float): Value of target relative to East (Counter-clockwise)
+    @param heading2 (float): Value of heading relative to East (Counter-clockwise)
+    @return float: Value from -180 to 180. Starting from bottom of robot (Counter-Clockwise)
     """
     diff = (heading1 - heading2 + 360) % 360
     return (diff + 180) % 360 - 180
@@ -135,14 +134,12 @@ def angle_diff(heading1: float, heading2: float) -> float:
 
 
 def update_target(target_lat, target_long) -> bool:
-    """ Updates target_angle with values from IMU which use gps coords
-    Args:
-        @param target_angle: Gives target angle relative to East (counter-clockwise)
-        @param imu An object that creates a planar target angle relative to east, accounting for curvature of Earth
-    
-    Returns:
-        
-        bool: If we have arrived to the destination, based on our current and target coords
+    """ 
+    Updates target_angle with values from IMU which use gps coords
+
+    @param target_angle: Gives target angle relative to East (counter-clockwise)
+    @param imu An object that creates a planar target angle relative to east, accounting for curvature of Earth    
+    @return bool: If we have arrived to the destination, based on our current and target coords
     """
     global target_angle
 
@@ -156,13 +153,13 @@ def update_target(target_lat, target_long) -> bool:
         return False
 
 def update_navigation(data: LaserScan) -> None:
-    """Update the robot's navigation and drive it towards the target angle 
-    Args:
-        @param delta_heading: Relative value of target from robot from -180 to 180. Starting from bottom of robot (Counter-Clockwise)
-        @param result: Angle to drive to based on target angle, current heading, and obstacles. Value given as a sector angle with right of robot being 0 (Counterclockwise).
-        @param msg: Get the DriveTrainCmd(motor values) relating to the heading of the robot and the resulting best navigation angle
-        @param data: Lidar data received
+    """
+    Update the robot's navigation and drive it towards the target angle 
     
+    @param delta_heading: Relative value of target from robot from -180 to 180. Starting from bottom of robot (Counter-Clockwise)
+    @param result: Angle to drive to based on target angle, current heading, and obstacles. Value given as a sector angle with right of robot being 0 (Counterclockwise).
+    @param msg: Get the DriveTrainCmd(motor values) relating to the heading of the robot and the resulting best navigation angle
+    @param data: Lidar data received
     """
 
     global frameCount

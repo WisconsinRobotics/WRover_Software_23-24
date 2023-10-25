@@ -33,11 +33,8 @@ def calculate_anti_window(d: float) -> int:
     Assuming an obstacle exists at a given distance away from the rover, calculate the additional 
     angle required to clear that obstacle
 
-    Args:
-        d (float): A given distance (in meters)
-
-    Returns:
-        int: Angle (in degrees) required to clear the obstacle
+    @param d (float): A given distance (in meters)
+    @return int: Angle (in degrees) required to clear the obstacle
     """
 
     return math.degrees(math.atan((ROVER_WIDTH / 2) / d))
@@ -47,15 +44,12 @@ def get_target_distance(sector_i: int, sector_f: int, target: int, sector_angle:
     Returns angular distance (in degrees) from sector parameter to target. Returns 0 if sector 
     parameter contains target.
 
-    Args:
-        sector_i (int): Starting sector (left boundary)
-        sector_f (int): Ending sector (right boundary)
-        target (int): The sector that the target heading falls in
-        sector_angle (float): The number of degrees contained within one sector
-
-    Returns:
-        float: The angle (in degrees) to turn by to head towards the target (negative is 
-        counterclockwise, positive is clockwise)
+    @param sector_i (int): Starting sector (left boundary)
+    @param sector_f (int): Ending sector (right boundary)
+    @param target (int): The sector that the target heading falls in
+    @param sector_angle (float): The number of degrees contained within one sector
+    @return float: The angle (in degrees) to turn by to head towards the target (negative is 
+    counterclockwise, positive is clockwise)
     """
 
     # Compute if the target is under the starting sector
@@ -74,13 +68,10 @@ def is_wide_valley(sector_i: int, sector_f: int, max_valley: int) -> bool:
     """
     Returns whether or not a valley is as wide or wider than the recommended max valley size
 
-    Args:
-        sector_i (int): Starting sector (left boundary)
-        sector_f (int): Ending sector (right boundary)
-        max_valley (int): The maximum amount of sectors that can be contained in a narrow valley
-
-    Returns:
-        bool: True if the given range qualifies as a wide valley, false otherwise
+    @param sector_i (int): Starting sector (left boundary)
+    @param sector_f (int): Ending sector (right boundary)
+    @param max_valley (int): The maximum amount of sectors that can be contained in a narrow valley
+    @return bool: True if the given range qualifies as a wide valley, false otherwise
     """
 
     # TODO: Cleaner way to write this?
@@ -91,14 +82,11 @@ def offset_lidar_data(data, sector_angle, is_rviz=False):
     Transforms the raw lidar data from compass coordinates (0 at north, clockwise) to math 
     coordinates (0 at east, counterclockwise)
 
-    Args:
-        data (_type_): The LiDAR data
-        sector_angle (float): The number of degrees contained within one sector
-        is_rviz (bool, optional): If the returned data is graphed in rviz or not. This is done as 
-        rviz processes data different compare to the rest of our code. Defaults to False.
-
-    Returns:
-        _type_: The offsetted LiDAR data
+    @param data : The LiDAR data
+    @param sector_angle (float): The number of degrees contained within one sector
+    @param is_rviz (bool, optional): If the returned data is graphed in rviz or not. This is done as 
+    @param rviz processes data different compare to the rest of our code. Defaults to False.
+    @return List[int]: The offsetted LiDAR data
     """
     #TODO: Run the code to check if coordinate system is good.
     offset_data = [0] * len(data)
@@ -124,17 +112,14 @@ def get_valley(
     of any length should be valid since they can only come from smoothing function of adjacent areas
     and correct thresholding.
 
-    Args:
-        target (int): The index of the sector that the target heading falls into
-        sector_angle (float): The number of degrees contained within one sector
-        threshold (float): The threshold distance which triggers obstacle avoidance (in meters)
-        data (LaserScan): The LiDAR reading data
-        smoothing (float, optional): The smoothing factor used when applying a gaussian filter to 
-        smooth out the LiDAR reading. Defaults to 3.
-
-    Returns:
-        List[int]: The best valley for navigating to the target. The valley is formatted as 
-        [Start Sector, End Sector]
+    @param target (int): The index of the sector that the target heading falls into
+    @param sector_angle (float): The number of degrees contained within one sector
+    @param threshold (float): The threshold distance which triggers obstacle avoidance (in meters)
+    @param data (LaserScan): The LiDAR reading data
+    @param smoothing (float, optional): The smoothing factor used when applying a gaussian filter to 
+    smooth out the LiDAR reading. Defaults to 3.
+    @return List[int]: The best valley for navigating to the target. The valley is formatted as 
+    [Start Sector, End Sector]
     """
 
     global prevData
@@ -286,16 +271,13 @@ def get_navigation_angle(
     """
     Gets the best angle to navigate to.
 
-    Args:
-        target (int): The index of the sector that the target heading falls into
-        threshold (float): The threshold distance which triggers obstacle avoidance (in meters)
-        data (LaserScan): The LiDAR reading data
-        smoothing_constant (float, optional): The smoothing factor used when applying a gaussian 
-        filter to smooth out the LiDAR reading. Defaults to 3.
-
-    Returns:
-        float: The angle to navigate towards after applying obstacle avoidance. The range of this value 
-        is 0 to 180, where 0 is straight left, 90 is center, and 180 is straight right
+    @param target (int): The index of the sector that the target heading falls into
+    @param threshold (float): The threshold distance which triggers obstacle avoidance (in meters)
+    @param data (LaserScan): The LiDAR reading data
+    @param smoothing_constant (float, optional): The smoothing factor used when applying a gaussian 
+    @param filter to smooth out the LiDAR reading. Defaults to 3.
+    @return float: The angle to navigate towards after applying obstacle avoidance. The range of this 
+    value is 0 to 180, where 0 is straight left, 90 is center, and 180 is straight right
     """
 
     sector_angle = math.degrees(data.angle_increment)

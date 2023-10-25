@@ -22,11 +22,10 @@ class AngleCalculations:
         """
         Declare a new AngleCalculations object with the current coordinates and target coordinates
 
-        Args:
-            clatitude (float): Current latitude of the rover
-            clongitude (float): Current longitude of the rover
-            glatitude (float): Target destination latitude
-            glongitude (float): Target destination longitude
+        @param clatitude (float): Current latitude of the rover
+        @param clongitude (float): Current longitude of the rover
+        @param glatitude (float): Target destination latitude
+        @param glongitude (float): Target destination longitude
         """
         # Set current position
         self.cur_lat = clatitude
@@ -42,12 +41,9 @@ class AngleCalculations:
         """
         Get the Great Circle distance between two latitudes
 
-        Args:
-            lat1 (float): First latitude coordinate
-            lat2 (float): Second latitude coordinate
-
-        Returns:
-            float: The Great Circle distance between the given latitudes
+        @param lat1 (float): First latitude coordinate
+        @param lat2 (float): Second latitude coordinate
+        @return float: The Great Circle distance between the given latitudes
         """
 
         # Set the reference 'up' if the target is further north than the current location
@@ -66,12 +62,9 @@ class AngleCalculations:
         """
         Get the Great Circle distance between two longitudes
 
-        Args:
-            lon1 (float): First longitude coordinate
-            lon2 (float): Second longitude coordinate
-
-        Returns:
-            float: The Great Circle distance between the given longitudes
+        @param lon1 (float): First longitude coordinate
+        @param lon2 (float): Second longitude coordinate
+        @return float: The Great Circle distance between the given longitudes
         """
 
         # Set the reference 'right' if the target is further on planar right than the current location
@@ -90,8 +83,7 @@ class AngleCalculations:
         """
         Get the Great Circle distance between this object's current and target locations
 
-        Returns:
-            float: The Great Circle distance between this object's current and target locations
+        @return float: The Great Circle distance between this object's current and target locations
         """
 
         # Since the contained functions compute great circle distance, the Euclidean distance formula will compute the right Great Circle composite distance
@@ -101,8 +93,7 @@ class AngleCalculations:
         """
         Get the planar angle relative to planar East as the straight-line trajectory towards the goal
 
-        Returns:
-            float: The planar angle relative to planar East as the straight-line trajectory towards the goal
+        @retunrn float: The planar angle relative to planar East as the straight-line trajectory towards the goal
         """
 
         # Use the Great Circle distances of the spherical triangle legs to get the angle (-90,90) to the goal coordinates
@@ -141,11 +132,8 @@ class AngleCalculations:
         """
         Get the target angle of the goal relative to some heading (that is relative to planar East)
 
-        Args:
-            heading: The current heading of the rover
-
-        Returns:
-            float: The target angle relative to our current heading in the standard angle interval
+        @param heading: The current heading of the rover
+        @return float: The target angle relative to our current heading in the standard angle interval
         """
 
         # Move the heading to the standard angle interval
