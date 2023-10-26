@@ -4,8 +4,10 @@
 @defgroup wr_logic_ai_longrange_ai
 @{
 @defgroup wr_logic_ai_longrange_ai_obstacle_avoidance Obstacle Avoidance
-@brief Placeholder
-@details Placeholder
+@brief Driver code for long range navigation logics
+@details Navigates the rover to the target coordinate using the rover's current coordinates and 
+a target coordinate. This code also takes obstacle avoidance into account, by calculating an 
+"open window" that is closest towards the target heading and navigating towards that window. 
 @{
 """
 
