@@ -9,7 +9,7 @@ This document describes the existing code and logics for long range navigation, 
 ## Long Range Navigation
 Long range navigation is primarily driven by a GPU sensor (which provides us the coordinate of the rover) and an IMU sensor (which provides us the heading of the rover). By listing the provided GNSS coordinates in the `coordinates.json` file, the rover would visit those locations in that specific order. The rover does so by finding the difference in coordinates and calculating a target heading using the difference.
 
-## Obstacle Avoidance Logics
+## Obstacle Avoidance Logic
 Obstacle avoidance makes up most of the long range navigation code. During autonomous navigation, it's possible that the rover will encounters obstacles such as rocks, steep slopes, or other man-made structures. Thus, it is crucial that the rover is capable of navigating around these obstacles.
 
 Obstacle avoidance is implementing using the rover's LiDAR sensor, which scans the landscape in front of the robot with a vision range of 180 degrees and an effective distance of 12 meters. The LiDAR data is read as an array, where the number of indexes is the LiDAR's angular resolution, and the value stored at an index represents the distance reading in that direction. 
