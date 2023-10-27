@@ -2,6 +2,7 @@
 
 @defgroup wr_logic_ai_state_machine_ai State Machine
 @ingroup wr_logic_ai
+@brief State Machine Logics
 
 
 ## Introduction
@@ -33,27 +34,3 @@ The state machine defines the following states and events:
 3. `evNotWaiting`: An event that triggers when we have completed all tasks at a given waypoint and is ready to move to the next waypoint, triggering a transition from `stWaypointSuccess` to `stLongRange`. 
 4. `evUnconditional`: An unconditional state transition from `stInit` to `stLongRange`.
 5. `evComplete`: Event indicating that all navigation tasks are complete, leading to a transition to `stComplete`.
-
-## Initialization and ROS Setup
-
-The code initializes ROS, defines helper functions, sets up LED matrix colors, and prepares the navigation state machine for operation. The main components include:
-
-- Helper functions for setting the LED matrix color to indicate the robot's state.
-- Initialization of ROS nodes, publishers, and timers.
-- Configuration of action clients for long-range and short-range navigation actions.
-- Methods for handling state transitions and errors.
-
-## State Descriptions
-
-Each state has associated methods for handling actions upon entering and exiting the state. These methods control the execution of tasks and transitions between states. Some of the key state descriptions include:
-
-- `on_enter_stInit`: Actions to be taken when entering the initial state, including setting up coordinates and running calibration.
-- `on_exit_stInit`: Actions to be taken when exiting the initial state, such as checking for new coordinates.
-- `on_enter_stLongRange`: Actions to be taken when entering the long-range navigation state, including setting the LED matrix color and sending navigation coordinates.
-- `on_exit_stLongRange`: Actions to be taken when exiting the long-range navigation state.
-- `on_enter_stLongRangeRecovery`: Actions to be taken when entering the long-range recovery state, including setting the LED matrix color and recovering from errors.
-- `on_exit_stLongRangeRecovery`: Actions to be taken when exiting the long-range recovery state.
-- `on_enter_stShortRange`: Actions to be taken when entering the short-range navigation state, including setting the LED matrix color and running short-range actions.
-- `on_exit_stShortRange`: Actions to be taken when exiting the short-range navigation state.
-
-Additional methods handle transitions, LED matrix color changes, and user input.
