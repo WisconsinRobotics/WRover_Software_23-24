@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 """@file
-@brief Node for switching between long-range navigation output and short-range navigation output to 
-rover motor power inputs.
 @defgroup wr_logic_ai_mux_selector Mux_Selector
 @ingroup wr_logic_ai
+@brief Node for switching between long-range navigation output and short-range navigation output to 
+rover motor power inputs
 @details In the world of computer engineering, MUX is short for multiplexer. A multiplexer is a logic 
 circuit that takes in multiple input signals, chooses one among them, and output that signal.
 
