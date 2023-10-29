@@ -1,8 +1,7 @@
 ##@defgroup wr_shortrange_ai
 # @{
-# @defgroup shortrange_util Utility Classes
+# @defgroup wr_shortrange_ai_util Utility Classes
 # @{
-
 
 from enum import Enum, Flag
 from typing import Tuple
@@ -14,6 +13,7 @@ class ShortrangeStateEnum(Flag):
     """
     Enum containing shortrange navigation states
     """
+
     ## Shortrange navigation failed
     FAIL = 1
     ## Shortrange navigation succeeded
@@ -28,9 +28,12 @@ class ShortrangeState:
     """
     An abstract class that should be implemented for shortrange navigation states
     """
-    def run(self) -> Tuple[ShortrangeStateEnum, int]:
+
+    def run(self) -> ShortrangeStateEnum:
         """
         Virtual function that the shortrange state machine runs
+
+        @return ShortrangeStateEnum: The next state to execute
         """
         raise NotImplementedError
 
@@ -38,6 +41,8 @@ class ShortrangeState:
 class TargetCache:
     """
     A class that contains a VisionTarget and timestamp
+
+    This class is used to track the last valid VisionTarget in VisionNavigation.
     """
 
     def __init__(self, timestamp: float, msg: VisionTarget):
@@ -45,6 +50,7 @@ class TargetCache:
         self.timestamp = timestamp
         ## Cached VistionTarget message
         self.msg = msg
+
 
 ## @}
 # @}
