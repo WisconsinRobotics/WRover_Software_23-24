@@ -250,8 +250,7 @@ class NavStateMachine(StateMachine):
         #Define different types of short range that will be used
         TARGET_TYPE_MAPPING = [
             ShortRangeGoal.TARGET_TYPE_GPS_ONLY,  # 0 Vision markers
-            ShortRangeGoal.TARGET_TYPE_SINGLE_MARKER,  # 1 Vision marker
-            ShortRangeGoal.TARGET_TYPE_GATE,  # 2 Vision markers #TODO: We don't use gates anymore
+            ShortRangeGoal.TARGET_TYPE_VISION,  # 1 Vision marker
         ]
         #Get what type of short range action it is from the coordinates
         goal = ShortRangeGoal(
