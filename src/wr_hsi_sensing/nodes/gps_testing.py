@@ -28,94 +28,137 @@ rospy.init_node("gps_testing", anonymous=False)
 ## Rate controlling how frequently we publish data
 rate = rospy.Rate(f)
 ## Publisher for GPS coordinate data
-pub = rospy.Publisher("/gps_coord_data", CoordinateMsg, queue_size=1)
+gpsPub = rospy.Publisher("/gps_coord_data", CoordinateMsg, queue_size=1)
 ## Publisher for heading data
 # TODO(@bennowotny): This should be migrated back to the IMU code
-pub_heading = rospy.Publisher("/heading_data", Float64, queue_size=1)
+headingPub = rospy.Publisher("/heading_data", Float64, queue_size=1)
 
-## Last latitude recorded, used to calculate heading
-last_lat = None
-## Last longitude recorded, used to calculate heading
-last_long = None
-## Last heading recorded, used to maintain publishing frequency once heading is locked
-cached_heading = None
+# ## Last latitude recorded, used to calculate heading
+# last_lat = None
+# ## Last longitude recorded, used to calculate heading
+# last_long = None
+# ## Last heading recorded, used to maintain publishing frequency once heading is locked
+# cached_heading = None
 
 ## How much the GPS data has to deviate to reliably calculate heading
 GPS_TOLERANCE = 0.000001
 
-"""
-Optional: average heading to get more stable value
-NUM_CACHED_HEADINGS = 3
-heading_ind = 0
-past_headings = np.zeros(NUM_CACHED_HEADINGS)
-"""
 
-
-def cb(gps: GPS) -> None:
-    """ROS Timer callback to process data (coordinates and heading) from the GPS sensor
-
-    @param gps The GPS sensor to talk to
+class MovingAverage:
     """
-    try:
-        gps.update()
-    except:
-        return
-    print(f"lat: {gps.latitude} long: {gps.longitude}")
-    if gps.latitude is not None and gps.longitude is not None:
-        global last_lat
-        global last_long
-        global cached_heading
-        """
-        Optional: average heading to get more stable value
-        global heading_ind
-        global past_headings
-        """
+    Class for keeping track of moving average of data. Implemented
+    using a circular buffer
+    """
+    def __init__(self, windowSize: int):
+        self.windowSize = max(windowSize, 1)  # don't allow to be less than 1
+        self.data = []
+        self.index = 0
 
-        msg = CoordinateMsg(latitude=gps.latitude, longitude=gps.longitude)
-        pub.publish(msg)
+    def add(self, data: float) -> None:
+        """
+        Adds data to the circular buffer. Simply appends if buffer not at max size, otherwise
+        it starts overwriting data
+        """
+        if len(self.data) < self.windowSize:  # buffer not at max size, so just increase size
+            self.data.append(data)
+            self.index += 1
+        else:
+            self.data[self.index] = data
+            self.index = (self.index + 1) % self.windowSize  # wrap around for next write
 
-        # TODO (@bennowotny): We probably want to keep this, but it should be in its own file, or at least an option we can shut off
-        if (
-            last_lat is not None
-            and last_long is not None
-            and (
-                abs(gps.longitude - last_long) > GPS_TOLERANCE
-                or abs(gps.latitude - last_lat) > GPS_TOLERANCE
-            )
+    def get(self) -> float:
+        """
+        Returns average of items in circular buffer
+        """
+        return sum(self.data) / len(self.data)
+    
+    def getLatest(self) -> float:
+        """
+        returns the last recorded data, not an average
+        """
+        return self.data[self.index]
+
+
+class GPSController:
+    """
+    Controls gps signals. Handles data updates and publishing data
+    """
+    def __init__(self, gps: GPS, gpsPub: rospy.Publisher, headingPub: rospy.Publisher, movingAverageWindow: int):
+        self.gps = gps
+        self.headingPub = headingPub
+        self.gpsPub = gpsPub
+        
+        self.averageHeading = True
+
+        self.lat = MovingAverage(movingAverageWindow)
+        self.long = MovingAverage(movingAverageWindow)
+        self.prevLat = 0
+        self.prevLong = 0
+
+        self.heading = 0
+        self.publishHeading = True
+
+    def udpateHeading(self) -> None:
+        """
+        Updates heading according to formula explained here:
+        https://www.igismap.com/formula-to-find-bearing-or-heading-angle-between-two-points-latitude-longitude/
+        TODO: this function should not be used, switch back to IMU for heading
+        """
+        if (self.lat.get() is not None and self.long.get() is not None and (
+            abs(self.lat.get() - self.prevLat) > GPS_TOLERANCE
+            or abs(self.long.get() - self.lastLong))
         ):
             # Find heading from the change in latitude and longitude
-            X = math.cos(gps.latitude) * math.sin(gps.longitude - last_long)
-            Y = math.cos(last_lat) * math.sin(gps.latitude) - math.sin(
-                last_lat
-            ) * math.cos(gps.latitude) * math.cos(gps.longitude - last_long)
-            bearing = math.atan2(X, Y)
+            X = math.cos(gps.latitude) * math.sin(gps.longitude - self.prevLong)
+            Y = math.cos(self.prevLat) * math.sin(gps.latitude) - math.sin(
+                self.prevLat
+            ) * math.cos(gps.latitude) * math.cos(gps.longitude - self.prevLong)
+            bearing = math.atan2(X, Y)  # probably correct, not verified though
             bearing = bearing if bearing > 0 else 2 * math.pi + bearing
             bearing = math.degrees(bearing)
-            cached_heading = bearing
-            pub_heading.publish(Float64(data=bearing))
 
-        """
-        Optional: average heading to get more stable value
-        past_headings[heading_ind] = bearing
-        i += 1
-        i %= NUM_CACHED_HEADINGS
-        avg_heading = past_headings.sum() / NUM_CACHED_HEADINGS
-        pub_heading.publish(Float64(data=avg_heading))
-        """
+            self.heading = bearing
 
-        # Update last GPS latitude and longitude
-        last_lat = gps.latitude
-        last_long = gps.longitude
-    if cached_heading is not None:
-        pub_heading.publish(Float64(data=cached_heading))
+    def callBack(self, debug=False) -> None:
+        """
+        Callback function called by ros. Updates headings and publishes data
+        """
+        try:
+            self.gps.update()
+        except:
+            return
+        
+        if self.gps.latitude is not None and self.gps.longitude is not None:
+            # update data
+            self.lat.add(self.gps.latitude)
+            self.long.add(self.gps.longitude)
+            self.prevLat = self.gps.latitude
+            self.prevLong = self.gps.longitude
+
+            self.updateHeading()
+
+            # publish lat and long
+            msg = CoordinateMsg(latitude=gps.latitude, longitude=gps.longitude)
+            self.gpsPub.publish(msg)
+
+            # publish heading if desired
+            if self.publishHeading and self.heading is not None:
+                self.headingPub.publish(Float64(data=self.heading))
+
+            # debug message
+            if debug:
+                print(f"lat: {gps.latitude} long: {gps.longitude} heading: {self.heading}")
 
 
 if __name__ == "__main__":
     ## GPS used to get data, defined on the RPi I2C bus
     gps = GPS(i2c_bus=I2C(sda=2, scl=3))
     gps.begin(0x10)
+
+    controller = GPSController(gps, gpsPub, headingPub, 1)
+
     ## ROS timer to calculate and publish GPS data
-    timer = rospy.Timer(rate.sleep_dur, lambda _: cb(gps))
+    timer = rospy.Timer(rate.sleep_dur, lambda _: controller.callBack(debug=False))
     rospy.spin()
 
 ## @}
