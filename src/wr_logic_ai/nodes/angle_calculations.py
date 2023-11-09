@@ -3,13 +3,14 @@
 @{
 @defgroup wr_logic_ai_longrange_ai_angle_calculations Angle Calculations
 @brief Helper class for angle calculation
-@details Package of functions for angle calculations using teh Haversine formula. Takes account for the 
+@details Package of functions for angle calculations using the Haversine formula. Takes account for the 
 curvature of the Earth.
 @{
 """
 
 import math
 import rospy
+
 
 class AngleCalculations:
     """
@@ -18,7 +19,9 @@ class AngleCalculations:
 
     EARTH_RADIUS_METERS = 6378100
 
-    def __init__(self, clatitude: float, clongitude: float, glatitude: float, glongitude: float):
+    def __init__(
+        self, clatitude: float, clongitude: float, glatitude: float, glongitude: float
+    ):
         """
         Declare a new AngleCalculations object with the current coordinates and target coordinates
 
@@ -51,12 +54,14 @@ class AngleCalculations:
 
         # Uses Haversine calculations to compute the Great Circle distance between two latitudes
         deltaLatitude = math.radians(math.fabs(lat2 - lat1))
-        verticalDistance = math.sin(deltaLatitude / 2.0)**2
-        angularDistance = 2 * math.atan2(math.sqrt(verticalDistance), math.sqrt(1.0 - verticalDistance))
-        if(self.up):
+        verticalDistance = math.sin(deltaLatitude / 2.0) ** 2
+        angularDistance = 2 * math.atan2(
+            math.sqrt(verticalDistance), math.sqrt(1.0 - verticalDistance)
+        )
+        if self.up:
             return angularDistance * self.EARTH_RADIUS_METERS
-        else:  
-            return -1*angularDistance * self.EARTH_RADIUS_METERS
+        else:
+            return -1 * angularDistance * self.EARTH_RADIUS_METERS
 
     def longitude_to_distance(self, lon1: float, lon2: float) -> float:
         """
@@ -72,12 +77,18 @@ class AngleCalculations:
 
         # Uses Haversine calculations to compute the Great Circle distance between two longitudes
         deltaLongitude = math.radians(math.fabs(lon2 - lon1))
-        lateralDistance = math.cos(math.radians(self.cur_lat)) * math.cos(math.radians(self.tar_lat)) * math.sin(deltaLongitude / 2.0)**2
-        angularDistance = 2 * math.atan2(math.sqrt(lateralDistance), math.sqrt(1.0 - lateralDistance))
-        if(self.right):
+        lateralDistance = (
+            math.cos(math.radians(self.cur_lat))
+            * math.cos(math.radians(self.tar_lat))
+            * math.sin(deltaLongitude / 2.0) ** 2
+        )
+        angularDistance = 2 * math.atan2(
+            math.sqrt(lateralDistance), math.sqrt(1.0 - lateralDistance)
+        )
+        if self.right:
             return angularDistance * self.EARTH_RADIUS_METERS
-        else:  
-            return -1*angularDistance * self.EARTH_RADIUS_METERS
+        else:
+            return -1 * angularDistance * self.EARTH_RADIUS_METERS
 
     def get_distance(self) -> float:
         """
@@ -87,22 +98,28 @@ class AngleCalculations:
         """
 
         # Since the contained functions compute great circle distance, the Euclidean distance formula will compute the right Great Circle composite distance
-        return math.sqrt(self.latitude_to_distance(self.cur_lat, self.tar_lat)**2 + self.longitude_to_distance(self.cur_long, self.tar_long)**2)
+        return math.sqrt(
+            self.latitude_to_distance(self.cur_lat, self.tar_lat) ** 2
+            + self.longitude_to_distance(self.cur_long, self.tar_long) ** 2
+        )
 
     def get_angle(self) -> float:
         """
         Get the planar angle relative to planar East as the straight-line trajectory towards the goal
 
-        @retunrn float: The planar angle relative to planar East as the straight-line trajectory towards the goal
+        @return float: The planar angle relative to planar East as the straight-line trajectory towards the goal
         """
 
         # Use the Great Circle distances of the spherical triangle legs to get the angle (-90,90) to the goal coordinates
-        angle = math.atan2(self.latitude_to_distance(self.cur_lat, self.tar_lat), self.longitude_to_distance(self.cur_long, self.tar_long)) #TODO: Why not use atan2?
+        angle = math.atan2(
+            self.latitude_to_distance(self.cur_lat, self.tar_lat),
+            self.longitude_to_distance(self.cur_long, self.tar_long),
+        )
         angle = math.degrees(angle)
         # rospy.loginfo(f"latitude to distance: {self.latitude_to_distance(self.cur_lat, self.tar_lat)}")
         # rospy.loginfo(f"longitude to distance: {self.longitude_to_distance(self.cur_long, self.tar_long)}")
         # rospy.loginfo(f"angle: {angle}")
-        
+
         # #Setting up in which quadrant we are
         # if self.cur_lat < self.tar_lat:
         #     self.up = True
@@ -143,6 +160,7 @@ class AngleCalculations:
         # Compute the target angle relative to our heading in the standard angle interval
         # TODO: Is the ternary operator taken care of by Python modulo?
         return angle - heading if angle >= heading else (360 - heading) + angle
+
 
 ## @}
 ## @}

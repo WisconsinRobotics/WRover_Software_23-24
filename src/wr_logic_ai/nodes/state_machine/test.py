@@ -10,6 +10,7 @@ from statemachine import StateMachine, State
 from state_machine import NavStateMachine
 from wr_logic_ai.coordinate_manager import CoordinateManager
 import time
+
 # class test_a(State):
 #     def __init__(self) -> None:
 #         super().__init__()
@@ -43,7 +44,7 @@ class TestStateMachine(StateMachine):
     test_a = State(initial=True)
     test_b = State()
 
-    event = (test_a.to(test_b) | test_b.to(test_a))
+    event = test_a.to(test_b) | test_b.to(test_a)
 
     def on_enter_test_a(self):
         time.sleep(1)

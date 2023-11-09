@@ -32,15 +32,14 @@ def wait_for_user_input(req):
 
 
 def wait_for_user_input_server():
-    """initializes rospy service
-    """
+    """initializes rospy service"""
     rospy.init_node("wait_for_user_input_server")
-    s = rospy.Service('wait_for_user_input_service',
-                      Empty, wait_for_user_input)
+    s = rospy.Service("wait_for_user_input_service", Empty, wait_for_user_input)
     print("wait for user input server initialized")
     rospy.spin()
 
-#TODO: Figure what to do with this
+
+# TODO: Figure what to do with this
 def shutdown_server():
     rospy.signal_shutdown("Ended user signal")
 

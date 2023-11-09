@@ -21,6 +21,7 @@ import obstacle_avoidance
 ## Timeout time for when we declare a long range navigation as failed
 LONG_RANGE_TIMEOUT_TIME = rospy.Duration(1000)
 
+
 class LongRangeActionServer(object):
     """
     Class for long range navigation's action server
@@ -38,7 +39,11 @@ class LongRangeActionServer(object):
         self._action_name = name
         obstacle_avoidance.initialize()
         self._as = actionlib.SimpleActionServer(
-            self._action_name, LongRangeAction, execute_cb=self.execute_callback, auto_start=False)
+            self._action_name,
+            LongRangeAction,
+            execute_cb=self.execute_callback,
+            auto_start=False,
+        )
         self._as.start()
 
     def execute_callback(self, goal: LongRangeGoal):
@@ -51,7 +56,10 @@ class LongRangeActionServer(object):
         """
 
         start_time = rospy.get_rostime()
-        while rospy.get_rostime() - start_time < LONG_RANGE_TIMEOUT_TIME and not rospy.is_shutdown():
+        while (
+            rospy.get_rostime() - start_time < LONG_RANGE_TIMEOUT_TIME
+            and not rospy.is_shutdown()
+        ):
             if obstacle_avoidance.update_target(goal.target_lat, goal.target_long):
                 return self._as.set_succeeded()
         return self._as.set_aborted()
