@@ -1,11 +1,16 @@
 <?xml version="1.0"?>
 <!DOCTYPE launch SYSTEM "https://gist.githubusercontent.com/nalt/dfa2abc9d2e3ae4feb82ca5608090387/raw/roslaunch.dtd">
+
+<!-- Running this launch group should start the robot -->
+
 <launch>
   <arg name="mux_name" default="nav_mux" />
   <arg name="long_range_output" default="/long_range_nav" />
   <arg name="short_range_output" default="/short_range_nav" />
 
   <!-- Hardware group -->
+
+  <!-- Launch files for when using real robot -->
   <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" />
   <include file="$(find wr_hsi_sensing)/launch/hw_test.launch"
     if="$(eval env('WROVER_HW') == 'REAL')" />
@@ -15,6 +20,7 @@
     if="$(eval env('WROVER_HW') == 'REAL')" />
   <include file="$(find rplidar_ros)/launch/rplidar.launch" if="$(eval env('WROVER_HW') == 'REAL')" />
 
+  <!-- Launch files when simulating data -->
   <node name="fake_data" pkg="wr_logic_ai" type="inputFakeData.py" output="screen"
     unless="$(eval env('WROVER_HW') == 'REAL')" />
 

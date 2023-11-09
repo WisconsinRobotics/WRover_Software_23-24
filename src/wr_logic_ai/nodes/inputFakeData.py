@@ -25,11 +25,10 @@ def get_laser_ranges(t=0):
 def run_mock_data() -> None:
     global mock_heading
 
-    distanceData = rospy.Publisher('/scan', LaserScan, queue_size=10)
-    mock_heading_pub = rospy.Publisher('/heading_data', Float64, queue_size=10)
-    mock_gps_pub = rospy.Publisher(
-        '/gps_coord_data', CoordinateMsg, queue_size=10)
-    zero_pub = rospy.Publisher('/debug_zero', PoseStamped, queue_size=10)
+    distanceData = rospy.Publisher("/scan", LaserScan, queue_size=10)
+    mock_heading_pub = rospy.Publisher("/heading_data", Float64, queue_size=10)
+    mock_gps_pub = rospy.Publisher("/gps_coord_data", CoordinateMsg, queue_size=10)
+    zero_pub = rospy.Publisher("/debug_zero", PoseStamped, queue_size=10)
     zero_msg = PoseStamped()
     zero_msg.pose.position.x = 0
     zero_msg.pose.position.y = 0
@@ -42,12 +41,12 @@ def run_mock_data() -> None:
     frameCount = 0
 
     # Testing publishers and subscribers
-    #rospy.Subscriber('/control/drive_system/cmd', DriveTrainCmd, updateHeading)
+    # rospy.Subscriber('/control/drive_system/cmd', DriveTrainCmd, updateHeading)
 
     laser = LaserScan()
     # vara.intensities
 
-    #laser.angle_min = 0.
+    # laser.angle_min = 0.
     laser.angle_max = 2 * math.pi
     laser.angle_increment = math.pi / 180
     laser.time_increment = 0
@@ -85,30 +84,30 @@ def run_mock_data() -> None:
 
 def updateHeading(data) -> None:
     global mock_heading
-    mock_heading = (
-        mock_heading + (data.right_value - data.left_value)*10) % 360
+    mock_heading = (mock_heading + (data.right_value - data.left_value) * 10) % 360
 
 
 def display_data(data) -> None:
     rviz_data = deepcopy(data)
     rviz_data.ranges = offset_lidar_data(
-        rviz_data.ranges, math.degrees(rviz_data.angle_increment), True)
-    scan_rviz_pub = rospy.Publisher('/scan_rviz', LaserScan, queue_size=10)
+        rviz_data.ranges, math.degrees(rviz_data.angle_increment), True
+    )
+    scan_rviz_pub = rospy.Publisher("/scan_rviz", LaserScan, queue_size=10)
     scan_rviz_pub.publish(rviz_data)
 
 
 def run_real_data() -> None:
-    rospy.Subscriber('/scan', LaserScan, display_data)
+    rospy.Subscriber("/scan", LaserScan, display_data)
 
 
-if __name__ == '__main__':
-    rospy.init_node('publish_fake_data', anonymous=False)
+if __name__ == "__main__":
+    rospy.init_node("publish_fake_data", anonymous=False)
 
-    if rospy.get_param('~run_in_mock', True):
+    if rospy.get_param("~run_in_mock", True):
         # Run fake data
         run_mock_data()
     else:
         # Run lidar data
-        sub = rospy.Subscriber('/scan', LaserScan, display_data)
+        sub = rospy.Subscriber("/scan", LaserScan, display_data)
         # run_real_data()
         rospy.spin()
