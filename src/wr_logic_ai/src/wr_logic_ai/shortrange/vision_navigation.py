@@ -3,7 +3,7 @@
 ##@defgroup wr_shortrange_ai
 # @{
 # @defgroup wr_shortrange_ai_navigation Vision Navigation
-# @brief ShortrangeState for navigating to an ArUco tag
+# @brief ShortrangeState that subscribes to vision data and drives to the ArUco tag
 # @{
 
 import math

@@ -1,6 +1,7 @@
 ##@defgroup wr_shortrange_ai
 # @{
 # @defgroup wr_shortrange_ai_util Utility Classes
+# @brief Miscellaneous classes used to implement the shortrange state machine
 # @{
 
 from enum import Enum, Flag

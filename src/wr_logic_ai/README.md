@@ -11,7 +11,9 @@
 INFO FOR STATE MACHINE
 
 For running test in computer run 
-$ roscore
-$ export WROVER_LOCAL=true
-$ export WROVER_HW=mock
-$ roslaunch wr_logic_ai state_machine.launch
+```
+roscore
+export WROVER_LOCAL=true
+export WROVER_HW=mock
+roslaunch wr_logic_ai state_machine.launch
+```
