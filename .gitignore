@@ -3,7 +3,7 @@ build/
 devel/
 
 # python env
-/venv/
+venv/
 
 # ide
 /.vscode/*

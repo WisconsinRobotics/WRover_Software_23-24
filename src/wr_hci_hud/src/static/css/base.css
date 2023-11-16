@@ -1,0 +1,38 @@
+/* FILEPATH: /c:/Users/gimin/PythonProjects/flask1/.venv/css/styles.css */
+
+/* Set default font family and size */
+body {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+}
+
+/* Add a background color */
+body {
+    background-color: #6a819c;
+}
+
+/* Add some padding to the page */
+.container {
+    padding: 20px;
+}
+
+/* Add a border to all images */
+img {
+    border: 1px solid #ccc;
+}
+
+/* Add a hover effect to links */
+a:hover {
+    color: red;
+    text-decoration: underline;
+}
+
+/* Center text */
+.center {
+    text-align: center;
+}
+
+/* Add a box shadow to a button */
+button {
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+}

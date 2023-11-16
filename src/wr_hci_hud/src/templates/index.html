@@ -1,0 +1,48 @@
+<!-- FILEPATH: /c:/Users/gimin/PythonProjects/flask1/templates/index.html -->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="../static/css/index.css">
+        <title>Four Squares</title>
+        <!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> -->
+        <script src="../static/js/logic.js" defer></script>
+    </head>
+    <body>
+        <div class="container">
+            <div class="square launch">
+                <h1 style="margin: 0;">Launch/Video</h1>
+                <div class="dropdown">
+                    <button class="launch-button">Competition mission</button>
+                </div>
+                <div class="dropdown">
+                    <button class="launch-button">Science mission</button>
+                </div>
+                <div class="dropdown">
+                    <button class="launch-button">Delivery mission</button>
+                </div>
+                <div class="dropdown">
+                    <button class="launch-button">Equipment servicing mission</button>
+                </div>
+            </div>
+
+            <div class="square control"><h1 style="margin: 0;">Control</h1><p style="margin: 0;"></p>
+                <div id="joystick1"></div>
+            </div>
+
+            
+        </div>
+
+        <div class="container">
+            <div class="square diagnostic">
+                <h1 style="margin: 0;">Diagnostic</h1><p style="margin: 0;"></p>
+                <textarea class="diagnostic-input" placeholder="Diagnostics from the server will be displayed here" readonly ></textarea>
+            </div>
+
+            <div class="square messages">
+                <h1 style="margin: 0;">Messages</h1>
+                <textarea class="message-input" placeholder="Messages from the server will be displayed here" readonly ></textarea>
+            </div>
+        </div>
+    </body>
+</html>
