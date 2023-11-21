@@ -1,91 +1,28 @@
-body, html {
+body, html{
     height: 100%;
     width: 100%;
     margin: 0;
     padding: 0;
     overflow: hidden;
     background-color: #f2f2f2;
-    padding-bottom: 10%;
 }
 
-.container {
-    display: flex;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-rows: repeat(2, 1fr);
-    height: 50%;
-    width: 100%;
-    min-height: 25%;
-    max-height: 75%;
-    padding: 0%;
-    margin: 0%;
-    resize: both;
-    background-color: antiquewhite;
+body{
+    display: grid;
+    grid-template-columns: 50% 50%;
+    grid-template-rows: 50% 50%;
 }
 
 .square {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-start;
-    font-size: 1.5rem;
-
     color: white;
     text-shadow: 2px 2px 4px #000000;
-    background-color: grey;
+    background-color: rgb(62, 62, 62);
     border-right: 3px solid #000000;
     border-bottom: 3px solid #000000;
     padding: 20px;
     box-shadow: 2px 2px 20px #525252;
-    resize: both;
-    overflow:auto;
-
-    /* width: 950px; */
-
-    max-width: 75%;
-    min-width: 25%;
-    max-height: 125%;
-}
-    
-/* .container {
-    display: flex;
-    flex-wrap: wrap;
-    height: 100vh;
-}
-.square {
-    flex: 1 1 25%;
-    min-width: 200px;
-    min-height: 200px;
-    border: 1px solid black;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-} */
-
-
-.launch {
-    background-color: rgb(62, 62, 62);
-    grid-row: 1 / 2;
-    grid-column: 1 / 2;
-}
-
-.control {
-    background-color: rgb(62, 62, 62);
-    grid-row: 1 / 2;
-    grid-column: 2 / 3;
-}
-
-.diagnostic {
-    background-color: rgb(62, 62, 62);
-    grid-row: 2 / 3;
-    grid-column: 1 / 2;
-}
-
-.messages {
-    background-color: rgb(62, 62, 62);
-    grid-row: 2 / 3;
-    grid-column: 2 / 3;
+    /* display: grid; */
+    overflow: hidden;
 }
 
 .dropdown {
@@ -154,30 +91,10 @@ body, html {
 }
 
 .clicked-button {
-    background-color: #525252;
+    background-color: #930000;
     /* font-size: 1.5rem; */
     /* margin-left: 10px; */
-}
-
-
-.message-input {
-    width: 90%;
-    height: 80%;
-    margin-top: 10px;
-    padding: 10px;
-    font-size: 1.2rem;
-    border-radius: 5px;
-    border: none;
-    /* box-shadow: 2px 2px 4px #000000; */
-    background-color: rgb(42, 42, 42);
-    color: white;
-    resize: none;
-}
-
-.message-input:focus {
-    /* removed box-shadow */
-    outline: none;
-    cursor: default;
+    content: "stop";
 }
 
 .diagnostic-input {
@@ -192,6 +109,7 @@ body, html {
     background-color: rgb(42, 42, 42);
     color: white;
     resize: none;
+    
 }
 
 #joystick1{
