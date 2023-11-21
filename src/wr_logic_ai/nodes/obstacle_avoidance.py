@@ -2,6 +2,7 @@
 import math
 import rospy
 import time
+from visualization_msgs.msg import Marker
 from finder import get_navigation_angle
 from angle_calculations import AngleCalculations
 import angle_to_drive_methods as angle_calc
@@ -15,7 +16,7 @@ from std_msgs.msg import Float64
 
 # Navigation parameters
 # distance before obstacle avoidance logics is triggered (in meters)
-LIDAR_THRESH_DISTANCE = 1
+LIDAR_THRESH_DISTANCE = 3
 # distance before rover believes it has reached the target (in meters)
 NAV_THRESH_DISTANCE = 0.5
 
@@ -41,7 +42,16 @@ def initialize() -> None:
     global heading_pub
     global frameCount
     global heading_msg
-    global raw_heading_pub
+    global actual_heading_msg
+    global actual_heading_pub
+    #global raw_heading_pub
+    global delta_heading_pub
+    global delta_heading_msg
+    global marker
+    global marker_pub
+    global laser_adjuster_pub
+    global wRover
+    global wRover_pub
 
     # Publisher
     drive_pub = rospy.Publisher(rospy.get_param(
@@ -51,10 +61,13 @@ def initialize() -> None:
     rospy.Subscriber('/gps_coord_data', CoordinateMsg, update_gps_coord)
 
     # Subscribe to heading data
-    #rospy.Subscriber('/heading_data', Float64, update_heading)
+    rospy.Subscriber('/heading_data', Float64, update_heading)
 
     # Subscribe to lidar data
     rospy.Subscriber('/scan', LaserScan, update_navigation)
+
+    wRover_pub = rospy.Publisher('wRover_marker', Marker, queue_size=10)
+
 
     # TESING
     heading_pub = rospy.Publisher('/debug_heading', PoseStamped, queue_size=1)
@@ -66,8 +79,67 @@ def initialize() -> None:
     heading_msg.pose.orientation.y = 0
     heading_msg.header.frame_id = "laser"
     frameCount = 0
-    raw_heading_pub = rospy.Publisher(
-        '/target_heading_raw', Float64, queue_size=1)
+    # raw_heading_pub = rospy.Publisher(
+    #     '/target_heading_raw', Float64, queue_size=1)
+    
+     # TESING
+    actual_heading_pub = rospy.Publisher('/actual_heading', PoseStamped, queue_size=1)
+    actual_heading_msg = PoseStamped()
+    actual_heading_msg.pose.position.x = 0
+    actual_heading_msg.pose.position.y = 0
+    actual_heading_msg.pose.position.z = 0
+    actual_heading_msg.pose.orientation.x = 0
+    actual_heading_msg.pose.orientation.y = 0
+    actual_heading_msg.header.frame_id = "laser"
+
+     # TESING
+    delta_heading_pub = rospy.Publisher('/delta_heading', PoseStamped, queue_size=1)
+    delta_heading_msg = PoseStamped()
+    delta_heading_msg.pose.position.x = 0
+    delta_heading_msg.pose.position.y = 0
+    delta_heading_msg.pose.position.z = 0
+    delta_heading_msg.pose.orientation.x = 0
+    delta_heading_msg.pose.orientation.y = 0
+    delta_heading_msg.header.frame_id = "laser"
+
+    laser_adjuster_pub = rospy.Publisher('/laser_adjuster', Float64, queue_size=1)
+
+
+    marker_pub = rospy.Publisher("pose_marker", Marker, queue_size=1)
+    marker = Marker()
+    marker.header.frame_id = "laser"  # Set your frame_id
+    marker.type = Marker.CUBE
+    marker.action = Marker.ADD
+    marker.scale.x = 5.0  # Set the dimensions of the plane
+    marker.scale.y = 5.0
+    marker.scale.z = 0.01  # Thickness of the plane
+    marker.color.a = 0.5
+    marker.color.r = .6
+    marker.color.g = .3
+    marker.color.b = .1
+    marker.pose = delta_heading_msg.pose  # Set the position and orientation based on your pose
+
+    wRover = Marker()
+    wRover.header.frame_id = "laser"  # Replace with your fixed frame
+    wRover.type = Marker.MESH_RESOURCE
+    wRover.mesh_resource = "package://wr_logic_ai/meshes/Eclipse_Base_Simple.stl"  # Replace with your 3D object path
+    wRover.pose.position.x = 0.0  # Replace with your desired position
+    wRover.pose.position.y = 0.0
+    wRover.pose.position.z = 0.0
+    wRover.pose.orientation.x = 0.0  # Replace with your desired orientation
+    wRover.pose.orientation.y = 0.0
+    wRover.pose.orientation.z = 0.0
+    wRover.pose.orientation.w = 1.0
+    wRover.scale.x = 0.01  # Replace with your desired scale
+    wRover.scale.y = 0.01
+    wRover.scale.z = 0.01
+    wRover.color.a = 1.0
+    wRover.color.r = 1.0
+    wRover.color.g = 0.0
+    wRover.color.b = 0.0
+    wRover_pub.publish(wRover)
+
+    
 
 
 def update_gps_coord(msg: CoordinateMsg) -> None:
@@ -100,7 +172,7 @@ def update_target(target_lat, target_long) -> bool:
     
     
     target_angle = imu.get_angle() % 360
-    rospy.logerr(target_angle)
+
     if imu.get_distance() < NAV_THRESH_DISTANCE:
         return True
     else:
@@ -130,7 +202,7 @@ def update_navigation(data: LaserScan) -> None:
             data,
             smoothing_constant)
 
-        raw_heading_pub.publish(result)
+        #raw_heading_pub.publish(result)
         # rospy.loginfo(f"raw heading: {result}")
 
         # Set the bounds of the speed multiplier
@@ -154,10 +226,43 @@ def update_navigation(data: LaserScan) -> None:
         # TESTING
         heading_msg.header.seq = frameCount
         heading_msg.header.stamp = rospy.get_rostime()
+
+        actual_heading_msg.header.seq = frameCount
+        actual_heading_msg.header.stamp = rospy.get_rostime()
+
+        delta_heading_msg.header.seq = frameCount
+        delta_heading_msg.header.stamp = rospy.get_rostime()
+
         frameCount += 1
         heading_msg.pose.orientation.z = math.sin(math.radians(result) / 2)
         heading_msg.pose.orientation.w = math.cos(math.radians(result) / 2)
         heading_pub.publish(heading_msg)
+
+        # TESTING
+
+        actual_heading_msg.pose.orientation.z = math.sin(math.radians(cur_heading) / 2)
+        actual_heading_msg.pose.orientation.w = math.cos(math.radians(cur_heading) / 2)
+        actual_heading_pub.publish(actual_heading_msg)
+
+         # TESTING
+
+        delta_heading_msg.pose.orientation.z = math.sin(math.radians(delta_heading+90) / 2)
+        delta_heading_msg.pose.orientation.w = math.cos(math.radians(delta_heading+90) / 2)
+        delta_heading_pub.publish(delta_heading_msg)
+
+        laser_adjuster_pub.publish(delta_heading) #Used for inputFakeData
+
+        marker.pose.orientation.z = math.sin(math.radians(delta_heading+90) / 2)
+        marker.pose.orientation.w = math.cos(math.radians(delta_heading+90) / 2)
+        # Set the position and orientation based on delta-heading
+
+        # Publish the Marker message
+        marker_pub.publish(marker)
+
+        # Publish the wRover message
+        
+        if(frameCount < 10):
+            wRover_pub.publish(wRover)
 
 
 # If this file was executed...
