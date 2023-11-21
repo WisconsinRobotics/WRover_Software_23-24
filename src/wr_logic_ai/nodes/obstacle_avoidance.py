@@ -49,6 +49,8 @@ def initialize() -> None:
     global delta_heading_msg
     global marker
     global marker_pub
+    global marker_circle
+    global marker_circle_pub
     global laser_adjuster_pub
     global wRover
     global wRover_pub
@@ -118,6 +120,20 @@ def initialize() -> None:
     marker.color.g = .3
     marker.color.b = .1
     marker.pose = delta_heading_msg.pose  # Set the position and orientation based on your pose
+
+    marker_circle_pub = rospy.Publisher("pose_circle_marker", Marker, queue_size=1)
+    marker_circle = Marker()
+    marker_circle.header.frame_id = "laser"  # Set your frame_id
+    marker_circle.type = Marker.SPHERE
+    marker_circle.action = Marker.ADD
+    marker_circle.scale.x = LIDAR_THRESH_DISTANCE*2  # Set the dimensions of the plane
+    marker_circle.scale.y = LIDAR_THRESH_DISTANCE*2
+    marker_circle.scale.z = 0.01  # Thickness of the plane
+    marker_circle.color.a = 0.5
+    marker_circle.color.r = .1
+    marker_circle.color.g = .3
+    marker_circle.color.b = .6
+    marker_circle.pose = delta_heading_msg.pose  # Set the position and orientation based on your pose
 
     wRover = Marker()
     wRover.header.frame_id = "laser"  # Replace with your fixed frame
@@ -258,6 +274,9 @@ def update_navigation(data: LaserScan) -> None:
 
         # Publish the Marker message
         marker_pub.publish(marker)
+
+        # Publish the circle :D
+        marker_circle_pub.publish(marker_circle)
 
         # Publish the wRover message
         
