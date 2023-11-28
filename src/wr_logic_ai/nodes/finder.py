@@ -198,7 +198,7 @@ def get_valley(
             pose.orientation.w = math.cos(
                 math.radians(i * sector_angle) / 2)
             window_msg.poses.append(pose)
-    window_pub.publish(window_msg)
+    #window_pub.publish(window_msg)
 
     # Initialize best valley array
     best_valley = []

@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
+from numbers import Integral
 import random
+
+from numpy import integer
 import rospy
 from std_msgs.msg import Float64
 from sensor_msgs.msg import LaserScan
@@ -23,9 +26,9 @@ class Obstacle:
     def moveRight(self, x):
         self.coord1[0] = self.coord1[0] + x 
         self.coord2[0] = self.coord2[0] + x 
-    def moveUp(self, x):
-        self.coord1[1] = self.coord1[1] + x 
-        self.coord2[1] = self.coord2[1] + x 
+    def moveUp(self, y):
+        self.coord1[1] = self.coord1[1] + y
+        self.coord2[1] = self.coord2[1] + y 
     def getAngle1(self) -> int:
         return int(pointsToAngle(self.coord1[0], self.coord1[1]))
     def getAngle2(self) -> int:
@@ -33,9 +36,19 @@ class Obstacle:
     def setObstacleFront(self):
         self.coord1[0] = 3
         self.coord2[0] = -2
+    def testAngle(self):
+        self.coord1[0] = 3
+        self.coord1[1] = 4
 
-obstacle = Obstacle([3,3],[2,3])
-obstacle.moveRight(-2)
+        self.coord2[0] = -3
+        self.coord2[1] = 3
+    def getSlope(self):
+        if(self.coord2[0] - self.coord1[0] == 0):
+            return 99999
+        else:
+            return (self.coord2[1] - self.coord1[1])/(self.coord2[0] - self.coord1[0])
+
+obstacle = Obstacle([3,1],[2,2])
 
 def get_laser_ranges(t=0):
     inputData = []
@@ -46,23 +59,65 @@ def get_laser_ranges(t=0):
     angle1 = obstacle.getAngle1()
     angle2 = obstacle.getAngle2()
     
+    modifierx = 0
+    modifiery = 0
+    post_modifierx = 0
+    post_modifiery = 0
 
-    for x in range(180):
-        if(x >= angle1 and x <= angle2):
-            if(x != 0):
-                modifier = (obstacle.coord1[1]/math.tan(math.radians(x))) - obstacle.coord1[0] # get x distance x = height/tan(angle)
-            inputData.append(cartesianToRadian(obstacle.coord1[0]+modifier, obstacle.coord1[1]))
+    m_slope = obstacle.getSlope()
 
-            #rospy.logerr(str(x) + " " +str(cartesianToRadian(obstacle.coord1[0]+modifier, obstacle.coord1[1])))
+    # post_modifierx=((obstacle.coord1[0] + post_modifierx)*math.tan(math.radians(angle1))) - obstacle.coord1[1]
+    # post_modifiery=((obstacle.coord1[1] + post_modifiery)/math.tan(math.radians(angle1))) - obstacle.coord1[0]
+
+    for t in range(180):
+        if(t >= angle1 and t <= angle2):
+            if(t != 0):
+                #Using point-slope formula and knowing the equation for the line between the two points and the line made by the angle,
+                #you can find the intersection of those lines and plot that point in rviz
+
+                
+                #y=(y_1+x_1*m_slope)/(1-(m_slope/m_angle))
+                #x=y/m_angle
+                m_angle = math.tan(math.radians(t))
+
+                y = (obstacle.coord1[1] - obstacle.coord1[0]*m_slope)/(1-(m_slope/m_angle))
+                x = y/m_angle
+                # rospy.logerr("x" + " " + str(t) + " " + str(x))
+                # rospy.logerr("y" + " " + str(t) + " " + str(y))
+
+                inputData.append(cartesianToRadian(x,y))
+
+                # rospy.logerr(angle1)
+                # modifiery = ((obstacle.coord1[0] + post_modifierx)*math.tan(math.radians(t))) - obstacle.coord1[1]
+                # rospy.logerr("y" + " " + str(t) + " " + str(modifiery))
+                # modifierx = ((obstacle.coord1[1] + post_modifiery)/math.tan(math.radians(t))) - obstacle.coord1[0] # get x distance x = height/tan(angle)
+                # #rospy.logerr("x" + " " + str(t) + " " + str(modifierx))
+                # post_modifiery= modifiery
+                # post_modifierx = modifierx
+
+                
+
+                # rospy.logerr(slope)
+                # if(slope == 0):
+                #     inputData.append(cartesianToRadian( ((y_obs-obstacle.coord1[1])/slope)+obstacle.coord1[0] , slope*(x_obs-obstacle.coord1[0])-obstacle.coord1[1]))
+                # else:
+                #     inputData.append(cartesianToRadian( ((y_obs-obstacle.coord1[1])/slope)+obstacle.coord1[0] , slope*(x_obs-obstacle.coord1[0])-obstacle.coord1[1]))
+                
+            # else:
+            #     modifierx = 0
+            #     modifiery = 0
+            # inputData.append(cartesianToRadian(obstacle.coord1[0]+modifierx, obstacle.coord1[1] +modifiery))
+
+            #rospy.logerr(str(t) + " " +str(cartesianToRadian(obstacle.coord1[0]+modifier, obstacle.coord1[1])))
         else:
             inputData.append(10)
 
     for i in range(180):
         inputData.append(.3)
 
-    # for x in range(180):
+    # for t in range(180):
     #     distance = 10
-    #     if t -90 <= x and x <= t and x != 0:
+    #     if t -90 <= t and t <= t and t != 0:
     #         distance = dist
     #     inputData.append(distance)
     # for i in range(180):
@@ -152,10 +207,9 @@ def updateHeading(data) -> None:
 
     obstacle.moveRight(-laser_adjust*.03)
     if(obstacle.coord1[1] < .1 or obstacle.coord2[1] <.1):
-        obstacle.moveUp(5)
-        obstacle.setObstacleFront()
-        rospy.logerr(obstacle.coord1[0])
-    
+        obstacle.testAngle()    
+        # rospy.logerr(obstacle.coord1[1])
+        # rospy.logerr(obstacle.coord2[1])
 
 
     # dist = dist - .1*((data.left_value + data.right_value)/2)

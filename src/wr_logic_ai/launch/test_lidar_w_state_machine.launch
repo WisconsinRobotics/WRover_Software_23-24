@@ -1,6 +1,16 @@
 <?xml version="1.0"?>
 <!DOCTYPE launch SYSTEM "https://gist.githubusercontent.com/nalt/dfa2abc9d2e3ae4feb82ca5608090387/raw/roslaunch.dtd">
 <launch>
+
+  <env name='WROVER_HW' value='MOCK'/>
+  <env name='WROVER_LOCAL' value = 'true'/>
+
+  <!-- 
+    export WROVER_HW=MOCK
+  export WROVER_LOCAL=true
+
+   -->
+ 
   <arg name="mux_name" default="nav_mux" />
   <arg name="long_range_output" default="/long_range_nav" />
   <arg name="short_range_output" default="/short_range_nav" />
