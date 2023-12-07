@@ -276,12 +276,13 @@ def update_navigation(data: LaserScan) -> None:
         marker_pub.publish(marker)
 
         # Publish the circle :D
-        marker_circle_pub.publish(marker_circle)
+        #rospy.logerr(rospy.Rate.remaining(0x7f594e3e5f70))
 
         # Publish the wRover message
         
         if(frameCount < 10):
             wRover_pub.publish(wRover)
+            marker_circle_pub.publish(marker_circle)
 
 
 # If this file was executed...
@@ -291,6 +292,7 @@ if __name__ == '__main__':
         initialize()
         # Spin RosPy to the next update cycle
         rospy.spin()
+        
 
     # Ignore ROS Interrupt Exceptions
     except rospy.ROSInterruptException:

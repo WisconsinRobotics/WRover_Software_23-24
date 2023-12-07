@@ -9,11 +9,11 @@ import os
 import pdb
 import pickle
 
-ROVER_WIDTH = 0.5
+ROVER_WIDTH = 1.06
 
-scan_rviz_pub = rospy.Publisher("/scan_rviz", LaserScan, queue_size=10)
+#scan_rviz_pub = rospy.Publisher("/scan_rviz", LaserScan, queue_size=10)
 # TODO (@bennowotny ) This should be disable-able for bandwidth
-window_pub = rospy.Publisher("/lidar_windows", PoseArray, queue_size=1)
+#window_pub = rospy.Publisher("/lidar_windows", PoseArray, queue_size=1)
 
 
 def calculate_anti_window(d: float) -> int:
@@ -80,7 +80,7 @@ def get_valley(
     #rviz_data.ranges = gaussian_smooth.gaussian_filter1d(rviz_data.ranges, smoothing)
     rviz_data.ranges = offset_lidar_data(
         rviz_data.ranges, sector_angle, is_rviz=True)
-    scan_rviz_pub.publish(rviz_data)
+    #scan_rviz_pub.publish(rviz_data)
 
     # rospy.loginfo(f"{data.ranges}")
     # TODO: remove dependency on this variable by making the mock script more like real hardware input
@@ -96,6 +96,7 @@ def get_valley(
     # inadvertently and unpredictably (due to sensor noise) block out most of the view
     # frame due to obstacle expansion
     del hist[int(len(hist)/2):]
+
 
     # Write the sectors data to an output file for logging
     output_file = open('sectors.data', 'wb')
@@ -121,7 +122,9 @@ def get_valley(
                 # Calculate size of anti-window and add to obstacle bounds
                 # pass in distance to target to caculate angle that allows robot to pass through
                 angleToIncrease = calculate_anti_window(
-                    hist[one_obstacle[i]]) / sector_angle
+                    hist[one_obstacle[i]])
+                #rospy.logerr(hist[one_obstacle[i]])
+                #rospy.logerr(hist[one_obstacle[0]])
 
                 # Update left and right bound
                 left_bound = max(
@@ -129,6 +132,7 @@ def get_valley(
                 right_bound = min(
                     max(right_bound, one_obstacle[i]+angleToIncrease), len(hist))
 
+            rospy.logerr("Left: " + str(left_bound) + "Right: " + str(right_bound))
             # Check to see if the obstacle we just found can actually be merged with a previous obstacle
             while len(obstacle_list) > 0 and obstacle_list[-1][1] >= left_bound:
                 left_bound = min(left_bound, obstacle_list[-1][0])
@@ -145,7 +149,7 @@ def get_valley(
             # Calculate size of anti-window and add to obstacle bounds
             # pass in distance to target to caculate angle that allows robot to pass through
             angleToIncrease = calculate_anti_window(
-                hist[one_obstacle[i]]) / sector_angle
+                hist[one_obstacle[i]])
 
             # Update left and right bound
             left_bound = max(
