@@ -51,6 +51,8 @@ def initialize() -> None:
     global marker_pub
     global marker_circle
     global marker_circle_pub
+    global marker_flag
+    global marker_flag_pub
     global laser_adjuster_pub
     global wRover
     global wRover_pub
@@ -103,6 +105,7 @@ def initialize() -> None:
     delta_heading_msg.pose.orientation.x = 0
     delta_heading_msg.pose.orientation.y = 0
     delta_heading_msg.header.frame_id = "laser"
+    
 
     laser_adjuster_pub = rospy.Publisher('/laser_adjuster', Float64, queue_size=1)
 
@@ -141,7 +144,7 @@ def initialize() -> None:
     wRover.mesh_resource = "package://wr_logic_ai/meshes/Eclipse_Base_Simple.stl"  # Replace with your 3D object path
     wRover.pose.position.x = 0.0  # Replace with your desired position
     wRover.pose.position.y = 0.0
-    wRover.pose.position.z = 0.0
+    wRover.pose.position.z = .11
     wRover.pose.orientation.x = 0.0  # Replace with your desired orientation
     wRover.pose.orientation.y = 0.0
     wRover.pose.orientation.z = 0.0
@@ -155,6 +158,25 @@ def initialize() -> None:
     wRover.color.b = 0.0
     wRover_pub.publish(wRover)
 
+    marker_flag_pub = rospy.Publisher('flag_marker', Marker, queue_size=1)
+    marker_flag = Marker()
+    marker_flag.header.frame_id = "laser"  # Replace with your fixed frame
+    marker_flag.type = Marker.MESH_RESOURCE
+    marker_flag.mesh_resource = "package://wr_logic_ai/meshes/Eclipse_Base_Simple.stl"  # Replace with your 3D object path
+    marker_flag.pose.position.x = 0.0  # Replace with your desired position
+    marker_flag.pose.position.y = 5.0
+    marker_flag.pose.position.z = .11
+    marker_flag.pose.orientation.x = 0.0  # Replace with your desired orientation
+    marker_flag.pose.orientation.y = 0.0
+    marker_flag.pose.orientation.z = 0.0
+    marker_flag.pose.orientation.w = 1.0
+    marker_flag.scale.x = 0.01  # Replace with your desired scale
+    marker_flag.scale.y = 0.01
+    marker_flag.scale.z = 0.01
+    marker_flag.color.a = 1.0
+    marker_flag.color.r = 1.0
+    marker_flag.color.g = 0.0
+    marker_flag.color.b = 0.0
     
 
 
@@ -265,6 +287,12 @@ def update_navigation(data: LaserScan) -> None:
         delta_heading_msg.pose.orientation.z = math.sin(math.radians(delta_heading+90) / 2)
         delta_heading_msg.pose.orientation.w = math.cos(math.radians(delta_heading+90) / 2)
         delta_heading_pub.publish(delta_heading_msg)
+
+        # TESTING
+
+        marker_flag.pose.position.x =  -5*math.sin(math.radians(delta_heading))
+        marker_flag.pose.position.y = 5*math.cos(math.radians(delta_heading))
+        marker_flag_pub.publish(marker_flag)
 
         laser_adjuster_pub.publish(delta_heading) #Used for inputFakeData
 
