@@ -51,6 +51,8 @@ def initialize() -> None:
     global marker_pub
     global marker_circle
     global marker_circle_pub
+    global marker_flag
+    global marker_flag_pub
     global laser_adjuster_pub
     global wRover
     global wRover_pub
@@ -103,6 +105,7 @@ def initialize() -> None:
     delta_heading_msg.pose.orientation.x = 0
     delta_heading_msg.pose.orientation.y = 0
     delta_heading_msg.header.frame_id = "laser"
+    
 
     laser_adjuster_pub = rospy.Publisher('/laser_adjuster', Float64, queue_size=1)
 
@@ -112,12 +115,12 @@ def initialize() -> None:
     marker.header.frame_id = "laser"  # Set your frame_id
     marker.type = Marker.CUBE
     marker.action = Marker.ADD
-    marker.scale.x = 5.0  # Set the dimensions of the plane
-    marker.scale.y = 5.0
+    marker.scale.x = 10.0  # Set the dimensions of the plane
+    marker.scale.y = 10.0
     marker.scale.z = 0.01  # Thickness of the plane
     marker.color.a = 0.5
-    marker.color.r = .6
-    marker.color.g = .3
+    marker.color.r = .1
+    marker.color.g = .6
     marker.color.b = .1
     marker.pose = delta_heading_msg.pose  # Set the position and orientation based on your pose
 
@@ -141,7 +144,7 @@ def initialize() -> None:
     wRover.mesh_resource = "package://wr_logic_ai/meshes/Eclipse_Base_Simple.stl"  # Replace with your 3D object path
     wRover.pose.position.x = 0.0  # Replace with your desired position
     wRover.pose.position.y = 0.0
-    wRover.pose.position.z = 0.0
+    wRover.pose.position.z = .11
     wRover.pose.orientation.x = 0.0  # Replace with your desired orientation
     wRover.pose.orientation.y = 0.0
     wRover.pose.orientation.z = 0.0
@@ -155,6 +158,25 @@ def initialize() -> None:
     wRover.color.b = 0.0
     wRover_pub.publish(wRover)
 
+    marker_flag_pub = rospy.Publisher('flag_marker', Marker, queue_size=1)
+    marker_flag = Marker()
+    marker_flag.header.frame_id = "laser"  # Replace with your fixed frame
+    marker_flag.type = Marker.MESH_RESOURCE
+    marker_flag.mesh_resource = "package://wr_logic_ai/meshes/flag.stl"  # Replace with your 3D object path
+    marker_flag.pose.position.x = 0.0  # Replace with your desired position
+    marker_flag.pose.position.y = 5.0
+    marker_flag.pose.position.z = .11
+    marker_flag.pose.orientation.x = 0.0  # Replace with your desired orientation
+    marker_flag.pose.orientation.y = 0.0
+    marker_flag.pose.orientation.z = 0.0
+    marker_flag.pose.orientation.w = 1.0
+    marker_flag.scale.x = 0.02  # Replace with your desired scale
+    marker_flag.scale.y = 0.02
+    marker_flag.scale.z = 0.02
+    marker_flag.color.a = 1.0
+    marker_flag.color.r = 1.0
+    marker_flag.color.g = 0.0
+    marker_flag.color.b = 0.0
     
 
 
@@ -266,10 +288,17 @@ def update_navigation(data: LaserScan) -> None:
         delta_heading_msg.pose.orientation.w = math.cos(math.radians(delta_heading+90) / 2)
         delta_heading_pub.publish(delta_heading_msg)
 
+        # TESTING
+
+        # Adding the nums is cuz the flag is off center, I'm not sure why??? I downloaded this from a random website :D
+        marker_flag.pose.position.x =  -5*math.sin(math.radians(delta_heading)) + 0.57
+        marker_flag.pose.position.y = 5*math.cos(math.radians(delta_heading)) + .3
+        marker_flag_pub.publish(marker_flag)
+
         laser_adjuster_pub.publish(delta_heading) #Used for inputFakeData
 
-        marker.pose.orientation.z = math.sin(math.radians(delta_heading+90) / 2)
-        marker.pose.orientation.w = math.cos(math.radians(delta_heading+90) / 2)
+        marker.pose.orientation.z = math.sin(math.radians(delta_heading) / 2)
+        marker.pose.orientation.w = math.cos(math.radians(delta_heading) / 2)
         # Set the position and orientation based on delta-heading
 
         # Publish the Marker message
