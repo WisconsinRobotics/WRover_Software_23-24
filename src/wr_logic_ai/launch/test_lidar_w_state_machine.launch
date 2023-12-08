@@ -16,13 +16,14 @@
   <arg name="short_range_output" default="/short_range_nav" />
 
 
-  <include file="$(find rplidar_ros)/launch/rplidar.launch" if="$(eval env('WROVER_HW') == 'REAL')" />
+  <include file="$(find rplidar_ros)/launch/rplidar.launch"/>
 
   <node name="fake_data" pkg="wr_logic_ai" type="inputFakeData.py" output="screen"
     unless="$(eval env('WROVER_HW') == 'REAL')" />
 
   <node pkg="wr_logic_ai" name="wait_for_user_input" type="wait_for_user_input.py" output="screen" />
   <node pkg="wr_logic_ai" name="nav_state_machine_driver" type="state_machine.py" output="screen" />
+
 
   <include file="$(find wr_logic_ai)/launch/mux_select.launch">
     <arg name="mux_name" default="nav_mux" />

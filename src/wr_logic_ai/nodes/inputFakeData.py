@@ -43,7 +43,7 @@ class Obstacle:
         self.coord1[1] = random.randint(5, 10)
         self.coord2[0] = random.randint(-5, 5)
         self.coord2[1] = random.randint(5, 10)
-        rospy.logerr("1:" + str(self.coord1) + "2:" + str(self.coord2))
+        #rospy.logerr("1:" + str(self.coord1) + "2:" + str(self.coord2))
             
         #Switch which coord is one and which is two as algorithm works when coord 1 is the first one scanning from right to left
         if(self.getAngle1() > self.getAngle2()):
@@ -294,6 +294,8 @@ def updateHeading(data) -> None:
 
 def display_data(data) -> None:
     rviz_data = deepcopy(data)
+    rospy.logerr((data.ranges[287]))
+
     rviz_data.ranges = offset_lidar_data(
         rviz_data.ranges, math.degrees(rviz_data.angle_increment), True)
     scan_rviz_pub = rospy.Publisher('/scan_rviz', LaserScan, queue_size=10)
@@ -307,11 +309,11 @@ def run_real_data() -> None:
 if __name__ == '__main__':
     rospy.init_node('publish_fake_data', anonymous=False)
 
-    if rospy.get_param('~run_in_mock', True):
-        # Run fake data
-        run_mock_data()
-    else:
-        # Run lidar data
-        sub = rospy.Subscriber('/scan', LaserScan, display_data)
-        # run_real_data()
-        rospy.spin()
+    # if rospy.get_param('~run_in_mock', True):
+    #     # Run fake data
+    #     run_mock_data()
+    # else:
+    # Run lidar data
+    sub = rospy.Subscriber('/scan', LaserScan, display_data)
+    # run_real_data()
+    rospy.spin()

@@ -31,6 +31,6 @@
     <arg name="long_range_output" value="$(arg long_range_output)" />
   </include>
 
-  <include file="$(find wr_led_matrix)/launch/led_matrix.launch" />
+  <!-- <include file="$(find wr_led_matrix)/launch/led_matrix.launch" /> -->
 
 </launch>

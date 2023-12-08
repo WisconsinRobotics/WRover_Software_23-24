@@ -11,7 +11,7 @@ import pickle
 
 ROVER_WIDTH = 1.06
 
-#scan_rviz_pub = rospy.Publisher("/scan_rviz", LaserScan, queue_size=10)
+scan_rviz_pub = rospy.Publisher("/scan_rviz", LaserScan, queue_size=10)
 # TODO (@bennowotny ) This should be disable-able for bandwidth
 #window_pub = rospy.Publisher("/lidar_windows", PoseArray, queue_size=1)
 
@@ -48,6 +48,7 @@ def is_wide_valley(sector_i: int, sector_f: int, max_valley: int) -> bool:
 
 
 def offset_lidar_data(data, sector_angle, is_rviz=False):
+    # the 0 angle is the right side but the lidar starts from there, we add another 90 degrees so that the right is at 0
     offset_data = [0] * len(data)
     if is_rviz:
         for i in range(len(data)):
@@ -80,7 +81,7 @@ def get_valley(
     #rviz_data.ranges = gaussian_smooth.gaussian_filter1d(rviz_data.ranges, smoothing)
     rviz_data.ranges = offset_lidar_data(
         rviz_data.ranges, sector_angle, is_rviz=True)
-    #scan_rviz_pub.publish(rviz_data)
+    scan_rviz_pub.publish(rviz_data)
 
     # rospy.loginfo(f"{data.ranges}")
     # TODO: remove dependency on this variable by making the mock script more like real hardware input
@@ -132,7 +133,7 @@ def get_valley(
                 right_bound = min(
                     max(right_bound, one_obstacle[i]+angleToIncrease), len(hist))
 
-            rospy.logerr("Left: " + str(left_bound) + "Right: " + str(right_bound))
+            #rospy.logerr("Left: " + str(left_bound) + "Right: " + str(right_bound))
             # Check to see if the obstacle we just found can actually be merged with a previous obstacle
             while len(obstacle_list) > 0 and obstacle_list[-1][1] >= left_bound:
                 left_bound = min(left_bound, obstacle_list[-1][0])
