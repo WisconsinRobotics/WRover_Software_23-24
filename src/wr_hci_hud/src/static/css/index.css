@@ -25,6 +25,7 @@ body{
     overflow: hidden;
 }
 
+
 .dropdown {
     position: relative;
     display: inline-block;
@@ -98,9 +99,8 @@ body{
 }
 
 .diagnostic-input {
-    width: 90%;
+    width: 50%;
     height: 80%;
-    margin-top: 10px;
     padding: 10px;
     font-size: 1.2rem;
     border-radius: 5px;
@@ -112,16 +112,111 @@ body{
     
 }
 
+
 #joystick1{
     width: 30%;
-    height: 40%;
-    margin-top: 10px;
+    margin: 10px;
+    margin-right: 60px;
     padding: 10px;
     font-size: 1.2rem;
     border-radius: 5px;
     border: none;
     /* box-shadow: 2px 2px 4px #000000; */
     background-color: rgb(42, 42, 42);
+    color: white;
+    resize: none;
+}
+
+#controlContent{
+    height: auto;
+    width: auto;
+    margin: 0;
+    display: flex;
+
+}
+
+#mapimg{
+    width: 40%;
+    height: 40%;
+    border: #000000 3px solid;
+}
+
+.square-heading {
+    margin: 0;
+}
+
+.square-title {
+    height: 10%;
+}
+
+#info-box {
+    display: flex;
+    padding: 0;
+    margin: 0;
+    height: 80%;
+    padding-top: 10px;
+}
+
+#smallInfoBox{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#gpsBox{
+    display: flex;
+    text-align: center;
+    vertical-align: middle;
+    font-size: large;
+}
+
+#voltage-div {
+    /* background-color: rgb(42, 42, 42); */
+    margin-left: 20px;
+    height: 50px;
+    width: 100px;
+    border-radius: 5px;
+    margin-bottom: 10%;
+    font-size: large;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 50px;
+    text-shadow: #000000 3px 3px 4px;
+    background-image: linear-gradient(180deg, rgb(42, 42, 42) 60%, #00ff44 60%);
+}
+
+.gps{
+    
+    margin-left: 20px;
+    height: 50px;
+    width: 100px;
+    border-radius: 5px;
+    font-size: large;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 50px;
+    text-shadow: #000000 3px 3px 4px;
+    background-color: rgb(42, 42, 42);
+}
+
+.infoLabel{
+    margin-left: 20px;
+    height: 50px;
+    border-radius: 5px;
+    font-size: large;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 50px;
+    text-shadow: #000000 3px 3px 4px;
+}
+
+#videoBox{
+    height: 40%;
+    width: 60%;
+    background-color: rgb(42, 42, 42);
+    border-radius: 5px;
+    border: none;
+    box-shadow: 2px 2px 4px #000000;
     color: white;
     resize: none;
 }

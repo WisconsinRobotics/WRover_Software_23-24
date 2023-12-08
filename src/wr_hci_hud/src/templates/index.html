@@ -9,7 +9,9 @@
     </head>
     <body>
         <div class="square launch">
-            <h1 style="margin: 0;">Launch</h1>
+            <div class="square-title">
+                <h1 class="square-heading">Launch</h1>
+            </div>
             <div class="dropdown">
                 <button class="launch-button">Competition mission</button>
             </div>
@@ -24,17 +26,58 @@
             </div>
         </div>
 
-        <div class="square control"><h1 style="margin: 0;">Control</h1><p style="margin: 0;"></p>
-            <div id="joystick1"></div>
+        <div class="square control">
+            <div class="square-title">
+                <h1 class="square-heading">Control</h1>
+            </div>
+
+
+            <div id="controlContent">
+                <p style="margin: 0;"></p>
+                <div id="joystick1">
+                    <script src="./../static/js/nipplejs.js"></script>
+                    <script>
+                        var dynamic = nipplejs.create({
+                            zone: document.getElementById('joystick1'),
+                            color: "white",
+                            // dataOnly: Boolean,              // no dom element whatsoever
+                            position: {top: "30%", right: "40%"},               // preset position for 'static' mode
+                            mode: "static",                   // 'dynamic', 'static' or 'semi'
+                            // restJoystick: Boolean|Object,   // Re-center joystick on rest state
+                            restOpacity: 1,            // opacity when not 'dynamic' and rested
+                            // lockX: Boolean,                 // only move on the X axis
+                            // lockY: Boolean,                 // only move on the Y axis
+                        });
+                    </script>
+                </div>
+                <img id="mapimg" src="https://lroc.sese.asu.edu/ckeditor_assets/pictures/456/content_fig_04_boguslavsky_map_ellipses_crop.png" alt="Online Image" width="200" height="150">
+            </div>
+
         </div>
 
         <div class="square diagnostic">
-            <h1 style="margin: 0;">Diagnostic</h1><p style="margin: 0;"></p>
-            <textarea class="diagnostic-input" placeholder="Diagnostics from the server will be displayed here" readonly ></textarea>
+            <div class="square-title">
+                <h1 class="square-heading">Diagnostic</h1>
+            </div>
+            <div id="info-box">
+                <textarea class="diagnostic-input" placeholder="Diagnostics from the server will be displayed here" readonly ></textarea>
+                <div id="smallInfoBox">
+                    <div class="infoLabel">Voltage</div>
+                    <div id="voltage-div">2.5 V</div>
+                    <div class="infoLabel">Coordinate</div>
+                    <div id="gpsBox">
+                        <div class="gps">X: 122.43</div>
+                        <div class="gps">Y: -12.43</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="square Video">
-            <h1 style="margin: 0;">Video</h1>
+            <div class="square-title">
+                <h1 class="square-heading">Video</h1>
+            </div>
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/jfKfPfyJRdk" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
         </div>
     </body>
 </html>

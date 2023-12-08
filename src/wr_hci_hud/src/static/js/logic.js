@@ -78,3 +78,5 @@ function handleScroll() {
     detectScroll = true;
 }
     
+const voltageDiv = document.getElementById('voltage-div'); // Find element with id "voltage-div"
+
