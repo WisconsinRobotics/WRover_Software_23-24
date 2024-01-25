@@ -112,21 +112,6 @@ body{
     
 }
 
-
-#joystick1{
-    width: 30%;
-    margin: 10px;
-    margin-right: 60px;
-    padding: 10px;
-    font-size: 1.2rem;
-    border-radius: 5px;
-    border: none;
-    /* box-shadow: 2px 2px 4px #000000; */
-    background-color: rgb(42, 42, 42);
-    color: white;
-    resize: none;
-}
-
 #controlContent{
     height: auto;
     width: auto;
@@ -219,4 +204,46 @@ body{
     box-shadow: 2px 2px 4px #000000;
     color: white;
     resize: none;
+}
+
+#joystick{
+    width: 30%;
+    margin: 10px;
+    margin-right: 60px;
+    padding: 10px;
+    font-size: 1.2rem;
+    border-radius: 5px;
+    border: none;
+    /* box-shadow: 2px 2px 4px #000000; */
+    background-color: rgb(42, 42, 42);
+    color: white;
+    resize: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#joystickBase{
+    width: 100px;
+    height: 100px;
+    background-color: #888888;
+    border-radius: 50%;
+    
+}
+
+#joystickHandle{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    width: 50px;
+    height: 50px;
+    background-color: #ffffff;
+    user-select: none;
+    border-radius: 50%;
+    margin-left: 25px;
+    margin-top: 25px;
+    color: #000000;
+    font-size: medium;
+    cursor: grab;
 }
