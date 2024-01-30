@@ -44,6 +44,13 @@
         "package": "ros-noetic-moveit-visual-tools",
         "provider": "apt"
       }
+    },
+    {
+      "name": "ros-ublox",
+      "build": {
+        "package": "ros-noetic-ublox",
+        "provider": "apt"
+      }
     }
   ]
 }
