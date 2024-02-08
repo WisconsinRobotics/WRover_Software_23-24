@@ -19,12 +19,12 @@
     unless="$(eval env('WROVER_HW') == 'REAL')" />
 
   <node pkg="wr_logic_ai" name="wait_for_user_input" type="wait_for_user_input.py" output="screen" />
-  <node pkg="wr_logic_ai" name="nav_state_machine_driver" type="state_machine.py" output="screen" />
+  <!-- <node pkg="wr_logic_ai" name="nav_state_machine_driver" type="state_machine.py" output="screen" /> -->
 
   <include file="$(find wr_logic_ai)/launch/mux_select.launch">
     <arg name="mux_name" default="nav_mux" />
     <arg name="long_range_output" value="$(arg long_range_output)" />
-    <arg name="short_range_output" value="$(arg short_range_output)" />
+    <!-- <arg name="short_range_output" value="$(arg short_range_output)" /> -->
   </include>
 
   <include file="$(find wr_logic_ai)/launch/long_range.launch">

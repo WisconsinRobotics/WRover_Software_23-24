@@ -183,14 +183,16 @@ def initialize() -> None:
 def update_gps_coord(msg: CoordinateMsg) -> None:
     global current_lat
     global current_long
-    current_lat = msg.latitude
-    current_long = msg.longitude
+    # current_lat = msg.latitude
+    # current_long = msg.longitude
+    current_lat = 0.0
+    current_long = 10000
 
 
 # extected as 0 to 360 from  North (Clockwise)
 def update_heading(msg: Float64) -> None:
     global cur_heading
-    cur_heading = (90-msg.data) % 360  # Shifting to East
+    cur_heading = (90 - msg.data) % 360  # Shifting to East
 
 
 def angle_diff(heading1: float, heading2: float) -> float:
@@ -272,7 +274,8 @@ def update_navigation(data: LaserScan) -> None:
         delta_heading_msg.header.stamp = rospy.get_rostime()
 
         frameCount += 1
-        heading_msg.pose.orientation.z = math.sin(math.radians(result) / 2)
+        # negative sign on the pose is hardcoded, may not model how the actual robot will act
+        heading_msg.pose.orientation.z = -math.sin(math.radians(result) / 2)
         heading_msg.pose.orientation.w = math.cos(math.radians(result) / 2)
         heading_pub.publish(heading_msg)
 

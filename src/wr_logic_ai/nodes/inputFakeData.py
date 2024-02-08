@@ -294,7 +294,13 @@ def updateHeading(data) -> None:
 
 def display_data(data) -> None:
     rviz_data = deepcopy(data)
-    rospy.logerr((data.ranges[287]))
+
+    # rospy.logerr((data.ranges[287]))
+    # print(data.ranges[287])
+
+    rospy.loginfo("Front " + str(data.ranges[0 * 287]))
+    rospy.loginfo("Back " + str(data.ranges[2 * 287]))
+
 
     rviz_data.ranges = offset_lidar_data(
         rviz_data.ranges, math.degrees(rviz_data.angle_increment), True)
@@ -315,5 +321,5 @@ if __name__ == '__main__':
     # else:
     # Run lidar data
     sub = rospy.Subscriber('/scan', LaserScan, display_data)
-    # run_real_data()
+    #run_real_data()
     rospy.spin()
