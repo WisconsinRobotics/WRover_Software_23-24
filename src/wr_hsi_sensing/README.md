@@ -10,3 +10,12 @@ The current IMU implementation doesn't actually use the IMU (due to a thermal fa
 ## Launching
 
 The `hw_test.launch` file starts both the IMU and GPS sensing.  Currently, since the IMU logic was not run at competition, only the GPS node is started.
+
+# We're doing rtk now and it'll need a few things
+
+First we'll need access to a file so run: `sudo chmod a+rw /dev/ttyACM0`
+Then run the node: `roslaunch wr_hsi_sensing rtk_test.launch`
+
+To see all ros topics run: `rostopic list`
+To get info of a topic run: `rostopic info /gps/fix`
+To see all messages on a topic run: `rostopic echo /gps/fix`
