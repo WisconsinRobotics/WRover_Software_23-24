@@ -1,6 +1,6 @@
 import math
 
-class coord_calculations:
+class CoordCalculations:
     #def __init__(self, )
     earth_radius = 6378100 # in meters
 
@@ -17,7 +17,7 @@ class coord_calculations:
             # update the distance as needed
             if (i > 1) and (i % 2) == 0:
                 mult += orig_dist
-            coords.append(coord_calculations.calc_dest_coord(coords[i]['lat'], coords[i]['long'], distance + mult, bearing))
+            coords.append(CoordCalculations.calc_dest_coord(coords[i]['lat'], coords[i]['long'], distance + mult, bearing))
             bearing += 90
 
         return coords
@@ -33,13 +33,13 @@ class coord_calculations:
 
         # call respective direction method
         if bearing % 360 == 0:
-            lat2_rad, lon2_rad = coord_calculations.calc_north_coord(lat1_rad, lon1_rad, distance)
+            lat2_rad, lon2_rad = CoordCalculations.calc_north_coord(lat1_rad, lon1_rad, distance)
         elif bearing % 360 == 90:
-            lat2_rad, lon2_rad = coord_calculations.calc_east_coord(lat1_rad, lon1_rad, distance)
+            lat2_rad, lon2_rad = CoordCalculations.calc_east_coord(lat1_rad, lon1_rad, distance)
         elif bearing % 360 == 180:
-            lat2_rad, lon2_rad = coord_calculations.calc_south_coord(lat1_rad, lon1_rad, distance)
+            lat2_rad, lon2_rad = CoordCalculations.calc_south_coord(lat1_rad, lon1_rad, distance)
         elif bearing % 360 == 270:
-            lat2_rad, lon2_rad = coord_calculations.calc_west_coord(lat1_rad, lon1_rad, distance)
+            lat2_rad, lon2_rad = CoordCalculations.calc_west_coord(lat1_rad, lon1_rad, distance)
         else:
             return {}
 
@@ -52,25 +52,25 @@ class coord_calculations:
 
     @staticmethod
     def calc_north_coord(lat1, lon1, distance):
-        lat2 = math.asin(math.sin(lat1) * math.cos(distance / coord_calculations.earth_radius) + math.cos(lat1) * math.sin(distance / coord_calculations.earth_radius) * 1)
+        lat2 = math.asin(math.sin(lat1) * math.cos(distance / CoordCalculations.earth_radius) + math.cos(lat1) * math.sin(distance / CoordCalculations.earth_radius) * 1)
 
         return lat2, lon1
 
     @staticmethod
     def calc_east_coord(lat1, lon1, distance):
-        lon2 = lon1 + math.atan2(1 * math.sin(distance / coord_calculations.earth_radius) * math.cos(lat1), math.cos(distance / coord_calculations.earth_radius) - math.sin(lat1) ** 2)
+        lon2 = lon1 + math.atan2(1 * math.sin(distance / CoordCalculations.earth_radius) * math.cos(lat1), math.cos(distance / CoordCalculations.earth_radius) - math.sin(lat1) ** 2)
 
         return lat1, lon2
 
     @staticmethod
     def calc_south_coord(lat1, lon1, distance):
-        lat2 = math.asin(math.sin(lat1) * math.cos(distance / coord_calculations.earth_radius) + math.cos(lat1) * math.sin(distance / coord_calculations.earth_radius) * -1)
+        lat2 = math.asin(math.sin(lat1) * math.cos(distance / CoordCalculations.earth_radius) + math.cos(lat1) * math.sin(distance / CoordCalculations.earth_radius) * -1)
 
         return lat2, lon1
 
 
     @staticmethod
     def calc_west_coord(lat1, lon1, distance):
-        lon2 = lon1 + math.atan2(-1 * math.sin(distance / coord_calculations.earth_radius) * math.cos(lat1), math.cos(distance / coord_calculations.earth_radius) - math.sin(lat1) ** 2)
+        lon2 = lon1 + math.atan2(-1 * math.sin(distance / CoordCalculations.earth_radius) * math.cos(lat1), math.cos(distance / CoordCalculations.earth_radius) - math.sin(lat1) ** 2)
 
         return lat1, lon2
