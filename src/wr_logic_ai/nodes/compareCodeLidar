@@ -105,6 +105,7 @@ def initialize() -> None:
     delta_heading_msg.pose.orientation.x = 0
     delta_heading_msg.pose.orientation.y = 0
     delta_heading_msg.header.frame_id = "laser"
+    
 
     laser_adjuster_pub = rospy.Publisher('/laser_adjuster', Float64, queue_size=1)
 
@@ -143,7 +144,7 @@ def initialize() -> None:
     wRover.mesh_resource = "package://wr_logic_ai/meshes/Eclipse_Base_Simple.stl"  # Replace with your 3D object path
     wRover.pose.position.x = 0.0  # Replace with your desired position
     wRover.pose.position.y = 0.0
-    wRover.pose.position.z = 0.11
+    wRover.pose.position.z = .11
     wRover.pose.orientation.x = 0.0  # Replace with your desired orientation
     wRover.pose.orientation.y = 0.0
     wRover.pose.orientation.z = 0.0
@@ -177,6 +178,7 @@ def initialize() -> None:
     marker_flag.color.g = 0.0
     marker_flag.color.b = 0.0
     
+
 
 def update_gps_coord(msg: CoordinateMsg) -> None:
     global current_lat
@@ -285,7 +287,7 @@ def update_navigation(data: LaserScan) -> None:
         delta_heading_msg.pose.orientation.z = math.sin(math.radians(delta_heading+90) / 2)
         delta_heading_msg.pose.orientation.w = math.cos(math.radians(delta_heading+90) / 2)
         delta_heading_pub.publish(delta_heading_msg)
-        
+
         # TESTING
 
         # Adding the nums is cuz the flag is off center, I'm not sure why??? I downloaded this from a random website :D

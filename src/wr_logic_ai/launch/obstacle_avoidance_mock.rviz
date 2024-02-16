@@ -10,9 +10,6 @@ Panels:
         - /Pose1
         - /Pose2
         - /Pose3
-        - /Marker1
-        - /Marker2
-        - /Marker3
       Splitter Ratio: 0.5
     Tree Height: 774
   - Class: rviz/Selection
@@ -158,6 +155,14 @@ Visualization Manager:
         "": true
       Queue Size: 100
       Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /flag_marker
+      Name: Marker
+      Namespaces:
+        "": true
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -186,7 +191,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 13.922130584716797
+      Distance: 19.807146072387695
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -202,9 +207,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.2697961330413818
+      Pitch: 0.8347963690757751
       Target Frame: <Fixed Frame>
-      Yaw: 4.604033946990967
+      Yaw: 5.429034233093262
     Saved:
       - Class: rviz/Orbit
         Distance: 15.243936538696289
