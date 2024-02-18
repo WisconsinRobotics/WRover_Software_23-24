@@ -7,7 +7,7 @@ project(wr_hsi_sensing)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS message_generation std_msgs rospy)
+find_package(catkin REQUIRED COMPONENTS message_generation std_msgs roscpp rospy)
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -118,13 +118,24 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
 # include
+sh2
 ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/wr_hsi_sensing.cpp
+# add_library(sh2
+#   # src/${PROJECT_NAME}/wr_hsi_sensing.cpp
 # )
+
+add_library(${PROJECT_NAME}
+  sh2/euler.c
+  sh2/sh2_SensorValue.c
+  sh2/sh2_util.c
+  sh2/sh2.c
+  sh2/shtp.c
+  src/BNO085_hal.cpp
+)
+# target_link_libraries(${PROJECT_NAME} sh2)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -134,7 +145,8 @@ ${catkin_INCLUDE_DIRS}
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/wr_hsi_sensing_node.cpp)
+add_executable(BNO0855_IMU src/BNO085_IMU.cpp)
+target_link_libraries(BNO0855_IMU ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
