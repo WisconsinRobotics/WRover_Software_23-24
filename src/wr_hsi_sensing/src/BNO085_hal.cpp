@@ -1,14 +1,15 @@
 #include "BNO085_hal.hpp"
+#include "sh2.h"
 
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
 #include <fcntl.h>
-#include <i2c/smbus.h>
 #include <iostream>
 #include <linux/i2c-dev.h>
 #include <memory>
+#include <ostream>
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -40,6 +41,10 @@ BNO085::BNO085(int addr)
     i2c_addr = addr;
 }
 
+BNO085::~BNO085() {
+    close();
+}
+
 auto BNO085::begin() -> bool {
     int status;
 
@@ -65,12 +70,41 @@ auto BNO085::reset() -> int {
     return sh2_devReset();
 }
 
+void BNO085::close() {
+    sh2_close();
+}
+
 auto BNO085::set_sensor_config(sh2_SensorId_t sensorId) -> int {
 
     sh2_SensorConfig_t sensor_config;
-    sensor_config.reportInterval_us = 100000;
+    // TODO make this not a magic number
+    sensor_config.reportInterval_us = 10000;
 
     return sh2_setSensorConfig(sensorId, &sensor_config);
+}
+
+auto BNO085::get_sensor_event() -> bool {
+    sensor_value.timestamp = 0;
+
+    sh2_service();
+
+    if (sensor_value.timestamp == 0) {
+        return false;
+    }
+
+    return true;
+}
+
+auto BNO085::get_mag_x() -> int {
+    return sensor_value.un.rawMagnetometer.x;
+}
+
+auto BNO085::get_mag_y() -> int {
+    return sensor_value.un.rawMagnetometer.y;
+}
+
+auto BNO085::get_mag_z() -> int {
+    return sensor_value.un.rawMagnetometer.z;
 }
 
 static auto get_timestamp_us() -> uint32_t {
@@ -95,7 +129,6 @@ static auto sh2_hal_open(sh2_Hal_t *self) -> int {
 }
 
 static void sh2_hal_close(sh2_Hal_t *self) {
-    // Empty for now
     close(fd);
 }
 
@@ -125,22 +158,19 @@ static auto sh2_hal_getTimeUs(sh2_Hal_t *self) -> uint32_t {
 
 // Handle non-sensor events from the sensor hub
 static void event_handler(void *cookie, sh2_AsyncEvent_t *pEvent) {
-    // // If we see a reset, set a flag so that sensors will be reconfigured.
-    // if (pEvent->eventId == SH2_RESET) {
-    //     resetOccurred = true;
-    // }
-    // else if (pEvent->eventId == SH2_SHTP_EVENT) {
-    //     printf("EventHandler  id:SHTP, %d\n", pEvent->shtpEvent);
-    // }
-    // else if (pEvent->eventId == SH2_GET_FEATURE_RESP) {
-    //     // printf("EventHandler Sensor Config, %d\n", pEvent->sh2SensorConfigResp.sensorId);
-    // }
-    // else {
-    //     printf("EventHandler, unknown event Id: %d\n", pEvent->eventId);
-    // }
-
     // TODO - figure out what events need to be handled
-    std::cout << "EventHandler recieved event Id: " << pEvent->eventId << std::endl;
+
+    if (pEvent->eventId == SH2_RESET) {
+        std::cout << "Sensor Reset" << std::endl;
+        // // If we see a reset, set a flag so that sensors will be reconfigured.
+        //     resetOccurred = true;
+    } else if (pEvent->eventId == SH2_SHTP_EVENT) {
+        std::cout << "EventHandler recieved SHTP event ID: " << pEvent->shtpEvent << std::endl;
+    } else if (pEvent->eventId == SH2_GET_FEATURE_RESP) {
+        std::cout << "EventHandler Sensor Config: " << pEvent->sh2SensorConfigResp.sensorId << std::endl;
+    } else {
+        std::cout << "EventHandler reieved unknown event ID: " << pEvent->eventId << std::endl;
+    }
 }
 
 // Handle sensor events from the sensor hub
@@ -149,7 +179,9 @@ static void sensor_handler(void *cookie, sh2_SensorEvent_t *pEvent) {
     if (sensor_value_ptr != nullptr) {
         int status = sh2_decodeSensorEvent(sensor_value_ptr, pEvent);
 
-        // if (status != SH2_OK) {
-        // }
+        if (status != SH2_OK) {
+            sensor_value_ptr->timestamp = 0;
+            std::cout << "Error decoding SensorEvent" << std::endl;
+        }
     }
 }

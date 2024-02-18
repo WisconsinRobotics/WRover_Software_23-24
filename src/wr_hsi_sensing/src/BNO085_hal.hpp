@@ -9,14 +9,20 @@ extern "C" {
 }
 
 #define DEFAULT_ADDR 0x4A
-#define I2C_ADAPTER "/dev/i2c-0"
+#define I2C_ADAPTER "/dev/i2c-1"
 
 class BNO085 {
 public:
     explicit BNO085(int addr = DEFAULT_ADDR);
+    ~BNO085();
     auto begin() -> bool;
     auto reset() -> int;
+    void close();
     auto set_sensor_config(sh2_SensorId_t sensorId) -> int;
+    auto get_sensor_event() -> bool;
+    auto get_mag_x() -> int;
+    auto get_mag_y() -> int;
+    auto get_mag_z() -> int;
 
     sh2_ProductIds_t prod_ids;
     sh2_SensorValue_t sensor_value;

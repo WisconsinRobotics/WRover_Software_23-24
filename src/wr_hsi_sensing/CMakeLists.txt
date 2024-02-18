@@ -145,8 +145,8 @@ add_library(${PROJECT_NAME}
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(BNO0855_IMU src/BNO085_IMU.cpp)
-target_link_libraries(BNO0855_IMU ${catkin_LIBRARIES} ${PROJECT_NAME})
+add_executable(BNO085_IMU src/BNO085_IMU.cpp)
+target_link_libraries(BNO085_IMU ${catkin_LIBRARIES} ${PROJECT_NAME})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
