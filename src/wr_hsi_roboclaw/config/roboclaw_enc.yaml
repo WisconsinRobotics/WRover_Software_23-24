@@ -7,10 +7,11 @@ claws:
     enc_left:
         enabled: true
         max_speed: 100 # TODO probably don't actually need all these encoders
-        offset: 500
+        offset: 486
     enc_right:
         enabled: true
         max_speed: 100
+        offset: 1301
     #current_limit_left: 15
     #current_limit_right: 15
   aux1: # arm elbow/forearm, science ?
@@ -19,10 +20,11 @@ claws:
     enc_left:
         enabled: true
         max_speed: 100
-        offset: 500
+        offset: 364
     enc_right:
         enabled: true
         max_speed: 100
+        offset: 446
     #current_limit_left: 15
     #current_limit_right: 15
   aux2: # arm wrist, science ?
@@ -43,9 +45,10 @@ claws:
     enc_left:
         enabled: true
         max_speed: 100
-        offset: 500
+        offset: 312
     enc_right:
         enabled: true
         max_speed: 300000000
+        offset: 124
     #current_limit_left: 15
     #current_limit_right: 15

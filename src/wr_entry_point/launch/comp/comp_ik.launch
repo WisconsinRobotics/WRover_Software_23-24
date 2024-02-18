@@ -1,7 +1,17 @@
 <launch>
     <include file="$(find wroboarm_23)/launch/demo_test.launch" />
-    <node name="arm_driver" pkg="wr_logic_teleop_arm" type="ArmTeleopLogic" output="screen" />
+
+    <!-- <node name="arm_driver" pkg="wr_logic_teleop_arm" type="ArmTeleopLogic" output="screen" /> -->
+    <node name="bad_arm_driver" pkg="wr_logic_teleop_arm" type="bad_arm_driver.py">
+        <param name="controller_ns" value="/hci/arm/gamepad" />
+        <param name="claw_ns_0" value="/hsi/roboclaw/aux0" />
+        <param name="claw_ns_1" value="/hsi/roboclaw/aux1" />
+        <param name="claw_ns_2" value="/hsi/roboclaw/aux2" />
+        <param name="claw_ns_3" value="/hsi/roboclaw/aux3" />
+    </node>
+    
     <node name="end_effector_driver" pkg="wr_logic_teleop_arm" type="end_effector_controller.py"
         output="screen" />
+        
     <include file="$(find wr_control_drive_arm)/launch/std.launch" />
 </launch>

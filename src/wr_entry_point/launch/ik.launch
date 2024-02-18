@@ -5,15 +5,15 @@
     <include file="$(find wr_entry_point)/launch/comp/comp_roboclaw.launch">
         <arg name="use_encoders" value="true" />
     </include>
-    <include file="$(find wr_entry_point)/launch/comp/comp_falcon.launch" />
+    <!-- <include file="$(find wr_entry_point)/launch/comp/comp_falcon.launch" /> -->
 
     <!-- HCI -->
     <include file="$(find wr_entry_point)/launch/comp/comp_ui.launch" />
     <include file="$(find wr_hci_hid)/launch/teleop_arm.launch" />
 
     <!-- Drive -->
-    <include file="$(find wr_entry_point)/launch/comp/comp_ds_control.launch" />
-    <include file="$(find wr_entry_point)/launch/comp/comp_ds_teleop.launch" />
+    <!-- <include file="$(find wr_entry_point)/launch/comp/comp_ds_control.launch" /> -->
+    <!-- <include file="$(find wr_entry_point)/launch/comp/comp_ds_teleop.launch" /> -->
 
     <!-- IK -->
     <include file="$(find wr_entry_point)/launch/comp/comp_ik.launch" />
