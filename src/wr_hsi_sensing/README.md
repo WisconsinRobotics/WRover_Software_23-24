@@ -13,6 +13,12 @@ The `hw_test.launch` file starts both the IMU and GPS sensing.  Currently, since
 
 # We're doing rtk now and it'll need a few things
 
+Initialize the project: `./assemble.py init`
+Make the venv so ros runs: `source setup.sh` (I think build does this)
+Clean if broken: `./assemble.py clean`
+Build the project: `./assemble.py build` (will take forever, installs dependencies too)
+
+Check which tty exists: `ls /dev/tty*`
 First we'll need access to a file so run: `sudo chmod a+rw /dev/ttyACM0`
 Then run the node: `roslaunch wr_hsi_sensing rtk_test.launch`
 
