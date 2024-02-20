@@ -12,6 +12,7 @@ find_package(catkin REQUIRED COMPONENTS
     std_msgs
     rospy
     ublox_gps
+    mapviz
 )
 
 ## System dependencies are found with CMake's conventions

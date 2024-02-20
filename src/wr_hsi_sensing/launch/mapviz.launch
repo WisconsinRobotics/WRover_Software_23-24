@@ -1,0 +1,15 @@
+<launch>
+
+  <node pkg="mapviz" type="mapviz" name="mapviz">
+    <!-- <param name="config" value=""/> -->
+  </node>
+
+  <node pkg="swri_transform_util" type="initialize_origin.py" name="initialize_origin" >
+    <param name="local_xy_frame" value="/map"/> <!-- Could be "/map"-->
+    <param name="local_xy_origin" value="auto"/>
+    <param name="local_xy_navsatfix_topic" value="/gps/fix"/>
+    
+  </node>
+
+  <!-- <node pkg="tf" type="static_transform_publisher" name="swri_transform" args="0 0 0 0 0 0 /map /origin 100"  /> -->
+</launch>

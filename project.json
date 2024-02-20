@@ -51,6 +51,13 @@
         "package": "ros-noetic-ublox",
         "provider": "apt"
       }
+    },
+    {
+      "name": "mapviz",
+      "build": {
+        "package": "ros-noetic-mapviz",
+        "provider": "apt"
+      }
     }
   ]
 }
