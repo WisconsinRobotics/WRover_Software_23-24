@@ -5,8 +5,6 @@
 #include "ros/node_handle.h"
 #include "ros/publisher.h"
 #include "ros/rate.h"
-#include "sh2.h"
-#include "sh2_err.h"
 #include "std_msgs/Float64.h"
 #include <cstdlib>
 #include <iostream>
@@ -28,19 +26,40 @@ auto main(int argc, char **argv) -> int {
     auto pub_y{nHandle.advertise<std_msgs::Float64>("/mag_y", QUEUE_SIZE)};
     auto pub_z{nHandle.advertise<std_msgs::Float64>("/mag_z", QUEUE_SIZE)};
 
+    auto pub_heading{nHandle.advertise<std_msgs::Float64>("/heading_data", QUEUE_SIZE)};
+
     // Initalize IMU
-    BNO085 sensor;
+    BNO085 sensor(true);
     if (!sensor.begin()) {
         ROS_FATAL("FAILED TO INITIALIZE IMU");
     }
 
-    if (sensor.set_sensor_config(SH2_RAW_MAGNETOMETER) != SH2_OK) {
-        ROS_FATAL("FAILED TO ENABLE MAGNETOMETER");
+    if (sensor.set_sensor_config(SH2_MAGNETIC_FIELD_UNCALIBRATED) != SH2_OK) {
+        ROS_FATAL("FAILED TO ENABLE MAGNETIC FIELD");
     }
 
+    if (sensor.set_sensor_config(SH2_MAGNETIC_FIELD_CALIBRATED) != SH2_OK) {
+        ROS_FATAL("FAILED TO ENABLE MAGNETIC FIELD CALIBRATED");
+    }
+
+    if (sensor.set_sensor_config(SH2_ROTATION_VECTOR) != SH2_OK) {
+        ROS_FATAL("FAILED TO ENABLE ROTATION VECTOR");
+    }
+
+    std_msgs::Float64 mag_x, mag_y, mag_z, heading;
     while (ros::ok()) {
         if (sensor.get_sensor_event()) {
-            std::cout << "Mag X: " << sensor.get_mag_x() << "Mag Y: " << sensor.get_mag_y() << "Mag Z: " << sensor.get_mag_z() << std::endl;
+            mag_x.data = sensor.get_mag_x();
+            pub_x.publish(mag_x);
+
+            mag_y.data = sensor.get_mag_y();
+            pub_y.publish(mag_y);
+
+            mag_z.data = sensor.get_mag_z();
+            pub_z.publish(mag_z);
+
+            heading.data = sensor.get_yaw();
+            pub_heading.publish(heading);
         }
 
         rate.sleep();

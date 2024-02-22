@@ -2,14 +2,13 @@
 #include "sh2.h"
 
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
 #include <fcntl.h>
-#include <iostream>
 #include <linux/i2c-dev.h>
 #include <memory>
-#include <ostream>
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -18,6 +17,7 @@
 
 static int fd;
 static int i2c_addr;
+static bool debug_i2c;
 static sh2_SensorValue_t *sensor_value_ptr = nullptr;
 
 static auto get_timestamp_us() -> uint32_t;
@@ -31,14 +31,18 @@ static auto sh2_hal_getTimeUs(sh2_Hal_t *self) -> uint32_t;
 static void event_handler(void *cookie, sh2_AsyncEvent_t *pEvent);
 static void sensor_handler(void *cookie, sh2_SensorEvent_t *pEvent);
 
-BNO085::BNO085(int addr)
-    : _sh2_hal{
+BNO085::BNO085(bool debug, int addr)
+    : _debug(debug),
+      _sh2_hal{
           .open = sh2_hal_open,
           .close = sh2_hal_close,
           .read = sh2_hal_read,
           .write = sh2_hal_write,
-          .getTimeUs = sh2_hal_getTimeUs} {
+          .getTimeUs = sh2_hal_getTimeUs},
+      sensor_value(),
+      prod_ids() {
     i2c_addr = addr;
+    debug_i2c = debug;
 }
 
 BNO085::~BNO085() {
@@ -46,9 +50,7 @@ BNO085::~BNO085() {
 }
 
 auto BNO085::begin() -> bool {
-    int status;
-
-    status = sh2_open(&_sh2_hal, event_handler, nullptr);
+    int status = sh2_open(&_sh2_hal, event_handler, nullptr);
     if (status != SH2_OK) {
         return false;
     }
@@ -88,27 +90,60 @@ auto BNO085::get_sensor_event() -> bool {
 
     sh2_service();
 
-    if (sensor_value.timestamp == 0) {
-        return false;
-    }
-
-    return true;
+    return sensor_value.timestamp != 0;
 }
 
-auto BNO085::get_mag_x() -> int {
+auto BNO085::get_mag_x() -> float {
+    return sensor_value.un.magneticField.x;
+}
+
+auto BNO085::get_mag_y() -> float {
+    return sensor_value.un.magneticField.y;
+}
+
+auto BNO085::get_mag_z() -> float {
+    return sensor_value.un.magneticField.z;
+}
+
+auto BNO085::get_raw_mag_x() -> int {
     return sensor_value.un.rawMagnetometer.x;
 }
 
-auto BNO085::get_mag_y() -> int {
+auto BNO085::get_raw_mag_y() -> int {
     return sensor_value.un.rawMagnetometer.y;
 }
 
-auto BNO085::get_mag_z() -> int {
+auto BNO085::get_raw_mag_z() -> int {
     return sensor_value.un.rawMagnetometer.z;
 }
 
+auto BNO085::get_yaw() -> float {
+    return q_to_yaw(sensor_value.un.rotationVector.real,
+                    sensor_value.un.rotationVector.i,
+                    sensor_value.un.rotationVector.j,
+                    sensor_value.un.rotationVector.k);
+}
+
+auto BNO085::tare(bool zAxis, sh2_TareBasis_t basis) -> bool {
+  int status = sh2_setTareNow(zAxis ? SH2_TARE_Z : (SH2_TARE_X & SH2_TARE_Y & SH2_TARE_Z), basis);
+
+  return status == SH2_OK;	
+}
+
+auto BNO085::persist_tare() -> bool{
+  int status = sh2_persistTare();
+
+    return status == SH2_OK;
+}
+
+auto BNO085::clear_tare() -> bool {
+  int status = sh2_clearTare();
+
+  return status == SH2_OK;
+}
+
 static auto get_timestamp_us() -> uint32_t {
-    struct timespec ts;
+    struct timespec ts{};
     clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
     return ts.tv_nsec / US_TO_NS;
 }
@@ -140,6 +175,13 @@ static auto sh2_hal_read(sh2_Hal_t *self, uint8_t *pBuffer, unsigned int len, ui
         return 0;
     }
 
+    if (debug_i2c) {
+        uint16_t packet_size = (buf[0] | (buf[1] << 8)) & ~0x8000U;
+        uint8_t seq_num = buf[3];
+
+        printf("Recieved packet of %d bytes, Sequence number %d\n", packet_size, seq_num);
+    }
+
     memcpy(pBuffer, buf.get(), len);
 
     *t_us = get_timestamp_us();
@@ -148,6 +190,10 @@ static auto sh2_hal_read(sh2_Hal_t *self, uint8_t *pBuffer, unsigned int len, ui
 
 static auto sh2_hal_write(sh2_Hal_t *self, uint8_t *pBuffer, unsigned len) -> int {
     ssize_t bytes_written = write(fd, pBuffer, len);
+
+    if (debug_i2c) {
+        printf("Wrote packet of %d bytes, %ld bytes written\n", len, bytes_written);
+    }
 
     return bytes_written;
 }
@@ -160,16 +206,18 @@ static auto sh2_hal_getTimeUs(sh2_Hal_t *self) -> uint32_t {
 static void event_handler(void *cookie, sh2_AsyncEvent_t *pEvent) {
     // TODO - figure out what events need to be handled
 
-    if (pEvent->eventId == SH2_RESET) {
-        std::cout << "Sensor Reset" << std::endl;
-        // // If we see a reset, set a flag so that sensors will be reconfigured.
-        //     resetOccurred = true;
-    } else if (pEvent->eventId == SH2_SHTP_EVENT) {
-        std::cout << "EventHandler recieved SHTP event ID: " << pEvent->shtpEvent << std::endl;
-    } else if (pEvent->eventId == SH2_GET_FEATURE_RESP) {
-        std::cout << "EventHandler Sensor Config: " << pEvent->sh2SensorConfigResp.sensorId << std::endl;
-    } else {
-        std::cout << "EventHandler reieved unknown event ID: " << pEvent->eventId << std::endl;
+    if (debug_i2c) {
+        if (pEvent->eventId == SH2_RESET) {
+            printf("Sensor Reset\n");
+            // // If we see a reset, set a flag so that sensors will be reconfigured.
+            //     resetOccurred = true;
+        } else if (pEvent->eventId == SH2_SHTP_EVENT) {
+            printf("EventHandler recieved SHTP event ID: %d\n", pEvent->shtpEvent);
+        } else if (pEvent->eventId == SH2_GET_FEATURE_RESP) {
+            printf("EventHandler Sensor Config: %d\n", pEvent->sh2SensorConfigResp.sensorId);
+        } else {
+            printf("EventHandler reieved unknown event ID: %d\n", pEvent->eventId);
+        }
     }
 }
 
@@ -181,7 +229,9 @@ static void sensor_handler(void *cookie, sh2_SensorEvent_t *pEvent) {
 
         if (status != SH2_OK) {
             sensor_value_ptr->timestamp = 0;
-            std::cout << "Error decoding SensorEvent" << std::endl;
+            if (debug_i2c) {
+                printf("Error decoding SensorEvent\n");
+            }
         }
     }
 }
