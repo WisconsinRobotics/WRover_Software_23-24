@@ -93,6 +93,10 @@ auto BNO085::get_sensor_event() -> bool {
     return sensor_value.timestamp != 0;
 }
 
+auto BNO085::get_accuracy() -> int {
+    return sensor_value.status;
+}
+
 auto BNO085::get_mag_x() -> float {
     return sensor_value.un.magneticField.x;
 }
@@ -124,26 +128,32 @@ auto BNO085::get_yaw() -> float {
                     sensor_value.un.rotationVector.k);
 }
 
-auto BNO085::tare(bool zAxis, sh2_TareBasis_t basis) -> bool {
-  int status = sh2_setTareNow(zAxis ? SH2_TARE_Z : (SH2_TARE_X & SH2_TARE_Y & SH2_TARE_Z), basis);
-
-  return status == SH2_OK;	
+auto BNO085::get_yaw(float &accuracy) -> float {
+    accuracy = sensor_value.un.rotationVector.accuracy;
+    return get_yaw();
 }
 
-auto BNO085::persist_tare() -> bool{
-  int status = sh2_persistTare();
+auto BNO085::tare(bool zAxis, sh2_TareBasis_t basis) -> bool {
+    int status = sh2_setTareNow(zAxis ? SH2_TARE_Z : (SH2_TARE_X & SH2_TARE_Y & SH2_TARE_Z), basis);
+
+    return status == SH2_OK;
+}
+
+auto BNO085::persist_tare() -> bool {
+    int status = sh2_persistTare();
 
     return status == SH2_OK;
 }
 
 auto BNO085::clear_tare() -> bool {
-  int status = sh2_clearTare();
+    int status = sh2_clearTare();
 
-  return status == SH2_OK;
+    return status == SH2_OK;
 }
 
 static auto get_timestamp_us() -> uint32_t {
-    struct timespec ts{};
+    struct timespec ts {};
+
     clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
     return ts.tv_nsec / US_TO_NS;
 }
