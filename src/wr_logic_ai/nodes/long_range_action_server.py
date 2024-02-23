@@ -30,12 +30,7 @@ class LongRangeActionServer(object):
     """
 
     def __init__(self, name) -> None:
-        """
-        Initializes the action server
-
-        @param name (String): Name of the action server
-        """
-
+        rospy.loginfo("initing long range action server")
         self._action_name = name
         obstacle_avoidance.initialize()
         self._as = actionlib.SimpleActionServer(
@@ -45,6 +40,8 @@ class LongRangeActionServer(object):
             auto_start=False,
         )
         self._as.start()
+        
+        
 
     def execute_callback(self, goal: LongRangeGoal):
         """
@@ -56,11 +53,9 @@ class LongRangeActionServer(object):
         """
 
         start_time = rospy.get_rostime()
-        while (
-            rospy.get_rostime() - start_time < LONG_RANGE_TIMEOUT_TIME
-            and not rospy.is_shutdown()
-        ):
-            if obstacle_avoidance.update_target(goal.target_lat, goal.target_long):
+        while rospy.get_rostime() - start_time < LONG_RANGE_TIMEOUT_TIME and not rospy.is_shutdown():
+            rospy.Rate(10).sleep()
+            if obstacle_avoidance.update_target(goal.target_lat, goal.target_long):   
                 return self._as.set_succeeded()
         return self._as.set_aborted()
 
@@ -69,6 +64,6 @@ if __name__ == "__main__":
     rospy.init_node("long_range_action_server")
     server = LongRangeActionServer("LongRangeActionServer")
     rospy.spin()
-
-## }
-## }
+    
+    
+    

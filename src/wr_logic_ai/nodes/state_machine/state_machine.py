@@ -143,18 +143,14 @@ class NavStateMachine(StateMachine):
             self.evUnconditional()
 
     def init_w_ros(self):
-        """Init function to start ROS publisher and time"""
-        # Set the LED to autonomous
-        set_matrix_color(COLOR_AUTONOMOUS)
 
-        # Publisher for sending init calibrate
-        pub = rospy.Publisher("/control/drive_system/cmd", DriveTrainCmd, queue_size=1)
-        # Set amount of time to calibrate
-        stop_time = rospy.get_time() + 7
+        #set_matrix_color(COLOR_AUTONOMOUS)
 
-        self._init_tmr = rospy.Timer(
-            rospy.Duration.from_sec(0.1), lambda _: self.init_calibrate(pub, stop_time)
-        )
+        pub = rospy.Publisher("/control/drive_system/cmd",
+                              DriveTrainCmd, queue_size=1)
+        stop_time = rospy.get_time() + .01
+        self._init_tmr = rospy.Timer(rospy.Duration.from_sec(
+            0.1), lambda _: self.init_calibrate(pub, stop_time))
 
     def on_enter_stInit(self) -> None:
         print("\non enter stInit")
@@ -183,34 +179,23 @@ class NavStateMachine(StateMachine):
     def on_enter_stLongRange(self) -> None:
         print("\non enter stLongRange")
         rospy.loginfo("\non enter stLongRange")
-
-        # Publish to mux, runs every .2 seconds. (The mux will tell the robot to get drive values from Long Range and not short range)
-        self.timer = rospy.Timer(
-            rospy.Duration(0.2), lambda _: self.mux_pub.publish(self.mux_long_range)
-        )
-
-        # sets autonomous color for the LED
-        set_matrix_color(COLOR_AUTONOMOUS)
+        self.timer = rospy.Timer(rospy.Duration(
+            0.2), lambda _: self.mux_pub.publish(self.mux_long_range))
+        # enter autonomous mode
+        #set_matrix_color(COLOR_AUTONOMOUS) TODO:This breaks rviz
 
         # Initialize the action client that will run the long range
         self._client = actionlib.SimpleActionClient(
             "LongRangeActionServer", LongRangeAction
         )
         self._client.wait_for_server()
+        goal = LongRangeGoal(target_lat=self._mgr.get_coordinate()[
+                             "lat"], target_long=self._mgr.get_coordinate()["long"])
+        
+        
 
-        # Get the coordinates as a LongRangeGoal. Two coordinates (lat, long)
-        goal = LongRangeGoal(
-            target_lat=self._mgr.get_coordinate()["lat"],
-            target_long=self._mgr.get_coordinate()["long"],
-        )
-
-        # Send coordinates to action service
-        self._client.send_goal(
-            goal,
-            done_cb=lambda status, result: self._longRangeActionComplete(
-                status, result
-            ),
-        )
+        self._client.send_goal(goal, done_cb=lambda status, result:
+                               self._longRangeActionComplete(status, result))
 
     def on_exit_stLongRange(self) -> None:
         print("Exting Long Range")

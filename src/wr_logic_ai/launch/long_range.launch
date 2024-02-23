@@ -14,4 +14,8 @@
     args="-d $(find wr_logic_ai)/launch/obstacle_avoidance_mock.rviz"
     if="$(eval env('WROVER_HW') == 'MOCK' and env('WROVER_LOCAL') == 'true')" />
 
+  <node pkg="rviz" name="$(anon rviz)" type="rviz" output="screen"
+    args="-d $(find wr_logic_ai)/launch/obstacle_avoidance_mock.rviz"
+    if="$(eval env('WROVER_HW') == 'REAL' and env('WROVER_LOCAL') == 'true')" />
+
 </launch>
