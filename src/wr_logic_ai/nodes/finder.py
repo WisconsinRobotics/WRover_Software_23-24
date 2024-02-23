@@ -44,20 +44,16 @@ def is_wide_valley(sector_i: int, sector_f: int, max_valley: int) -> bool:
     # TODO: Cleaner way to write this?
     return 1 + sector_f - sector_i > max_valley
 
-# Transforms the raw lidar data from compass coordinates (0 at north, clockwise) to math coordinates (0 at east, counterclockwise)
+# Transforms the raw lidar data from compass coordinates (0 at north, clockwise) to math coordinates(0 at east, counterclockwise)
 
 
 def offset_lidar_data(data, sector_angle, is_rviz=False):
-    # the 0 angle is the right side but the lidar starts from there, we add another 90 degrees so that the right is at 0
+    # the 0 angle should be the right side but the lidar going counterclockwise
+    #It is actually the front 0 and it does go counterclockwise
     offset_data = [0] * len(data)
-    if is_rviz:
-        for i in range(len(data)):
-            offset_data[(i + math.floor(90 / sector_angle) +
-                         math.floor(len(data) / 2)) % len(data)] = data[i]
-    else:
-        for i in range(len(data)):
-            offset_data[(i + math.floor((270/360)*len(data))) %
-                        len(data)] = data[i]
+    data = list(data)    
+    offset_data = list((data[math.floor(270/sector_angle):]))
+    offset_data.extend(list((data[:(math.floor(270/sector_angle))])))    
     return offset_data
 
 # represent a valley as an ordered pair as in (start sector, end sector)
