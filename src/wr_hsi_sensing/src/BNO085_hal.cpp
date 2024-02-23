@@ -1,5 +1,4 @@
 #include "BNO085_hal.hpp"
-#include "sh2.h"
 
 #include <cstdint>
 #include <cstdio>
@@ -85,6 +84,28 @@ auto BNO085::set_sensor_config(sh2_SensorId_t sensorId) -> int {
     return sh2_setSensorConfig(sensorId, &sensor_config);
 }
 
+auto BNO085::start_calibration(uint8_t sensors) -> bool {
+    int status = sh2_setCalConfig(sensors);
+
+    return status == SH2_OK;
+}
+
+auto BNO085::save_calibration() -> bool {
+    int status = sh2_saveDcdNow();
+
+    return status == SH2_OK;
+}
+
+auto BNO085::set_dynamic_calibration() -> bool {
+    if (!start_calibration(SH2_CAL_ACCEL | SH2_CAL_MAG)) {
+        return false;
+    }
+
+    int status = sh2_setDcdAutoSave(true);
+
+    return status == SH2_OK;
+}
+
 auto BNO085::get_sensor_event() -> bool {
     sensor_value.timestamp = 0;
 
@@ -119,6 +140,13 @@ auto BNO085::get_raw_mag_y() -> int {
 
 auto BNO085::get_raw_mag_z() -> int {
     return sensor_value.un.rawMagnetometer.z;
+}
+
+auto BNO085::get_game_yaw() -> float {
+    return q_to_yaw(sensor_value.un.gameRotationVector.real,
+                    sensor_value.un.gameRotationVector.i,
+                    sensor_value.un.gameRotationVector.j,
+                    sensor_value.un.gameRotationVector.k);
 }
 
 auto BNO085::get_yaw() -> float {

@@ -21,6 +21,9 @@ public:
     void close();
     auto set_sensor_config(sh2_SensorId_t sensorId) -> int;
     auto get_sensor_event() -> bool;
+    auto start_calibration(uint8_t sensors = SH2_CAL_MAG) -> bool;
+    auto save_calibration() -> bool;
+    auto set_dynamic_calibration() -> bool;
     auto get_accuracy() -> int;
     auto get_mag_x() -> float;
     auto get_mag_y() -> float;
@@ -28,6 +31,7 @@ public:
     auto get_raw_mag_x() -> int;
     auto get_raw_mag_y() -> int;
     auto get_raw_mag_z() -> int;
+    auto get_game_yaw() -> float;
     auto get_yaw() -> float;
     auto get_yaw(float &accuracy) -> float;
     auto tare(bool zAxis, sh2_TareBasis_t basis) -> bool;
