@@ -98,7 +98,6 @@ class NavStateMachine(StateMachine):
         rospy.loginfo("\non enter stLongRange")
         self.timer = rospy.Timer(rospy.Duration(
             0.2), lambda _: self.mux_pub.publish(self.mux_long_range))
-
         # enter autonomous mode
         #set_matrix_color(COLOR_AUTONOMOUS) TODO:This breaks rviz
 
@@ -108,7 +107,7 @@ class NavStateMachine(StateMachine):
         goal = LongRangeGoal(target_lat=self._mgr.get_coordinate()[
                              "lat"], target_long=self._mgr.get_coordinate()["long"])
         
-        print(goal)
+        
 
         self._client.send_goal(goal, done_cb=lambda status, result:
                                self._longRangeActionComplete(status, result))

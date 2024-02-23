@@ -16,7 +16,7 @@ from std_msgs.msg import Float64
 
 # Navigation parameters
 # distance before obstacle avoidance logics is triggered (in meters)
-LIDAR_THRESH_DISTANCE = 3
+LIDAR_THRESH_DISTANCE = 5
 # distance before rover believes it has reached the target (in meters)
 NAV_THRESH_DISTANCE = 0.5
 
@@ -186,7 +186,7 @@ def update_gps_coord(msg: CoordinateMsg) -> None:
     # current_lat = msg.latitude
     # current_long = msg.longitude
     current_lat = 0.0
-    current_long = 10000
+    current_long = 0.0
 
 
 # extected as 0 to 360 from  North (Clockwise)
@@ -207,11 +207,14 @@ def update_target(target_lat, target_long) -> bool:
     global target_angle
 
     # Construct the planar target angle relative to east, accounting for curvature
+    # imu = AngleCalculations(current_lat, current_long,
+    #                         target_lat, target_long)
     imu = AngleCalculations(current_lat, current_long,
-                            target_lat, target_long)
+                        10, 10)
     
     
     target_angle = imu.get_angle() % 360
+
 
     if imu.get_distance() < NAV_THRESH_DISTANCE:
         return True
@@ -235,6 +238,7 @@ def update_navigation(data: LaserScan) -> None:
     if True:
         # Gets best possible angle, considering obstacles
         delta_heading = angle_diff(target_angle, cur_heading)
+        # rospy.logerr(delta_heading)
         result = get_navigation_angle(
             ((((90 + delta_heading) % 360) + 360) % 360) /
             math.degrees(data.angle_increment),  # sector angle
@@ -245,12 +249,15 @@ def update_navigation(data: LaserScan) -> None:
         #raw_heading_pub.publish(result)
         # rospy.loginfo(f"raw heading: {result}")
 
+
         # Set the bounds of the speed multiplier
         speed_factor = 0.3
         speed_factor = 0 if speed_factor < 0 else speed_factor
         speed_factor = 1 if speed_factor > 1 else speed_factor
         # Get the DriveTrainCmd relating to the heading of the robot and the resulting best navigation angle
         msg = angle_calc.piecewise_linear(angle_diff(90, result), 0)
+
+        #rospy.logerr(result)
         # rospy.loginfo(f"left drive value: {msg.left_value}, right drive value: {msg.right_value}")
 #        t += 2
 #        if t > 90: # t for debugging purposes
@@ -259,8 +266,8 @@ def update_navigation(data: LaserScan) -> None:
         msg.left_value *= speed_factor  # Right value was inverted, -1 "fixes"
         msg.right_value *= speed_factor
         # Publish the DriveTrainCmd to the topic
-        #print("Left Value: " + str(msg.left_value))
-        #print("Right Value: " + str(msg.right_value))
+        rospy.loginfo("Left Value: " + str(msg.left_value))
+        rospy.loginfo("Right Value: " + str(msg.right_value))
         drive_pub.publish(msg)
 
         # TESTING
@@ -275,7 +282,7 @@ def update_navigation(data: LaserScan) -> None:
 
         frameCount += 1
         # negative sign on the pose is hardcoded, may not model how the actual robot will act
-        heading_msg.pose.orientation.z = -math.sin(math.radians(result) / 2)
+        heading_msg.pose.orientation.z = math.sin(math.radians(result) / 2)
         heading_msg.pose.orientation.w = math.cos(math.radians(result) / 2)
         heading_pub.publish(heading_msg)
 
@@ -287,8 +294,8 @@ def update_navigation(data: LaserScan) -> None:
 
          # TESTING
 
-        delta_heading_msg.pose.orientation.z = math.sin(math.radians(delta_heading+90) / 2)
-        delta_heading_msg.pose.orientation.w = math.cos(math.radians(delta_heading+90) / 2)
+        delta_heading_msg.pose.orientation.z = math.sin(math.radians(delta_heading) / 2)
+        delta_heading_msg.pose.orientation.w = math.cos(math.radians(delta_heading) / 2)
         delta_heading_pub.publish(delta_heading_msg)
 
         # TESTING

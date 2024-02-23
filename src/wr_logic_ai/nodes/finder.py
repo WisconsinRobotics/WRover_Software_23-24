@@ -56,7 +56,7 @@ def offset_lidar_data(data, sector_angle, is_rviz=False):
                          math.floor(len(data) / 2)) % len(data)] = data[i]
     else:
         for i in range(len(data)):
-            offset_data[(i + math.floor(90 / sector_angle)) %
+            offset_data[(i + math.floor((270/360)*len(data))) %
                         len(data)] = data[i]
     return offset_data
 
@@ -79,19 +79,29 @@ def get_valley(
 
     rviz_data = deepcopy(data)
     #rviz_data.ranges = gaussian_smooth.gaussian_filter1d(rviz_data.ranges, smoothing)
+    if rospy.get_param("~wrover_hw") == "REAL":
+        is_rviz = False
+    else:
+        is_rviz = True
     rviz_data.ranges = offset_lidar_data(
-        rviz_data.ranges, sector_angle, is_rviz=True)
-    scan_rviz_pub.publish(rviz_data)
+        rviz_data.ranges, sector_angle, is_rviz)
+
+    #scan_rviz_pub.publish(rviz_data)
 
     # rospy.loginfo(f"{data.ranges}")
     # TODO: remove dependency on this variable by making the mock script more like real hardware input
     if rospy.get_param("~wrover_hw") == "REAL":
         #hist = offset_lidar_data(gaussian_smooth.gaussian_filter1d(data.ranges, smoothing), sector_angle)
-        hist = offset_lidar_data(data.ranges, sector_angle)
+        hist = offset_lidar_data(data.ranges, sector_angle, is_rviz = False)
     # For testing:
     else:
         #hist = gaussian_smooth.gaussian_filter1d(data.ranges, smoothing)
         hist = list(data.ranges)
+
+    rviz_data.ranges = hist
+    scan_rviz_pub.publish(rviz_data)
+
+    rospy.logerr(hist[0])
 
     # This is to prevent expanding constant obstacles from behind the robot, which can
     # inadvertently and unpredictably (due to sensor noise) block out most of the view
@@ -165,6 +175,73 @@ def get_valley(
             del obstacle_list[-1]
         obstacle_list.append([left_bound, right_bound])
         one_obstacle.clear()
+
+    # ######################################################################################
+    # # new large block of code that will take calc a new set of anti windows and compare if
+    # # we use the close windows or far windows based on number of close windows
+    # obstacle_list_close = list()
+    # # this will be an array of two values with the beginning and ending index of the obstacle.
+    # one_obstacle = []
+    # for i in range(len(hist)):
+    #     if(hist[i] < 3):
+    #         one_obstacle.append(i)
+    #     # This prevents single noisy points from blocking out large portions of the drive window
+    #     # TODO (@bennowotny ): This 'obstacle too small' magic number should be a named constant
+    #     elif (len(one_obstacle) > 1):
+    #         left_bound = len(hist)
+    #         right_bound = 0
+    #         for i in range(len(one_obstacle)):
+    #             # Calculate size of anti-window and add to obstacle bounds
+    #             # pass in distance to target to caculate angle that allows robot to pass through
+    #             angleToIncrease = calculate_anti_window(
+    #                 hist[one_obstacle[i]])
+    #             #rospy.logerr(hist[one_obstacle[i]])
+    #             #rospy.logerr(hist[one_obstacle[0]])
+
+    #             # Update left and right bound
+    #             left_bound = max(
+    #                 min(left_bound, one_obstacle[i]-angleToIncrease), 0)
+    #             right_bound = min(
+    #                 max(right_bound, one_obstacle[i]+angleToIncrease), len(hist))
+
+    #         #rospy.logerr("Left: " + str(left_bound) + "Right: " + str(right_bound))
+    #         # Check to see if the obstacle we just found can actually be merged with a previous obstacle
+    #         while len(obstacle_list_close) > 0 and obstacle_list_close[-1][1] >= left_bound:
+    #             left_bound = min(left_bound, obstacle_list_close[-1][0])
+    #             right_bound = max(right_bound, obstacle_list_close[-1][1])
+    #             del obstacle_list_close[-1]
+    #         obstacle_list_close.append([left_bound, right_bound])
+    #         one_obstacle.clear()
+
+    # # TODO (@bennowotny ): This code is the same as what's in the loop, so it should be abstracted out to its own function
+    # if (len(one_obstacle) != 0):
+    #     left_bound = len(hist)
+    #     right_bound = 0
+    #     for i in range(len(one_obstacle)):
+    #         # Calculate size of anti-window and add to obstacle bounds
+    #         # pass in distance to target to caculate angle that allows robot to pass through
+    #         angleToIncrease = calculate_anti_window(
+    #             hist[one_obstacle[i]])
+
+    #         # Update left and right bound
+    #         left_bound = max(
+    #             min(left_bound, one_obstacle[i]-angleToIncrease), 0)
+    #         right_bound = min(
+    #             max(right_bound, one_obstacle[i]+angleToIncrease), len(hist))
+
+    #     # Check to see if the obstacle we just found can actually be merged with a previous obstacle
+    #     while len(obstacle_list_close) > 0 and obstacle_list_close[-1][1] >= left_bound:
+    #         left_bound = min(left_bound, obstacle_list_close[-1][0])
+    #         right_bound = max(right_bound, obstacle_list_close[-1][1])
+    #         del obstacle_list_close[-1]
+    #     obstacle_list_close.append([left_bound, right_bound])
+    #     one_obstacle.clear()
+
+    
+    # # if the close windows are empty use the far ones
+    # if(len(obstacle_list_close) != 0):
+    #     obstacle_list = obstacle_list_close
+    # ######################################################################################
 
     # At this point we make an inverse list of the obstacles to have a 2d list of all
     # the places that we can drive through (our windows)

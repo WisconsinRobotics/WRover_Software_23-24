@@ -298,14 +298,14 @@ def display_data(data) -> None:
     # rospy.logerr((data.ranges[287]))
     # print(data.ranges[287])
 
-    rospy.loginfo("Front " + str(data.ranges[0 * 287]))
-    rospy.loginfo("Back " + str(data.ranges[2 * 287]))
+    # rospy.loginfo("Front " + str(data.ranges[0 * 287]))
+    # rospy.loginfo("Back " + str(data.ranges[2 * 287]))
 
 
     rviz_data.ranges = offset_lidar_data(
         rviz_data.ranges, math.degrees(rviz_data.angle_increment), True)
-    scan_rviz_pub = rospy.Publisher('/scan_rviz', LaserScan, queue_size=10)
-    scan_rviz_pub.publish(rviz_data)
+    #scan_rviz_pub = rospy.Publisher('/scan_rviz', LaserScan, queue_size=10)
+    #scan_rviz_pub.publish(rviz_data)
 
 
 def run_real_data() -> None:
@@ -315,11 +315,21 @@ def run_real_data() -> None:
 if __name__ == '__main__':
     rospy.init_node('publish_fake_data', anonymous=False)
 
-    # if rospy.get_param('~run_in_mock', True):
-    #     # Run fake data
-    #     run_mock_data()
-    # else:
-    # Run lidar data
-    sub = rospy.Subscriber('/scan', LaserScan, display_data)
-    #run_real_data()
+    # rospy.loginfo(rospy.get_param('WROVER_HW'))
+
+    rospy.loginfo(rospy.get_param("/long_range_action_server/wrover_hw"))
+
+    # params_list = rospy.get_param_names()
+
+    # for param in params_list:
+    #     rospy.logerr("parameter: " + str(param))
+
+    if rospy.get_param("/long_range_action_server/wrover_hw") == "MOCK":
+        # Run fake data
+        rospy.loginfo("Running fake data")
+        run_mock_data()
+    else:
+        # Run real data
+        run_real_data()
+    
     rospy.spin()
