@@ -20,7 +20,7 @@ CAMERA_WIDTH = 1280
 ## Height of the camera frame, in pixels
 CAMERA_HEIGHT = 720
 ## Name of the VisionTarget topic to publish to
-vision_topic = rospy.get_param("~vision_topic")
+vision_topic = rospy.get_param("vision_topic")
 
 
 def process_corners(target_id: int, corners: np.ndarray) -> VisionTarget:
@@ -60,7 +60,7 @@ def main():
 
     # Retrieve video stream from parameter server
     # If no vision stream is specified, try to use camera directly
-    stream_url = rospy.get_param("~video_stream")
+    stream_url = rospy.get_param("video_stream")
     if stream_url is not None and stream_url != "":
         cap = cv.VideoCapture(stream_url)
     else:
