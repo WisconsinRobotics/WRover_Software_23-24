@@ -1,7 +1,10 @@
 <launch>
     <include file="$(find wroboarm_23)/launch/demo_test.launch" />
+
     <node name="arm_driver" pkg="wr_logic_teleop_arm" type="ArmTeleopLogic" output="screen" />
+
     <node name="end_effector_driver" pkg="wr_logic_teleop_arm" type="end_effector_controller.py"
         output="screen" />
+
     <include file="$(find wr_control_drive_arm)/launch/std.launch" />
 </launch>

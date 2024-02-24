@@ -1,13 +1,13 @@
 encoder_parameters:
   elbow:
     counts_per_rotation: 1850
-    offset: 546
+    offset: 392
   forearmRoll:
     counts_per_rotation: -1850
-    offset: 576
+    offset: 956
   shoulder:
     counts_per_rotation: 5550
-    offset: 1281
+    offset: 1604
   turntable:
     counts_per_rotation: 6900 #7200
     offset: 90
