@@ -1,10 +1,6 @@
 /**
- * @addtogroup wr_control_drive_arm
- * @{
- */
-
-/**
  * @file JointStatePublisher.cpp
+ * @author Ben Nowotny
  * @author Jack Zautner
  * @brief The executable file to run the joint state publisher
  * @date 2022-12-05
@@ -37,15 +33,21 @@ constexpr std::uint32_t MESSAGE_CACHE_SIZE = 1;
  */
 constexpr float TIMER_CALLBACK_DURATION = 1.0 / 50.0;
 
-void publishJointStates(const std::unordered_map<std::string, const std::shared_ptr<const SingleEncoderJointPositionMonitor>> &namedJointPositionMonitors,
-                        const ros::Publisher &jointStatePublisher) {
+/**
+ * @brief The joint state publisher for MoveIt
+ */
+ros::Publisher jointStatePublisher;
+
+std::map<std::string, SingleEncoderJointPositionMonitor> namedJointPositionMonitors;
+
+void publishJointStates(const ros::TimerEvent &event) {
     std::vector<std::string> names;
     std::vector<double> positions;
     sensor_msgs::JointState js_msg;
 
-    for (const auto &[name, monitor] : namedJointPositionMonitors) {
+    for (auto &[name, monitor] : namedJointPositionMonitors) {
         names.push_back(name);
-        positions.push_back((*monitor)());
+        positions.push_back(monitor());
     }
 
     js_msg.name = names;
@@ -55,27 +57,9 @@ void publishJointStates(const std::unordered_map<std::string, const std::shared_
     jointStatePublisher.publish(js_msg);
 }
 
-/**
- * @brief Get the Encoder Config from ROS Params
- *
- * @param params The dictionary of ROS parameters
- * @param jointName The name of the joint requested
- * @return EncoderConfiguration The encoder configuration of that joint
- */
 auto getEncoderConfigFromParams(const XmlRpcValue &params, const std::string &jointName) -> EncoderConfiguration {
-    return {.countsPerRotation = static_cast<int32_t>(params[jointName]["encoder_parameters"]["counts_per_rotation"]),
-            .offset = static_cast<int32_t>(params[jointName]["encoder_parameters"]["offset"])};
-}
-
-/**
- * @brief Get the Motor Config from ROS Params
- *
- * @param params The dictionary of ROS parameters
- * @param jointName The name of the joint requested
- * @return MotorConfiguration The motor configuration of that joint
- */
-auto getMotorConfigFromParams(const XmlRpcValue &params, const std::string &jointName) -> MotorConfiguration {
-    return {.gearRatio = static_cast<double>(params[jointName]["motor_configurations"]["gear_ratio"])};
+    return {.countsPerRotation = static_cast<int32_t>(params[jointName]["counts_per_rotation"]),
+            .offset = static_cast<int32_t>(params[jointName]["offset"])};
 }
 
 /**
@@ -91,68 +75,56 @@ auto main(int argc, char **argv) -> int {
     // // Initialize the current node as JointStatePublisherApplication
     ros::init(argc, argv, "JointStatePublisher");
     // // Create the NodeHandle to the current ROS node
-    ros::NodeHandle nodeHandle;
-    ros::NodeHandle privateNodeHandle{"~"};
+    ros::NodeHandle n;
+    ros::NodeHandle pn{"~"};
 
-    XmlRpcValue armParams;
-    privateNodeHandle.getParam("arm_parameters", armParams);
+    XmlRpcValue encParams;
+    pn.getParam("encoder_parameters", encParams);
 
-    const std::unordered_map<std::string, const std::shared_ptr<const SingleEncoderJointPositionMonitor>> namedPositionMonitors{
-        {"turntable_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
-                                "aux0",
-                                RoboclawChannel::A,
-                                getEncoderConfigFromParams(armParams, "turntable"),
-                                getMotorConfigFromParams(armParams, "turntable"),
-                                nodeHandle)},
+    namedJointPositionMonitors.try_emplace("elbowPitch_joint",
 
-        {"shoulder_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
-                               "aux0",
-                               RoboclawChannel::B,
-                               getEncoderConfigFromParams(armParams, "shoulder"),
-                               getMotorConfigFromParams(armParams, "shoulder"),
-                               nodeHandle)},
+                                           "aux1",
+                                           RoboclawChannel::A,
+                                           getEncoderConfigFromParams(encParams, "elbow"),
+                                           n);
+    namedJointPositionMonitors.try_emplace("elbowRoll_joint",
 
-        {"elbowPitch_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
-                                 "aux1",
-                                 RoboclawChannel::A,
-                                 getEncoderConfigFromParams(armParams, "elbow"),
-                                 getMotorConfigFromParams(armParams, "elbow"),
-                                 nodeHandle)},
+                                           "aux1",
+                                           RoboclawChannel::B,
+                                           getEncoderConfigFromParams(encParams, "forearmRoll"),
+                                           n);
+    namedJointPositionMonitors.try_emplace("shoulder_joint",
 
-        {"elbowRoll_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
-                                "aux1",
-                                RoboclawChannel::B,
-                                getEncoderConfigFromParams(armParams, "forearmRoll"),
-                                getMotorConfigFromParams(armParams, "forearmRoll"),
-                                nodeHandle)},
+                                           "aux0",
+                                           RoboclawChannel::B,
+                                           getEncoderConfigFromParams(encParams, "shoulder"),
+                                           n);
+    namedJointPositionMonitors.try_emplace("turntable_joint",
 
-        {"wristPitch_joint", std::make_shared<SingleEncoderJointPositionMonitor>(
-                                 "aux2",
-                                 RoboclawChannel::A,
-                                 getEncoderConfigFromParams(armParams, "wristPitch"),
-                                 getMotorConfigFromParams(armParams, "wristPitch"),
-                                 nodeHandle)},
+                                           "aux0",
+                                           RoboclawChannel::A,
+                                           getEncoderConfigFromParams(encParams, "turntable"),
+                                           n);
+    namedJointPositionMonitors.try_emplace("wristPitch_joint",
 
-        {"wristRoll_link", std::make_shared<SingleEncoderJointPositionMonitor>(
-                               "aux2",
-                               RoboclawChannel::B,
-                               getEncoderConfigFromParams(armParams, "wristRoll"),
-                               getMotorConfigFromParams(armParams, "wristRoll"),
-                               nodeHandle)}};
+                                           "aux2",
+                                           RoboclawChannel::A,
+                                           getEncoderConfigFromParams(encParams, "wristPitch"),
+                                           n);
+    namedJointPositionMonitors.try_emplace("wristRoll_link",
+                                           "aux2",
+                                           RoboclawChannel::B,
+                                           getEncoderConfigFromParams(encParams, "wristRoll"),
+                                           n);
 
     // Initialize the Joint State Data Publisher
-    ros::Publisher jointStatePublisher{nodeHandle.advertise<sensor_msgs::JointState>("/joint_states", MESSAGE_CACHE_SIZE)};
+    jointStatePublisher = n.advertise<sensor_msgs::JointState>("/joint_states", MESSAGE_CACHE_SIZE);
 
     // Timer that will call publishJointStates periodically
-    ros::Timer timer = nodeHandle.createTimer(ros::Duration(TIMER_CALLBACK_DURATION),
-                                              [&namedPositionMonitors, &jointStatePublisher](const ros::TimerEvent &) {
-                                                  publishJointStates(namedPositionMonitors, jointStatePublisher);
-                                              });
+    ros::Timer timer = n.createTimer(ros::Duration(TIMER_CALLBACK_DURATION), publishJointStates);
 
     // Enter ROS spin
     ros::spin();
 
     return 0;
 }
-
-/// @}

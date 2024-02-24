@@ -1,15 +1,3 @@
-/**
- * @addtogroup wr_control_drive_arm
- * @{
- */
-
-/**
- * @file
- * @author Ben Nowotny
- * @brief Definitions for the model of a JointPositionMonitors and required setup objects
- *
- */
-
 #include "SingleEncoderJointPositionMonitor.hpp"
 #include "MathUtil.hpp"
 #include "RoboclawChannel.hpp"
@@ -21,15 +9,13 @@ using MathUtil::RADIANS_PER_ROTATION;
 SingleEncoderJointPositionMonitor::SingleEncoderJointPositionMonitor(
     const std::string &controllerName,
     RoboclawChannel channel,
-    EncoderConfiguration eConfig,
-    MotorConfiguration mConfig,
+    EncoderConfiguration config,
     ros::NodeHandle node)
-    : countsPerRotation{eConfig.countsPerRotation},
-      offset{eConfig.offset},
-      gearRatio{mConfig.gearRatio},
+    : countsPerRotation{config.countsPerRotation},
+      offset{config.offset},
       position{0},
       encoderSubscriber{
-          std::make_shared<ros::Subscriber>(node.subscribe( // TODO(@ben.nowotny): I don't remember how this is supposed to work, and I marvel that it does
+          std::make_shared<ros::Subscriber>(node.subscribe(
               "/hsi/roboclaw/"s + controllerName + "/enc/" + (channel == RoboclawChannel::A ? "left" : "right"),
               1,
               &SingleEncoderJointPositionMonitor::onEncoderReceived,
@@ -39,7 +25,6 @@ SingleEncoderJointPositionMonitor::SingleEncoderJointPositionMonitor(
     const SingleEncoderJointPositionMonitor &other)
     : countsPerRotation(other.countsPerRotation),
       offset(other.offset),
-      gearRatio{other.getGearRatio()},
       encoderSubscriber{other.encoderSubscriber},
       position{other.position.load()} {}
 
@@ -47,11 +32,10 @@ SingleEncoderJointPositionMonitor::SingleEncoderJointPositionMonitor(
     SingleEncoderJointPositionMonitor &&other) noexcept
     : countsPerRotation(other.countsPerRotation),
       offset(other.offset),
-      gearRatio(other.getGearRatio()),
       encoderSubscriber{std::move(other.encoderSubscriber)},
       position{other.position.load()} {}
 
-auto SingleEncoderJointPositionMonitor::operator()() const -> double {
+auto SingleEncoderJointPositionMonitor::operator()() -> double {
     return position;
 }
 
@@ -60,13 +44,3 @@ void SingleEncoderJointPositionMonitor::onEncoderReceived(const std_msgs::UInt32
     auto rotations = MathUtil::corrMod(enc - offset, countsPerRotation) / countsPerRotation;
     position = MathUtil::corrMod(rotations * RADIANS_PER_ROTATION + M_PI, RADIANS_PER_ROTATION) - M_PI;
 }
-
-auto SingleEncoderJointPositionMonitor::getCountsPerRotation() const -> int32_t {
-    return this->countsPerRotation;
-}
-
-auto SingleEncoderJointPositionMonitor::getGearRatio() const -> double {
-    return this->gearRatio;
-}
-
-/// @}
