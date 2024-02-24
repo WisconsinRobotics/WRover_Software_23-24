@@ -159,42 +159,14 @@ def estimate_distance_with_measured_focal_length(corners: np.ndarray) -> float:
     @return float: estimated distance to vision target in meters
     """
     # make sure that the corners are in (4, 1, 2) shape
+    if corners.shape[0] == 1:
+        corners = corners.reshape((-1,1,2))
+
     side_lengths = [
         np.linalg.norm(corners[i - 1] - corners[i]) for i in range(len(corners))
     ][0]
 
     return REAL_WORLD_ARUCO_DIM * FOCAL_LENGTH_MM / (side_lengths * 1000)
-
-def test_aruco_stuff_with_data():
-    
-    file_path = '../../../../../../aruco_tag_images/data/'
-    files = [file_path + f for f in os.listdir(file_path)][-2:]
-    i = 0
-    for f in files:
-        img = cv.imread(f, cv.IMREAD_GRAYSCALE)
-        #print(img.shape)
-        showimg(img)
-        (corners, ids, rejects) = detect_aruco(img)
-        #print(corners)
-        dis = estimate_distance_m(corners[0].reshape((-1,1,2)))
-        print(corners[0].shape)
-        print(corners[0].reshape((-1,1,2)).shape)
-        print("m: ", dis)
-        print("in: ", dis * 39.3701)
-
-def showimg(img, save=False, count = 0, typename = 'test'):
-    if img is None:
-        print('no image found')
-        return
-    if save:
-        cv.imwrite("../data/imgs/results/result_test_"+str(count)+".png", img)
-    cv.startWindowThread()
-    cv.namedWindow(typename, cv.WINDOW_NORMAL)
-    cv.imshow(typename, img)
-    cv.waitKey(0)
-
-test_aruco_stuff_with_data()
-
 
 ## @}
 # @}
