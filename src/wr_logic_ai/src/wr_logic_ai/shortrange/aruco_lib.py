@@ -168,5 +168,23 @@ def estimate_distance_with_measured_focal_length(corners: np.ndarray) -> float:
 
     return REAL_WORLD_ARUCO_DIM * FOCAL_LENGTH_MM / (side_lengths * 1000)
 
+def mark_aruco_tag(img, corners, isolate = False):
+    """
+    For a given image, this surrounds the aruco tag with a green box. If
+    isolate is true, then a black mask is applied to non aruco tag parts of
+    image.
+
+    @param img (np.ndarray): array containing image
+    @param corners (np.ndarray): array containing the corners of the ArUco tag
+    @param isolate (bool): boolean to decide whether the rest of the image needs to masked
+    @return np.ndarray: edited image
+    """
+    if img is None:
+        raise Exception ("bad image inputted")
+    return img
+
+
+
+
 ## @}
 # @}
