@@ -160,10 +160,12 @@ def estimate_distance_with_measured_focal_length(corners: np.ndarray) -> float:
     """
     # make sure that the corners are in (4, 1, 2) shape
     if corners.shape[0] == 1:
-        corners = corners.reshape((-1,1,2))
+        c = corners.reshape((-1,1,2))
+    else:
+        c = corners
 
     side_lengths = [
-        np.linalg.norm(corners[i - 1] - corners[i]) for i in range(len(corners))
+        np.linalg.norm(c[i - 1] - c[i]) for i in range(len(c))
     ][0]
 
     return REAL_WORLD_ARUCO_DIM * FOCAL_LENGTH_MM / (side_lengths * 1000)
@@ -181,7 +183,31 @@ def mark_aruco_tag(img, corners, isolate = False):
     """
     if img is None:
         raise Exception ("bad image inputted")
-    return img
+    if len(corners) <= 0:
+        raise Exception ("bad corners, so no aruco tag detected")
+
+    # make sure that the corners are in (4, 1, 2) shape
+    if corners.shape[0] == 1:
+        c = corners.reshape((-1,1,2))
+    else:
+        c = corners
+
+    # use a copy of the image
+    res_img = img.copy()
+
+    # get the contours from the corners and then cast it to int
+    contours = [c.astype(np.int32)]
+
+    # draw the green box
+    cv.polylines(res_img,contours,True,(0,255,0), 4)
+
+    # create a black mask around the aruco tag and add it to the image
+    if isolate:
+        mask = np.zeros(res_img.shape, dtype=np.uint8)
+        cv.fillPoly(mask, pts=contours, color=(255,255,255))
+        res_img = cv.bitwise_and(res_img, mask)
+
+    return res_img
 
 
 
