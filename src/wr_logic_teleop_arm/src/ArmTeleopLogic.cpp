@@ -210,7 +210,7 @@ auto main(int argc, char **argv) -> int {
         }
 
         // stop current path
-        isNewPath.store(false);
+        // isNewPath.store(false);
         move.stop();
 
         // configure target pose

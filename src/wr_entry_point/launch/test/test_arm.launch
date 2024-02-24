@@ -12,7 +12,7 @@
   
   <include file="$(find wr_entry_point)/launch/comp/comp_ui.launch"/>
   
-  <inclue file="$(find wr_control_drive_arm)/launch/std.launch"/>
+  <include file="$(find wr_control_drive_arm)/launch/std.launch"/>
   
   <include file="$(find wroboarm_22)/launch/demo_test.launch" if="$(eval env('WROVER_HW') == 'MOCK')"/>
 
