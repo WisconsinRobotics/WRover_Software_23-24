@@ -13,7 +13,7 @@ encoder_parameters:
     offset: 90
   wristPitch:
     counts_per_rotation: -1850
-    offset: 886
+    offset: 1040
   wristRoll:
     counts_per_rotation: -1850
-    offset: 981
+    offset: 1032
