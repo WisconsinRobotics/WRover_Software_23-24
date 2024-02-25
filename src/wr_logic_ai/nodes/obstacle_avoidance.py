@@ -183,10 +183,10 @@ def initialize() -> None:
 def update_gps_coord(msg: CoordinateMsg) -> None:
     global current_lat
     global current_long
-    # current_lat = msg.latitude
-    # current_long = msg.longitude
-    current_lat = 0.0
-    current_long = 0.0
+    current_lat = msg.latitude
+    current_long = msg.longitude
+    # current_lat = 0.0
+    # current_long = 0.0
 
 
 # extected as 0 to 360 from  North (Clockwise)
@@ -207,10 +207,10 @@ def update_target(target_lat, target_long) -> bool:
     global target_angle
 
     # Construct the planar target angle relative to east, accounting for curvature
-    # imu = AngleCalculations(current_lat, current_long,
-    #                         target_lat, target_long)
     imu = AngleCalculations(current_lat, current_long,
-                        10, 10)
+                            target_lat, target_long)
+    # imu = AngleCalculations(current_lat, current_long,
+    #                     10, 10)
     
     
     target_angle = imu.get_angle() % 360
