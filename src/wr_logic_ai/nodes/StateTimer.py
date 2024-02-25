@@ -20,10 +20,10 @@ class StateTimer:
         for i in range(8, ((StateTimer.round_up_to_multiple_of_4(radius)) * 4) + 1, 8):
             total_distance += i
             last_path = i
-            
+
         last_path += 8
-        total_distance += last_path/2
-        total_time = total_distance/speed
+        total_distance += last_path / 2
+        total_time = total_distance / speed
 
         return total_time
 
