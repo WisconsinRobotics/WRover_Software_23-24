@@ -1,6 +1,6 @@
 import math
 
-class StateTimer: #WORKING
+class StateTimer:
 
     @staticmethod
     def round_up_to_multiple_of_4(number):
@@ -10,7 +10,7 @@ class StateTimer: #WORKING
         return rounded_up
 
     @staticmethod
-    def calculateTime(radius = 20):
+    def calculate_time(radius = 20):
         speed = 0.5
         distance = 0
         final = 0
@@ -28,8 +28,8 @@ class StateTimer: #WORKING
 
 
     @staticmethod
-    def testTimer():
+    def test_timer():
         StateTimer.calculateTime(20)
 
-# Test the timer
-StateTimer.testTimer()
+# # Test the timer
+# StateTimer.testTimer()
