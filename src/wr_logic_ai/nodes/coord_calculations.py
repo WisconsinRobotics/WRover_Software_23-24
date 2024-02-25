@@ -16,7 +16,6 @@ class CoordCalculations:
         calc_east_coord(curr_lat_rad, curr_long_rad, distance) - calculates coordinate going east
         calc_south_coord(curr_lat_rad, curr_long_rad, distance) - calculates coordinate going south
         calc_west_coord(curr_lat_rad, curr_long_rad, distance) - calculates coordinate going west
-        
     '''
     
     earth_radius = 6378100 # in meters
