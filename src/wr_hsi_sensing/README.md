@@ -20,7 +20,7 @@ Build the project: `./assemble.py build` (will take forever, installs dependenci
 
 Check which tty exists: `ls /dev/tty*`
 First we'll need access to a file so run: `sudo chmod a+rw /dev/ttyACM0`
-Then run the node: `roslaunch wr_hsi_sensing rtk_test.launch`
+Then run the node: `roslaunch wr_hsi_sensing ardusimple_provided.launch`
 
 To see all ros topics run: `rostopic list`
 To get info of a topic run: `rostopic info /gps/fix`

@@ -8,8 +8,10 @@
     <param name="local_xy_frame" value="/map"/> <!-- Could be "/map"-->
     <param name="local_xy_origin" value="auto"/>
     <param name="local_xy_navsatfix_topic" value="/gps/fix"/>
+    <remap from="fix" to="/gps/fix"/>
     
   </node>
 
-  <!-- <node pkg="tf" type="static_transform_publisher" name="swri_transform" args="0 0 0 0 0 0 /map /origin 100"  /> -->
+  <node pkg="tf" type="static_transform_publisher" name="swri_transform" args="0 0 0 0 0 0 /map /origin 100"  />
+  
 </launch>
