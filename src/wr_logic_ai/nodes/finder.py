@@ -18,7 +18,7 @@ import os
 import pdb
 import pickle
 
-ROVER_WIDTH = 1.06
+ROVER_WIDTH = 1.5
 
 ## Publisher for LiDAR data for debugging on rviz
 scan_rviz_pub = rospy.Publisher("/scan_rviz", LaserScan, queue_size=10)

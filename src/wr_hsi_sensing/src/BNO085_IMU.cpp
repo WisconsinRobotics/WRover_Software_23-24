@@ -50,6 +50,7 @@ auto main(int argc, char **argv) -> int {
     if (sensor.set_sensor_config(SH2_GAME_ROTATION_VECTOR) != SH2_OK) {
         ROS_FATAL("FAILED TO ENABLE ROTATION VECTOR");
     }
+    sensor.tare(false, SH2_TARE_BASIS_GAMING_ROTATION_VECTOR);
 
     std_msgs::Float64 mag_x, mag_y, mag_z, heading;
     std_msgs::Int16 mag_acc;

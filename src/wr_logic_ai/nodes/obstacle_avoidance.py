@@ -28,18 +28,18 @@ from std_msgs.msg import Float64
 
 # Navigation parameters
 # distance before obstacle avoidance logics is triggered (in meters)
-LIDAR_THRESH_DISTANCE = 5
+LIDAR_THRESH_DISTANCE = 2.5
 # distance before rover believes it has reached the target (in meters)
 NAV_THRESH_DISTANCE = 0.5
 
 # initialize target angle to move forward
-current_lat = 0
+current_lat = 10
 current_long = 0
 
 ##Value robot is heading currently. East is 0. (Counterclockwise). Extected as a value from 0 to 360.
 cur_heading = 0
 ##Gives target angle relative to East (counter-clockwise)
-target_angle = 0
+target_angle = 270
 
 # target_sector = 0
 ##Used to smooth over lidar data
@@ -218,7 +218,7 @@ def update_gps_coord(msg: CoordinateMsg) -> None:
     global current_long
     # current_lat = msg.latitude
     # current_long = msg.longitude
-    current_lat = 0.0
+    current_lat = 10.0
     current_long = 0.0
 
 
@@ -264,10 +264,10 @@ def update_target(target_lat, target_long) -> bool:
     # imu = AngleCalculations(current_lat, current_long,
     #                         target_lat, target_long)
     imu = AngleCalculations(current_lat, current_long,
-                        10, 10)
+                        0, 0)
     
     
-    target_angle = imu.get_angle() % 360
+    target_angle = 270 # imu.get_angle() % 360
 
 
     if imu.get_distance() < NAV_THRESH_DISTANCE:
@@ -330,8 +330,8 @@ def update_navigation(data: LaserScan) -> None:
         msg.left_value *= speed_factor  # Right value was inverted, -1 "fixes"
         msg.right_value *= speed_factor
         # Publish the DriveTrainCmd to the topic
-        rospy.loginfo("Left Value: " + str(msg.left_value))
-        rospy.loginfo("Right Value: " + str(msg.right_value))
+        rospy.loginfo("Heading Value: " + str(cur_heading))
+        rospy.loginfo("Target Value: " + str(target_angle))
         drive_pub.publish(msg)
 
         # TESTING
