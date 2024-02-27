@@ -12,6 +12,23 @@
 
 static constexpr uint32_t QUEUE_SIZE = 1;
 
+const bool debug = true;
+BNO085 sensor(debug);
+
+void sensor_setup() {
+    // if (sensor.set_sensor_config(SH2_MAGNETIC_FIELD_UNCALIBRATED) != SH2_OK) {
+    //     ROS_FATAL("FAILED TO ENABLE MAGNETIC FIELD");
+    // }
+
+    // if (sensor.set_sensor_config(SH2_MAGNETIC_FIELD_CALIBRATED) != SH2_OK) {
+    // ROS_FATAL("FAILED TO ENABLE MAGNETIC FIELD CALIBRATED");
+    // }
+
+    if (sensor.set_sensor_config(SH2_GAME_ROTATION_VECTOR) != SH2_OK) {
+        ROS_FATAL("FAILED TO ENABLE IMU GAME ROTATION VECTOR");
+    }
+}
+
 auto main(int argc, char **argv) -> int {
 
     // Initialize the node in ROS
@@ -31,30 +48,30 @@ auto main(int argc, char **argv) -> int {
     auto pub_heading{nHandle.advertise<std_msgs::Float64>("/heading_data", QUEUE_SIZE)};
 
     // Initalize IMU
-    bool debug = true;
     // nHandle.getParam("imu/debug", debug);
-
-    BNO085 sensor(debug);
     if (!sensor.begin()) {
         ROS_FATAL("FAILED TO INITIALIZE IMU");
     }
 
-    // if (sensor.set_sensor_config(SH2_MAGNETIC_FIELD_UNCALIBRATED) != SH2_OK) {
-    //     ROS_FATAL("FAILED TO ENABLE MAGNETIC FIELD");
-    // }
+    sensor_setup();
 
-    // if (sensor.set_sensor_config(SH2_MAGNETIC_FIELD_CALIBRATED) != SH2_OK) {
-    // ROS_FATAL("FAILED TO ENABLE MAGNETIC FIELD CALIBRATED");
-    // }
-
-    if (sensor.set_sensor_config(SH2_GAME_ROTATION_VECTOR) != SH2_OK) {
-        ROS_FATAL("FAILED TO ENABLE ROTATION VECTOR");
+    if (!sensor.tare(true, SH2_TARE_BASIS_GAMING_ROTATION_VECTOR)) {
+        ROS_WARN("FAILED TO TARE IMU GAME ROTATION VECTOR");
+    } else {
+        if (!sensor.persist_tare()) {
+            ROS_WARN("IMU TARE WILL CHANGE ON NEXT RESET");
+        }
     }
     sensor.tare(false, SH2_TARE_BASIS_GAMING_ROTATION_VECTOR);
 
     std_msgs::Float64 mag_x, mag_y, mag_z, heading;
     std_msgs::Int16 mag_acc;
     while (ros::ok()) {
+        if (sensor.get_reset()) {
+            ROS_INFO("IMU SENSOR RESET %d", sensor.prod_ids.entry[0].resetCause);
+            sensor_setup();
+        }
+
         if (sensor.get_sensor_event()) {
 
             // if (sensor.sensor_value.sensorId == SH2_MAGNETIC_FIELD_CALIBRATED) {
