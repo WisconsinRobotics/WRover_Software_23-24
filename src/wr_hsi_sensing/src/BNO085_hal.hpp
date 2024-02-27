@@ -21,6 +21,7 @@ public:
     void close();
     auto set_sensor_config(sh2_SensorId_t sensorId) -> int;
     auto get_sensor_event() -> bool;
+    auto get_reset() -> bool;
     auto start_calibration(uint8_t sensors = SH2_CAL_MAG) -> bool;
     auto save_calibration() -> bool;
     auto set_dynamic_calibration() -> bool;

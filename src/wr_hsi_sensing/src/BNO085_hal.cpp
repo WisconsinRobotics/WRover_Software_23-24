@@ -17,6 +17,7 @@
 static int fd;
 static int i2c_addr;
 static bool debug_i2c;
+static bool reset_event;
 static sh2_SensorValue_t *sensor_value_ptr = nullptr;
 
 static auto get_timestamp_us() -> uint32_t;
@@ -112,6 +113,15 @@ auto BNO085::get_sensor_event() -> bool {
     sh2_service();
 
     return sensor_value.timestamp != 0;
+}
+
+auto BNO085::get_reset() -> bool {
+    if (reset_event) {
+        reset_event = false;
+        return true;
+    }
+
+    return false;
 }
 
 auto BNO085::get_accuracy() -> int {
@@ -244,11 +254,14 @@ static auto sh2_hal_getTimeUs(sh2_Hal_t *self) -> uint32_t {
 static void event_handler(void *cookie, sh2_AsyncEvent_t *pEvent) {
     // TODO - figure out what events need to be handled
 
+    if (pEvent->eventId == SH2_RESET) {
+        // // If we see a reset, set a flag so that sensors will be reconfigured.
+        reset_event = true;
+    }
+
     if (debug_i2c) {
         if (pEvent->eventId == SH2_RESET) {
             printf("Sensor Reset\n");
-            // // If we see a reset, set a flag so that sensors will be reconfigured.
-            //     resetOccurred = true;
         } else if (pEvent->eventId == SH2_SHTP_EVENT) {
             printf("EventHandler recieved SHTP event ID: %d\n", pEvent->shtpEvent);
         } else if (pEvent->eventId == SH2_GET_FEATURE_RESP) {
