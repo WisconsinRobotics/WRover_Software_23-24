@@ -8,6 +8,7 @@ import numpy as np
 import cv2 as cv
 from typing import *
 import os
+
 ## Initialize ArUco 4x4 marker dictionary
 ARUCO_DICT = cv.aruco.getPredefinedDictionary(cv.aruco.DICT_4X4_50)
 ## Initialize ArUco detector
@@ -19,7 +20,8 @@ FT_TO_M = 0.3048
 
 FOCAL_LENGTH_MM = 1360.17
 
-REAL_WORLD_ARUCO_DIM = 200 # in mm
+REAL_WORLD_ARUCO_DIM = 200  # in mm
+
 
 def detect_aruco(img: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Detects ArUco markers
@@ -139,6 +141,7 @@ def estimate_distance_ft(corners: np.ndarray) -> float:
     ]
     return SIDE_LENGTH_1FT / max(side_lengths)
 
+
 # might do a perspective transform to get a better idea of pixel area n so distance
 def estimate_distance_m(corners: np.ndarray) -> float:
     """
@@ -147,9 +150,9 @@ def estimate_distance_m(corners: np.ndarray) -> float:
     @param corners (np.ndarray): array containing the corners of the ArUco tag
     @return float: estimated distance to vision target in meters
     """
-    #return FT_TO_M * estimate_distance_ft(corners)
+    # return FT_TO_M * estimate_distance_ft(corners)
     return estimate_distance_with_measured_focal_length(corners)
-    
+
 
 def estimate_distance_with_measured_focal_length(corners: np.ndarray) -> float:
     """
@@ -160,17 +163,16 @@ def estimate_distance_with_measured_focal_length(corners: np.ndarray) -> float:
     """
     # make sure that the corners are in (4, 1, 2) shape
     if corners.shape[0] == 1:
-        c = corners.reshape((-1,1,2))
+        c = corners.reshape((-1, 1, 2))
     else:
         c = corners
 
-    side_lengths = [
-        np.linalg.norm(c[i - 1] - c[i]) for i in range(len(c))
-    ][0]
+    side_lengths = [np.linalg.norm(c[i - 1] - c[i]) for i in range(len(c))][0]
 
     return REAL_WORLD_ARUCO_DIM * FOCAL_LENGTH_MM / (side_lengths * 1000)
 
-def mark_aruco_tag(img, corners, isolate = False):
+
+def mark_aruco_tag(img, corners, isolate=False):
     """
     For a given image, this surrounds the aruco tag with a green box. If
     isolate is true, then a black mask is applied to non aruco tag parts of
@@ -182,13 +184,13 @@ def mark_aruco_tag(img, corners, isolate = False):
     @return np.ndarray: edited image
     """
     if img is None:
-        raise Exception ("bad image inputted")
+        raise Exception("bad image inputted")
     if len(corners) <= 0:
-        raise Exception ("bad corners, so no aruco tag detected")
+        raise Exception("bad corners, so no aruco tag detected")
 
     # make sure that the corners are in (4, 1, 2) shape
     if corners.shape[0] == 1:
-        c = corners.reshape((-1,1,2))
+        c = corners.reshape((-1, 1, 2))
     else:
         c = corners
 
@@ -199,17 +201,15 @@ def mark_aruco_tag(img, corners, isolate = False):
     contours = [c.astype(np.int32)]
 
     # draw the green box
-    cv.polylines(res_img,contours,True,(0,255,0), 4)
+    cv.polylines(res_img, contours, True, (0, 255, 0), 4)
 
     # create a black mask around the aruco tag and add it to the image
     if isolate:
         mask = np.zeros(res_img.shape, dtype=np.uint8)
-        cv.fillPoly(mask, pts=contours, color=(255,255,255))
+        cv.fillPoly(mask, pts=contours, color=(255, 255, 255))
         res_img = cv.bitwise_and(res_img, mask)
 
     return res_img
-
-
 
 
 ## @}

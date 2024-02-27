@@ -19,8 +19,6 @@ from wr_logic_ai.msg import VisionTarget
 CAMERA_WIDTH = 1280
 ## Height of the camera frame, in pixels
 CAMERA_HEIGHT = 720
-## Name of the VisionTarget topic to publish to
-vision_topic = rospy.get_param("vision_topic")
 
 
 def process_corners(target_id: int, corners: np.ndarray) -> VisionTarget:
@@ -44,7 +42,7 @@ def process_corners(target_id: int, corners: np.ndarray) -> VisionTarget:
     # Estimate the distance of the ArUco tag in meters
     distance_estimate = aruco_lib.estimate_distance_m(corners)
 
-    return VisionTarget(target_id, x_offset, distance_estimate, True)
+    return VisionTarget(target_id, x_offset, distance_estimate)
 
 
 def main():
@@ -53,14 +51,17 @@ def main():
 
     This function initializes and runs a node to read camera input and publish ArUco tag data to a topic.
     """
-    pub = rospy.Publisher(vision_topic, VisionTarget, queue_size=10)
     rospy.init_node("vision_target_detection")
 
     rate = rospy.Rate(10)
 
+    # Set up publisher
+    vision_topic = rospy.get_param("~vision_topic")
+    pub = rospy.Publisher(vision_topic, VisionTarget, queue_size=10)
+
     # Retrieve video stream from parameter server
     # If no vision stream is specified, try to use camera directly
-    stream_url = rospy.get_param("video_stream")
+    stream_url = rospy.get_param("~video_stream")
     if stream_url is not None and stream_url != "":
         cap = cv.VideoCapture(stream_url)
     else:
@@ -82,9 +83,6 @@ def main():
             if ids is not None:
                 for i, target_id in enumerate(ids):
                     pub.publish(process_corners(target_id[0], corners[i][0]))
-            else:
-                # Publish even when no target is found to constantly run the navigation callback
-                pub.publish(VisionTarget(0, 0, 0, False))
         rate.sleep()
 
     cap.release()

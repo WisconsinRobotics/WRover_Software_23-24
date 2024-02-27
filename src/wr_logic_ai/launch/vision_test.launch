@@ -1,15 +1,15 @@
 <launch>
     <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" />
 
-    <!-- <arg name="vision_topic" default="/logic/vision_target" /> -->
-    <!-- <arg name="video_stream" default="" /> -->
+    <arg name="vision_topic" default="/logic/vision_target" />
+    <arg name="video_stream" default="" />
 
     <!-- <include file="$(find wr_entry_point)/launch/comp/comp_ds_control.launch" /> -->
 
-    <rosparam file="$(find wr_logic_ai)/config/vision_params.yaml" />
+    <!-- <rosparam file="$(find wr_logic_ai)/config/vision_params.yaml" /> -->
     <node name="vision_target_detection" pkg="wr_logic_ai" type="vision_target_detection.py" >
-        <!-- <param name="vision_topic" value="$(arg vision_topic)" /> -->
-        <!-- <param name="video_stream" value="$(arg video_stream)" /> -->
+        <param name="vision_topic" value="$(arg vision_topic)" />
+        <param name="video_stream" value="$(arg video_stream)" />
     </node>
     <!-- <node name="shortrange" pkg="wr_logic_ai" type="vision_navigation.py" >
         <param name="vision_topic" value="$(arg vision_topic)" />
