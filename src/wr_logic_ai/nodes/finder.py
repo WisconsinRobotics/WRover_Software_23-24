@@ -18,7 +18,7 @@ import os
 import pdb
 import pickle
 
-ROVER_WIDTH = 1.5
+ROVER_WIDTH = 1.06
 
 ## Publisher for LiDAR data for debugging on rviz
 scan_rviz_pub = rospy.Publisher("/scan_rviz", LaserScan, queue_size=10)
@@ -141,7 +141,8 @@ def get_valley(
     rviz_data.ranges = hist
     scan_rviz_pub.publish(rviz_data)
 
-    rospy.logerr(hist[0])
+    #Front of scanner
+    #rospy.loginfo(hist[math.floor(90/sector_angle)])
 
     # This is to prevent expanding constant obstacles from behind the robot, which can
     # inadvertently and unpredictably (due to sensor noise) block out most of the view
@@ -173,7 +174,8 @@ def get_valley(
                 # Calculate size of anti-window and add to obstacle bounds
                 # pass in distance to target to caculate angle that allows robot to pass through
                 angleToIncrease = calculate_anti_window(
-                    hist[one_obstacle[i]])
+                    hist[one_obstacle[i]])/sector_angle
+        
                 #rospy.logerr(hist[one_obstacle[i]])
                 #rospy.logerr(hist[one_obstacle[0]])
 
@@ -200,7 +202,7 @@ def get_valley(
             # Calculate size of anti-window and add to obstacle bounds
             # pass in distance to target to caculate angle that allows robot to pass through
             angleToIncrease = calculate_anti_window(
-                hist[one_obstacle[i]])
+                hist[one_obstacle[i]])/sector_angle
 
             # Update left and right bound
             left_bound = max(min(left_bound, one_obstacle[i] - angleToIncrease), 0)
@@ -376,7 +378,7 @@ def get_navigation_angle(
     if get_target_distance(best_valley[0], best_valley[1], target, sector_angle) == 0:
         # Report the current target angle; no adjustment needed
         # print("target * sector_angle = " + str(target * sector_angle))
-        rospy.loginfo("In target valley")
+        #rospy.loginfo("In target valley")
         return target * sector_angle
 
     # If the valley is wide...
@@ -399,7 +401,7 @@ def get_navigation_angle(
         )
 
         # Aim for the center of this new max_valley valley (this helps avoid accidentally clipping an edge of the robot)
-        rospy.loginfo("Obstacle in the way, turning to wide valley")
+        #rospy.loginfo("Obstacle in the way, turning to wide valley")
         return ((nearest_sector + border_sector) / 2.0) * sector_angle
 
     # If the valley is narrow...
@@ -407,7 +409,7 @@ def get_navigation_angle(
         # Follow the probotcol as defined above for narrow valleys
 
         # Aim for the center of the valley
-        rospy.loginfo("Obstacle in the way, turning to narrow valley")
+        #rospy.loginfo("Obstacle in the way, turning to narrow valley")
         return ((best_valley[0] + best_valley[1]) / 2.0) * sector_angle
 
 

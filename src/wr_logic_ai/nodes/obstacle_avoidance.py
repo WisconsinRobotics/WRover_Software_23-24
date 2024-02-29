@@ -32,12 +32,12 @@ LIDAR_THRESH_DISTANCE = 2.5
 # distance before rover believes it has reached the target (in meters)
 NAV_THRESH_DISTANCE = 0.5
 
-# initialize target angle to move forward
-current_lat = 10
+# initialize current lat and Long when simulating Data
+current_lat = 0
 current_long = 0
 
 ##Value robot is heading currently. East is 0. (Counterclockwise). Extected as a value from 0 to 360.
-cur_heading = 0
+cur_heading = 90
 ##Gives target angle relative to East (counter-clockwise)
 target_angle = 270
 
@@ -218,7 +218,7 @@ def update_gps_coord(msg: CoordinateMsg) -> None:
     global current_long
     # current_lat = msg.latitude
     # current_long = msg.longitude
-    current_lat = 10.0
+    current_lat = 0.0
     current_long = 0.0
 
 
@@ -264,10 +264,12 @@ def update_target(target_lat, target_long) -> bool:
     # imu = AngleCalculations(current_lat, current_long,
     #                         target_lat, target_long)
     imu = AngleCalculations(current_lat, current_long,
-                        0, 0)
-    
-    
-    target_angle = 270 # imu.get_angle() % 360
+                        10, 0)
+    # rospy.loginfo(current_lat)
+    # rospy.loginfo(current_long)
+
+    target_angle =  imu.get_angle() % 360
+    #rospy.loginfo(target_angle)
 
 
     if imu.get_distance() < NAV_THRESH_DISTANCE:
@@ -298,7 +300,7 @@ def update_navigation(data: LaserScan) -> None:
     if True:
         ## Gets best possible angle, considering obstacles
         delta_heading = angle_diff(target_angle, cur_heading)
-        # rospy.logerr(delta_heading)
+        #rospy.logerr(delta_heading)
         result = get_navigation_angle(
             ((((90 + delta_heading) % 360) + 360) % 360)
             / math.degrees(
@@ -329,9 +331,17 @@ def update_navigation(data: LaserScan) -> None:
         # Scale the resultant DriveTrainCmd by the speed multiplier
         msg.left_value *= speed_factor  # Right value was inverted, -1 "fixes"
         msg.right_value *= speed_factor
+        
+        if msg.left_value > msg.right_value:
+            valueToTurn = "Turn right"
+        elif msg.left_value < msg.right_value:
+            valueToTurn = "Turn left"
+        else:
+            valueToTurn = "Stay straight"
+            
         # Publish the DriveTrainCmd to the topic
-        rospy.loginfo("Heading Value: " + str(cur_heading))
-        rospy.loginfo("Target Value: " + str(target_angle))
+        rospy.loginfo("Drive to: " + str(valueToTurn))
+        #rospy.loginfo("Target Value: " + str(target_angle))
         drive_pub.publish(msg)
 
         # TESTING
@@ -346,27 +356,27 @@ def update_navigation(data: LaserScan) -> None:
 
         frameCount += 1
         # negative sign on the pose is hardcoded, may not model how the actual robot will act
-        heading_msg.pose.orientation.z = math.sin(math.radians(result) / 2)
-        heading_msg.pose.orientation.w = math.cos(math.radians(result) / 2)
+        heading_msg.pose.orientation.z = math.sin(math.radians(result+180) / 2)
+        heading_msg.pose.orientation.w = math.cos(math.radians(result+180) / 2)
         heading_pub.publish(heading_msg)
 
         # TESTING
 
-        actual_heading_msg.pose.orientation.z = math.sin(math.radians(cur_heading) / 2)
+        actual_heading_msg.pose.orientation.z = math.sin(math.radians(-cur_heading) / 2)
         actual_heading_msg.pose.orientation.w = math.cos(math.radians(cur_heading) / 2)
         actual_heading_pub.publish(actual_heading_msg)
 
          # TESTING
 
-        delta_heading_msg.pose.orientation.z = math.sin(math.radians(delta_heading) / 2)
-        delta_heading_msg.pose.orientation.w = math.cos(math.radians(delta_heading) / 2)
+        delta_heading_msg.pose.orientation.z = math.sin(math.radians(delta_heading - 90) / 2)
+        delta_heading_msg.pose.orientation.w = math.cos(math.radians(delta_heading + 90) / 2)
         delta_heading_pub.publish(delta_heading_msg)
 
         # TESTING
 
         # Adding the nums is cuz the flag is off center, I'm not sure why??? I downloaded this from a random website :D
-        marker_flag.pose.position.x =  -5*math.sin(math.radians(delta_heading)) + 0.57
-        marker_flag.pose.position.y = 5*math.cos(math.radians(delta_heading)) + .3
+        marker_flag.pose.position.x =  5*math.sin(math.radians(delta_heading)) + 0.57
+        marker_flag.pose.position.y = -5*math.cos(math.radians(delta_heading)) + .3
         marker_flag_pub.publish(marker_flag)
 
         laser_adjuster_pub.publish(delta_heading) #Used for inputFakeData
