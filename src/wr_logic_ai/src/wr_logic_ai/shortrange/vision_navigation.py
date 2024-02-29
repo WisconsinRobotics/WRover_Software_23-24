@@ -10,10 +10,13 @@ from typing import *
 
 import rospy
 
-from shortrange_util import ShortrangeStateEnum, ShortrangeState, TargetCache
 from wr_logic_ai.msg import VisionTarget
 from wr_drive_msgs.msg import DriveTrainCmd
-from wr_logic_ai.shortrange.shortrange_util import ShortrangeStateEnum
+from wr_logic_ai.shortrange.shortrange_util import (
+    ShortrangeStateEnum,
+    ShortrangeState,
+    TargetCache,
+)
 
 ## Distance from target to stop at (in meters)
 STOP_DISTANCE_M = 1.5
@@ -64,9 +67,8 @@ class VisionNavigation(ShortrangeState):
         # Publisher to set motor speeds
         drivetrain_pub = rospy.Publisher(drivetrain_topic, DriveTrainCmd, queue_size=1)
 
-        # Wait for the rover to finish navigating
-        while not self.is_done:
-
+        # Loop for running ArUco tag approach
+        while not rospy.is_shutdown() and not self.is_done:
             if (
                 self.target_cache is not None
                 and rospy.get_time() - self.target_cache.timestamp < CACHE_EXPIRY_SECS
@@ -80,13 +82,21 @@ class VisionNavigation(ShortrangeState):
                     self.success = True
                 else:
                     # Drive the rover to the target if the cache was updated recently
-                    turn = kP * self.target_cache.msg.x_offset
-                    drivetrain_pub.publish(SPEED + turn, SPEED - turn)
+                    # turn = kP * self.target_cache.msg.x_offset
+                    # drivetrain_pub.publish(SPEED + turn, SPEED - turn)
+
+                    if self.target_cache.msg.x_offset > 50:
+                        drivetrain_pub.publish(SPEED, 0)
+                    elif self.target_cache.msg.x_offset < -50:
+                        drivetrain_pub.publish(0, SPEED)
+                    else:
+                        drivetrain_pub.publish(SPEED, SPEED)
             else:
                 # Turn the rover to look for the ArUco tag
-                drivetrain_pub.publish(SPEED, -SPEED)
+                # drivetrain_pub.publish(SPEED, -SPEED)
+                drivetrain_pub.publish(0, 0)
 
-            rospy.sleep(rate)
+            rate.sleep()
 
         sub.unregister()
         drivetrain_pub.unregister()

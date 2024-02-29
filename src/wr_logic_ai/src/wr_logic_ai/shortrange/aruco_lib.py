@@ -4,6 +4,8 @@
 # @brief Functions for detecting ArUco tags
 # @{
 
+import math
+
 import numpy as np
 import cv2 as cv
 from typing import *
@@ -172,7 +174,7 @@ def estimate_distance_with_measured_focal_length(corners: np.ndarray) -> float:
     return REAL_WORLD_ARUCO_DIM * FOCAL_LENGTH_MM / (side_lengths * 1000)
 
 
-def mark_aruco_tag(img, corners, isolate=False):
+def mark_aruco_tag(img, corners, isolate=False, tag_distance=math.inf):
     """
     For a given image, this surrounds the aruco tag with a green box. If
     isolate is true, then a black mask is applied to non aruco tag parts of
@@ -208,6 +210,9 @@ def mark_aruco_tag(img, corners, isolate=False):
         mask = np.zeros(res_img.shape, dtype=np.uint8)
         cv.fillPoly(mask, pts=contours, color=(255, 255, 255))
         res_img = cv.bitwise_and(res_img, mask)
+
+    if tag_distance != math.inf:
+        res_img = cv.putText(res_img, text=f"distance: {tag_distance} meters")
 
     return res_img
 

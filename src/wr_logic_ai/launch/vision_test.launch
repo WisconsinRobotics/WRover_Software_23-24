@@ -3,6 +3,8 @@
 
     <arg name="vision_topic" default="/logic/vision_target" />
     <arg name="video_stream" default="" />
+    <arg name="debug" default="true" />
+    <arg name="motor_speeds" default="/control/drive_system/cmd" />
 
     <!-- <include file="$(find wr_entry_point)/launch/comp/comp_ds_control.launch" /> -->
 
@@ -10,8 +12,18 @@
     <node name="vision_target_detection" pkg="wr_logic_ai" type="vision_target_detection.py" >
         <param name="vision_topic" value="$(arg vision_topic)" />
         <param name="video_stream" value="$(arg video_stream)" />
+        <param name="debug" type="bool" value="$(arg debug)" />
     </node>
-    <!-- <node name="shortrange" pkg="wr_logic_ai" type="vision_navigation.py" >
+
+    <!-- Launch ShortRange state machine and publish message to enter navigation state -->
+
+    <!-- <node name="shortrange_navigation" pkg="wr_logic_ai" type="shortrange_state_machine.py" >
         <param name="vision_topic" value="$(arg vision_topic)" />
+        <param name="motor_speeds" value="$(arg motor_speeds)" />
     </node> -->
+
+    <!-- <node pkg="rostopic" type="rostopic" name="rostopic" args="pub -1 /ShortRangeActionServer/goal wr_logic_ai/ShortRangeActionGoal
+    '{header: { seq: 0, stamp: { secs: 0, nsecs: 0 }, frame_id: '' },
+    goal_id: { stamp: { secs: 0, nsecs: 0 }, id: '' },
+    goal: { target_type: 1 }}'"/> -->
 </launch>

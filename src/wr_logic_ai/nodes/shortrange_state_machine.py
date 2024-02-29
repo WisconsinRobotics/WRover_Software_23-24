@@ -14,16 +14,15 @@
 # ![](ShortrangeStateMachine.png)
 # @{
 
-from typing import Union
+from typing import *
 
 import rospy
 import actionlib
 from actionlib_msgs.msg import GoalStatus
 
-from wr_logic_ai.shortrange.shortrange_util import ShortrangeStateEnum, ShortrangeState
-from wr_logic_ai.shortrange.encoder_drive import EncoderDrive
+from wr_logic_ai.shortrange.shortrange_util import ShortrangeStateEnum
 from wr_logic_ai.shortrange.vision_navigation import VisionNavigation
-from wr_logic_ai.msg import ShortrangeAction, ShortrangeGoal
+from wr_logic_ai.msg import ShortRangeAction, ShortRangeGoal
 
 
 class ShortrangeStateMachine:
@@ -44,7 +43,7 @@ class ShortrangeStateMachine:
         ## SimpleActionServer using shortrange_callback to execute ShortrangeGoals
         self._as = actionlib.SimpleActionServer(
             self._action_name,
-            ShortrangeAction,
+            ShortRangeAction,
             execute_cb=self.shortrange_callback,
             auto_start=False,
         )
@@ -52,28 +51,29 @@ class ShortrangeStateMachine:
         ## The current state of the state machine
         self.state: ShortrangeStateEnum = None
 
-    def shortrange_callback(self, goal: ShortrangeGoal):
+    def shortrange_callback(self, goal: ShortRangeGoal):
         """
-        Sets the shortrange state based on the ShortrangeGoal message
+        Sets the shortrange state based on the ShortRangeGoal message
 
-        @param goal (ShortrangeGoal): ShortrangeGoal message defined in action/ShortRange.action
+        @param goal (ShortRangeGoal): ShortRangeGoal message defined in action/ShortRange.action
         """
 
         # Set initial state based on goal
         if goal.target_type == goal.TARGET_TYPE_GPS_ONLY:
             self.state = ShortrangeStateEnum.SUCCESS
-        elif goal.target_type == goal.TARGET_TYPE_SINGLE_MARKER:
+        elif goal.target_type == goal.TARGET_TYPE_VISION:
             self.state = ShortrangeStateEnum.VISION_DRIVE
         else:
             self.state = None
 
-        distance = 0
         # Run states while the current state is not a terminating state
-        while self.state and self.state not in ShortrangeStateEnum.TERMINATING:
+        while (
+            not rospy.is_shutdown()
+            and self.state
+            and self.state not in ShortrangeStateEnum.TERMINATING
+        ):
             if self.state is ShortrangeStateEnum.VISION_DRIVE:
                 self.state = VisionNavigation().run()
-            elif self.state is ShortrangeStateEnum.ENCODER_DRIVE:
-                self.state = EncoderDrive(distance).run()
 
         # Set result of
         if self.state is ShortrangeStateEnum.SUCCESS:

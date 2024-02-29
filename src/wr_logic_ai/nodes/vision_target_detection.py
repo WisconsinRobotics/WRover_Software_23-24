@@ -9,6 +9,8 @@
 # Then, the data for all ArUco tags detected is published as a VisionTarget message.
 # @{
 
+import math
+
 import rospy
 import cv2 as cv
 import numpy as np
@@ -69,6 +71,14 @@ def main():
         cap.set(cv.CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH)
         cap.set(cv.CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
 
+    # Save video if debugging
+    debug = rospy.get_param("~debug")
+    if debug:
+        fourcc = cv.VideoWriter_fourcc(*"XVID")
+        out = cv.VideoWriter(
+            "~/output.avi", fourcc, 30.0, (CAMERA_WIDTH, CAMERA_HEIGHT)
+        )
+
     if not cap.isOpened():
         rospy.logerr("Failed to open camera")
         exit()
@@ -80,9 +90,18 @@ def main():
             rospy.logerr("Failed to read frame")
         else:
             (corners, ids, _) = aruco_lib.detect_aruco(frame)
+            closest_tag = math.inf
             if ids is not None:
                 for i, target_id in enumerate(ids):
                     pub.publish(process_corners(target_id[0], corners[i][0]))
+
+                    closest_tag = min(
+                        closest_tag, aruco_lib.estimate_distance_m(corners[i][0])
+                    )
+
+            if debug:
+                out.write(aruco_lib.mark_aruco_tag(frame, corners, False, closest_tag))
+
         rate.sleep()
 
     cap.release()
