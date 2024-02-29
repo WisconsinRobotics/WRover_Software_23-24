@@ -80,7 +80,7 @@ auto BNO085::set_sensor_config(sh2_SensorId_t sensorId) -> int {
 
     sh2_SensorConfig_t sensor_config;
     // TODO make this not a magic number
-    sensor_config.reportInterval_us = 10000;
+    sensor_config.reportInterval_us = 100000;
 
     return sh2_setSensorConfig(sensorId, &sensor_config);
 }

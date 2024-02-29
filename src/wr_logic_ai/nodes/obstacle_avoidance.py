@@ -28,7 +28,7 @@ from std_msgs.msg import Float64
 
 # Navigation parameters
 # distance before obstacle avoidance logics is triggered (in meters)
-LIDAR_THRESH_DISTANCE = 2.5
+LIDAR_THRESH_DISTANCE = 5
 # distance before rover believes it has reached the target (in meters)
 NAV_THRESH_DISTANCE = 0.5
 
@@ -235,7 +235,7 @@ def update_heading(msg: Float64) -> None:
 
 
 def angle_diff(heading1: float, heading2: float) -> float:
-    """
+    """std::this_thread::sleep_for(std::chrono::milliseconds(100));
     Returns relative angle difference from heading of robot to heading of target
 
     @param heading1 (float): Value of target relative to East (Counter-clockwise)
@@ -319,7 +319,7 @@ def update_navigation(data: LaserScan) -> None:
         speed_factor = 1 if speed_factor > 1 else speed_factor
         # Get the DriveTrainCmd relating to the heading of the robot and the resulting best navigation angle
         # Reason we do 90 - result is to get a value where 0 is up, + is clockwise, and - is counterclockwise
-        msg = angle_calc.piecewise_linear(angle_diff(90, result), 0)
+        msg = angle_calc.logistic(angle_diff(90, result), 0)
 
         #rospy.logerr(result)
         # rospy.loginfo(f"left drive value: {msg.left_value}, right drive value: {msg.right_value}")
@@ -330,8 +330,8 @@ def update_navigation(data: LaserScan) -> None:
         msg.left_value *= speed_factor  # Right value was inverted, -1 "fixes"
         msg.right_value *= speed_factor
         # Publish the DriveTrainCmd to the topic
-        rospy.loginfo("Heading Value: " + str(cur_heading))
-        rospy.loginfo("Target Value: " + str(target_angle))
+        # rospy.loginfo("Heading Value: " + str(cur_heading))
+        # rospy.loginfo("Target Value: " + str(target_angle))
         drive_pub.publish(msg)
 
         # TESTING

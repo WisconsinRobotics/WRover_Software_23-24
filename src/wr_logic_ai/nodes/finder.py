@@ -18,7 +18,7 @@ import os
 import pdb
 import pickle
 
-ROVER_WIDTH = 1.5
+ROVER_WIDTH = 2.5
 
 ## Publisher for LiDAR data for debugging on rviz
 scan_rviz_pub = rospy.Publisher("/scan_rviz", LaserScan, queue_size=10)
@@ -141,7 +141,7 @@ def get_valley(
     rviz_data.ranges = hist
     scan_rviz_pub.publish(rviz_data)
 
-    rospy.logerr(hist[0])
+    # rospy.logerr(hist[0])
 
     # This is to prevent expanding constant obstacles from behind the robot, which can
     # inadvertently and unpredictably (due to sensor noise) block out most of the view

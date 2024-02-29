@@ -7,6 +7,8 @@
 #include "ros/rate.h"
 #include "std_msgs/Float64.h"
 #include "std_msgs/Int16.h"
+#include <chrono>
+#include <thread>
 #include <cstdlib>
 #include <iostream>
 
@@ -40,10 +42,12 @@ auto main(int argc, char **argv) -> int {
     ros::Rate rate(10);
 
     // Create publishers
+    /*
     auto pub_x{nHandle.advertise<std_msgs::Float64>("/mag_x", QUEUE_SIZE)};
     auto pub_y{nHandle.advertise<std_msgs::Float64>("/mag_y", QUEUE_SIZE)};
     auto pub_z{nHandle.advertise<std_msgs::Float64>("/mag_z", QUEUE_SIZE)};
     auto pub_acc{nHandle.advertise<std_msgs::Int16>("/mag_acc", QUEUE_SIZE)};
+    */
 
     auto pub_heading{nHandle.advertise<std_msgs::Float64>("/heading_data", QUEUE_SIZE)};
 
@@ -62,10 +66,11 @@ auto main(int argc, char **argv) -> int {
             ROS_WARN("IMU TARE WILL CHANGE ON NEXT RESET");
         }
     }
-    sensor.tare(false, SH2_TARE_BASIS_GAMING_ROTATION_VECTOR);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-    std_msgs::Float64 mag_x, mag_y, mag_z, heading;
-    std_msgs::Int16 mag_acc;
+    // std_msgs::Float64 mag_x, mag_y, mag_z, heading;
+    // std_msgs::Int16 mag_acc;
+    std_msgs::Float64 heading;
     while (ros::ok()) {
         if (sensor.get_reset()) {
             ROS_INFO("IMU SENSOR RESET %d", sensor.prod_ids.entry[0].resetCause);
