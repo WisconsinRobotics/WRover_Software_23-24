@@ -1,7 +1,7 @@
 # TODO: imports
 import rospy
 import actionlib
-from wr_logic_ai.msg import SearchAction, SearchGoal # where to find?
+from wr_logic_ai.msg import SearchStateAction, SearchStateGoal
 import obstacle_avoidance
 import PointTimer
 
@@ -17,13 +17,13 @@ class SearchActionServer(object):
         obstacle_avoidance.initialize()
         self._as = actionlib.SimpleActionServer(
             self._action_name,
-            SearchAction,
+            SearchStateAction,
             execute_cb=self.execute_callback,
             auto_start=False,
         )
         self._as.start()
 
-    def execute_callback(self, goal: SearchGoal):
+    def execute_callback(self, goal: SearchStateGoal):
         """
         Executes the long range obstacle avoidance code, and triggers the corresponding state machine event
         depending on the result of the navigation
@@ -31,7 +31,6 @@ class SearchActionServer(object):
         @param goal (SearchGoal): Goal for the navigation segment, which contains the GPS coordinates
         of the target
         """
-
         start_time = rospy.get_rostime()
         while (
             rospy.get_rostime() - start_time < PointTimer.calculateTime(goal.dist)
