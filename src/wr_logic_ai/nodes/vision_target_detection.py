@@ -74,9 +74,9 @@ def main():
     # Save video if debugging
     debug = rospy.get_param("~debug")
     if debug:
-        fourcc = cv.VideoWriter_fourcc(*"XVID")
+        fourcc = cv.VideoWriter_fourcc(*"MJPG")
         out = cv.VideoWriter(
-            "~/output.avi", fourcc, 30.0, (CAMERA_WIDTH, CAMERA_HEIGHT)
+            "output.avi", fourcc, 20.0, (CAMERA_WIDTH, CAMERA_HEIGHT), True
         )
 
     if not cap.isOpened():
@@ -90,21 +90,23 @@ def main():
             rospy.logerr("Failed to read frame")
         else:
             (corners, ids, _) = aruco_lib.detect_aruco(frame)
-            closest_tag = math.inf
             if ids is not None:
                 for i, target_id in enumerate(ids):
                     pub.publish(process_corners(target_id[0], corners[i][0]))
 
-                    closest_tag = min(
-                        closest_tag, aruco_lib.estimate_distance_m(corners[i][0])
+                    closest_tag = aruco_lib.estimate_distance_m(corners[i][0])
+                    frame = aruco_lib.mark_aruco_tag(
+                        frame, corners[i][0], False, closest_tag
                     )
 
             if debug:
-                out.write(aruco_lib.mark_aruco_tag(frame, corners, False, closest_tag))
+                out.write(frame)
 
         rate.sleep()
 
     cap.release()
+    if debug:
+        out.release()
 
 
 if __name__ == "__main__":

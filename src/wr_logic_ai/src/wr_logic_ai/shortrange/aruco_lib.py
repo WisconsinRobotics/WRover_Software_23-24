@@ -212,7 +212,14 @@ def mark_aruco_tag(img, corners, isolate=False, tag_distance=math.inf):
         res_img = cv.bitwise_and(res_img, mask)
 
     if tag_distance != math.inf:
-        res_img = cv.putText(res_img, text=f"distance: {tag_distance} meters")
+        res_img = cv.putText(
+            res_img,
+            text=f"Distance: {tag_distance:.2f} meters",
+            org=(20, 20),
+            fontFace=cv.FONT_HERSHEY_PLAIN,
+            fontScale=1,
+            color=(0, 255, 0),
+        )
 
     return res_img
 
