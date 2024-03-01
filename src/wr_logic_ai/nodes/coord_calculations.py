@@ -7,7 +7,7 @@ class CoordCalculations:
     @brief Calculates the coordinates the rover travels to when searching.
 
     Attributes(s):
-        earth_radius - radius of the Earth
+        EARTH_RADIUS - radius of the Earth
 
     Methods(s):
         get_coords(start_lat, start_long, distance, num_vertices) - gets the list of coordinates
@@ -18,7 +18,7 @@ class CoordCalculations:
         calc_west_coord(curr_lat_rad, curr_long_rad, distance) - calculates coordinate going west
     '''
     
-    earth_radius = 6378100 # in meters
+    EARTH_RADIUS = 6378100 # in meters
 
     @staticmethod
     def get_coords(start_lat, start_long, distance, num_vertices):
@@ -111,21 +111,21 @@ class CoordCalculations:
     # formulas, north has a bearing of 0°, east has a bearing of 90°, south has a bearing of 180°, 
     # and west has a bearing of 270°. 
     #
-    # With the variables curr_lat, curr_long, distance, bearing, and earth_radius, 
+    # With the variables curr_lat, curr_long, distance, bearing, and EARTH_RADIUS, 
     #   target_lat and target_long can be calculated using these formulas:
     #
     #       target_lat = asin(
     #           sin(curr_lat) 
-    #           ⋅ cos(distance / earth_radius) 
+    #           ⋅ cos(distance / EARTH_RADIUS) 
     #           + cos(curr_lat) 
-    #           ⋅ sin(distance / earth_radius) 
+    #           ⋅ sin(distance / EARTH_RADIUS) 
     #           ⋅ cos(bearing))
     #
     #       target_long = curr_long + atan2(
     #           sin(bearing) 
-    #           ⋅ sin(distance / earth_radius) 
+    #           ⋅ sin(distance / EARTH_RADIUS) 
     #           ⋅ cos(curr_lat), 
-    #           cos(distance / earth_radius) 
+    #           cos(distance / EARTH_RADIUS) 
     #           − sin(curr_lat)^2))
 
     @staticmethod
@@ -146,9 +146,9 @@ class CoordCalculations:
         '''
         target_lat_rad = math.asin(
                 math.sin(curr_lat_rad) 
-                * math.cos(distance / CoordCalculations.earth_radius) 
+                * math.cos(distance / CoordCalculations.EARTH_RADIUS) 
                 + math.cos(curr_lat_rad) 
-                * math.sin(distance / CoordCalculations.earth_radius) 
+                * math.sin(distance / CoordCalculations.EARTH_RADIUS) 
                 * 1)
 
         return target_lat_rad, curr_long_rad
@@ -171,9 +171,9 @@ class CoordCalculations:
         '''
         target_long_rad = curr_long_rad + math.atan2(
                 1 
-                * math.sin(distance / CoordCalculations.earth_radius) 
+                * math.sin(distance / CoordCalculations.EARTH_RADIUS) 
                 * math.cos(curr_lat_rad), 
-                math.cos(distance / CoordCalculations.earth_radius) 
+                math.cos(distance / CoordCalculations.EARTH_RADIUS) 
                 - math.sin(curr_lat_rad) ** 2)
 
         return curr_lat_rad, target_long_rad
@@ -196,9 +196,9 @@ class CoordCalculations:
         '''
         target_lat_rad = math.asin(
                 math.sin(curr_lat_rad) 
-                * math.cos(distance / CoordCalculations.earth_radius) 
+                * math.cos(distance / CoordCalculations.EARTH_RADIUS) 
                 + math.cos(curr_lat_rad) 
-                * math.sin(distance / CoordCalculations.earth_radius) 
+                * math.sin(distance / CoordCalculations.EARTH_RADIUS) 
                 * -1)
 
         return target_lat_rad, curr_long_rad
@@ -221,9 +221,9 @@ class CoordCalculations:
         '''
         target_long_rad = curr_long_rad + math.atan2(
                 -1 
-                * math.sin(distance / CoordCalculations.earth_radius) 
+                * math.sin(distance / CoordCalculations.EARTH_RADIUS) 
                 * math.cos(curr_lat_rad), 
-                math.cos(distance / CoordCalculations.earth_radius) 
+                math.cos(distance / CoordCalculations.EARTH_RADIUS) 
                 - math.sin(curr_lat_rad) ** 2)
 
         return curr_lat_rad, target_long_rad
