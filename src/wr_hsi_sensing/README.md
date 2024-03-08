@@ -30,7 +30,7 @@ To launch the mapping node: `roslaunch wr_hsi_sensing gps_data_mapper.launch`
 - You'll need the ArduSimple/Ublox GPS node for this node to do anything
 
 To lanch mapviz: `roslaumch wr_hsi_sensing mapviz.launch`
-1. You'll need a Bing API key to get the satellite map layer 😭. Visit https://www.bingmapsportal.com/
+1. You'll need a BingMaps API key to get the satellite map layer 😭. Visit https://www.bingmapsportal.com/
 2. Set fixed Frame to map in the upper left corner, set Target Frame to "none", and check use latest transforms.
 3. Click Add at the bottom left to add tile_map. After that, set Source to BingMaps. Use the afforementioned API Key
 4. Click Add again and add navsat. After that, click Select on Topic to load the topic set in remap (/gps/fix). After setting the color you like, change the draw style to point. 
