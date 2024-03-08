@@ -3,9 +3,9 @@
 @defgroup wr_hsi_sensing wr_hsi_sensing
 @brief Provides GPS data to the ROS network
 
-This package contains nodes for the ArduSimple RTK GNSS board and a mapping node that maps the ArduSimple /gps/fix topic to a message used in our ROS environment.
+This package contains nodes for the ArduSimple RTK GNSS board, a mapping node that maps the ArduSimple /gps/fix topic to a message used in our ROS environment, and a node for mapviz, a visualization tool.
 
-There is also an old node "previos_gps_node.py" that was used when we were using an old GPS sensor to calculate IMU heading data as a temporary fix during a competition.
+There is also an old node "previous_gps_node.py" that was used when we were using an old GPS sensor to calculate IMU heading data as a temporary fix during a competition.
 It is no longer used.
 
 # Launching Nodes
