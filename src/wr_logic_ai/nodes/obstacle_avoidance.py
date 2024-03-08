@@ -313,7 +313,7 @@ def update_navigation(data: LaserScan) -> None:
         speed_factor = 0.3
         if(speed_factor < 0):
             speed_factor = 0
-        else if(speed_factor > 1):
+        elif(speed_factor > 1):
             speed_factor = 1
 
         # Get the DriveTrainCmd relating to the heading of the robot and the resulting best navigation angle
