@@ -1,4 +1,6 @@
 <launch>
+  <!-- Launches mapviz visualization. -->
+  <!-- Requires ardusimple_provided node to be running -->
 
   <node pkg="mapviz" type="mapviz" name="mapviz">
     <!-- <param name="config" value=""/> -->

@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+## @file
+# @brief Node responsible for mapping Ardusimple GPS data to CoordinateMsg
+# @ingroup wr_hsi_sensing
+# @defgroup wr_hsi_sensing_gps GPS
+# @details Subscribes to the /gps/fix topic and publishes the latitude and longitude data to the /gps_coord_data topic
+# @{
+
 import rospy
 from sensor_msgs.msg import NavSatFix
 from wr_hsi_sensing.msg import CoordinateMsg

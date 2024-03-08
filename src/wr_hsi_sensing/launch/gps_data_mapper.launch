@@ -1,7 +1,5 @@
 <launch>
+    <!-- Launches GPS data mapping node that translate ardusimple GPS messages to CoordinateMsg -->
     <!-- <arg name="debug" default="false"/> -->
-    <!-- TODO (@Tzancc): undo commenting to bring back IMU sensors -->
-    <!-- and work on reformatting this module as well so things aren't just "test" -->
-    <!-- <node name="imu" type="imu_testing.py" pkg="wr_hsi_sensing" /> -->
     <node name="gps_mapper" type="gps_forwarding_node.py" pkg="wr_hsi_sensing" output="screen"/>
 </launch>
