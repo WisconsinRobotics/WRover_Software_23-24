@@ -81,79 +81,29 @@ def get_laser_ranges(t=0):
     
     if(obstacle.getAngle1() > obstacle.getAngle2() and obstacle.getAngle1() < 180):
         obstacle.switchCoords()
-        rospy.logerr("SWWWWWWWWWWWWWWIIIIIIITCCCCCCCCCHHHHH")
-
-    # rospy.logerr("-------------")
-    # rospy.logerr(angle1)
-    # rospy.logerr(angle2)
-    # rospy.logerr("-------------")
-    #rospy.logerr(angle1)
-
-   # rospy.logerr("\n1:" + str(obstacle.coord1) + "\n2:" + str(obstacle.coord2))
-
-
-    # modifierx = 0
-    # modifiery = 0
-    # post_modifierx = 0
-    # post_modifiery = 0
 
     m_slope = obstacle.getSlope()
-
-    # post_modifierx=((obstacle.coord1[0] + post_modifierx)*math.tan(math.radians(angle1))) - obstacle.coord1[1]
-    # post_modifiery=((obstacle.coord1[1] + post_modifiery)/math.tan(math.radians(angle1))) - obstacle.coord1[0]
     for t in range(180):
         if(t >= angle1 and t <= angle2):
             if(t != 0):
                 #Using point-slope formula and knowing the equation for the line between the two points and the line made by the angle,
                 #you can find the intersection of those lines and plot that point in rviz
 
-                
                 #y=(y_1+x_1*m_slope)/(1-(m_slope/m_angle))
                 #x=y/m_angle
                 m_angle = math.tan(math.radians(t))
 
                 y = (obstacle.coord1[1] - obstacle.coord1[0]*m_slope)/(1-(m_slope/m_angle))
                 x = y/m_angle
-                # rospy.logerr("x" + " " + str(t) + " " + str(x))
-                # rospy.logerr("y" + " " + str(t) + " " + str(y))
 
                 inputData.append(cartesianToRadian(x,y))
-
-                # rospy.logerr(angle1)
-                # modifiery = ((obstacle.coord1[0] + post_modifierx)*math.tan(math.radians(t))) - obstacle.coord1[1]
-                # rospy.logerr("y" + " " + str(t) + " " + str(modifiery))
-                # modifierx = ((obstacle.coord1[1] + post_modifiery)/math.tan(math.radians(t))) - obstacle.coord1[0] # get x distance x = height/tan(angle)
-                # #rospy.logerr("x" + " " + str(t) + " " + str(modifierx))
-                # post_modifiery= modifiery
-                # post_modifierx = modifierx
-
                 
-
-                # rospy.logerr(slope)
-                # if(slope == 0):
-                #     inputData.append(cartesianToRadian( ((y_obs-obstacle.coord1[1])/slope)+obstacle.coord1[0] , slope*(x_obs-obstacle.coord1[0])-obstacle.coord1[1]))
-                # else:
-                #     inputData.append(cartesianToRadian( ((y_obs-obstacle.coord1[1])/slope)+obstacle.coord1[0] , slope*(x_obs-obstacle.coord1[0])-obstacle.coord1[1]))
-                
-            # else:
-            #     modifierx = 0
-            #     modifiery = 0
-            # inputData.append(cartesianToRadian(obstacle.coord1[0]+modifierx, obstacle.coord1[1] +modifiery))
-
-            #rospy.logerr(str(t) + " " +str(cartesianToRadian(obstacle.coord1[0]+modifier, obstacle.coord1[1])))
         else:
             inputData.append(10)
 
     for i in range(180):
         inputData.append(.3)
 
-    # for t in range(180):
-    #     distance = 10
-    #     if t -90 <= t and t <= t and t != 0:
-    #         distance = dist
-    #     inputData.append(distance)
-    # for i in range(180):
-    #     inputData.append(.3)
     return inputData
 
 
@@ -186,12 +136,8 @@ def run_mock_data() -> None:
 
     # Testing publishers and subscribers
     rospy.Subscriber('/control/drive_system/cmd', DriveTrainCmd, updateHeading)
-    #rospy.Subscriber('/laser_adjuster', Float64, updateLaserAdjuster)
 
     laser = LaserScan()
-    # vara.intensities
-
-    # laser.angle_min = 0.
     laser.angle_max = 2 * math.pi
     laser.angle_increment = math.pi / 180
     laser.time_increment = 0
@@ -208,7 +154,7 @@ def run_mock_data() -> None:
     mock_gps.latitude = 0
     mock_gps.longitude = 0
 
-    print("sent fake nav data")
+    rospy.loginfo("sent fake nav data")
     
     sleeper = rospy.Rate(RATE)
     while not rospy.is_shutdown():
@@ -233,8 +179,6 @@ def updateHeading(data) -> None:
     #global dist
     #global height
     
-    #t+= ((data.left_value - data.right_value)*3)*(4)
-
     #Move obstacle up and down
     # distance = velocity * time
     # distance = amount of movement of obstacle
@@ -248,7 +192,7 @@ def updateHeading(data) -> None:
     #amount rotated = angular velocity * time
     #amount rotated = laser_adjust
     #------------------
-    #w = v/r
+    #w(angular velocity) = v/r
     #angular velocity = (velocity of left value + velocity of right value) / radius of robot
     #angular velocity = (data.left_value*maxVelocity + data.right_value*maxVelocity) / radius of robot
     #angular velocity will return in radians per second
@@ -276,60 +220,17 @@ def updateHeading(data) -> None:
 
     # rospy.logerr(str(obstacle.coord2[0]) + " " + str(obstacle.coord2[1]))
 
-    #******* Reset obstacle *************#
+    #******* Reset obstacle when behind us *************#
     if(obstacle.coord1[1] < .1 and obstacle.coord2[1] <.1):
         obstacle.testAngle()    
-        # rospy.logerr(obstacle.coord1[1])
-        # rospy.logerr(obstacle.coord2[1])
-
-
-    # dist = dist - .1*((data.left_value + data.right_value)/2)
-    # #t+=2
-    # t%=360
-    # if(dist <= 0.1 or (dist < 2.8 and data.left_value >= .298 and data.right_value >= .298)):
-    #     t=100+(random.randint(0,70))
-    #     dist=7
-   
-
-
-def display_data(data) -> None:
-    rviz_data = deepcopy(data)
-
-    # rospy.logerr((data.ranges[287]))
-    # print(data.ranges[287])
-
-    # rospy.loginfo("Front " + str(data.ranges[0 * 287]))
-    # rospy.loginfo("Back " + str(data.ranges[2 * 287]))
-
-
-    rviz_data.ranges = offset_lidar_data(
-        rviz_data.ranges, math.degrees(rviz_data.angle_increment), True)
-    #scan_rviz_pub = rospy.Publisher('/scan_rviz', LaserScan, queue_size=10)
-    #scan_rviz_pub.publish(rviz_data)
-
-
-def run_real_data() -> None:
-    rospy.Subscriber("/scan", LaserScan, display_data)
 
 
 if __name__ == "__main__":
     rospy.init_node("publish_fake_data", anonymous=False)
 
-    # rospy.loginfo(rospy.get_param('WROVER_HW'))
-
-    rospy.loginfo(rospy.get_param("/long_range_action_server/wrover_hw"))
-
-    # params_list = rospy.get_param_names()
-
-    # for param in params_list:
-    #     rospy.logerr("parameter: " + str(param))
-
     if rospy.get_param("/long_range_action_server/wrover_hw") == "MOCK":
         # Run fake data
         rospy.loginfo("Running fake data")
         run_mock_data()
-    else:
-        # Run real data
-        run_real_data()
-    
+
     rospy.spin()
