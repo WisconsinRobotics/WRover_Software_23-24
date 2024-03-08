@@ -345,53 +345,96 @@ def update_navigation(data: LaserScan) -> None:
         drive_pub.publish(msg)
 
         # TESTING
-        heading_msg.header.seq = frameCount
-        heading_msg.header.stamp = rospy.get_rostime()
 
-        actual_heading_msg.header.seq = frameCount
-        actual_heading_msg.header.stamp = rospy.get_rostime()
+        if rospy.get_param("/long_range_action_server/wrover_hw") == "MOCK":
+            heading_msg.header.seq = frameCount
+            heading_msg.header.stamp = rospy.get_rostime()
 
-        delta_heading_msg.header.seq = frameCount
-        delta_heading_msg.header.stamp = rospy.get_rostime()
+            actual_heading_msg.header.seq = frameCount
+            actual_heading_msg.header.stamp = rospy.get_rostime()
 
-        frameCount += 1
-        # negative sign on the pose is hardcoded, may not model how the actual robot will act
-        heading_msg.pose.orientation.z = math.sin(math.radians(result+180) / 2)
-        heading_msg.pose.orientation.w = math.cos(math.radians(result+180) / 2)
-        heading_pub.publish(heading_msg)
+            delta_heading_msg.header.seq = frameCount
+            delta_heading_msg.header.stamp = rospy.get_rostime()
 
-        # TESTING
+            frameCount += 1
+            # negative sign on the pose is hardcoded, may not model how the actual robot will act
+            heading_msg.pose.orientation.z = math.sin(math.radians(result) / 2)
+            heading_msg.pose.orientation.w = math.cos(math.radians(result) / 2)
+            heading_pub.publish(heading_msg)
 
-        actual_heading_msg.pose.orientation.z = math.sin(math.radians(-cur_heading) / 2)
-        actual_heading_msg.pose.orientation.w = math.cos(math.radians(cur_heading) / 2)
-        actual_heading_pub.publish(actual_heading_msg)
+            # TESTING
 
-         # TESTING
+            actual_heading_msg.pose.orientation.z = math.sin(math.radians(cur_heading) / 2)
+            actual_heading_msg.pose.orientation.w = math.cos(math.radians(cur_heading) / 2)
+            actual_heading_pub.publish(actual_heading_msg)
 
-        delta_heading_msg.pose.orientation.z = math.sin(math.radians(delta_heading - 90) / 2)
-        delta_heading_msg.pose.orientation.w = math.cos(math.radians(delta_heading + 90) / 2)
-        delta_heading_pub.publish(delta_heading_msg)
+            # TESTING
 
-        # TESTING
+            delta_heading_msg.pose.orientation.z = math.sin(math.radians(delta_heading + 90) / 2)
+            delta_heading_msg.pose.orientation.w = math.cos(math.radians(delta_heading + 90) / 2)
+            delta_heading_pub.publish(delta_heading_msg)
 
-        # Adding the nums is cuz the flag is off center, I'm not sure why??? I downloaded this from a random website :D
-        marker_flag.pose.position.x =  5*math.sin(math.radians(delta_heading)) + 0.57
-        marker_flag.pose.position.y = -5*math.cos(math.radians(delta_heading)) + .3
-        marker_flag_pub.publish(marker_flag)
+            # TESTING
 
-        laser_adjuster_pub.publish(delta_heading) #Used for inputFakeData
+            # Adding the nums is cuz the flag is off center, I'm not sure why??? I downloaded this from a random website :D
+            marker_flag.pose.position.x =  5*math.sin(math.radians(delta_heading)) + 0.57
+            marker_flag.pose.position.y = -5*math.cos(math.radians(delta_heading)) + .3
+            marker_flag_pub.publish(marker_flag)
 
-        marker.pose.orientation.z = math.sin(math.radians(delta_heading) / 2)
-        marker.pose.orientation.w = math.cos(math.radians(delta_heading) / 2)
-        # Set the position and orientation based on delta-heading
+            laser_adjuster_pub.publish(delta_heading) #Used for inputFakeData
 
-        # Publish the Marker message
-        marker_pub.publish(marker)
+            marker.pose.orientation.z = math.sin(math.radians(delta_heading) / 2)
+            marker.pose.orientation.w = math.cos(math.radians(delta_heading) / 2)
+            # Set the position and orientation based on delta-heading
 
-        # Publish the circle :D
-        #rospy.logerr(rospy.Rate.remaining(0x7f594e3e5f70))
+            # Publish the Marker message
+            marker_pub.publish(marker)
 
-        # Publish the wRover message
+        #Flipped lines to match laser scan from rpLIDAR
+        elif rospy.get_param("/long_range_action_server/wrover_hw") == "REAL":
+
+            heading_msg.header.seq = frameCount
+            heading_msg.header.stamp = rospy.get_rostime()
+
+            actual_heading_msg.header.seq = frameCount
+            actual_heading_msg.header.stamp = rospy.get_rostime()
+
+            delta_heading_msg.header.seq = frameCount
+            delta_heading_msg.header.stamp = rospy.get_rostime()
+
+            frameCount += 1
+            # negative sign on the pose is hardcoded, may not model how the actual robot will act
+            heading_msg.pose.orientation.z = math.sin(math.radians(result+180) / 2)
+            heading_msg.pose.orientation.w = math.cos(math.radians(result+180) / 2)
+            heading_pub.publish(heading_msg)
+
+            # TESTING
+
+            actual_heading_msg.pose.orientation.z = math.sin(math.radians(-cur_heading) / 2)
+            actual_heading_msg.pose.orientation.w = math.cos(math.radians(cur_heading) / 2)
+            actual_heading_pub.publish(actual_heading_msg)
+
+            # TESTING
+
+            delta_heading_msg.pose.orientation.z = math.sin(math.radians(delta_heading - 90) / 2)
+            delta_heading_msg.pose.orientation.w = math.cos(math.radians(delta_heading + 90) / 2)
+            delta_heading_pub.publish(delta_heading_msg)
+
+            # TESTING
+
+            # Adding the nums is cuz the flag is off center, I'm not sure why??? I downloaded this from a random website :D
+            marker_flag.pose.position.x =  5*math.sin(math.radians(delta_heading)) + 0.57
+            marker_flag.pose.position.y = -5*math.cos(math.radians(delta_heading)) + .3
+            marker_flag_pub.publish(marker_flag)
+
+            laser_adjuster_pub.publish(delta_heading) #Used for inputFakeData
+
+            marker.pose.orientation.z = math.sin(math.radians(delta_heading) / 2)
+            marker.pose.orientation.w = math.cos(math.radians(delta_heading) / 2)
+            # Set the position and orientation based on delta-heading
+
+            # Publish the Marker message
+            marker_pub.publish(marker)
         
         if(frameCount < 10):
             wRover_pub.publish(wRover)
