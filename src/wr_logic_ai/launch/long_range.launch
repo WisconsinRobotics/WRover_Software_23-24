@@ -1,7 +1,7 @@
 <launch>
   <arg name="long_range_output" />
 
-  <node pkg="wr_logic_ai" name="long_range_action_server" type="long_range_action_server.py">
+  <node pkg="wr_logic_ai" name="long_range_action_server" type="long_range_action_server.py" output="screen">
     <param name="motor_speeds" value="$(arg long_range_output)" />
     <param name="wrover_hw" value="$(env WROVER_HW)" />
   </node>

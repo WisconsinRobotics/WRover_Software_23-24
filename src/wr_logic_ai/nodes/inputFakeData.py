@@ -191,7 +191,7 @@ def run_mock_data() -> None:
     laser = LaserScan()
     # vara.intensities
 
-    #laser.angle_min = 0.
+    # laser.angle_min = 0.
     laser.angle_max = 2 * math.pi
     laser.angle_increment = math.pi / 180
     laser.time_increment = 0
@@ -309,11 +309,11 @@ def display_data(data) -> None:
 
 
 def run_real_data() -> None:
-    rospy.Subscriber('/scan', LaserScan, display_data)
+    rospy.Subscriber("/scan", LaserScan, display_data)
 
 
-if __name__ == '__main__':
-    rospy.init_node('publish_fake_data', anonymous=False)
+if __name__ == "__main__":
+    rospy.init_node("publish_fake_data", anonymous=False)
 
     # rospy.loginfo(rospy.get_param('WROVER_HW'))
 

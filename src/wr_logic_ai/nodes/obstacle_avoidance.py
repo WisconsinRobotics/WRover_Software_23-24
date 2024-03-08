@@ -1,4 +1,16 @@
 #!/usr/bin/env python3
+
+"""@file
+@defgroup wr_logic_ai_longrange_ai
+@{
+@defgroup wr_logic_ai_longrange_ai_obstacle_avoidance Obstacle Avoidance
+@brief Driver code for long range navigation logics
+@details Navigates the rover to the target coordinate using the rover's current coordinates and 
+a target coordinate. This code also takes obstacle avoidance into account, by calculating an 
+"open window" that is closest towards the target heading and navigating towards that window. 
+@{
+"""
+
 import math
 import rospy
 import time
@@ -36,6 +48,21 @@ speed_factor = 0
 
 # Start the tasks managed to drive autonomously
 def initialize() -> None:
+    """Initialize publisher and subscribers for nodes
+
+    Publishers:
+
+        drive_pub: Sends motor speeds to robot
+        raw_heading_pug: Publishes data of our current heading relative to the right of the robot. (90 Degrees is where the robot is pointing)
+        heading_pub: Data from heading is transformed to be worked with rviz tester.
+
+    Subscriber:
+
+        gps_coord_data: gets lat and long coordinates from GPS
+        heading_data: Gets data of our heading with East beign 0.
+        scan: Get values from lidar scan
+
+    """
     global drive_pub
     global smoothing_constant
     global speed_factor
@@ -58,14 +85,15 @@ def initialize() -> None:
     global wRover_pub
 
     # Publisher
-    drive_pub = rospy.Publisher(rospy.get_param(
-        '~motor_speeds'), DriveTrainCmd, queue_size=1)
+    drive_pub = rospy.Publisher(
+        rospy.get_param("~motor_speeds"), DriveTrainCmd, queue_size=1
+    )
 
     # Subscribe to gps coordinate data
-    rospy.Subscriber('/gps_coord_data', CoordinateMsg, update_gps_coord)
+    rospy.Subscriber("/gps_coord_data", CoordinateMsg, update_gps_coord)
 
     # Subscribe to heading data
-    rospy.Subscriber('/heading_data', Float64, update_heading)
+    rospy.Subscriber("/heading_data", Float64, update_heading)
 
     # Subscribe to lidar data
     rospy.Subscriber('/scan', LaserScan, update_navigation)
@@ -75,7 +103,7 @@ def initialize() -> None:
 
 
     # TESING
-    heading_pub = rospy.Publisher('/debug_heading', PoseStamped, queue_size=1)
+    heading_pub = rospy.Publisher("/debug_heading", PoseStamped, queue_size=1)
     heading_msg = PoseStamped()
     heading_msg.pose.position.x = 0
     heading_msg.pose.position.y = 0
@@ -191,14 +219,28 @@ def update_gps_coord(msg: CoordinateMsg) -> None:
 
 # extends from 0 to 360 degrees, heading is shifted based on east (90 is north -> 0)
 def update_heading(msg: Float64) -> None:
+    """
+    Shifted from compass coordinates to math coordinates.
+
+    @param msg (Float64): Heading value received as value from 0 to 360. North is 0 clockwise.
+    @param cur_heading East is 0. (Counterclockwise). Extected as a value from 0 to 360.
+    """
     global cur_heading
     cur_heading = (90 - msg.data) % 360  # Shifting to East
 
 
 # calculates difference of angles from -180 to 180 degrees
 def angle_diff(heading1: float, heading2: float) -> float:
+    """std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    Returns relative angle difference from heading of robot to heading of target
+
+    @param heading1 (float): Value of target relative to East (Counter-clockwise)
+    @param heading2 (float): Value of heading relative to East (Counter-clockwise)
+    @return float: Value from -180 to 180. Starting from bottom of robot (Counter-Clockwise)
+    """
     diff = (heading1 - heading2 + 360) % 360
     return (diff + 180) % 360 - 180
+
 
 # Calculate current heading and the planar target angle
 # TODO: this should now be part of a action server callback function
@@ -206,6 +248,13 @@ def angle_diff(heading1: float, heading2: float) -> float:
 
 # update angle from rover to target based on new current position
 def update_target(target_lat, target_long) -> bool:
+    """
+    Updates target_angle with values from IMU which use gps coords
+
+    @param target_angle: Gives target angle relative to East (counter-clockwise)
+    @param imu An object that creates a planar target angle relative to east, accounting for curvature of Earth
+    @return bool: If we have arrived to the destination, based on our current and target coords
+    """
     global target_angle
 
     # Construct the planar target angle relative to east, accounting for curvature
@@ -223,6 +272,15 @@ def update_target(target_lat, target_long) -> bool:
 
 # Update the robot's navigation and drive it towards the target angle based on our best valley
 def update_navigation(data: LaserScan) -> None:
+    """
+    Update the robot's navigation and drive it towards the target angle
+
+    @param delta_heading: Relative value of target from robot from -180 to 180. Starting from bottom of robot (Counter-Clockwise)
+    @param result: Angle to drive to based on target angle, current heading, and obstacles. Value given as a sector angle with right of robot being 0 (Counterclockwise).
+    @param msg: Get the DriveTrainCmd(motor values) relating to the heading of the robot and the resulting best navigation angle
+    @param data: Lidar data received
+    """
+
     global frameCount
 
     # rospy.loginfo(f"target angle: {target_angle}, current heading: {cur_heading}")
@@ -235,15 +293,18 @@ def update_navigation(data: LaserScan) -> None:
     # data_avg is above 0.5 almost always, but result stays the same (?)
     # TODO (@bennowotny ): This depended on data_avg, why?
     if True:
-        # Gets best possible angle, considering obstacles
+        ## Gets best possible angle, considering obstacles
         delta_heading = angle_diff(target_angle, cur_heading)
-        # rospy.logerr(delta_heading)
+        #rospy.logerr(delta_heading)
         result = get_navigation_angle(
-            ((((90 + delta_heading) % 360) + 360) % 360) /
-            math.degrees(data.angle_increment),  # sector angle
+            ((((90 + delta_heading) % 360) + 360) % 360)
+            / math.degrees(
+                data.angle_increment
+            ),  # sector angle, #Changes delta_heading to be based on the right of the robot as 0 (Counter-clockwise), and go in increments of sector angle.
             LIDAR_THRESH_DISTANCE,
             data,
-            smoothing_constant)
+            smoothing_constant,
+        )
 
         #raw_heading_pub.publish(result)
         # rospy.loginfo(f"raw heading: {result}")
@@ -256,17 +317,24 @@ def update_navigation(data: LaserScan) -> None:
             speed_factor = 1
 
         # Get the DriveTrainCmd relating to the heading of the robot and the resulting best navigation angle
-        msg = angle_calc.piecewise_linear(angle_diff(90, result), 0)
+        # Reason we do 90 - result is to get a value where 0 is up, + is clockwise, and - is counterclockwise
+        msg = angle_calc.logistic(angle_diff(90, result), 0)
 
         # rospy.loginfo(f"left drive value: {msg.left_value}, right drive value: {msg.right_value}")
-
         # Scale the resultant DriveTrainCmd by the speed multiplier
         msg.left_value *= speed_factor 
         msg.right_value *= speed_factor
-
+        
+        if msg.left_value > msg.right_value:
+            valueToTurn = "Turn right"
+        elif msg.left_value < msg.right_value:
+            valueToTurn = "Turn left"
+        else:
+            valueToTurn = "Stay straight"
+            
         # Publish the DriveTrainCmd to the topic
-        rospy.loginfo("Left Value: " + str(msg.left_value))
-        rospy.loginfo("Right Value: " + str(msg.right_value))
+        rospy.loginfo("Drive to: " + str(valueToTurn))
+        #rospy.loginfo("Target Value: " + str(target_angle))
         drive_pub.publish(msg)
 
         # TESTING
@@ -281,27 +349,28 @@ def update_navigation(data: LaserScan) -> None:
 
         frameCount += 1
         # negative sign on the pose is hardcoded, may not model how the actual robot will act
-        heading_msg.pose.orientation.z = math.sin(math.radians(result) / 2)
-        heading_msg.pose.orientation.w = math.cos(math.radians(result) / 2)
+        heading_msg.pose.orientation.z = math.sin(math.radians(result+180) / 2)
+        heading_msg.pose.orientation.w = math.cos(math.radians(result+180) / 2)
         heading_pub.publish(heading_msg)
 
         # TESTING
-        actual_heading_msg.pose.orientation.z = math.sin(math.radians(cur_heading) / 2)
+        actual_heading_msg.pose.orientation.z = math.sin(math.radians(-cur_heading) / 2)
         actual_heading_msg.pose.orientation.w = math.cos(math.radians(cur_heading) / 2)
         actual_heading_pub.publish(actual_heading_msg)
 
-         # TESTING
-        delta_heading_msg.pose.orientation.z = math.sin(math.radians(delta_heading) / 2)
-        delta_heading_msg.pose.orientation.w = math.cos(math.radians(delta_heading) / 2)
+        # TESTING
+        delta_heading_msg.pose.orientation.z = math.sin(math.radians(delta_heading - 90) / 2)
+        delta_heading_msg.pose.orientation.w = math.cos(math.radians(delta_heading + 90) / 2)
         delta_heading_pub.publish(delta_heading_msg)
 
         # TESTING
         # Adding the nums is cuz the flag is off center, I'm not sure why??? I downloaded this from a random website :D
-        marker_flag.pose.position.x =  -5*math.sin(math.radians(delta_heading)) + 0.57
-        marker_flag.pose.position.y = 5*math.cos(math.radians(delta_heading)) + .3
+        marker_flag.pose.position.x =  5*math.sin(math.radians(delta_heading)) + 0.57
+        marker_flag.pose.position.y = -5*math.cos(math.radians(delta_heading)) + .3
         marker_flag_pub.publish(marker_flag)
 
-        laser_adjuster_pub.publish(delta_heading) #Used for inputFakeData
+        # Used for inputFakeData
+        laser_adjuster_pub.publish(delta_heading)
 
         # Set the position and orientation based on delta-heading
         marker.pose.orientation.z = math.sin(math.radians(delta_heading) / 2)
@@ -321,7 +390,7 @@ def update_navigation(data: LaserScan) -> None:
 
 
 # If this file was executed...
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         # Initialize the running environment for this program
         initialize()
@@ -342,3 +411,6 @@ if __name__ == '__main__':
         msg_stop.right_value = 0
         drive_pub.publish(msg_stop)
         time.sleep(0.1)
+
+## @}
+## @}

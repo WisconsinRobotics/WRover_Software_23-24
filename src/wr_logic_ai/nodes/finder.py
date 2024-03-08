@@ -1,3 +1,12 @@
+"""@file
+@defgroup wr_logic_ai_longrange_ai
+@{
+@defgroup wr_logic_ai_longrange_ai_finder Finder
+@brief Calculates the optimal LiDAR/heading to drive towards, taking obstacle avoidance into account
+@details 
+@{
+"""
+
 from typing import List
 import math
 import scipy.ndimage as gaussian_smooth
@@ -11,20 +20,39 @@ import pickle
 
 ROVER_WIDTH = 1.06
 
+## Publisher for LiDAR data for debugging on rviz
 scan_rviz_pub = rospy.Publisher("/scan_rviz", LaserScan, queue_size=10)
 # TODO (@bennowotny ) This should be disable-able for bandwidth
 #window_pub = rospy.Publisher("/lidar_windows", PoseArray, queue_size=1)
 
 
 def calculate_anti_window(d: float) -> int:
+    """
+    Assuming an obstacle exists at a given distance away from the rover, calculate the additional
+    angle required to clear that obstacle
+
+    @param d (float): A given distance (in meters)
+    @return int: Angle (in degrees) required to clear the obstacle
+    """
+
     return math.degrees(math.atan((ROVER_WIDTH / 2) / d))
 
-# Returns angular distance (in degrees) from sector parameter to target
-# Returns 0 if sector parameter contains target
-# TODO: Is there a cleaner way to write the logic?
 
+def get_target_distance(
+    sector_i: int, sector_f: int, target: int, sector_angle: float
+) -> float:
+    """
+    Returns angular distance (in degrees) from sector parameter to target. Returns 0 if sector
+    parameter contains target.
 
-def get_target_distance(sector_i: int, sector_f: int, target: int, sector_angle: float) -> float:
+    @param sector_i (int): Starting sector (left boundary)
+    @param sector_f (int): Ending sector (right boundary)
+    @param target (int): The sector that the target heading falls in
+    @param sector_angle (float): The number of degrees contained within one sector
+    @return float: The angle (in degrees) to turn by to head towards the target (negative is
+    counterclockwise, positive is clockwise)
+    """
+
     # Compute if the target is under the starting sector
     if target < sector_i:
         # Return angular distance between target and starting sector
@@ -37,10 +65,17 @@ def get_target_distance(sector_i: int, sector_f: int, target: int, sector_angle:
     # Angular distance is then 0
     return 0
 
-# Returns whether or not a valley is as wide or wider than the recommended max valley size
-
 
 def is_wide_valley(sector_i: int, sector_f: int, max_valley: int) -> bool:
+    """
+    Returns whether or not a valley is as wide or wider than the recommended max valley size
+
+    @param sector_i (int): Starting sector (left boundary)
+    @param sector_f (int): Ending sector (right boundary)
+    @param max_valley (int): The maximum amount of sectors that can be contained in a narrow valley
+    @return bool: True if the given range qualifies as a wide valley, false otherwise
+    """
+
     # TODO: Cleaner way to write this?
     return 1 + sector_f - sector_i > max_valley
 
@@ -56,21 +91,30 @@ def offset_lidar_data(data, sector_angle, is_rviz=False):
     offset_data.extend(list((data[:(math.floor(270/sector_angle))])))    
     return offset_data
 
-# represent a valley as an ordered pair as in (start sector, end sector)
-# iterate through sector array to add valleys to new candidate valleys list
-# from candidate valleys choose the one that is closest to the target sector
-# valleys of any length should be valid since they can only come from smoothing function of adjacent areas
-# and correct thresholding
-
-# Get the 'best' valley from the LIDAR data.  The valley is formatted as [Start Sector, End Sector]
-
 
 def get_valley(
-        target: int,
-        sector_angle: float,
-        threshold: float,
-        data: LaserScan,
-        smoothing: float = 3) -> List[int]:
+    target: int,
+    sector_angle: float,
+    threshold: float,
+    data: LaserScan,
+    smoothing: float = 3,
+) -> List[int]:
+    """
+    Get the 'best' valley from the LIDAR data. Iterate through data array to add valleys to new
+    candidate valleys list. From there, choose the one that is closest to the target sector. Valleys
+    of any length should be valid since they can only come from smoothing function of adjacent areas
+    and correct thresholding.
+
+    @param target (int): The index of the sector that the target heading falls into
+    @param sector_angle (float): The number of degrees contained within one sector
+    @param threshold (float): The threshold distance which triggers obstacle avoidance (in meters)
+    @param data (LaserScan): The LiDAR reading data
+    @param smoothing (float, optional): The smoothing factor used when applying a gaussian filter to
+    smooth out the LiDAR reading. Defaults to 3.
+    @return List[int]: The best valley for navigating to the target. The valley is formatted as
+    [Start Sector, End Sector]
+    """
+
     global prevData
 
     rviz_data = deepcopy(data)
@@ -97,7 +141,8 @@ def get_valley(
     rviz_data.ranges = hist
     scan_rviz_pub.publish(rviz_data)
 
-    rospy.logerr(hist[0])
+    #Front of scanner
+    #rospy.loginfo(hist[math.floor(90/sector_angle)])
 
     # This is to prevent expanding constant obstacles from behind the robot, which can
     # inadvertently and unpredictably (due to sensor noise) block out most of the view
@@ -106,7 +151,7 @@ def get_valley(
 
 
     # Write the sectors data to an output file for logging
-    output_file = open('sectors.data', 'wb')
+    output_file = open("sectors.data", "wb")
     pickle.dump(hist, output_file)
     output_file.close()
 
@@ -118,26 +163,27 @@ def get_valley(
     # this will be an array of two values with the beginning and ending index of the obstacle.
     one_obstacle = []
     for i in range(len(hist)):
-        if(hist[i] < threshold):
+        if hist[i] < threshold:
             one_obstacle.append(i)
         # This prevents single noisy points from blocking out large portions of the drive window
         # TODO (@bennowotny ): This 'obstacle too small' magic number should be a named constant
-        elif (len(one_obstacle) > 1):
+        elif len(one_obstacle) > 1:
             left_bound = len(hist)
             right_bound = 0
             for i in range(len(one_obstacle)):
                 # Calculate size of anti-window and add to obstacle bounds
                 # pass in distance to target to caculate angle that allows robot to pass through
                 angleToIncrease = calculate_anti_window(
-                    hist[one_obstacle[i]])
+                    hist[one_obstacle[i]])/sector_angle
+        
                 #rospy.logerr(hist[one_obstacle[i]])
                 #rospy.logerr(hist[one_obstacle[0]])
 
                 # Update left and right bound
-                left_bound = max(
-                    min(left_bound, one_obstacle[i]-angleToIncrease), 0)
+                left_bound = max(min(left_bound, one_obstacle[i] - angleToIncrease), 0)
                 right_bound = min(
-                    max(right_bound, one_obstacle[i]+angleToIncrease), len(hist))
+                    max(right_bound, one_obstacle[i] + angleToIncrease), len(hist)
+                )
 
             #rospy.logerr("Left: " + str(left_bound) + "Right: " + str(right_bound))
             # Check to see if the obstacle we just found can actually be merged with a previous obstacle
@@ -149,20 +195,20 @@ def get_valley(
             one_obstacle.clear()
 
     # TODO (@bennowotny ): This code is the same as what's in the loop, so it should be abstracted out to its own function
-    if (len(one_obstacle) != 0):
+    if len(one_obstacle) != 0:
         left_bound = len(hist)
         right_bound = 0
         for i in range(len(one_obstacle)):
             # Calculate size of anti-window and add to obstacle bounds
             # pass in distance to target to caculate angle that allows robot to pass through
             angleToIncrease = calculate_anti_window(
-                hist[one_obstacle[i]])
+                hist[one_obstacle[i]])/sector_angle
 
             # Update left and right bound
-            left_bound = max(
-                min(left_bound, one_obstacle[i]-angleToIncrease), 0)
+            left_bound = max(min(left_bound, one_obstacle[i] - angleToIncrease), 0)
             right_bound = min(
-                max(right_bound, one_obstacle[i]+angleToIncrease), len(hist))
+                max(right_bound, one_obstacle[i] + angleToIncrease), len(hist)
+            )
 
         # Check to see if the obstacle we just found can actually be merged with a previous obstacle
         while len(obstacle_list) > 0 and obstacle_list[-1][1] >= left_bound:
@@ -255,8 +301,7 @@ def get_valley(
 
         # If obstacle_list does not end on the right bound of lidar
         if obstacle_list[len(obstacle_list) - 1][1] < len(hist):
-            window_list.append(
-                [obstacle_list[len(obstacle_list) - 1][1], len(hist)])
+            window_list.append([obstacle_list[len(obstacle_list) - 1][1], len(hist)])
 
     # print("obstacle list:")
     # print(obstacle_list)
@@ -271,10 +316,8 @@ def get_valley(
             pose.position.x = 0
             pose.position.y = 0
             pose.position.z = 0
-            pose.orientation.z = math.sin(
-                math.radians(i * sector_angle) / 2)
-            pose.orientation.w = math.cos(
-                math.radians(i * sector_angle) / 2)
+            pose.orientation.z = math.sin(math.radians(i * sector_angle) / 2)
+            pose.orientation.w = math.cos(math.radians(i * sector_angle) / 2)
             window_msg.poses.append(pose)
     #window_pub.publish(window_msg)
 
@@ -287,30 +330,33 @@ def get_valley(
     # (distance is more like angle in this case)
     for i in range(len(window_list)):
         dist = get_target_distance(
-            window_list[i][0], window_list[i][1], target, sector_angle)
+            window_list[i][0], window_list[i][1], target, sector_angle
+        )
         if dist < best_distance:
             best_valley = window_list[i]
             best_distance = dist
     return best_valley
 
-# Gets the best angle to navigate to
-
 
 def get_navigation_angle(
-        target: int,
-        threshold: float,
-        data: LaserScan,
-        smoothing_constant: float = 3) -> float:
+    target: int, threshold: float, data: LaserScan, smoothing_constant: float = 3
+) -> float:
+    """
+    Gets the best angle to navigate to.
+
+    @param target (int): The index of the sector that the target heading falls into
+    @param threshold (float): The threshold distance which triggers obstacle avoidance (in meters)
+    @param data (LaserScan): The LiDAR reading data
+    @param smoothing_constant (float, optional): The smoothing factor used when applying a gaussian
+    @param filter to smooth out the LiDAR reading. Defaults to 3.
+    @return float: The angle to navigate towards after applying obstacle avoidance. The range of this
+    value is 0 to 180, where 0 is straight left, 90 is center, and 180 is straight right
+    """
 
     sector_angle = math.degrees(data.angle_increment)
 
     # Get the best valley in the LIDAR data given our target angle
-    best_valley = get_valley(
-        target,
-        sector_angle,
-        threshold,
-        data,
-        smoothing_constant)
+    best_valley = get_valley(target, sector_angle, threshold, data, smoothing_constant)
 
     # If the rover is completely surrounded by obstacles, we want to turn hard right
     if len(best_valley) == 0:
@@ -329,15 +375,10 @@ def get_navigation_angle(
     # degrees
     max_valley = int(90 / sector_angle)
     # If the target is already in the best valley...
-    if get_target_distance(
-            best_valley[0],
-            best_valley[1],
-            target,
-            sector_angle) == 0:
-
+    if get_target_distance(best_valley[0], best_valley[1], target, sector_angle) == 0:
         # Report the current target angle; no adjustment needed
-        #print("target * sector_angle = " + str(target * sector_angle))
-        rospy.loginfo("In target valley")
+        # print("target * sector_angle = " + str(target * sector_angle))
+        #rospy.loginfo("In target valley")
         return target * sector_angle
 
     # If the valley is wide...
@@ -348,15 +389,19 @@ def get_navigation_angle(
         nearest_sector = best_valley[1] if target > best_valley[1] else best_valley[0]
 
         # Construct a second border edge to make the valley of size max_valley
-        border_sector = best_valley[1] - \
-            max_valley if target > best_valley[1] else best_valley[0] + max_valley
+        border_sector = (
+            best_valley[1] - max_valley
+            if target > best_valley[1]
+            else best_valley[0] + max_valley
+        )
         # Ensure that this new border edge is within the bounds of allowable sectors
         border_sector = 0 if border_sector < 0 else border_sector
-        border_sector = len(data.ranges) if border_sector > len(
-            data.ranges) else border_sector
+        border_sector = (
+            len(data.ranges) if border_sector > len(data.ranges) else border_sector
+        )
 
         # Aim for the center of this new max_valley valley (this helps avoid accidentally clipping an edge of the robot)
-        rospy.loginfo("Obstacle in the way, turning to wide valley")
+        #rospy.loginfo("Obstacle in the way, turning to wide valley")
         return ((nearest_sector + border_sector) / 2.0) * sector_angle
 
     # If the valley is narrow...
@@ -364,5 +409,9 @@ def get_navigation_angle(
         # Follow the probotcol as defined above for narrow valleys
 
         # Aim for the center of the valley
-        rospy.loginfo("Obstacle in the way, turning to narrow valley")
+        #rospy.loginfo("Obstacle in the way, turning to narrow valley")
         return ((best_valley[0] + best_valley[1]) / 2.0) * sector_angle
+
+
+## @}
+## @}

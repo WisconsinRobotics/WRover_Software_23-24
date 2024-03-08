@@ -25,6 +25,6 @@ class CoordinateManager:
     @staticmethod
     def read_coordinates_file():
         dirname = Path(__file__).parents[0]
-        file_name = Path.joinpath(dirname, 'coordinates.json')
-        file = open(file_name, 'r').read()
+        file_name = Path.joinpath(dirname, "coordinates.json")
+        file = open(file_name, "r").read()
         CoordinateManager.coordinates = json.loads(file)
