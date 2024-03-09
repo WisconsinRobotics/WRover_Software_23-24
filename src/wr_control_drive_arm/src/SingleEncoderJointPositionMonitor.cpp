@@ -43,4 +43,5 @@ void SingleEncoderJointPositionMonitor::onEncoderReceived(const std_msgs::UInt32
     auto enc = static_cast<double>(msg->data);
     auto rotations = MathUtil::corrMod(enc - offset, countsPerRotation) / countsPerRotation;
     position = MathUtil::corrMod(rotations * RADIANS_PER_ROTATION + M_PI, RADIANS_PER_ROTATION) - M_PI;
+    // position = (enc - offset) / countsPerRotation * RADIANS_PER_ROTATION;
 }

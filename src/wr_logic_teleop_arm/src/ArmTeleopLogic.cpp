@@ -8,6 +8,8 @@
 #include "std_msgs/Float32.h"
 #include "tf2/LinearMath/Quaternion.h"
 #include "tf2/LinearMath/Vector3.h"
+#include <tf/transform_datatypes.h>
+#include "tf2/convert.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include <atomic>
 #include <cmath>
@@ -20,7 +22,7 @@
 using Std_Bool = const std_msgs::BoolConstPtr &;
 using Std_Float32 = const std_msgs::Float32ConstPtr &;
 
-std::atomic_bool isNewPath{true};
+std::atomic_bool isNewPath{false};
 const tf2::Quaternion WORLD_OFFSET{0, sin(M_PI / 2), 0, cos(M_PI / 2)};
 
 auto updateTarget(float x_pos, float y_pos, float z_pos, tf2::Quaternion orientation, ros::Publisher &pub) -> void {
@@ -58,16 +60,13 @@ auto main(int argc, char **argv) -> int {
     float accel = 1.0;
     float deaccel = 1.0;
     float step_mult = 1.0;
-    float x_pos = HOME_X;
-    float y_pos = HOME_Y;
-    float z_pos = HOME_Z;
 
-    tf2::Quaternion orientation{sin(M_PI / 4), 0, 0, cos(-M_PI / 4)};
-    orientation = orientation;
 
     const tf2::Quaternion SPIN_X{sin(2 * M_PI / 1000), 0, 0, cos(2 * M_PI / 1000)};
     const tf2::Quaternion SPIN_Y{0, sin(2 * M_PI / 1000), 0, cos(2 * M_PI / 1000)};
     const tf2::Quaternion SPIN_Z{0, 0, sin(2 * M_PI / 1000), cos(2 * M_PI / 1000)};
+
+    bool isExecuting = false;
 
     moveit::planning_interface::MoveGroupInterface move("arm");
     // move.setPlannerId("RRTStar");
@@ -76,13 +75,19 @@ auto main(int argc, char **argv) -> int {
     robot_state::RobotState start_state(*move.getCurrentState());
     moveit_visual_tools::MoveItVisualTools visual_tools("arm");
 
+    geometry_msgs::Pose startPose = move.getCurrentPose().pose;
+    auto x_pos = (float) startPose.position.x;
+    auto y_pos = (float) startPose.position.y;
+    auto z_pos = (float) startPose.position.z;
+
+    tf2::Quaternion orientation;
+    
+    tf2::convert(startPose.orientation, orientation);
+    
     ros::Rate loop{CLOCK_RATE};
 
     ros::Publisher nextTarget = np.advertise<geometry_msgs::PoseStamped>("/logic/arm_teleop/next_target",
                                                                          MESSAGE_QUEUE_LENGTH);
-
-    ros::Publisher trajectoryPub = np.advertise<visualization_msgs::MarkerArray>("/logic/arm_teleop/trajectory",
-                                                                                 MESSAGE_QUEUE_LENGTH);
 
     // y axis
     ros::Subscriber yAxis = np.subscribe("/hci/arm/gamepad/axis/stick_left_y",
@@ -204,46 +209,42 @@ auto main(int argc, char **argv) -> int {
     while (ros::ok()) {
 
         updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
-        if (!isNewPath.load()) {
-            loop.sleep();
-            continue;
-        }
-
-        // stop current path
-        // isNewPath.store(false);
-        move.stop();
-
-        // configure target pose
-        geometry_msgs::PoseStamped p{};
-        p.pose.position.x = x_pos;
-        p.pose.position.y = y_pos;
-        p.pose.position.z = z_pos;
-        p.pose.orientation = tf2::toMsg(orientation);
-        p.header.frame_id = "world";
-
-        move.setPoseTarget(p);
-        move.setStartStateToCurrentState();
-
-        // plan and execute path
-        move.asyncMove();
-
-        while (ros::ok()) {
-            updateTarget(x_pos, y_pos, z_pos, orientation, nextTarget);
-
-            if (move.getMoveGroupClient().getState().isDone()) {
-                std::cout << "[INFO] [" << ros::Time::now() << "]: path finished: " << move.getMoveGroupClient().getState().getText() << std::endl;
-                break;
-            }
-
-            else if (isNewPath.load()) {
+       
+        if(isNewPath.load()){
+            isNewPath.store(false);
+            isExecuting = true;
+            
+            if(isExecuting){
                 std::cout << "[INFO] [" << ros::Time::now() << "]: path overridden" << std::endl;
                 move.stop();
-                break;
-            }
+            } 
 
-            loop.sleep();
+            geometry_msgs::PoseStamped p = move.getRandomPose();
+
+            x_pos = p.pose.position.x;
+            x_pos = p.pose.position.y;
+            x_pos = p.pose.position.z;
+            tf2::convert(p.pose.orientation, orientation);
+            
+            // p.pose.position.x = x_pos;
+            // p.pose.position.y = y_pos;
+            // p.pose.position.z = z_pos;
+            // p.pose.orientation = tf2::toMsg(orientation);
+            // p.header.frame_id = "world";
+
+            move.setPoseTarget(p);
+            move.setStartStateToCurrentState();
+
+            // plan and execute path
+            move.asyncMove();
         }
-    }
 
+        if (isExecuting && move.getMoveGroupClient().getState().isDone()) {
+            isExecuting = false;
+            std::cout << "[INFO] [" << ros::Time::now() << "]: path finished: " << move.getMoveGroupClient().getState().getText() << std::endl;
+            move.stop();
+        }
+
+    }
     return 0;
 }
