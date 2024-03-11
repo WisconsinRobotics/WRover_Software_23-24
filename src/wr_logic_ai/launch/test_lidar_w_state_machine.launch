@@ -13,7 +13,7 @@
   <arg name="short_range_output" default="/short_range_nav" />
 
 
-  <include file="$(find rplidar_ros)/launch/rplidar.launch"/>
+  <include file="$(find wr_logic_ai)/launch/wrplidar.launch"/>
 
   <node name="fake_data" pkg="wr_logic_ai" type="inputFakeData.py" output="screen"/>
 
