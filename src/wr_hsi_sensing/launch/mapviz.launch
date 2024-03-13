@@ -1,6 +1,7 @@
 <launch>
   <!-- Launches mapviz visualization. -->
   <!-- Requires ardusimple_provided node to be running -->
+  <!-- <include file="$(find wr_hsi_sensing)/launch/ardusimple_provided.launch" /> -->
 
   <node pkg="mapviz" type="mapviz" name="mapviz">
     <!-- <param name="config" value=""/> -->
