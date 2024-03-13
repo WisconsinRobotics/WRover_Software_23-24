@@ -10,13 +10,7 @@ It is no longer used.
 
 # Launching Nodes
 
-## Build
-- Initialize the project: `./assemble.py init`
-- Source the workspace: `source setup.sh`
-- Clean (can help if errors occur): `./assemble.py clean`
-- Build the project: `./assemble.py build` (install dependences)
-
-## Other Setup
+## Setup
 - Check which tty exists: `ls /dev/tty*`
 - We'll need access to a file so run: `sudo chmod a+rw /dev/ttyACM0`
 
