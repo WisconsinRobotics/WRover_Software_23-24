@@ -37,8 +37,8 @@
   <!--   <build_depend>roscpp</build_depend> -->
   <!--   <exec_depend>roscpp</exec_depend> -->
     <depend>rospy</depend>
-    <depend>ublox_gps</depend>
-    <depend>mapviz</depend>
+    <exec_depend>ublox_gps</exec_depend>
+    <exec_depend>mapviz</exec_depend>
 
   <!-- Use build_depend for packages you need at compile time: -->
     <build_depend>message_generation</build_depend>
