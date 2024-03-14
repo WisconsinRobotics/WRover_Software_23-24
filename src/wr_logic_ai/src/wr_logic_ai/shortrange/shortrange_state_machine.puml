@@ -1,0 +1,10 @@
+@startuml ShortrangeStateMachine
+hide empty description
+
+[*] -right-> shortrange_callback : ShortRangeGoal
+shortrange_callback -right-> VisionNavigation : Vision
+shortrange_callback -up-> success : GPS only
+VisionNavigation -> success : Success
+VisionNavigation -> fail : Fail
+
+@enduml

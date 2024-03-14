@@ -1,4 +1,4 @@
-@startuml Navigation State Machine
+@startuml NavigationStateMachine
 hide empty description
 
 [*] -right-> Init

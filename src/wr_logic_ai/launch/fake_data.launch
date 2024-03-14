@@ -1,0 +1,3 @@
+<launch>
+  <node name="fake_data" pkg="wr_logic_ai" type="inputFakeData.py" output="screen"/>
+</launch>

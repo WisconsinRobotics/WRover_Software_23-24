@@ -1,14 +1,14 @@
 [
     {
-        "lat": 10,
-        "long": 10,
+        "lat": 0,
+        "long": 0,
         "note": "EHall Entrance",
         "num_vision_posts": 0
     },
     {
-        "lat": 11,
-        "long": 10,
-        "note": "EHall Entrance",
+        "lat": 0,
+        "long": 0,
+        "note": "Somewhere in UTAH",
         "num_vision_posts": 0
     }
 ]
