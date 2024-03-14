@@ -51,8 +51,24 @@ def initialize() -> None:
     global marker_pub
     global marker_circle
     global marker_circle_pub
+    global marker_cactus1_pub
+    global marker_cactus2_pub
+    global marker_cactus1
+    global marker_cactus2
     global marker_flag
     global marker_flag_pub
+
+    global marker_point1
+    global marker_point1_pub
+    global marker_point2
+    global marker_point2_pub
+    global marker_point3
+    global marker_point3_pub
+    global marker_point4
+    global marker_point4_pub
+    global marker_point5
+    global marker_point5_pub
+
     global laser_adjuster_pub
     global wRover
     global wRover_pub
@@ -108,6 +124,25 @@ def initialize() -> None:
 
     laser_adjuster_pub = rospy.Publisher('/laser_adjuster', Float64, queue_size=1)
 
+    # marker_pub = rospy.Publisher("pose_marker", Marker, queue_size=1)
+    # marker = Marker()
+    # marker.header.frame_id = "laser"  # Replace with your fixed frame
+    # marker.type = Marker.MESH_RESOURCE
+    # marker.mesh_resource = "package://wr_logic_ai/meshes/lindySand.stl"  # Replace with your 3D object path
+    # marker.pose.position.x = 0.0  # Replace with your desired position
+    # marker.pose.position.y = 5.0
+    # marker.pose.position.z = .11
+    # marker.pose.orientation.x = 0.0  # Replace with your desired orientation
+    # marker.pose.orientation.y = 0.0
+    # marker.pose.orientation.z = 0.0
+    # marker.pose.orientation.w = 0.0
+    # marker.scale.x = 0.1  # Replace with your desired scale
+    # marker.scale.y = 0.1
+    # marker.scale.z = 0.1
+    # marker.color.a = 1.0
+    # marker.color.r = 1.0
+    # marker.color.g = 0.0
+    # marker.color.b = 0.0
 
     marker_pub = rospy.Publisher("pose_marker", Marker, queue_size=1)
     marker = Marker()
@@ -122,6 +157,9 @@ def initialize() -> None:
     marker.color.g = .6
     marker.color.b = .1
     marker.pose = delta_heading_msg.pose  # Set the position and orientation based on your pose
+
+    marker.mesh_resource = "package://wr_logic_ai/meshes/sandText.png"
+    marker.mesh_use_embedded_materials = True
 
     marker_circle_pub = rospy.Publisher("pose_circle_marker", Marker, queue_size=1)
     marker_circle = Marker()
@@ -176,7 +214,83 @@ def initialize() -> None:
     marker_flag.color.r = 1.0
     marker_flag.color.g = 0.0
     marker_flag.color.b = 0.0
-    
+
+    # marker_dot1_pub = rospy.Publisher("dot1_marker", Marker, queue_size=1)
+    # marker_dot1 = Marker()
+    # marker_dot1.header.frame_id = "laser"  # Set your frame_id
+    # marker_dot1.type = Marker.SPHERE
+    # marker_dot1.action = Marker.ADD
+    # marker_dot1.scale.x = 10  # Set the dimensions of the plane
+    # marker_dot1.scale.y = 10
+    # marker_dot1.scale.z = 0.05  # Thickness of the plane
+    # marker_dot1.color.a = 0.5
+    # marker_dot1.color.r = .8
+    # marker_dot1.color.g = .1
+    # marker_dot1.color.b = .1
+    # marker_dot1.pose = delta_heading_msg.pose  # Set the position and orientation based on your pose
+
+    # testing plane coordinates
+    marker_point1_pub = rospy.Publisher("point1_marker", Marker, queue_size=1)
+    marker_point2_pub = rospy.Publisher("point2_marker", Marker, queue_size=1)
+    marker_point3_pub = rospy.Publisher("point3_marker", Marker, queue_size=1)
+    marker_point4_pub = rospy.Publisher("point4_marker", Marker, queue_size=1)
+    marker_point5_pub = rospy.Publisher("point5_marker", Marker, queue_size=1)
+    marker_point1 = place_point(0.0, 0.0)
+    marker_point2 = place_point(5.0, 5.0)
+    marker_point3 = place_point(-5.0, 5.0)
+    marker_point4 = place_point(5.0, -5.0)
+    marker_point5 = place_point(-5.0, -5.0)
+
+    marker_cactus1_pub = rospy.Publisher('cactus1_marker', Marker, queue_size=1)
+    marker_cactus2_pub = rospy.Publisher('cactus2_marker', Marker, queue_size=1)
+    marker_cactus1 = place_cactus(5.0, -5.0)
+    marker_cactus2 = place_cactus(-5.0, -5.0)
+
+# to place a cactus
+def place_cactus(x, y, frame_id="laser", mesh_resource="package://wr_logic_ai/meshes/lindyCactus.stl", scale=0.02):
+    cactus = Marker()
+    cactus.header.frame_id = frame_id
+    cactus.type = Marker.MESH_RESOURCE
+    cactus.mesh_resource = mesh_resource
+    cactus.pose.position.x = x
+    cactus.pose.position.y = y
+    cactus.pose.position.z = 0.11
+    cactus.pose.orientation.x = 1.5
+    cactus.pose.orientation.y = 0.5
+    cactus.pose.orientation.z = 0.5
+    cactus.pose.orientation.w = 1.0
+    cactus.scale.x = scale
+    cactus.scale.y = scale
+    cactus.scale.z = scale
+    cactus.color.a = 1.0
+    cactus.color.r = 0.0
+    cactus.color.g = 1.0
+    cactus.color.b = 0.0
+
+    return cactus
+
+def place_point(x, y):
+    point = Marker()
+    point.header.frame_id = "laser"  # Set your frame_id
+    point.type = Marker.SPHERE
+    point.action = Marker.ADD
+    point.pose.position.x = x
+    point.pose.position.y = y
+    point.pose.position.z = 0.11
+    point.scale.x = .5  # Set the dimensions of the plane
+    point.scale.y = .5
+    point.scale.z = 0.05  # Thickness of the plane
+    point.color.a = 0.5
+    point.color.r = .8
+    point.color.g = .1
+    point.color.b = .1
+    point.pose.orientation.x = 0.0
+    point.pose.orientation.y = 0.0
+    point.pose.orientation.z = 0.0
+    point.pose.orientation.w = 0.0
+
+    return point
+
 
 def update_gps_coord(msg: CoordinateMsg) -> None:
     global current_lat
@@ -220,6 +334,7 @@ def update_target(target_lat, target_long) -> bool:
 
 def update_navigation(data: LaserScan) -> None:
     global frameCount
+    
 
     # rospy.loginfo(f"target angle: {target_angle}, current heading: {cur_heading}")
     data_avg = sum(cur_range for cur_range in data.ranges) / len(data.ranges)
@@ -310,6 +425,17 @@ def update_navigation(data: LaserScan) -> None:
         if(frameCount < 10):
             wRover_pub.publish(wRover)
             marker_circle_pub.publish(marker_circle)
+
+            marker_point1_pub.publish(marker_point1)
+            marker_point2_pub.publish(marker_point2)
+            marker_point3_pub.publish(marker_point3)
+            marker_point4_pub.publish(marker_point4)
+            marker_point5_pub.publish(marker_point5)
+
+            marker_cactus1_pub.publish(marker_cactus1)
+            marker_cactus2_pub.publish(marker_cactus2)
+            
+            
 
 
 # If this file was executed...
