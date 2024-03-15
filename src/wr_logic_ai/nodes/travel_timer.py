@@ -13,8 +13,10 @@ Methods(s):
 '''
 
 SPEED = 0.5 # in meters per second,
-            # purposefully slow since true speed is inknown 
-            # and gives more time for obstacle avoidance
+            # purposefully slow to give more time for obstacle avoidance
+            # and because true speed is inknown 
+            # (motor power outputs are set to some value between 0.3 and 0.5,
+            # which does not correlate to speed)
 
 def calc_point_time(distance) -> float:
   '''
