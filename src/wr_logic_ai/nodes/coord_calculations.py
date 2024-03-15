@@ -28,7 +28,7 @@ def get_coords(start_lat, start_long, distance, num_vertices) -> list:
         num_vertices - the maximum number of coordinates the rover could travel to
 
     Return(s):
-        coords - list of coordinates the rover will travel to during the search state
+        coords - list of coordinates (dictionaries) the rover will travel to during the search state
     '''
     cumm_dist = distance
     coords = []

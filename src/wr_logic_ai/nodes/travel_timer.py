@@ -16,7 +16,7 @@ SPEED = 0.5 # in meters per second,
             # purposefully slow since true speed is inknown 
             # and gives more time for obstacle avoidance
 
-def calc_point_time(distance):
+def calc_point_time(distance) -> float:
   '''
   Description: Calculates the maximum time it should take the rover to travel from one 
     coordinate to another coordinate. If the rover reaches this limit, the coordinate 
