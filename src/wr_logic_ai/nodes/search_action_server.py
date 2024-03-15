@@ -1,9 +1,8 @@
-# TODO: imports
 import rospy
 import actionlib
 from wr_logic_ai.msg import SearchStateAction, SearchStateGoal
 import obstacle_avoidance
-import PointTimer
+import travel_timer
 
 class SearchActionServer(object):
     def __init__(self, name) -> None:
@@ -33,7 +32,7 @@ class SearchActionServer(object):
         """
         start_time = rospy.get_rostime()
         while (
-            rospy.get_rostime() - start_time < PointTimer.calculateTime(goal.dist)
+            rospy.get_rostime() - start_time < travel_timer.calc_point_time(goal.dist)
             and not rospy.is_shutdown()
         ):
             if obstacle_avoidance.update_target(goal.target_lat, goal.target_long):

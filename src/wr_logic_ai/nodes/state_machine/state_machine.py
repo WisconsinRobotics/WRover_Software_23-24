@@ -29,9 +29,9 @@ from wr_logic_ai.msg import (
     LongRangeGoal,
     LongRangeActionResult,
 )
-from wr_logic_ai import coord_calculations, PointTimer, StateTimer
+import coord_calculations, travel_timer
 from wr_logic_ai.msg import ShortRangeAction, ShortRangeGoal, ShortRangeActionResult
-# from wr_logic_ai import SearchStateAction, SearchStateGoal, SearchStateActionResult
+from wr_logic_ai.msg import SearchAction, SearchGoal, SearchActionResult
 from wr_led_matrix.srv import (
     led_matrix as LEDMatrix,
     led_matrixRequest as LEDMatrixRequest,
@@ -276,7 +276,7 @@ class NavStateMachine(StateMachine):
 
     def on_enter_stSearch(self) -> None:
         distance = 4
-        num_vertices = 20
+        num_vertices = 20 # 21?????
 
         print("\non enter stSearch")
         rospy.loginfo("\non enter stSearch")
@@ -292,13 +292,13 @@ class NavStateMachine(StateMachine):
         camera_service = rospy.ServiceProxy('search_pattern_service', SearchPatternService)
 
         coords = coord_calculations.get_coords(self._mgr.get_coordinate()["lat"], self._mgr.get_coordinate()["long"], distance, num_vertices)
-        SEARCH_TIMEOUT_TIME = 968.0 #calculateTime(), default = 20m
+        SEARCH_TIMEOUT_TIME = travel_timer.calc_state_time() # default = 20m
 
         # Scan starting point outside of loop???
         i = 0
         start_time = rospy.get_rostime()
         while (
-            rospy.get_rostime() - start_time < PointTimer.calculateTime(goal.dist)
+            rospy.get_rostime() - start_time < travel_timer.calc_point_time(goal.dist)
             and not rospy.is_shutdown()
             and i < num_vertices
         ):
