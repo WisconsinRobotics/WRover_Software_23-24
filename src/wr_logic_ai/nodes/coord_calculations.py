@@ -30,7 +30,7 @@ def get_coords(start_lat, start_long, distance, num_vertices) -> list:
     Return(s):
         coords - list of coordinates (dictionaries) the rover will travel to during the search state
     '''
-    cumm_dist = distance
+    cumulative_dist = distance
     coords = []
     bearing = 0
     mult = 0
@@ -41,10 +41,10 @@ def get_coords(start_lat, start_long, distance, num_vertices) -> list:
     for i in range(num_vertices):
         # update the distance after it has been traveled twice to create the square spiral shape
         if (i > 1) and (i % 2) == 0:
-            cumm_dist += distance
+            cumulative_dist += distance
 
         coords.append(calc_dest_coord(coords[i]['lat'], coords[i]['long'], 
-                cumm_dist, bearing))
+                cumulative_dist, bearing))
         bearing += 90
 
     return coords
