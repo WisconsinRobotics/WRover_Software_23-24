@@ -129,41 +129,15 @@ class NavStateMachine(StateMachine):
         self.mux_short_range.state = NavigationState.NAVIGATION_STATE_SHORT_RANGE
         super(NavStateMachine, self).__init__()
 
-    def init_calibrate(self, pub: rospy.Publisher, stop_time: float) -> None:
-        """
-        Function to spin the robot for a certain time. The IMU (N,E,S,W) needs to be spinned to be correct.
-
-        @param stop_time Time when the robot should stop
-        @param pub (rospy.Publisher): Publishes drive values to motors
-        """
-        if rospy.get_time() < stop_time:
-            pub.publish(DriveTrainCmd(left_value=0.3, right_value=-0.3))
-        else:
-            pub.publish(DriveTrainCmd(left_value=0, right_value=0))
-            self.evUnconditional()
-
-    def init_w_ros(self):
-
-        #set_matrix_color(COLOR_AUTONOMOUS)
-
-        pub = rospy.Publisher("/control/drive_system/cmd",
-                              DriveTrainCmd, queue_size=1)
-        stop_time = rospy.get_time() + .01
-        self._init_tmr = rospy.Timer(rospy.Duration.from_sec(
-            0.1), lambda _: self.init_calibrate(pub, stop_time))
-
     def on_enter_stInit(self) -> None:
         print("\non enter stInit")
         rospy.loginfo("\non enter stInit")
         # Get the coordinates that we will have to go to
         self._mgr.read_coordinates_file()
 
-        # Run calibrate for seven seconds
-        threading.Timer(1, lambda: self.init_w_ros()).start()
+        self.evUnconditional()
 
     def on_exit_stInit(self) -> None:
-        # Stop calibration code
-        self._init_tmr.shutdown()
         # Check if there is a new coordinate. Will go to event complete if ended.
         if self._mgr.next_coordinate():
             self.evComplete()
@@ -192,8 +166,6 @@ class NavStateMachine(StateMachine):
         goal = LongRangeGoal(target_lat=self._mgr.get_coordinate()[
                              "lat"], target_long=self._mgr.get_coordinate()["long"])
         
-        
-
         self._client.send_goal(goal, done_cb=lambda status, result:
                                self._longRangeActionComplete(status, result))
 

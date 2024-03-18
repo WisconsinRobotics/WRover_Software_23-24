@@ -14,11 +14,14 @@
   <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" />
   <include file="$(find wr_hsi_sensing)/launch/hw_test.launch"
     if="$(eval env('WROVER_HW') == 'REAL')" />
+  <include file="$(find wr_hsi_sensing)/launch/gps_data_mapper.launch" 
+    if="$(eval env('WROVER_HW') == 'REAL')" />
   <node name="control" pkg="wr_control_drive_ds" type="DriveTrainControlSystem"
     machine="wrover" />
   <include file="$(find wrevolution)/launch/ros_control_test.launch"
     if="$(eval env('WROVER_HW') == 'REAL')" />
-  <include file="$(find rplidar_ros)/launch/rplidar.launch" if="$(eval env('WROVER_HW') == 'REAL')" />
+  <include file="$(find rplidar_ros)/launch/rplidar.launch" 
+    if="$(eval env('WROVER_HW') == 'REAL')" />
 
   <!-- Launch files when simulating data -->
   <node name="fake_data" pkg="wr_logic_ai" type="inputFakeData.py" output="screen"
