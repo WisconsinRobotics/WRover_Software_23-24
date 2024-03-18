@@ -218,72 +218,12 @@ def get_valley(
         obstacle_list.append([left_bound, right_bound])
         one_obstacle.clear()
 
-    # ######################################################################################
-    # # new large block of code that will take calc a new set of anti windows and compare if
-    # # we use the close windows or far windows based on number of close windows
-    # obstacle_list_close = list()
-    # # this will be an array of two values with the beginning and ending index of the obstacle.
-    # one_obstacle = []
-    # for i in range(len(hist)):
-    #     if(hist[i] < 3):
-    #         one_obstacle.append(i)
-    #     # This prevents single noisy points from blocking out large portions of the drive window
-    #     # TODO (@bennowotny ): This 'obstacle too small' magic number should be a named constant
-    #     elif (len(one_obstacle) > 1):
-    #         left_bound = len(hist)
-    #         right_bound = 0
-    #         for i in range(len(one_obstacle)):
-    #             # Calculate size of anti-window and add to obstacle bounds
-    #             # pass in distance to target to caculate angle that allows robot to pass through
-    #             angleToIncrease = calculate_anti_window(
-    #                 hist[one_obstacle[i]])
-    #             #rospy.logerr(hist[one_obstacle[i]])
-    #             #rospy.logerr(hist[one_obstacle[0]])
+    obstacle_list = get_obstacle_list(sector_angle, threshold, hist)
 
-    #             # Update left and right bound
-    #             left_bound = max(
-    #                 min(left_bound, one_obstacle[i]-angleToIncrease), 0)
-    #             right_bound = min(
-    #                 max(right_bound, one_obstacle[i]+angleToIncrease), len(hist))
+    obstacle_list_close = get_obstacle_list(sector_angle, threshold / 2, hist)
+    if len(obstacle_list_close) != 0:
+        obstacle_list = obstacle_list
 
-    #         #rospy.logerr("Left: " + str(left_bound) + "Right: " + str(right_bound))
-    #         # Check to see if the obstacle we just found can actually be merged with a previous obstacle
-    #         while len(obstacle_list_close) > 0 and obstacle_list_close[-1][1] >= left_bound:
-    #             left_bound = min(left_bound, obstacle_list_close[-1][0])
-    #             right_bound = max(right_bound, obstacle_list_close[-1][1])
-    #             del obstacle_list_close[-1]
-    #         obstacle_list_close.append([left_bound, right_bound])
-    #         one_obstacle.clear()
-
-    # # TODO (@bennowotny ): This code is the same as what's in the loop, so it should be abstracted out to its own function
-    # if (len(one_obstacle) != 0):
-    #     left_bound = len(hist)
-    #     right_bound = 0
-    #     for i in range(len(one_obstacle)):
-    #         # Calculate size of anti-window and add to obstacle bounds
-    #         # pass in distance to target to caculate angle that allows robot to pass through
-    #         angleToIncrease = calculate_anti_window(
-    #             hist[one_obstacle[i]])
-
-    #         # Update left and right bound
-    #         left_bound = max(
-    #             min(left_bound, one_obstacle[i]-angleToIncrease), 0)
-    #         right_bound = min(
-    #             max(right_bound, one_obstacle[i]+angleToIncrease), len(hist))
-
-    #     # Check to see if the obstacle we just found can actually be merged with a previous obstacle
-    #     while len(obstacle_list_close) > 0 and obstacle_list_close[-1][1] >= left_bound:
-    #         left_bound = min(left_bound, obstacle_list_close[-1][0])
-    #         right_bound = max(right_bound, obstacle_list_close[-1][1])
-    #         del obstacle_list_close[-1]
-    #     obstacle_list_close.append([left_bound, right_bound])
-    #     one_obstacle.clear()
-
-    
-    # # if the close windows are empty use the far ones
-    # if(len(obstacle_list_close) != 0):
-    #     obstacle_list = obstacle_list_close
-    # ######################################################################################
 
     # At this point we make an inverse list of the obstacles to have a 2d list of all
     # the places that we can drive through (our windows)
@@ -336,6 +276,73 @@ def get_valley(
             best_valley = window_list[i]
             best_distance = dist
     return best_valley
+
+
+def get_obstacle_list(
+        sector_angle: float,
+        threshold: float,
+        hist: list
+    ):
+    obstacle_list = list()
+    # this will be an array of two values with the beginning and ending index of the obstacle.
+    one_obstacle = []
+    for i in range(len(hist)):
+        if hist[i] < threshold:
+            one_obstacle.append(i)
+        # This prevents single noisy points from blocking out large portions of the drive window
+        # TODO (@bennowotny ): This 'obstacle too small' magic number should be a named constant
+        elif len(one_obstacle) > 1:
+            left_bound = len(hist)
+            right_bound = 0
+            for i in range(len(one_obstacle)):
+                # Calculate size of anti-window and add to obstacle bounds
+                # pass in distance to target to caculate angle that allows robot to pass through
+                angleToIncrease = calculate_anti_window(
+                    hist[one_obstacle[i]])/sector_angle
+        
+                #rospy.logerr(hist[one_obstacle[i]])
+                #rospy.logerr(hist[one_obstacle[0]])
+
+                # Update left and right bound
+                left_bound = max(min(left_bound, one_obstacle[i] - angleToIncrease), 0)
+                right_bound = min(
+                    max(right_bound, one_obstacle[i] + angleToIncrease), len(hist)
+                )
+
+            #rospy.logerr("Left: " + str(left_bound) + "Right: " + str(right_bound))
+            # Check to see if the obstacle we just found can actually be merged with a previous obstacle
+            while len(obstacle_list) > 0 and obstacle_list[-1][1] >= left_bound:
+                left_bound = min(left_bound, obstacle_list[-1][0])
+                right_bound = max(right_bound, obstacle_list[-1][1])
+                del obstacle_list[-1]
+            obstacle_list.append([left_bound, right_bound])
+            one_obstacle.clear()
+
+    # TODO (@bennowotny ): This code is the same as what's in the loop, so it should be abstracted out to its own function
+    if len(one_obstacle) != 0:
+        left_bound = len(hist)
+        right_bound = 0
+        for i in range(len(one_obstacle)):
+            # Calculate size of anti-window and add to obstacle bounds
+            # pass in distance to target to caculate angle that allows robot to pass through
+            angleToIncrease = calculate_anti_window(
+                hist[one_obstacle[i]])/sector_angle
+
+            # Update left and right bound
+            left_bound = max(min(left_bound, one_obstacle[i] - angleToIncrease), 0)
+            right_bound = min(
+                max(right_bound, one_obstacle[i] + angleToIncrease), len(hist)
+            )
+
+        # Check to see if the obstacle we just found can actually be merged with a previous obstacle
+        while len(obstacle_list) > 0 and obstacle_list[-1][1] >= left_bound:
+            left_bound = min(left_bound, obstacle_list[-1][0])
+            right_bound = max(right_bound, obstacle_list[-1][1])
+            del obstacle_list[-1]
+        obstacle_list.append([left_bound, right_bound])
+        one_obstacle.clear()
+
+    return obstacle_list
 
 
 def get_navigation_angle(
