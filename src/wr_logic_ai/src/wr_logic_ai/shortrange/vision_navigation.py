@@ -28,11 +28,8 @@ kP = 0.01
 ## Name of the VisionTarget topic to subscribe to
 vision_topic = rospy.get_param("~vision_topic")
 
-# TODO : Add code for mux
-## Name of the drivetrain topic to publish to
-drivetrain_topic = rospy.get_param("~motor_speeds")
 ## Publisher to set motor speeds
-drivetrain_pub = rospy.Publisher(drivetrain_topic, DriveTrainCmd, queue_size=1)
+drivetrain_pub = rospy.Publisher("/control/drive_system/cmd", DriveTrainCmd, queue_size=1)
 
 ## Number of seconds to keep the cache
 CACHE_EXPIRY_SECS = 1

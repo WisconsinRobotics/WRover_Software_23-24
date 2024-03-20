@@ -14,7 +14,6 @@ a target coordinate. This code also takes obstacle avoidance into account, by ca
 import math
 import rospy
 import time
-from visualization_msgs.msg import Marker
 from finder import get_navigation_angle
 from angle_calculations import AngleCalculations
 import angle_to_drive_methods as angle_calc
@@ -71,9 +70,7 @@ def initialize() -> None:
     global speed_factor
 
     # Publisher
-    drive_pub = rospy.Publisher(
-        rospy.get_param("~motor_speeds"), DriveTrainCmd, queue_size=1
-    )
+    drive_pub = rospy.Publisher("/control/drive_system/cmd", DriveTrainCmd, queue_size=1)
 
     # Subscribe to gps coordinate data
     rospy.Subscriber("/gps_coord_data", CoordinateMsg, update_gps_coord)

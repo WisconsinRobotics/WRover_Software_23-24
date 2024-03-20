@@ -117,16 +117,6 @@ class NavStateMachine(StateMachine):
         self._mgr = mgr
         # Start in current event -1, as state machine runs it will go into event 0 (init)
         self.currentEvent = -1
-        # State machine will publish into the mux to switch b/w long range and short range
-        self.mux_pub = rospy.Publisher(
-            "/navigation_state", NavigationState, queue_size=1
-        )
-
-        # Initialization of messages to switch the mux
-        self.mux_long_range = NavigationState()
-        self.mux_long_range.state = NavigationState.NAVIGATION_STATE_LONG_RANGE
-        self.mux_short_range = NavigationState()
-        self.mux_short_range.state = NavigationState.NAVIGATION_STATE_SHORT_RANGE
         super(NavStateMachine, self).__init__()
 
     def on_enter_stInit(self) -> None:
@@ -153,8 +143,6 @@ class NavStateMachine(StateMachine):
     def on_enter_stLongRange(self) -> None:
         print("\non enter stLongRange")
         rospy.loginfo("\non enter stLongRange")
-        self.timer = rospy.Timer(rospy.Duration(
-            0.2), lambda _: self.mux_pub.publish(self.mux_long_range))
         # enter autonomous mode
         #set_matrix_color(COLOR_AUTONOMOUS) TODO:This breaks rviz
 
@@ -172,7 +160,6 @@ class NavStateMachine(StateMachine):
     def on_exit_stLongRange(self) -> None:
         print("Exting Long Range")
         rospy.loginfo("Exting Long Range")
-        self.timer.shutdown()  # Stop timer that was being used for MUX
 
     def _longRangeRecoveryActionComplete(
         self, state: GoalStatus, _: LongRangeActionResult
@@ -195,9 +182,6 @@ class NavStateMachine(StateMachine):
             # Get previous coordinate and go to it as same as long range as a live-action debugging strategy
             self._mgr.previous_coordinate()
             print(self._mgr.get_coordinate())
-            self.timer = rospy.Timer(
-                rospy.Duration(0.2), lambda _: self.mux_pub.publish(self.mux_long_range)
-            )
             self._client = actionlib.SimpleActionClient(
                 "LongRangeActionServer", LongRangeAction
             )
@@ -214,7 +198,7 @@ class NavStateMachine(StateMachine):
             )
 
     def on_exit_stLongRangeRecovery(self) -> None:
-        self.timer.shutdown()  # Shutdown mux timer
+        pass
 
     def _shortRangeActionComplete(
         self, state: GoalStatus, _: ShortRangeActionResult
@@ -229,11 +213,6 @@ class NavStateMachine(StateMachine):
         rospy.loginfo("\non enter stShortRange")
 
         set_matrix_color(COLOR_AUTONOMOUS)
-
-        # Set mux to switch to short range
-        self.timer = rospy.Timer(
-            rospy.Duration(0.2), lambda _: self.mux_pub.publish(self.mux_short_range)
-        )
 
         # Initialized short range action server that will do short range
         self._client = actionlib.SimpleActionClient(
@@ -261,7 +240,6 @@ class NavStateMachine(StateMachine):
         )
 
     def on_exit_stShortRange(self) -> None:
-        # self.timer.shutdown()
         pass
 
     # Defined for lambda function, not part of state machine architecture
