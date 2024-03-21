@@ -14,11 +14,6 @@ import rospy
 import time
 from visualization_msgs.msg import Marker
 from finder import get_navigation_angle
-from angle_calculations import AngleCalculations
-import angle_to_drive_methods as angle_calc
-from sensor_msgs.msg import LaserScan
-from wr_hsi_sensing.msg import CoordinateMsg
-from wr_drive_msgs.msg import DriveTrainCmd
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Float64
 
