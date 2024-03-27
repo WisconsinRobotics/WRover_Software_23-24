@@ -31,7 +31,8 @@ from wr_logic_ai.msg import (
 )
 import coord_calculations, travel_timer
 from wr_logic_ai.msg import ShortRangeAction, ShortRangeGoal, ShortRangeActionResult
-from wr_logic_ai.msg import SearchAction, SearchGoal, SearchActionResult
+from wr_logic_ai.msg import SearchStateAction, SearchStateGoal, SearchStateActionResult
+from wr_logic_ai.srv import SearchPatternService
 from wr_led_matrix.srv import (
     led_matrix as LEDMatrix,
     led_matrixRequest as LEDMatrixRequest,
@@ -268,7 +269,7 @@ class NavStateMachine(StateMachine):
     def on_exit_stLongRangeRecovery(self) -> None:
         self.timer.shutdown()  # Shutdown mux timer
 
-    def _searchActionComplete(self, state: GoalStatus, _: SearchActionResult) -> None: # SearchActionResult
+    def _searchActionComplete(self, state: GoalStatus, _: SearchStateActionResult) -> None: # SearchActionResult
         if state == GoalStatus.SUCCEEDED:
             self.evSuccess()
         else:
@@ -276,7 +277,7 @@ class NavStateMachine(StateMachine):
 
     def on_enter_stSearch(self) -> None:
         distance = 4
-        num_vertices = 20 # 21?????
+        num_vertices = 22
 
         print("\non enter stSearch")
         rospy.loginfo("\non enter stSearch")
@@ -285,28 +286,29 @@ class NavStateMachine(StateMachine):
         # enter autonomous mode
         set_matrix_color(COLOR_AUTONOMOUS)
 
-        self._client = actionlib.SimpleActionClient("SearchActionServer", SearchAction) # "SearchActionServer", SearchAction
+        self._client = actionlib.SimpleActionClient("SearchActionServer", SearchStateAction) # "SearchActionServer", SearchAction
         self._client.wait_for_server()
 
-        rospy.wait_for_service('search_pattern_service')
-        camera_service = rospy.ServiceProxy('search_pattern_service', SearchPatternService)
-
         coords = coord_calculations.get_coords(self._mgr.get_coordinate()["lat"], self._mgr.get_coordinate()["long"], distance, num_vertices)
-        SEARCH_TIMEOUT_TIME = travel_timer.calc_state_time() # default = 20m
+        SEARCH_TIMEOUT_TIME = travel_timer.calc_state_time() # default = 20 meters
 
-        # Scan starting point outside of loop???
         i = 0
         start_time = rospy.get_rostime()
         while (
-            rospy.get_rostime() - start_time < travel_timer.calc_point_time(goal.dist)
+            rospy.get_rostime() - start_time < SEARCH_TIMEOUT_TIME
             and not rospy.is_shutdown()
             and i < num_vertices
         ):
-            # coords[i + 1] to skip the origin/starting point
-            goal = SearchGoal(target_lat=coords[i + 1]["lat"], target_long=coords[i + 1]["long"], dist=coords[i + 1]['distance']) # SearchGoal
-            self._client.send_goal(goal, done_cb=lambda status, result: self._searchActionComplete(status, result))
+            if (i != 0): # skip starting point because rover is already there
+                goal = SearchStateGoal(target_lat=coords[i]["lat"], target_long=coords[i]["long"], dist=coords[i]['distance']) # SearchGoal
+                self._client.send_goal(goal, done_cb=lambda status, result: self._searchActionComplete(status, result))
 
-            # Camera Service here???
+            # Camera Service - still not sure about integrating the camera with the state machine
+            camera_service = rospy.ServiceProxy('search_pattern_service', SearchPatternService)
+            camera_service.wait_for_service('search_pattern_service')
+
+            if camera_service:
+                break # what should be done when the target object is found? how should we enter ShortRange?
 
             i += 1
 
