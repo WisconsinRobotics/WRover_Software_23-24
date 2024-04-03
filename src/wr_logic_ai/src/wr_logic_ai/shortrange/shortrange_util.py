@@ -7,7 +7,7 @@
 from enum import Enum, Flag
 from typing import Tuple
 
-from wr_logic_ai.msg import VisionTarget
+from wr_logic_shortrange.msg import VisionTarget
 
 
 class ShortrangeStateEnum(Flag):

@@ -54,7 +54,6 @@ add_message_files(
   FILES
   NavigationState.msg
   ObstaclesMsg.msg
-  VisionTarget.msg
   Waypoint.msg
 )
 

@@ -14,7 +14,7 @@ import rospy
 from geometry_msgs.msg import PoseStamped
 
 from shortrange_util import ShortrangeStateEnum, ShortrangeState, TargetCache
-from wr_logic_ai.msg import VisionTarget
+from wr_logic_shortrange.msg import VisionTarget
 from wr_drive_msgs.msg import DriveTrainCmd
 from wr_logic_ai.shortrange.shortrange_util import ShortrangeStateEnum
 
