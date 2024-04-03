@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import rospy
-from wr_logic_ai.srv import SearchPatternService, SearchPatternServiceRequest, SearchPatternServiceResponse
+from wr_logic_search.srv import SearchPatternService, SearchPatternServiceRequest, SearchPatternServiceResponse
 import keyboard  # I guess we don't need this anymore since we're not using FreeFall
 
 '''

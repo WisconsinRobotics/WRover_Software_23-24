@@ -1,5 +1,5 @@
 import rospy
-from wr_logic_ai.srv import SearchPatternService, SearchPatternServiceRequest, SearchPatternServiceResponse
+from wr_logic_search.srv import SearchPatternService, SearchPatternServiceRequest, SearchPatternServiceResponse
 
 '''
 @ingroup wr_logic_ai

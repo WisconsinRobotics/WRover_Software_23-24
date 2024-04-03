@@ -28,7 +28,7 @@ from wr_logic_longrange.msg import LongRangeAction, LongRangeGoal, LongRangeActi
 import coord_calculations, travel_timer
 from wr_logic_shortrange.msg import ShortRangeAction, ShortRangeGoal, ShortRangeActionResult
 from wr_logic_search.msg import SearchStateAction, SearchStateGoal, SearchStateActionResult
-from wr_logic_ai.srv import SearchPatternService
+from wr_logic_search.srv import SearchPatternService
 from wr_led_matrix.srv import (
     led_matrix as LEDMatrix,
     led_matrixRequest as LEDMatrixRequest,
