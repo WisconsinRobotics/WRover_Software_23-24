@@ -71,7 +71,6 @@ def initialize() -> None:
     global heading_msg
     global actual_heading_msg
     global actual_heading_pub
-    #global raw_heading_pub
     global delta_heading_pub
     global delta_heading_msg
     global marker
@@ -92,10 +91,6 @@ def initialize() -> None:
         rospy.get_param("~motor_speeds"), DriveTrainCmd, queue_size=1
     )
 
-    # rviz_sim_delta_heading_pub = rospy.Publisher("/rviz_simulation_heading", Float64, queue_size=1)
-    # rviz_sim_result_pub = rospy.Publisher("/rviz_simulation_result", Float64, queue_size=1)
-    # rviz_sim_cur_heading_pub = rospy.Publisher("/rviz_simulation_current", Float64, queue_size=1)
-
     # Subscribe to gps coordinate data
     rospy.Subscriber("/gps_coord_data", CoordinateMsg, update_gps_coord)
 
@@ -104,9 +99,6 @@ def initialize() -> None:
 
     # Subscribe to lidar data
     rospy.Subscriber('/scan', LaserScan, update_navigation)
-
-    # Publish data out to the marker 
-    # wRover_pub = rospy.Publisher('wRover_marker', Marker, queue_size=10)
 
 
 # update current position based on gps coordinates
@@ -196,7 +188,6 @@ def update_navigation(data: LaserScan) -> None:
     if True:
         ## Gets best possible angle, considering obstacles
         delta_heading = angle_diff(target_angle, cur_heading)
-        # rviz_sim_delta_heading_pub.publish(delta_heading)
         
         result = get_navigation_angle(
             ((((90 + delta_heading) % 360) + 360) % 360)
@@ -207,9 +198,7 @@ def update_navigation(data: LaserScan) -> None:
             data,
             smoothing_constant,
         )
-        # rviz_sim_result_pub.publish(result)
-
-        #raw_heading_pub.publish(result)
+        
         # rospy.loginfo(f"raw heading: {result}")
 
         # Set the bounds of the speed multiplier by clamping it

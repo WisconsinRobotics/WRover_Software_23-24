@@ -13,7 +13,6 @@ import math
 import rospy
 import time
 from visualization_msgs.msg import Marker
-from finder import get_navigation_angle
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Float64
 
@@ -63,7 +62,6 @@ def initialize() -> None:
     global heading_msg
     global actual_heading_msg
     global actual_heading_pub
-    #global raw_heading_pub
     global delta_heading_pub
     global delta_heading_msg
     global marker
@@ -80,24 +78,6 @@ def initialize() -> None:
     # Publish data out to the marker 
     wRover_pub = rospy.Publisher('wRover_marker', Marker, queue_size=10)
 
-    # rospy.Subscriber("/rviz_simulation_heading", CoordinateMsg, update_sim_heading)
-    # rospy.Subscriber("/rviz_simulation_result", CoordinateMsg, update_sim_result)
-    # rospy.Subscriber("/rviz_simulation_current", CoordinateMsg, update_sim_current)
-
-
-    # def update_sim_heading(msg: Float64) -> None:
-    #     global delta_heading
-    #     delta_heading = msg.data
-
-    # def update_sim_result(msg: Float64) -> None:
-    #     global result
-    #     result = msg.data
-
-    # def update_sim_current(msg: Float64) -> None:
-    #     global cur_heading
-    #     cur_heading = msg.data
-
-
     # TESING
     heading_pub = rospy.Publisher("/debug_heading", PoseStamped, queue_size=1)
     heading_msg = PoseStamped()
@@ -108,8 +88,6 @@ def initialize() -> None:
     heading_msg.pose.orientation.y = 0
     heading_msg.header.frame_id = "laser"
     frameCount = 0
-    # raw_heading_pub = rospy.Publisher(
-    #     '/target_heading_raw', Float64, queue_size=1)
     
      # TESING
     actual_heading_pub = rospy.Publisher('/actual_heading', PoseStamped, queue_size=1)
