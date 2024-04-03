@@ -1,6 +1,6 @@
 import rospy
 import actionlib
-from wr_logic_ai.msg import SearchStateAction, SearchStateGoal
+from wr_logic_search.msg import SearchStateAction, SearchStateGoal
 import obstacle_avoidance
 import travel_timer
 

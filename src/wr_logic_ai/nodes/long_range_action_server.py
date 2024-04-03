@@ -14,7 +14,7 @@ event accordingly.
 
 import rospy
 import actionlib
-from wr_logic_ai.msg import LongRangeAction, LongRangeGoal
+from wr_logic_longrange.msg import LongRangeAction, LongRangeGoal
 import obstacle_avoidance
 
 # TODO: check timeout time length validity
