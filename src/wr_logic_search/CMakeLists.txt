@@ -8,9 +8,11 @@ project(wr_logic_search)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  rospy
   std_msgs
   message_generation
   actionlib_msgs
+  std_srvs
 )
 
 ## System dependencies are found with CMake's conventions
