@@ -78,7 +78,7 @@ def initialize() -> None:
     # Publish data out to the marker 
     wRover_pub = rospy.Publisher('wRover_marker', Marker, queue_size=10)
 
-    # TESING
+    # TESTING
     heading_pub = rospy.Publisher("/debug_heading", PoseStamped, queue_size=1)
     heading_msg = PoseStamped()
     heading_msg.pose.position.x = 0
@@ -112,7 +112,7 @@ def initialize() -> None:
 
     laser_adjuster_pub = rospy.Publisher('/laser_adjuster', Float64, queue_size=1)
 
-
+    # instantiate all directional markers
     marker_pub = rospy.Publisher("pose_marker", Marker, queue_size=1)
     marker = Marker()
     marker.header.frame_id = "laser"  # Set your frame_id
@@ -161,6 +161,7 @@ def initialize() -> None:
     wRover.color.b = 0.0
     wRover_pub.publish(wRover)
 
+    # creates marker for target
     marker_flag_pub = rospy.Publisher('flag_marker', Marker, queue_size=1)
     marker_flag = Marker()
     marker_flag.header.frame_id = "laser"  # Replace with your fixed frame
@@ -181,10 +182,16 @@ def initialize() -> None:
     marker_flag.color.g = 0.0
     marker_flag.color.b = 0.0
     
-
-
-# TESTING
 def update_navigation_rviz_sim(delta_heading: Float64, result: Float64, cur_heading: Float64) -> None:
+    '''
+    Configures heading and poses for rviz simulation. Values either passed from fake data or real data 
+    are used to created headings/arrows in rviz. Used in obsracle avoidance to get input parameters.
+
+    @param delta_heading (Float64): Relative value of target from robot from -180 to 180. Starting from bottom of robot (Counter-Clockwise)
+    @param result (Float64): Angle to drive to based on target angle, current heading, and obstacles. Value given as a sector angle with right 
+        of robot being 0 (Counterclockwise).
+    @param cur_heading(Float64): Value of the current direction of the rover relative to East at 0
+    '''
     if rospy.get_param("/long_range_action_server/wrover_hw") == "MOCK":
         heading_msg.header.seq = frameCount
         heading_msg.header.stamp = rospy.get_rostime()
@@ -201,19 +208,13 @@ def update_navigation_rviz_sim(delta_heading: Float64, result: Float64, cur_head
         heading_msg.pose.orientation.w = math.cos(math.radians(result) / 2)
         heading_pub.publish(heading_msg)
 
-        # TESTING
-
         actual_heading_msg.pose.orientation.z = math.sin(math.radians(cur_heading) / 2)
         actual_heading_msg.pose.orientation.w = math.cos(math.radians(cur_heading) / 2)
         actual_heading_pub.publish(actual_heading_msg)
 
-        # TESTING
-
         delta_heading_msg.pose.orientation.z = math.sin(math.radians(delta_heading + 90) / 2)
         delta_heading_msg.pose.orientation.w = math.cos(math.radians(delta_heading + 90) / 2)
         delta_heading_pub.publish(delta_heading_msg)
-
-        # TESTING
 
         # Adding the nums is cuz the flag is off center, I'm not sure why??? I downloaded this from a random website :D
         marker_flag.pose.position.x =  5*math.sin(math.radians(delta_heading)) + 0.57
@@ -242,24 +243,18 @@ def update_navigation_rviz_sim(delta_heading: Float64, result: Float64, cur_head
         delta_heading_msg.header.stamp = rospy.get_rostime()
 
         frameCount += 1
-        # negative sign on the pose is hardcoded, may not model how the actual robot will act
+
         heading_msg.pose.orientation.z = math.sin(math.radians(result+180) / 2)
         heading_msg.pose.orientation.w = math.cos(math.radians(result+180) / 2)
         heading_pub.publish(heading_msg)
-
-        # TESTING
 
         actual_heading_msg.pose.orientation.z = math.sin(math.radians(-cur_heading) / 2)
         actual_heading_msg.pose.orientation.w = math.cos(math.radians(cur_heading) / 2)
         actual_heading_pub.publish(actual_heading_msg)
 
-        # TESTING
-
         delta_heading_msg.pose.orientation.z = math.sin(math.radians(delta_heading - 90) / 2)
         delta_heading_msg.pose.orientation.w = math.cos(math.radians(delta_heading + 90) / 2)
         delta_heading_pub.publish(delta_heading_msg)
-
-        # TESTING
 
         # Adding the nums is cuz the flag is off center, I'm not sure why??? I downloaded this from a random website :D
         marker_flag.pose.position.x =  5*math.sin(math.radians(delta_heading)) + 0.57

@@ -22,6 +22,9 @@ ROBOT_WIDTH = 1.06 #In meters
 
 #coord[x,y]
 class Obstacle:
+    '''
+    Sends a row of random points to act as walls/obstacles for lidar testing
+    '''
     def __init__(self, coord1, coord2):
         self.coord1 = coord1
         self.coord2 = coord2
@@ -69,10 +72,7 @@ obstacle = Obstacle([1,5],[-1,5])
 
 def get_laser_ranges(t=0):
     inputData = []
-
-    # angle1 = int(math.asin(height/(cartesianToRadian(xDist1,height))))
-
-    # angle2 = int(math.asin(height/(cartesianToRadian(xDist2,height))))
+    
     angle1 = obstacle.getAngle1()
     angle2 = obstacle.getAngle2()
 
@@ -169,9 +169,7 @@ def run_mock_data() -> None:
         mock_gps_pub.publish(mock_gps)
         zero_pub.publish(zero_msg)
         sleeper.sleep()
-# def updateLaserAdjuster(data):
-#     global laser_adjust
-#     laser_adjust = -data.data/30
+
 
 def updateHeading(data) -> None:
     global mock_heading
