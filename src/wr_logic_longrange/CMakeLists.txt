@@ -8,6 +8,9 @@ project(wr_logic_longrange)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  geometry_msgs
+  rospy
+  sensor_msgs
   std_msgs
   message_generation
   actionlib_msgs

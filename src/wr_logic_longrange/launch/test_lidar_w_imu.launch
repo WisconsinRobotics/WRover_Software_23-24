@@ -17,10 +17,10 @@
   <include file="$(find wr_control_drive_ds)/launch/std.launch"/>
 
   <!-- <include file="$(find rplidar_ros)/launch/rplidar.launch"/> -->
-  <node name="fake_data" pkg="wr_logic_ai" type="inputFakeData.py" output="screen"/>
+  <node name="fake_data" pkg="wr_logic_longrange" type="inputFakeData.py" output="screen"/>
 
   <!-- <node pkg="wr_logic_ai" name="wait_for_user_input" type="wait_for_user_input.py" output="screen" /> -->
 
-  <include file="$(find wr_logic_ai)/launch/long_range.launch" />
+  <include file="$(find wr_logic_longrange)/launch/long_range.launch" />
 
 </launch>

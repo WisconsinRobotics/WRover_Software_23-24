@@ -1,7 +1,7 @@
 import rospy
 import actionlib
 from wr_logic_search.msg import SearchStateAction, SearchStateGoal
-import obstacle_avoidance
+from wr_logic_longrange.nodes.obstacle_avoidance import obstacle_avoidance
 import travel_timer
 
 '''
