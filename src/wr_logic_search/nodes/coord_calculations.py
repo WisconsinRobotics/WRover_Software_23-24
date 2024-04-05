@@ -37,7 +37,6 @@ def get_coords(start_lat, start_long, distance, num_vertices) -> list:
     cumulative_dist = distance
     coords = []
     bearing = 0
-    mult = 0
 
     # create starting coordinate as the first coordinate
     coords.append({'lat': start_lat, 'long': start_long})
