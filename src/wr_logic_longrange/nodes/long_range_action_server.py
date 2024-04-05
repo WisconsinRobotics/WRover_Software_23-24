@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 """@file
-@defgroup wr_logic_ai_longrange_ai
+@defgroup wr_logic_longrange
 @{
-@defgroup wr_logic_ai_longrange_ai_action_server Long Range Action Server
+@defgroup wr_logic_longrange_action_server Long Range Action Server
 @brief Action server for long range navigation
 @details This action server is used in conjunction with the state machine to drive the long range 
 navigation logics. The action server determines if a navigation is successful (when it reaches the 

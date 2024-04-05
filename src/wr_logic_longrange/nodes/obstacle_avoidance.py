@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 """@file
-@defgroup wr_logic_ai_longrange_ai
+@defgroup wr_logic_longrange
 @{
-@defgroup wr_logic_ai_longrange_ai_obstacle_avoidance Obstacle Avoidance
+@defgroup wr_logic_longrange_obstacle_avoidance Obstacle Avoidance
 @brief Driver code for long range navigation logics
 @details Navigates the rover to the target coordinate using the rover's current coordinates and 
 a target coordinate. This code also takes obstacle avoidance into account, by calculating an 

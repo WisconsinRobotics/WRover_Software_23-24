@@ -1,7 +1,7 @@
 """@file
-@defgroup wr_logic_ai_longrange_ai
+@defgroup wr_logic_longrange
 @{
-@defgroup wr_logic_ai_longrange_ai_angle_to_drive_methods Angle to Drive Calculations
+@defgroup wr_logic_longrange_angle_to_drive_methods Angle to Drive Calculations
 @brief Helper class for converting angle headings to motor drive power
 @details Intermediate logic layer used to convert rover target heading to signals to motor drive power.
 @{

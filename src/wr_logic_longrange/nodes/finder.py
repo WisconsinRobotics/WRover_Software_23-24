@@ -1,7 +1,7 @@
 """@file
-@defgroup wr_logic_ai_longrange_ai
+@defgroup wr_logic_longrange
 @{
-@defgroup wr_logic_ai_longrange_ai_finder Finder
+@defgroup wr_logic_longrange_finder Finder
 @brief Calculates the optimal LiDAR/heading to drive towards, taking obstacle avoidance into account
 @details 
 @{

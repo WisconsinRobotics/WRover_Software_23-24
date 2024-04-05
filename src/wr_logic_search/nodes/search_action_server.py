@@ -1,17 +1,21 @@
+#!/usr/bin/env python3
+
+"""@file
+@defgroup wr_logic_search
+@{
+@defgroup wr_logic_search_search_action_server Search Action Server
+@brief Tells the rover travel to the target coordinates and calls obstacle avoidance to make sure the rover can actually reach these coordinates.
+@details Enters a while loop that continually calls obstacle avoidance to update the target to the next coordinate in the list. 
+For each coordinate, if the time between the starting time and the current time go above the estimated travel time for that
+specific coordinate, the coordinate is assumed to be unreachable, and the rover will skip it and move on to the next coordinate.
+@{
+"""
+
 import rospy
 import actionlib
 from wr_logic_search.msg import SearchStateAction, SearchStateGoal
 from wr_logic_longrange.nodes.obstacle_avoidance import obstacle_avoidance
 import travel_timer
-
-'''
-@ingroup wr_logic_ai
-@defgroup wr_logic_ai Search Action Server
-@brief Tells the rover travel to the target coordinates and calls obstacle avoidance to make sure the rover can actually reach these coordinates.
-@details Enters a while loop that continually calls obstacle avoidance to update the target to the next coordinate in the list. 
-For each coordinate, if the time between the starting time and the current time go above the estimated travel time for that
-specific coordinate, the coordinate is assumed to be unreachable, and the rover will skip it and move on to the next coordinate.
-'''
 
 class SearchActionServer(object):
     def __init__(self, name) -> None:
@@ -52,3 +56,6 @@ if __name__ == "__main__":
     rospy.init_node("search_action_server")
     server = SearchActionServer("SearchActionServer")
     rospy.spin()
+
+## @}
+## @}

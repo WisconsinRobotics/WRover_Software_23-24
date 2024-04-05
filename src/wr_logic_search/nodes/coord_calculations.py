@@ -1,17 +1,21 @@
-import math
+#!/usr/bin/env python3
 
-'''
-@ingroup wr_logic_ai
-@defgroup wr_logic_ai Coordinate Calculations
+"""@file
+@defgroup wr_logic_search
+@{
+@defgroup wr_logic_search_coord_calculations Coordinate Calculations
 @brief Calculates the coordinates the rover travels to when searching.
-
+@details
 Attributes(s):
     EARTH_RADIUS - radius of the Earth
 
 Methods(s):
     get_coords(start_lat, start_long, distance, num_vertices) - gets the list of coordinates
     calc_dest_coord(curr_lat, curr_long, distance, bearing) - calculates the target coordinate
-'''
+@{
+"""
+
+import math
     
 EARTH_RADIUS = 6378100 # in meters
 
@@ -144,3 +148,6 @@ def calc_dest_coord(curr_lat, curr_long, distance, bearing) -> dict:
     coord = {'lat': target_lat, 'long': target_long, 'distance': distance, 'bearing': bearing % 360}
 
     return coord
+
+## @}
+## @}

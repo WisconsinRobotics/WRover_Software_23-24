@@ -1,6 +1,9 @@
-'''
-@ingroup wr_logic_ai
-@defgroup wr_logic_ai Travel Timer
+#!/usr/bin/env python3
+
+"""@file
+@defgroup wr_logic_search
+@{
+@defgroup wr_logic_search_travel_timer Travel Timer
 @brief Calculates the maximum travel time between two or all coordinates to know when 
 to skip the coordinate or to restart searching
 
@@ -10,7 +13,8 @@ Attributes(s):
 Methods(s):
   calculate_time(distance) - Calculates maximum travel time between two coordinates
   calculate_time(distance) - Calculates maximum travel time between all coordinates
-'''
+@{
+"""
 
 SPEED = 0.5 # in meters per second,
             # purposefully slow to give more time for obstacle avoidance
@@ -52,3 +56,5 @@ def calc_state_time(radius = 20) -> float:
 
   return total_time
     
+## @}
+## @}

@@ -1,7 +1,6 @@
 # Longrange AI
 
-@defgroup wr_logic_ai_longrange_ai Longrange Navigation
-@ingroup wr_logic_ai
+@defgroup wr_logic_longrange wr_logic_longrange
 @brief Longrange Navigation Code
 
 This document describes the existing code and logic for long range navigation, which is primarily used in the autonomous navigation mission of URC. 

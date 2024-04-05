@@ -1,7 +1,7 @@
 """@file
-@defgroup wr_logic_ai_longrange_ai
+@defgroup wr_logic_longrange
 @{
-@defgroup wr_logic_ai_longrange_ai_angle_calculations Angle Calculations
+@defgroup wr_logic_longrange_angle_calculations Angle Calculations
 @brief Helper class for angle calculation
 @details Package of functions for angle calculations using the Haversine formula. Takes account for the 
 curvature of the Earth.
