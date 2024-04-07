@@ -20,9 +20,9 @@ import rospy
 import actionlib
 from actionlib_msgs.msg import GoalStatus
 
-from wr_logic_ai.shortrange.shortrange_util import ShortrangeStateEnum, ShortrangeState
-from wr_logic_ai.shortrange.encoder_drive import EncoderDrive
-from wr_logic_ai.shortrange.vision_navigation import VisionNavigation
+from wr_logic_shortrange.shortrange_util import ShortrangeStateEnum, ShortrangeState
+from wr_logic_shortrange.vision_navigation import VisionNavigation
+from wr_logic_shortrange.shortrange_util import ShortrangeStateEnum
 from wr_logic_shortrange.msg import ShortrangeAction, ShortrangeGoal
 
 

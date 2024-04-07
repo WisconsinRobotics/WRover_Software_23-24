@@ -5,7 +5,8 @@
     ],
     "python.analysis.extraPaths": [
         "./src/wr_hsi_sensing/src",
-        "./src/wr_logic_ai/src"
+        "./src/wr_logic_ai/src",
+        "./src/wr_logic_shortrange/src"
     ],
 	"C_Cpp.intelliSenseEngine": "disabled",
     "cmake.sourceDirectory": "${workspaceFolder}/src",

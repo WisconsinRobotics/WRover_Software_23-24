@@ -12,7 +12,7 @@
 import rospy
 import cv2 as cv
 import numpy as np
-import wr_logic_ai.shortrange.aruco_lib as aruco_lib
+import wr_logic_shortrange.aruco_lib as aruco_lib
 from wr_logic_shortrange.msg import VisionTarget
 
 ## Width of the camera frame, in pixels

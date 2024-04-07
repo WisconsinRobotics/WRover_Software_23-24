@@ -4,6 +4,8 @@
 # @brief Functions for detecting ArUco tags
 # @{
 
+from typing import *
+
 import numpy as np
 import cv2 as cv
 
