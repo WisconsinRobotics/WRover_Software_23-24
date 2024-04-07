@@ -6,43 +6,28 @@
 # @brief ShortrangeState that subscribes to vision data and drives to the ArUco tag
 # @{
 
-import math
-from enum import Enum
-from typing import Tuple, Optional
+from typing import *
 
 import rospy
-from geometry_msgs.msg import PoseStamped
 
-from wr_logic_shortrange.shortrange_util import ShortrangeStateEnum, ShortrangeState, TargetCache
+from wr_logic_shortrange.shortrange_util import (
+    ShortrangeStateEnum,
+    ShortrangeState,
+    TargetCache,
+)
 from wr_logic_shortrange.msg import VisionTarget
 from wr_drive_msgs.msg import DriveTrainCmd
 from wr_logic_shortrange.vision_navigation import ShortrangeStateEnum
 
 ## Distance from target to stop at (in meters)
-STOP_DISTANCE_M = 3
+STOP_DISTANCE_M = 1.5
 ## Base speed for robot to move at
 SPEED = 0.1
 ## Factor to for applying turn
 kP = 0.01
 
-## Name of the VisionTarget topic to subscribe to
-vision_topic = rospy.get_param("~vision_topic")
-
-## Publisher to set motor speeds
-drivetrain_pub = rospy.Publisher("/control/drive_system/cmd", DriveTrainCmd, queue_size=1)
-
-## Number of seconds to keep the cache
-CACHE_EXPIRY_SECS = 1
-
-
-def drive(left: float, right: float):
-    """
-    Helper function for publishing motor speeds
-
-    @param left (float): Left motor speed
-    @param right (float): Right motor speed
-    """
-    drivetrain_pub.publish(left, right)
+# Number of seconds to keep the cache
+CACHE_EXPIRY_SECS = 3
 
 
 class VisionNavigation(ShortrangeState):
@@ -65,26 +50,6 @@ class VisionNavigation(ShortrangeState):
             # Update cache if the VisionTarget message is valid
             self.target_cache = TargetCache(rospy.get_time(), msg)
 
-        if (
-            self.target_cache is not None
-            and rospy.get_time() - self.target_cache.timestamp < CACHE_EXPIRY_SECS
-        ):
-            if self.target_cache.msg.distance_estimate < STOP_DISTANCE_M:
-                # Stop the rover when it is close to the ArUco tag
-                rospy.loginfo(f"Reached target {self.target_cache.msg.id}")
-                drive(0, 0)
-
-                self.is_done = True
-                self.success = True
-                return
-
-            # Drive the rover to the target if the cache was updated recently
-            turn = kP * self.target_cache.msg.x_offset
-            drive(SPEED + turn, SPEED - turn)
-        else:
-            # Turn the rover to look for the ArUco tag
-            drive(SPEED, -SPEED)
-
     def run(self) -> ShortrangeStateEnum:
         """
         Run target navigation logic.
@@ -94,13 +59,49 @@ class VisionNavigation(ShortrangeState):
         """
         rate = rospy.Rate(10)
 
+        # Name of the VisionTarget topic to subscribe to
+        vision_topic = rospy.get_param("~vision_topic")
         sub = rospy.Subscriber(vision_topic, VisionTarget, self.target_callback)
 
-        # Wait for the rover to finish navigating
-        while not self.is_done:
-            rospy.sleep(rate)
+        # Name of the drivetrain topic to publish to
+        drivetrain_topic = rospy.get_param("~motor_speeds")
+        # Publisher to set motor speeds
+        drivetrain_pub = rospy.Publisher(drivetrain_topic, DriveTrainCmd, queue_size=1)
+
+        # Loop for running ArUco tag approach
+        while not rospy.is_shutdown() and not self.is_done:
+            if (
+                self.target_cache is not None
+                and rospy.get_time() - self.target_cache.timestamp < CACHE_EXPIRY_SECS
+            ):
+                if self.target_cache.msg.distance_estimate < STOP_DISTANCE_M:
+                    # Stop the rover when it is close to the ArUco tag
+                    rospy.loginfo(f"Reached target {self.target_cache.msg.id}")
+                    drivetrain_pub.publish(0, 0)
+
+                    self.is_done = True
+                    self.success = True
+                else:
+                    # Drive the rover to the target if the cache was updated recently
+                    # turn = kP * self.target_cache.msg.x_offset
+                    # drivetrain_pub.publish(SPEED + turn, SPEED - turn)
+
+                    if self.target_cache.msg.x_offset > 50:
+                        drivetrain_pub.publish(SPEED, 0)
+                    elif self.target_cache.msg.x_offset < -50:
+                        drivetrain_pub.publish(0, SPEED)
+                    else:
+                        drivetrain_pub.publish(SPEED, SPEED)
+            else:
+                # Turn the rover to look for the ArUco tag
+                # drivetrain_pub.publish(SPEED, -SPEED)
+                drivetrain_pub.publish(0, 0)
+
+            rate.sleep()
 
         sub.unregister()
+        drivetrain_pub.unregister()
+
         if self.success:
             return ShortrangeStateEnum.SUCCESS
         return ShortrangeStateEnum.FAIL

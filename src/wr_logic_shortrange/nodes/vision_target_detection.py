@@ -9,6 +9,8 @@
 # Then, the data for all ArUco tags detected is published as a VisionTarget message.
 # @{
 
+import math
+
 import rospy
 import cv2 as cv
 import numpy as np
@@ -19,8 +21,6 @@ from wr_logic_shortrange.msg import VisionTarget
 CAMERA_WIDTH = 1280
 ## Height of the camera frame, in pixels
 CAMERA_HEIGHT = 720
-## Name of the VisionTarget topic to publish to
-vision_topic = rospy.get_param("~vision_topic")
 
 
 def process_corners(target_id: int, corners: np.ndarray) -> VisionTarget:
@@ -44,7 +44,7 @@ def process_corners(target_id: int, corners: np.ndarray) -> VisionTarget:
     # Estimate the distance of the ArUco tag in meters
     distance_estimate = aruco_lib.estimate_distance_m(corners)
 
-    return VisionTarget(target_id, x_offset, distance_estimate, True)
+    return VisionTarget(target_id, x_offset, distance_estimate)
 
 
 def main():
@@ -53,10 +53,13 @@ def main():
 
     This function initializes and runs a node to read camera input and publish ArUco tag data to a topic.
     """
-    pub = rospy.Publisher(vision_topic, VisionTarget, queue_size=10)
     rospy.init_node("vision_target_detection")
 
     rate = rospy.Rate(10)
+
+    # Set up publisher
+    vision_topic = rospy.get_param("~vision_topic")
+    pub = rospy.Publisher(vision_topic, VisionTarget, queue_size=10)
 
     # Retrieve video stream from parameter server
     # If no vision stream is specified, try to use camera directly
@@ -67,6 +70,14 @@ def main():
         cap = cv.VideoCapture(0)
         cap.set(cv.CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH)
         cap.set(cv.CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
+
+    # Save video if debugging
+    debug = rospy.get_param("~debug")
+    if debug:
+        fourcc = cv.VideoWriter_fourcc(*"MJPG")
+        out = cv.VideoWriter(
+            "output.avi", fourcc, 20.0, (CAMERA_WIDTH, CAMERA_HEIGHT), True
+        )
 
     if not cap.isOpened():
         rospy.logerr("Failed to open camera")
@@ -82,12 +93,20 @@ def main():
             if ids is not None:
                 for i, target_id in enumerate(ids):
                     pub.publish(process_corners(target_id[0], corners[i][0]))
-            else:
-                # Publish even when no target is found to constantly run the navigation callback
-                pub.publish(VisionTarget(0, 0, 0, False))
+
+                    closest_tag = aruco_lib.estimate_distance_m(corners[i][0])
+                    frame = aruco_lib.mark_aruco_tag(
+                        frame, corners[i][0], False, closest_tag
+                    )
+
+            if debug:
+                out.write(frame)
+
         rate.sleep()
 
     cap.release()
+    if debug:
+        out.release()
 
 
 if __name__ == "__main__":
