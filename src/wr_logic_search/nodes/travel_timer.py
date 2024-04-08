@@ -11,8 +11,8 @@ Attributes(s):
   speed - speed of the rover in meters per second
 
 Methods(s):
-  calculate_time(distance) - Calculates maximum travel time between two coordinates
-  calculate_time(distance) - Calculates maximum travel time between all coordinates
+  calc_point_time(distance) - Calculates maximum travel time between two coordinates
+  calc_state_time(distance) - Calculates maximum travel time between all coordinates
 @{
 """
 
