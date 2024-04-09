@@ -14,8 +14,10 @@ specific coordinate, the coordinate is assumed to be unreachable, and the rover 
 import rospy
 import actionlib
 from wr_logic_search.msg import SearchStateAction, SearchStateGoal
-from wr_logic_longrange.nodes.obstacle_avoidance import obstacle_avoidance
+from wr_logic_longrange.nodes import obstacle_avoidance
+import coord_calculations
 import travel_timer
+# from wr_logic_search.srv import SearchPatternService
 
 class SearchActionServer(object):
     def __init__(self, name) -> None:
@@ -43,14 +45,37 @@ class SearchActionServer(object):
         @param goal (SearchGoal): Goal for the navigation segment, which contains the GPS coordinates
         of the target
         """
-        start_time = rospy.get_rostime()
+        distance = 4
+        num_vertices = 22
+
+        coords = coord_calculations.get_coords(goal.target_lat, goal.target_long, distance, num_vertices)
+        SEARCH_TIMEOUT_TIME = travel_timer.calc_state_time() # default = 20 meters
+
+        i = 0
+        state_time = rospy.get_rostime()
         while (
-            rospy.get_rostime() - start_time < travel_timer.calc_point_time(goal.dist)
+            rospy.get_rostime() - state_time < SEARCH_TIMEOUT_TIME
             and not rospy.is_shutdown()
+            and i < num_vertices
         ):
-            if obstacle_avoidance.update_target(goal.target_lat, goal.target_long):
-                return self._as.set_succeeded()
-        return self._as.set_aborted()
+            if (i != 0): # skip starting point because rover is already there
+                point_time = rospy.get_rostime()
+                while (
+                    rospy.get_rostime() - point_time < travel_timer.calc_point_time(coords[i]['distance'])
+                    and not rospy.is_shutdown()
+                ):
+                    if obstacle_avoidance.update_target(coords[i]['lat'], coords[i]['long']):
+                        return self._as.set_succeeded()
+                return self._as.set_aborted()
+            
+            # # Camera Service - still not sure about integrating the camera with the state machine
+            # camera_service = rospy.ServiceProxy('search_pattern_service', SearchPatternService)
+            # camera_service.wait_for_service('search_pattern_service')
+
+            # if camera_service:
+            #     break # what should be done when the target object is found? how should we enter ShortRange?
+
+            i += 1
 
 if __name__ == "__main__":
     rospy.init_node("search_action_server")
