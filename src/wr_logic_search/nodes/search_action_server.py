@@ -48,7 +48,7 @@ class SearchActionServer(object):
         distance = 4
         num_vertices = 22
 
-        coords = coord_calculations.get_coords(goal.target_lat, goal.target_long, distance, num_vertices)
+        coords = coord_calculations.get_coords(goal.starting_lat, goal.starting_long, distance, num_vertices)
         SEARCH_TIMEOUT_TIME = travel_timer.calc_state_time() # default = 20 meters
 
         i = 0
