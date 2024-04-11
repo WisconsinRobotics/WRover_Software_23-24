@@ -50,7 +50,7 @@ auto main(int argc, char **argv) -> int {
                         std_msgs::Float64 right;
 
                         left.data = msg->left_value;
-                        right.data = msg->right_value;
+                        right.data = -msg->right_value;
 
                         outLeft.publish(left);
                         outRight.publish(right);
