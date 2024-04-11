@@ -138,6 +138,10 @@ add_executable(DriveTrainControlSystem src/DriveTrainControlSystem.cpp)
 target_link_libraries(DriveTrainControlSystem ${catkin_LIBRARIES})
 add_dependencies(DriveTrainControlSystem ${catkin_EXPORTED_TARGETS})
 
+add_executable(DriveTrainControlFreefall src/DriveTrainControlFreefall.cpp)
+target_link_libraries(DriveTrainControlFreefall ${catkin_LIBRARIES})
+add_dependencies(DriveTrainControlFreefall ${catkin_EXPORTED_TARGETS})
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
