@@ -1,8 +1,6 @@
 <!-- Launches the teleop system for freefall system -->
+<!-- Launches the full robot system, configured for the URC extreme retrieval and delivery mission. -->
 <launch>
-  <env name="WROVER_MODE" value="ERDM" />
-
-  <!-- <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" /> -->
 
   <include file="$(find wr_hsi_roboclaw)/launch/roboclaw_freefall.launch"/>
   
@@ -10,7 +8,5 @@
 
   <include file="$(find wr_entry_point)/launch/comp/comp_ds_control.launch" />
   <include file="$(find wr_entry_point)/launch/comp/comp_ds_teleop.launch" />
-
-  <include file="$(find wr_entry_point)/launch/comp/comp_ui.launch" />
-
+  
 </launch>
