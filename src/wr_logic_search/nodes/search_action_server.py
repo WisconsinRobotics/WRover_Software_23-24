@@ -18,6 +18,7 @@ from wr_logic_longrange.nodes import obstacle_avoidance
 import coord_calculations
 import travel_timer
 # from wr_logic_search.srv import SearchPatternService
+# from camera_sub import CameraSub
 
 class SearchActionServer(object):
     def __init__(self, name) -> None:
@@ -66,6 +67,11 @@ class SearchActionServer(object):
                 ):
                     if obstacle_avoidance.update_target(coords[i]['lat'], coords[i]['long']):
                         return self._as.set_succeeded()
+                    
+                    # camera_sub = CameraSub()
+                    # if camera_sub.get_detection_result:
+                    #     break
+
                 return self._as.set_aborted()
             
             # # Camera Service - still not sure about integrating the camera with the state machine
@@ -78,9 +84,12 @@ class SearchActionServer(object):
             i += 1
 
 if __name__ == "__main__":
-    rospy.init_node("search_action_server")
-    server = SearchActionServer("SearchActionServer")
-    rospy.spin()
+    try:
+        rospy.init_node("search_action_server")
+        server = SearchActionServer("SearchActionServer")
+        rospy.spin()
+    except rospy.ROSInterruptException:
+        pass
 
 ## @}
 ## @}
