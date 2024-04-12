@@ -5,7 +5,9 @@
   
   <include file="$(find wr_control_drive_ds)/launch/freefall.launch"/>
   
-  <include file="$(find sick_scan)/launch/sick_tim_7xx.launch"/>
+  <include file="$(find sick_scan)/launch/sick_tim_7xx.launch">
+    <arg name="hostname" value="192.169.0.10" />
+  </include>
   
   <include file="$(find wr_logic_ai)/launch/freefall.launch"/>
 </launch>
