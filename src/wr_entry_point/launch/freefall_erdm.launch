@@ -1,6 +1,7 @@
 <!-- Launches the teleop system for freefall system -->
 <!-- Launches the full robot system, configured for the URC extreme retrieval and delivery mission. -->
 <launch>
+  <include file="$(find wr_hsi_roboclaw)/launch/roboclaw_freefall.launch"/>
 
   <include file="$(find wr_hsi_roboclaw)/launch/roboclaw_freefall.launch"/>
   
