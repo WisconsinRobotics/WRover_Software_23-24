@@ -7,7 +7,6 @@
   
   <include file="$(find wr_control_drive_ds)/launch/freefall.launch"/>
 
-  <incLlude file="$(find wr_entry_point)/launch/comp/comp_ds_control.launch" />
   <include file="$(find wr_entry_point)/launch/comp/comp_ds_teleop.launch" />
   
 </launch>
