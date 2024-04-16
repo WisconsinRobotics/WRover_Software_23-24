@@ -58,6 +58,13 @@
         "package": "ros-noetic-mapviz",
         "provider": "apt"
       }
+    },
+    {
+      "name": "smach",
+      "build": {
+        "package": "ros-noetic-smach-ros",
+        "provider": "apt"
+      }
     }
   ]
 }
