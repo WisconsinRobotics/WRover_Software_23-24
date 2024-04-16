@@ -6,7 +6,5 @@
   <include file="$(find wr_hsi_roboclaw)/launch/roboclaw_freefall.launch"/>
   
   <include file="$(find wr_control_drive_ds)/launch/freefall.launch"/>
-
-  <include file="$(find wr_entry_point)/launch/comp/comp_ds_teleop.launch" />
   
 </launch>
