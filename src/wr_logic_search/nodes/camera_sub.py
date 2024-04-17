@@ -6,7 +6,8 @@
 @defgroup wr_logic_search_camera_sub Camera Subscriber
 @brief Subscriber for the camera used in object detection
 @details Subscribes the to the placeholder camera topic. It is assumed there is a separate file that does object detection. 
-If the object is detected, it will return True to the Search Pattern action server. False otherwise.
+If the object is detected, it will return True to the Search Pattern action server. False otherwise. This Subscriber node
+means search_pattern_client.py and search_pattern_server.py can be removed.
 @{
 """
 
