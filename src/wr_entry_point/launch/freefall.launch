@@ -1,13 +1,22 @@
 <!-- Launches the full robot system, configured for the URC extreme retrieval and delivery mission. -->
 <launch>
 
-  <include file="$(find wr_hsi_roboclaw)/launch/roboclaw_freefall.launch"/>
-  
-  <include file="$(find wr_control_drive_ds)/launch/freefall.launch"/>
-  
+  <include file="$(find wr_entry_point)/launch/freefall_init.launch" />
+
+  <include file="$(find wr_hsi_roboclaw)/launch/roboclaw_freefall.launch" />
+
+  <include file="$(find wr_control_drive_ds)/launch/freefall.launch" />
+
+  <node name="wready" pkg="wready" type="default_server.py" output="screen" machine="base_station"/>
+
+  <node name="teleop_input" pkg="wreadinput" type="input_xbox360.py" machine="base_station">
+    <param name="name" value="Freefall Drive" />
+    <param name="namespace" value="/hci/freefall/gamepad" />
+  </node>
+
   <include file="$(find sick_scan)/launch/sick_tim_7xx.launch">
     <arg name="hostname" value="192.169.0.10" />
   </include>
-  
-  <include file="$(find wr_logic_ai)/launch/freefall.launch"/>
+
+  <!-- <include file="$(find wr_logic_ai)/launch/freefall.launch"/> -->
 </launch>
