@@ -17,6 +17,7 @@
   <include file="$(find sick_scan)/launch/sick_tim_7xx.launch">
     <arg name="hostname" value="192.169.0.10" />
   </include>
+  <node name="logic_teleop" pkg="wr_logic_teleop_ds" type="TeleopDriveFreefall.py"></node>
 
   <!-- <include file="$(find wr_logic_ai)/launch/freefall.launch"/> -->
 </launch>
