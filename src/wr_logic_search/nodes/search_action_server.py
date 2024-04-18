@@ -49,7 +49,12 @@ class SearchActionServer(object):
         distance = 4
         num_vertices = 22
 
-        coords = coord_calculations.get_coords(goal.starting_lat, goal.starting_long, distance, num_vertices)
+        # TODO: During testing, hard code some coordinates.
+        hard_coded_lat = 0
+        hard_coded_long = 0
+
+        # coords = coord_calculations.get_coords(goal.starting_lat, goal.starting_long, distance, num_vertices)
+        coords = coord_calculations.get_coords(hard_coded_lat, hard_coded_long, distance, num_vertices)
         SEARCH_TIMEOUT_TIME = travel_timer.calc_state_time() # default = 20 meters
 
         i = 0
@@ -59,20 +64,23 @@ class SearchActionServer(object):
             and not rospy.is_shutdown()
             and i < num_vertices
         ):
-            if (i != 0): # skip starting point because rover is already there
-                point_time = rospy.get_rostime()
-                while (
-                    rospy.get_rostime() - point_time < travel_timer.calc_point_time(coords[i]['distance'])
-                    and not rospy.is_shutdown()
-                ):
-                    if obstacle_avoidance.update_target(coords[i]['lat'], coords[i]['long']):
-                        return self._as.set_succeeded()
+            # if (i != 0): # skip starting point because rover is already there
+            point_time = rospy.get_rostime()
+            while (
+                rospy.get_rostime() - point_time < travel_timer.calc_point_time(coords[i]['distance'])
+                and not rospy.is_shutdown()
+            ):
+                if obstacle_avoidance.update_target(coords[i]['lat'], coords[i]['long']):
+                    # return self._as.set_succeeded()
+                    break # successful?
+                # TODO: else?????
                     
-                    # camera_sub = CameraSub()
-                    # if camera_sub.get_detection_result:
-                    #     break
+                # camera_sub = CameraSub()
+                # if camera_sub.get_detection_result:
+                #     break
 
-                return self._as.set_aborted()
+            i += 1
+            # return self._as.set_aborted()
             
             # # Camera Service - still not sure about integrating the camera with the state machine
             # camera_service = rospy.ServiceProxy('search_pattern_service', SearchPatternService)
@@ -80,8 +88,6 @@ class SearchActionServer(object):
 
             # if camera_service:
             #     break # what should be done when the target object is found? how should we enter ShortRange?
-
-            i += 1
 
 if __name__ == "__main__":
     try:
