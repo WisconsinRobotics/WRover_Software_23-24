@@ -38,7 +38,7 @@ class SearchActionServer(object):
         )
         self._as.start()
 
-    def execute_callback(self, goal: SearchStateGoal):
+    def execute_callback(self): #, goal: SearchStateGoal):
         """
         Executes the long range obstacle avoidance code, and triggers the corresponding state machine event
         depending on the result of the navigation
@@ -59,28 +59,23 @@ class SearchActionServer(object):
 
         i = 0
         state_time = rospy.get_rostime()
+        point_time = rospy.get_rostime()
         while (
             rospy.get_rostime() - state_time < SEARCH_TIMEOUT_TIME
+            and rospy.get_rostime() - point_time < travel_timer.calc_point_time(coords[i]['distance'])
             and not rospy.is_shutdown()
             and i < num_vertices
         ):
-            # if (i != 0): # skip starting point because rover is already there
-            point_time = rospy.get_rostime()
-            while (
-                rospy.get_rostime() - point_time < travel_timer.calc_point_time(coords[i]['distance'])
-                and not rospy.is_shutdown()
-            ):
-                if obstacle_avoidance.update_target(coords[i]['lat'], coords[i]['long']):
-                    # return self._as.set_succeeded()
-                    break # successful?
-                # TODO: else?????
+            if obstacle_avoidance.update_target(coords[i]['lat'], coords[i]['long']) == False:
+                # return self._as.set_succeeded()
+                return self._as.set_aborted()
                     
-                # camera_sub = CameraSub()
-                # if camera_sub.get_detection_result:
-                #     break
+            # camera_sub = CameraSub()
+            # if camera_sub.get_detection_result:
+            #     break
 
             i += 1
-            # return self._as.set_aborted()
+            point_time = rospy.get_rostime()
             
             # # Camera Service - still not sure about integrating the camera with the state machine
             # camera_service = rospy.ServiceProxy('search_pattern_service', SearchPatternService)
