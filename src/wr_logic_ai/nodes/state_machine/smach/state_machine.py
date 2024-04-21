@@ -4,6 +4,8 @@ from smach_ros import SimpleActionState
 from std_srvs.srv import Empty
 
 from wr_logic_longrange.msg import LongRangeAction, LongRangeGoal
+from wr_logic_search.msg import SearchStateAction, SearchStateGoal
+from wr_logic_shortrange.msg import ShortRangeAction, ShortRangeGoal
 from  wr_logic_ai.color_matrix import COLOR_NONE, COLOR_AUTONOMOUS, COLOR_COMPLETE, COLOR_ERROR, set_matrix_color
 from wr_logic_ai.coordinate_manager import CoordinateManager
 
@@ -72,8 +74,27 @@ def main():
                          remapping={'coord_mgr':'coord_mgr'})
 
         # st_search
+        StateMachine.add('st_search', 
+                         SimpleActionState('SearchActionServer', 
+                                           SearchStateAction, 
+                                           goal = SearchStateGoal()),
+                         transitions={'succeeded':'st_shortrange',
+                                      'aborted':'st_longrange',
+                                      'preempted':'st_longrange'})
 
         # st_shortrange
+        shortrange_goal = ShortRangeGoal()
+        if sm.userdata.coord_mgr.get_coordinate()["target"] == "none":
+            shortrange_goal.target_type = ShortRangeGoal.TARGET_TYPE_GPS_ONLY
+        else:
+            shortrange_goal.target_type = ShortRangeGoal.TARGET_TYPE_VISION
+        StateMachine.add('st_shortrange', 
+                         SimpleActionState('ShortRangeActionServer', 
+                                           ShortRangeAction, 
+                                           goal = shortrange_goal),
+                         transitions={'succeeded':'st_waypoint_complete',
+                                      'aborted':'st_search',
+                                      'preempted':'st_search'})
 
         # st_waypoint_complete
         StateMachine.add('st_waypoint_complete', St_Waypoint_Complete(),

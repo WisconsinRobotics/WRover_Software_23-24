@@ -1,6 +1,4 @@
 #goal definition
-float64 start_lat         # Info of current and target latitudes and longitudes
-float64 start_long
 ---
 #result definition
 ---
