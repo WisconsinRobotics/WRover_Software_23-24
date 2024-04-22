@@ -7,27 +7,6 @@ let intervalId; // Variable to store the interval ID
 let detectScroll = false;
 let autoscroll = false;
 
-var options = {
-    zone: document.getElementById('joystick1'),
-    color: "white",
-    // dataOnly: Boolean,              // no dom element whatsoever
-    position: {top: "20%", right: "40%"},               // preset position for 'static' mode
-    mode: "static",                   // 'dynamic', 'static' or 'semi'
-    // restJoystick: Boolean|Object,   // Re-center joystick on rest state
-    restOpacity: 1,            // opacity when not 'dynamic' and rested
-    // lockX: Boolean,                 // only move on the X axis
-    // lockY: Boolean,                 // only move on the Y axis
-};
-
-var manager = nipplejs.create(options);
-
-var joystick = manager.get(0);
-joystick.hide();
-console.log(joystick);
-joystick.setPosition(() => console.log(""), 1000, 1000);
-joystick.lockx = true;
-joystick.locky = true;
-
 // Add event listeners to the buttons
 for (let i = 0; i < launchButton.length; i++) {
     launchButton[i].addEventListener('click', handleButtonClick);
@@ -74,15 +53,17 @@ function handleButtonClick(event) {
     startTime = new Date().getTime();
 
     // Update the diagnostic input every second
-    intervalId = setInterval(() => {
-        const elapsedTime = Math.floor((new Date().getTime() - startTime) / 1000);
-        diagnosticInput.value += `Elapsed time: ${elapsedTime} s\n`;
-        if(!detectScroll) {
-            diagnosticInput.scrollTop = diagnosticInput.scrollHeight; // Scroll to the bottom
-            autoscroll = true;
-        }
-    }, 1000);
 }
+
+intervalId = setInterval(() => {
+    // const elapsedTime = Math.floor((new Date().getTime() - startTime) / 1000);
+    // diagnosticInput.value += `Elapsed time: ${elapsedTime} s\n`;
+    if(!detectScroll) {
+        diagnosticInput.scrollTop = diagnosticInput.scrollHeight; // Scroll to the bottom
+        autoscroll = true;
+    }
+}, 100);
+
 
 // Define the event listener function for scrolling
 function handleScroll() {
@@ -91,11 +72,13 @@ function handleScroll() {
         return;
     }
 
-    if (diagnosticInput.scrollTop - (diagnosticInput.scrollHeight - diagnosticInput.clientHeight) > 0) {
+    if (diagnosticInput.scrollTop - (diagnosticInput.scrollHeight - diagnosticInput.clientHeight) > -2) {
+        // console.log('Resume autoscrolling');
+        console.log(diagnosticInput.scrollTop - (diagnosticInput.scrollHeight - diagnosticInput.clientHeight));
         detectScroll = false;
         return;
     }
-
+    // console.log('Stop autoscrolling');
     detectScroll = true;
 }
 

@@ -12,6 +12,15 @@ def index():
 def send_js(path):
     return send_from_directory('js', path)
 
+
+@app.route('/assets/<path:path>')
+def send_assets(path):
+    return send_from_directory('../assets', path)
+
+@app.route('/node_modules/<path:path>')
+def send_node_modules(path):
+    return send_from_directory('../node_modules', path)
+
 if __name__ == '__main__':
     app.run(debug=True)
 

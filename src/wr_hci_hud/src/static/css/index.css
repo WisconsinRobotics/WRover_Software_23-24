@@ -5,6 +5,7 @@ body, html{
     padding: 0;
     overflow: hidden;
     background-color: #f2f2f2;
+    /* cursor: none; */
 }
 
 body{
@@ -17,12 +18,17 @@ body{
     color: white;
     text-shadow: 2px 2px 4px #000000;
     background-color: rgb(62, 62, 62);
-    border-right: 3px solid #000000;
-    border-bottom: 3px solid #000000;
+    /* background-image: linear-gradient(90deg, rgb(62, 62, 62) 90%, #000000); */
+    border-right: 5px solid #000000;
+    border-bottom: 5px solid #000000;
     padding: 20px;
-    box-shadow: 2px 2px 20px #525252;
+    box-shadow: inset -5px 5px 5px #525252;
     /* display: grid; */
-    overflow: hidden;
+    overflow: auto;
+    height: auto;
+    padding-bottom: 0%;
+    font-family: Haettenschweiler;
+    /* transition: all 5s; */
 }
 
 
@@ -49,7 +55,9 @@ body{
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
-    margin: 10px;
+    /* margin: 10px; */
+    margin-top: 10px;
+    margin-bottom: 10px;
     cursor: pointer;
     width: 500px;
     /* box-shadow: 0 3px #666; */
@@ -99,7 +107,7 @@ body{
 }
 
 .diagnostic-input {
-    width: 50%;
+    width: 90%;
     height: 80%;
     padding: 10px;
     font-size: 1.2rem;
@@ -113,25 +121,48 @@ body{
 }
 
 #controlContent{
-    height: auto;
-    width: auto;
+    height: 80%;
+    width: 100%;
     margin: 0;
     display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
 
 }
 
 #mapimg{
-    width: 40%;
-    height: 40%;
+    width: 100%;
+    height: 100%;
     border: #000000 3px solid;
 }
 
 .square-heading {
     margin: 0;
+    width: fit-content;
+    padding-left:10px;
+    padding-right: 10px;
+    border: 2px white solid;
+    padding-bottom: 5px;
+    cursor:pointer;
+    border-radius: 10px;
 }
 
+.square-heading:hover {
+    background-color: rgb(91, 91, 91);
+}
+
+.current-heading {
+    background-color: rgb(91, 91, 91);
+}
+
+
 .square-title {
-    height: 10%;
+    display: flex;
+    align-items: center;
+    height: fit-content;
+    gap: 5px;
+    margin-bottom: 5px;
 }
 
 #info-box {
@@ -145,35 +176,52 @@ body{
 #smallInfoBox{
     display: flex;
     flex-direction: column;
-    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    height: 90%;
 }
 
-#gpsBox{
+.smallInfoBoxWrapper{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+/* #gpsBox{
     display: flex;
     text-align: center;
     vertical-align: middle;
     font-size: large;
-}
+} */
 
-#voltage-div {
+.progress-div {
     /* background-color: rgb(42, 42, 42); */
     margin-left: 20px;
     height: 50px;
     width: 100px;
     border-radius: 5px;
-    margin-bottom: 10%;
+    /* margin-bottom: 10%; */
     font-size: large;
     text-align: center;
     vertical-align: middle;
     line-height: 50px;
     text-shadow: #000000 3px 3px 4px;
     background-image: linear-gradient(180deg, rgb(42, 42, 42) 60%, #00ff44 60%);
+    transition: all 0.5s;
 }
 
-.gps{
-    
-    margin-left: 20px;
+#battery-div::before {
+    width: 100px;
     height: 50px;
+    border-radius: 5px;
+    background-color: rgb(42, 42, 42);
+}
+
+.smallerInfoBox{
+    /* padding: 10px; */
+    margin-left: 20px;
+    height: fit-content;
     width: 100px;
     border-radius: 5px;
     font-size: large;
@@ -187,6 +235,7 @@ body{
 .infoLabel{
     margin-left: 20px;
     height: 50px;
+    width: fit-content;
     border-radius: 5px;
     font-size: large;
     text-align: center;
@@ -195,19 +244,109 @@ body{
     text-shadow: #000000 3px 3px 4px;
 }
 
-#videoBox{
-    height: 40%;
-    width: 60%;
+#dataPage{
+    height: 85%;
+    width: 100%;
+    margin: 0;
+    display: none;
+}
+
+#launchPage{
+    height: auto;
+    width: 100%;
+    margin: 0;
+    margin-top: 5%;
+
+}
+
+.enlargedVideoWrapper{
+    position: absolute;
+    top:0;
+    left:0;
+    width:98%;
+    height: 98%;
+    z-index: 9999;
+    animation: appear 0.2s ease-in-out ;
+    /* display: inline; */
+}
+
+
+
+.videoBox{
+    margin-top: 10px;
+    height: 300px;
+    width: auto;
     background-color: rgb(42, 42, 42);
     border-radius: 5px;
-    border: none;
+    border: 2px solid #000000;
     box-shadow: 2px 2px 4px #000000;
     color: white;
     resize: none;
 }
 
+.enlargedVideo{
+    /* width: 70rem; */
+    height: 700px;
+    /* height: auto; */
+    border: none;
+    background-color: #000000;
+    border-radius: 5px;
+    box-shadow: 2px 2px 4px #000000;
+    /* margin: auto; */
+    /* transform: scale(2); */
+    /* max-height: 88%; */
+    /* max-width: 90%; */
+    object-fit: cover;
+}
+.zoomingDiv{
+    /* max-width: 88%; */
+    /* max-height: 90%; */
+    width: fit-content;
+    height: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    
+    overflow: hidden;
+    display: inline-block;
+}
+
+.dualVideo{
+    width: 350px;
+    height: auto;
+    border: none;
+    background-color: #000000;
+    border-radius: 5px;
+    box-shadow: 2px 2px 4px #000000;
+}
+
+.enlargeDualVideo{
+    /* margin-top: 7%; */
+    width: 700px;
+    height: auto;
+    border: none;
+    background-color: #000000;
+    border-radius: 5px;
+    box-shadow: 2px 2px 4px #000000;
+
+}
+
+#dualCamWrapper{
+    display: flex;
+    height: 80%;
+    width: 100%;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+#vidEnlarge{
+    margin-left: auto;
+}
+
 #joystick{
     width: 30%;
+    height: 60%;
     margin: 10px;
     margin-right: 60px;
     padding: 10px;
@@ -232,6 +371,7 @@ body{
 }
 
 #joystickHandle{
+    position: absolute;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -241,9 +381,112 @@ body{
     background-color: #ffffff;
     user-select: none;
     border-radius: 50%;
-    margin-left: 25px;
-    margin-top: 25px;
+    margin-left: 15px;
+    margin-top: 15px;
     color: #000000;
     font-size: medium;
     cursor: grab;
+    transition: all 0.1s ease-in;
 }
+
+#mapWrapper{
+    /* width: 100%; */
+    /* height: 100%; */
+    aspect-ratio: 2/1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+}
+
+#mapMarker{
+    position: absolute;
+    z-index: 5;
+    width: 10px;
+    height: 10px;
+    background-color: #ff0000;
+    border-radius: 50%;
+    margin-left: -25px;
+    margin-top: -25px;
+    color: #000000;
+    font-size: medium;
+    /* cursor: grab; */
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+    60% {
+        opacity: 1;
+    }
+}
+
+@keyframes appear {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.hideSlide{
+    display: none;
+
+}
+
+
+.slidecontainer {
+    width: 50%; /* Width of the outside container */
+    height: auto;
+    margin-left: auto;
+  }
+  
+  /* The slider itself */
+  .slider {
+    border-top: 10px;
+    -webkit-appearance: none;  /* Override default CSS styles */
+    appearance: none;
+    width: 100%; /* Full-width */
+    height: 25px; /* Specified height */
+    background: #d3d3d3; /* Grey background */
+    outline: none; /* Remove outline */
+    opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+    -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+    transition: opacity .2s;
+    border-radius: 15px;
+  }
+  
+  /* Mouse-over effects */
+  .slider:hover {
+    opacity: 1; /* Fully shown on mouse-over */
+  }
+  
+  .slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    background: #cecece;
+    border-radius: 50%;
+    border: #000000 3px solid;
+    /* background:rgb(42, 42, 42); */
+    cursor: pointer;
+  }
+
+  #mouseCircle{
+    position: absolute;
+    z-index: 9999;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  

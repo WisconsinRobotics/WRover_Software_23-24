@@ -46,3 +46,5 @@ docs/generated-images
 # non-generated documentation images
 !src/wr_logic_teleop_ds/control_scheme_power_levels.png
 !src/wr_logic_teleop_ds/control_scheme_tank_drive.png
+
+src/wr_hci_hud/node_modules
