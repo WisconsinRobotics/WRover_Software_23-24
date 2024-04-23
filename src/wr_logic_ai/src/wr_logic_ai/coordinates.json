@@ -1,14 +1,20 @@
 [
     {
-        "lat": 10,
-        "long": 10,
+        "lat": 0,
+        "long": 0,
         "note": "EHall Entrance",
-        "num_vision_posts": 0
+        "target": "none"
     },
     {
-        "lat": 11,
-        "long": 10,
-        "note": "EHall Entrance",
-        "num_vision_posts": 0
+        "lat": 0,
+        "long": 0,
+        "note": "Somewhere in UTAH",
+        "target": "aruco"
+    },
+    {
+        "lat": 0,
+        "long": 0,
+        "note": "None",
+        "target": "vision"
     }
 ]

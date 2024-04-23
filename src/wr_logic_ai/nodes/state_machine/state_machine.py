@@ -23,6 +23,7 @@ Event: Most events will be either a success or error. This will indicate which s
 from __future__ import annotations
 from statemachine import StateMachine, State
 from wr_logic_ai.coordinate_manager import CoordinateManager
+<<<<<<< HEAD
 from wr_logic_ai.msg import (
     NavigationState,
     LongRangeAction,
@@ -32,6 +33,14 @@ from wr_logic_ai.msg import (
 from wr_logic_ai import coord_calculations, PointTimer, StateTimer
 from wr_logic_ai.msg import ShortRangeAction, ShortRangeGoal, ShortRangeActionResult
 # from wr_logic_ai import SearchStateAction, SearchStateGoal, SearchStateActionResult
+=======
+from wr_logic_ai.msg import NavigationState
+from wr_logic_longrange.msg import LongRangeAction, LongRangeGoal, LongRangeActionResult
+# from wr_logic_search import coord_calculations, travel_timer
+from wr_logic_shortrange.msg import ShortRangeAction, ShortRangeGoal, ShortRangeActionResult
+from wr_logic_search.msg import SearchStateAction, SearchStateGoal, SearchStateActionResult
+# from wr_logic_search.srv import SearchPatternService
+>>>>>>> 668f79d0e0fa28e53fc5c90b27d0ded5421583be
 from wr_led_matrix.srv import (
     led_matrix as LEDMatrix,
     led_matrixRequest as LEDMatrixRequest,
@@ -138,45 +147,15 @@ class NavStateMachine(StateMachine):
         self.mux_short_range.state = NavigationState.NAVIGATION_STATE_SHORT_RANGE
         super(NavStateMachine, self).__init__()
 
-    def init_calibrate(self, pub: rospy.Publisher, stop_time: float) -> None:
-        """
-        Function to spin the robot for a certain time. The IMU (N,E,S,W) needs to be spinned to be correct.
-
-        @param stop_time Time when the robot should stop
-        @param pub (rospy.Publisher): Publishes drive values to motors
-        """
-        if rospy.get_time() < stop_time:
-            pub.publish(DriveTrainCmd(left_value=0.3, right_value=-0.3))
-        else:
-            pub.publish(DriveTrainCmd(left_value=0, right_value=0))
-            self.evUnconditional()
-
-    def init_w_ros(self):
-        """Init function to start ROS publisher and time"""
-        # Set the LED to autonomous
-        set_matrix_color(COLOR_AUTONOMOUS)
-
-        # Publisher for sending init calibrate
-        pub = rospy.Publisher("/control/drive_system/cmd", DriveTrainCmd, queue_size=1)
-        # Set amount of time to calibrate
-        stop_time = rospy.get_time() + 7
-
-        self._init_tmr = rospy.Timer(
-            rospy.Duration.from_sec(0.1), lambda _: self.init_calibrate(pub, stop_time)
-        )
-
     def on_enter_stInit(self) -> None:
         print("\non enter stInit")
         rospy.loginfo("\non enter stInit")
         # Get the coordinates that we will have to go to
         self._mgr.read_coordinates_file()
 
-        # Run calibrate for seven seconds
-        threading.Timer(1, lambda: self.init_w_ros()).start()
+        self.evUnconditional()
 
     def on_exit_stInit(self) -> None:
-        # Stop calibration code
-        self._init_tmr.shutdown()
         # Check if there is a new coordinate. Will go to event complete if ended.
         if self._mgr.next_coordinate():
             self.evComplete()
@@ -192,39 +171,23 @@ class NavStateMachine(StateMachine):
     def on_enter_stLongRange(self) -> None:
         print("\non enter stLongRange")
         rospy.loginfo("\non enter stLongRange")
-
-        # Publish to mux, runs every .2 seconds. (The mux will tell the robot to get drive values from Long Range and not short range)
-        self.timer = rospy.Timer(
-            rospy.Duration(0.2), lambda _: self.mux_pub.publish(self.mux_long_range)
-        )
-
-        # sets autonomous color for the LED
-        set_matrix_color(COLOR_AUTONOMOUS)
+        # enter autonomous mode
+        #set_matrix_color(COLOR_AUTONOMOUS) TODO:This breaks rviz
 
         # Initialize the action client that will run the long range
         self._client = actionlib.SimpleActionClient(
             "LongRangeActionServer", LongRangeAction
         )
         self._client.wait_for_server()
-
-        # Get the coordinates as a LongRangeGoal. Two coordinates (lat, long)
-        goal = LongRangeGoal(
-            target_lat=self._mgr.get_coordinate()["lat"],
-            target_long=self._mgr.get_coordinate()["long"],
-        )
-
-        # Send coordinates to action service
-        self._client.send_goal(
-            goal,
-            done_cb=lambda status, result: self._longRangeActionComplete(
-                status, result
-            ),
-        )
+        goal = LongRangeGoal(target_lat=self._mgr.get_coordinate()[
+                             "lat"], target_long=self._mgr.get_coordinate()["long"])
+        
+        self._client.send_goal(goal, done_cb=lambda status, result:
+                               self._longRangeActionComplete(status, result))
 
     def on_exit_stLongRange(self) -> None:
         print("Exting Long Range")
         rospy.loginfo("Exting Long Range")
-        self.timer.shutdown()  # Stop timer that was being used for MUX
 
     def _longRangeRecoveryActionComplete(
         self, state: GoalStatus, _: LongRangeActionResult
@@ -247,9 +210,6 @@ class NavStateMachine(StateMachine):
             # Get previous coordinate and go to it as same as long range as a live-action debugging strategy
             self._mgr.previous_coordinate()
             print(self._mgr.get_coordinate())
-            self.timer = rospy.Timer(
-                rospy.Duration(0.2), lambda _: self.mux_pub.publish(self.mux_long_range)
-            )
             self._client = actionlib.SimpleActionClient(
                 "LongRangeActionServer", LongRangeAction
             )
@@ -266,7 +226,29 @@ class NavStateMachine(StateMachine):
             )
 
     def on_exit_stLongRangeRecovery(self) -> None:
-        self.timer.shutdown()  # Shutdown mux timer
+        pass
+
+    def _searchActionComplete(self, state: GoalStatus, _: SearchStateActionResult) -> None:
+        if state == GoalStatus.SUCCEEDED:
+            self.evSuccess()
+        else:
+            self.evError()
+
+    def on_enter_stSearch(self) -> None:
+        print("\non enter stSearch")
+        rospy.loginfo("\non enter stSearch")
+
+        set_matrix_color(COLOR_AUTONOMOUS)
+
+        self._client = actionlib.SimpleActionClient("SearchActionServer", SearchStateAction)
+        self._client.wait_for_server()
+
+        goal = SearchStateGoal(target_lat=self._mgr.get_coordinate()['lat'], target_long=self._mgr.get_coordinate()['long'])
+        self._client.send_goal(goal, done_cb=lambda status, result: self._searchActionComplete(status, result))
+
+    def on_exit_stSearch(self) -> None:
+        print("Exiting Search")
+        rospy.loginfo("Exiting Search")
 
     def _searchActionComplete(self, state: GoalStatus, _: SearchActionResult) -> None: # SearchActionResult
         if state == GoalStatus.SUCCEEDED:
@@ -329,11 +311,6 @@ class NavStateMachine(StateMachine):
 
         set_matrix_color(COLOR_AUTONOMOUS)
 
-        # Set mux to switch to short range
-        self.timer = rospy.Timer(
-            rospy.Duration(0.2), lambda _: self.mux_pub.publish(self.mux_short_range)
-        )
-
         # Initialized short range action server that will do short range
         self._client = actionlib.SimpleActionClient(
             "ShortRangeActionServer", ShortRangeAction
@@ -360,7 +337,6 @@ class NavStateMachine(StateMachine):
         )
 
     def on_exit_stShortRange(self) -> None:
-        # self.timer.shutdown()
         pass
 
     # Defined for lambda function, not part of state machine architecture

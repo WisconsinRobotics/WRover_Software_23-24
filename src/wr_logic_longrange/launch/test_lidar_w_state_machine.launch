@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!DOCTYPE launch SYSTEM "https://gist.githubusercontent.com/nalt/dfa2abc9d2e3ae4feb82ca5608090387/raw/roslaunch.dtd">
+<launch>
+
+  <!-- 
+    export WROVER_HW=MOCK
+  export WROVER_LOCAL=true
+
+   -->
+
+  <include file="$(find rplidar_ros)/launch/rplidar.launch"/>
+
+  <node name="fake_data" pkg="wr_logic_longrange" type="inputFakeData.py" output="screen"/>
+
+  <!-- <node pkg="wr_logic_ai" name="wait_for_user_input" type="wait_for_user_input.py" output="screen" /> -->
+  <node pkg="wr_logic_ai" name="nav_state_machine_driver" type="state_machine.py" output="screen" />
+
+  <include file="$(find wr_logic_longrange)/launch/long_range.launch" />
+
+</launch>

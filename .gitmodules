@@ -16,3 +16,6 @@
 [submodule "src/wrevolution"]
 	path = src/wrevolution
 	url = https://github.com/WisconsinRobotics/wrevolution
+[submodule "src/wr_hsi_sensing/src/sh2"]
+	path = src/wr_hsi_sensing/sh2
+	url = https://github.com/ceva-dsp/sh2
