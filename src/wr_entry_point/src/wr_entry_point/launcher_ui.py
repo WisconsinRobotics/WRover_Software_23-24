@@ -21,7 +21,7 @@ def do_launch(launch_file: str, local_mode: bool, mock_mode: bool):
         local_inet_addr: str
         with SSHClient() as ssh_cli:
             ssh_cli.load_system_host_keys()
-            ssh_cli.connect('wrover-pi.local', username='wiscrobo')
+            ssh_cli.connect('wrover.local', username='wiscrobo')
             local_inet_addr = ssh_cli.get_transport().sock.getsockname()[0]
             
             # retrieve rover ethernet ip address
@@ -41,7 +41,7 @@ def do_launch(launch_file: str, local_mode: bool, mock_mode: bool):
                 environment={
                     'ROS_MASTER_URI': 'http://localhost:11311',
                     'ROS_IP': rover_inet_addr,
-                    'ROS_HOSTNAME': 'wrover-pi.local'
+                    'ROS_HOSTNAME': 'wrover.local'
                 })
             with bootstrap_stdout:
                 bootstrap_stdout.read()
@@ -50,7 +50,7 @@ def do_launch(launch_file: str, local_mode: bool, mock_mode: bool):
             print(f'REMOTE ADDR: {rover_inet_addr}')
         
         os.environ['WROVER_LOCAL'] = 'false'
-        os.environ['ROS_MASTER_URI'] = 'http://wrover-pi.local:11311'
+        os.environ['ROS_MASTER_URI'] = 'http://wrover.local:11311'
         os.environ['ROS_IP'] = local_inet_addr
 
     # run roslaunch

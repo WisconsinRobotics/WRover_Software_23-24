@@ -68,9 +68,9 @@ auto main(int argc, char **argv) -> int {
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-    // std_msgs::Float64 mag_x, mag_y, mag_z, heading;
-    // std_msgs::Int16 mag_acc;
-    std_msgs::Float64 heading;
+
+    std_msgs::Float64 mag_x, mag_y, mag_z, heading;
+    std_msgs::Int16 mag_acc;
     while (ros::ok()) {
         if (sensor.get_reset()) {
             ROS_INFO("IMU SENSOR RESET %d", sensor.prod_ids.entry[0].resetCause);
@@ -92,6 +92,10 @@ auto main(int argc, char **argv) -> int {
             //     mag_acc.data = static_cast<int16_t>(sensor.get_accuracy());
             //     pub_acc.publish(mag_acc);
             // }
+
+            if (sensor.get_reset()) {
+                sensor_setup();
+            }
 
             if (sensor.sensor_value.sensorId == SH2_GAME_ROTATION_VECTOR) {
                 // Convert Euler angle to 0 to 360

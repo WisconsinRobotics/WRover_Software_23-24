@@ -3,12 +3,18 @@
         "lat": 0,
         "long": 0,
         "note": "EHall Entrance",
-        "num_vision_posts": 0
+        "target": "none"
     },
     {
         "lat": 0,
         "long": 0,
         "note": "Somewhere in UTAH",
-        "num_vision_posts": 0
+        "target": "aruco"
+    },
+    {
+        "lat": 0,
+        "long": 0,
+        "note": "None",
+        "target": "vision"
     }
 ]
