@@ -19,6 +19,7 @@ import coord_calculations
 import travel_timer
 # from wr_logic_search.srv import SearchPatternService
 # from camera_sub import CameraSub
+from coord_sub import CoordSub
 
 class SearchActionServer(object):
     def __init__(self, name) -> None:
@@ -48,6 +49,11 @@ class SearchActionServer(object):
         """
         distance = 4
         num_vertices = 22
+
+        # coord_sub = CoordSub()
+        # coord = coord_sub.get_coord_result()
+        # start_lat =  coord.latitude
+        # start_long = coord.longitude
 
         # TODO: During testing, hard code some coordinates.
         hard_coded_lat = 0
