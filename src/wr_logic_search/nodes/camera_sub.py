@@ -26,7 +26,6 @@ class CameraSub:
     '''
     def object_detection_callback(data):
         global object_detected
-        rospy.loginfo(rospy.get_caller_id() + "Received object detection event: %s", data.data)
         object_detected = data.data
 
     '''
