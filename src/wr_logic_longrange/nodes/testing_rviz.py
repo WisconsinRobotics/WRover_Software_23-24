@@ -37,6 +37,8 @@ smoothing_constant = 3
 # global speed factor updated through navigation
 speed_factor = 0
 
+frameCount = 0
+
 # Start the tasks managed to drive autonomously
 def initialize() -> None:
     """Initialize publisher and subscribers for nodes
