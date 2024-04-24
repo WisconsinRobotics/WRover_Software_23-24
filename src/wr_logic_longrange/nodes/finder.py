@@ -156,7 +156,7 @@ def get_valley(
     output_file.close()
 
     # get two obstacles lists for 2 thresholds in order to get rid of
-    # any obstacle that is skinny
+    # any obstacle that is skinny and far away
     obstacle_list = get_obstacle_list(sector_angle, threshold, hist)
     obstacle_list_close = get_obstacle_list(sector_angle, threshold / 2, hist)
 

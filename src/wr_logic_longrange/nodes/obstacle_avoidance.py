@@ -223,7 +223,7 @@ def update_navigation(data: LaserScan) -> None:
             valueToTurn = "Turn left"
         else:
             valueToTurn = "Stay straight"
-            
+        
         # Publish the DriveTrainCmd to the topic
         rospy.loginfo("Drive to: " + str(valueToTurn))
         #rospy.loginfo("Target Value: " + str(target_angle))
@@ -239,7 +239,7 @@ if __name__ == "__main__":
     try:
         # Initialize the running environment for this program
         initialize()
-        testing_rviz.initialize()
+        # testing_rviz.initialize()
         # Spin RosPy to the next update cycle
         rospy.spin()
         

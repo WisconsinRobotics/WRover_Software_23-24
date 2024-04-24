@@ -22,6 +22,9 @@ ROBOT_WIDTH = 1.06 #In meters
 
 #coord[x,y]
 class Obstacle:
+    '''
+    Sends a row of random points to act as walls/obstacles for lidar testing
+    '''
     def __init__(self, coord1, coord2):
         self.coord1 = coord1
         self.coord2 = coord2
@@ -69,10 +72,7 @@ obstacle = Obstacle([1,5],[-1,5])
 
 def get_laser_ranges(t=0):
     inputData = []
-
-    # angle1 = int(math.asin(height/(cartesianToRadian(xDist1,height))))
-
-    # angle2 = int(math.asin(height/(cartesianToRadian(xDist2,height))))
+    
     angle1 = obstacle.getAngle1()
     angle2 = obstacle.getAngle2()
 
@@ -100,6 +100,35 @@ def get_laser_ranges(t=0):
                 
         else:
             inputData.append(10)
+        # if(t >= angle1 and t <= angle1 + ((angle2 - angle1) / 2)):
+        #     if(t != 0):
+        #         #Using point-slope formula and knowing the equation for the line between the two points and the line made by the angle,
+        #         #you can find the intersection of those lines and plot that point in rviz
+
+        #         #y=(y_1+x_1*m_slope)/(1-(m_slope/m_angle))
+        #         #x=y/m_angle
+        #         m_angle = math.tan(math.radians(t))
+
+        #         y = (obstacle.coord1[1] - obstacle.coord1[0]*m_slope * 2)/(1-(m_slope * 2/m_angle))
+        #         x = y/m_angle
+
+        #         inputData.append(cartesianToRadian(x,y))
+                
+        # elif (t >= angle1 and t <= angle2):
+        #     if(t != 0):
+        #         #Using point-slope formula and knowing the equation for the line between the two points and the line made by the angle,
+        #         #you can find the intersection of those lines and plot that point in rviz
+
+        #         #y=(y_1+x_1*m_slope)/(1-(m_slope/m_angle))
+        #         #x=y/m_angle
+        #         m_angle = math.tan(math.radians(t))
+
+        #         y = (obstacle.coord1[1] - obstacle.coord1[0]*m_slope)/(1-(m_slope/m_angle))
+        #         x = y/m_angle
+
+        #         inputData.append(cartesianToRadian(x,y))
+        # else:
+        #     inputData.append(10)
 
     for i in range(180):
         inputData.append(.3)
@@ -169,9 +198,7 @@ def run_mock_data() -> None:
         mock_gps_pub.publish(mock_gps)
         zero_pub.publish(zero_msg)
         sleeper.sleep()
-# def updateLaserAdjuster(data):
-#     global laser_adjust
-#     laser_adjust = -data.data/30
+
 
 def updateHeading(data) -> None:
     global mock_heading

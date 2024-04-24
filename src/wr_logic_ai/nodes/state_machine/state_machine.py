@@ -139,6 +139,9 @@ class NavStateMachine(StateMachine):
         super(NavStateMachine, self).__init__()
 
     def on_enter_stInit(self) -> None:
+        '''
+        Confirmation on entering init state and creates a thread
+        '''
         print("\non enter stInit")
         rospy.loginfo("\non enter stInit")
         # Get the coordinates that we will have to go to
@@ -147,6 +150,11 @@ class NavStateMachine(StateMachine):
         self.evUnconditional()
 
     def on_exit_stInit(self) -> None:
+        '''
+        Exits init state while also shutting down init timer
+        '''
+        # Stop calibration code
+        self._init_tmr.shutdown()
         # Check if there is a new coordinate. Will go to event complete if ended.
         if self._mgr.next_coordinate():
             self.evComplete()
@@ -154,12 +162,20 @@ class NavStateMachine(StateMachine):
     def _longRangeActionComplete(
         self, state: GoalStatus, _: LongRangeActionResult
     ) -> None:
+        '''
+        When finished with long range state, provides signal of 
+        if we succeded or failed
+        '''
         if state == GoalStatus.SUCCEEDED:
             self.evSuccess()
         else:
             self.evError()
 
     def on_enter_stLongRange(self) -> None:
+        '''
+        Confirmation on enter long range state, sets up a timer and goal
+        we are aiming to for long range
+        '''
         print("\non enter stLongRange")
         rospy.loginfo("\non enter stLongRange")
         # enter autonomous mode
@@ -177,18 +193,28 @@ class NavStateMachine(StateMachine):
                                self._longRangeActionComplete(status, result))
 
     def on_exit_stLongRange(self) -> None:
+        '''
+        On exiting long range state we stop the timer
+        '''
         print("Exting Long Range")
         rospy.loginfo("Exting Long Range")
 
     def _longRangeRecoveryActionComplete(
         self, state: GoalStatus, _: LongRangeActionResult
     ) -> None:
+        '''
+        After completing long range RECOVERY we notify if we succeeded
+        or failed 
+        '''
         if state == GoalStatus.SUCCEEDED:
             self.evSuccess()
         else:
             self.evError()
 
     def on_enter_stLongRangeRecovery(self) -> None:
+        '''
+        On entering long range RECOVERY, resend coordinates and goal
+        '''
         print("\non enter stLongRangeRecovery")
         rospy.loginfo("\non enter stLongRangeRecovery")
 
@@ -291,12 +317,20 @@ class NavStateMachine(StateMachine):
     def _shortRangeActionComplete(
         self, state: GoalStatus, _: ShortRangeActionResult
     ) -> None:
+        '''
+        After finishing long range state, check
+        if we succeeded or failed
+        '''
         if state == GoalStatus.SUCCEEDED:
             self.evSuccess()
         else:
             self.evError()
 
     def on_enter_stShortRange(self) -> None:
+        '''
+        On entering short range state and set up configurations 
+        for the goal
+        '''
         print("\non enter stShortRange")
         rospy.loginfo("\non enter stShortRange")
 
