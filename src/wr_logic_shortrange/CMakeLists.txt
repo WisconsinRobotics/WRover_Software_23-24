@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(wr_hsi_sensing)
+project(wr_logic_shortrange)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -7,20 +7,16 @@ project(wr_hsi_sensing)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-find_package(catkin REQUIRED COMPONENTS 
-    message_generation
-    std_msgs
-    roscpp
-    rospy
-    ublox_gps
+find_package(catkin REQUIRED COMPONENTS
+  rospy
+  std_msgs
+  message_generation
+  actionlib_msgs
 )
 
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
-include_directories(
-    ${catkin_INCLUDE_DIRS}
-)
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
@@ -54,9 +50,7 @@ catkin_python_setup()
 ## Generate messages in the 'msg' folder
 add_message_files(
   FILES
-#   Message1.msg
-#   Message2.msg
-    CoordinateMsg.msg
+  VisionTarget.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -67,16 +61,16 @@ add_message_files(
 # )
 
 ## Generate actions in the 'action' folder
-# add_action_files(
-#   FILES
-#   Action1.action
-#   Action2.action
-# )
+add_action_files(
+  FILES
+  ShortRange.action
+)
 
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
   std_msgs  # Or other packages containing msgs
+  actionlib_msgs
 )
 
 ################################################
@@ -110,10 +104,9 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES wr_hsi_sensing
+#  LIBRARIES wr_logic_shortrange
 #  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
-    DEPENDS message_runtime
 )
 
 ###########
@@ -124,24 +117,13 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
 # include
-sh2
-${catkin_INCLUDE_DIRS}
+# ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
-# add_library(sh2
-#   # src/${PROJECT_NAME}/wr_hsi_sensing.cpp
+# add_library(${PROJECT_NAME}
+#   src/${PROJECT_NAME}/wr_logic_shortrange.cpp
 # )
-
-add_library(${PROJECT_NAME}
-  sh2/euler.c
-  sh2/sh2_SensorValue.c
-  sh2/sh2_util.c
-  sh2/sh2.c
-  sh2/shtp.c
-  src/BNO085_hal.cpp
-)
-# target_link_libraries(${PROJECT_NAME} sh2)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
@@ -151,8 +133,7 @@ add_library(${PROJECT_NAME}
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(BNO085_IMU src/BNO085_IMU.cpp)
-target_link_libraries(BNO085_IMU ${catkin_LIBRARIES} ${PROJECT_NAME})
+# add_executable(${PROJECT_NAME}_node src/wr_logic_shortrange_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -216,7 +197,7 @@ target_link_libraries(BNO085_IMU ${catkin_LIBRARIES} ${PROJECT_NAME})
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_wr_hsi_sensing.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_wr_logic_shortrange.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

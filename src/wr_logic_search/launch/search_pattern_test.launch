@@ -1,0 +1,3 @@
+<launch>
+    <node name="search_pattern" pkg="wr_logic_search" type="search_action_server.py">
+</launch>

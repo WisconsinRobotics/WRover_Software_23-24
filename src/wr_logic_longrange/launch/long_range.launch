@@ -1,0 +1,18 @@
+<launch>
+  <node pkg="wr_logic_longrange" name="long_range_action_server" type="long_range_action_server.py" output="screen">
+    <param name="wrover_hw" value="$(env WROVER_HW)" />
+  </node>
+
+  <node pkg="rviz" name="$(anon rviz)" type="rviz" output="screen" machine="base_station"
+    args="-d $(find wr_logic_longrange)/config/obstacle_avoidance.rviz"
+    if="$(eval env('WROVER_HW') == 'REAL' and env('WROVER_LOCAL') != 'true')" />
+
+  <node pkg="rviz" name="$(anon rviz)" type="rviz" output="screen"
+    args="-d $(find wr_logic_longrange)/config/obstacle_avoidance_mock.rviz"
+    if="$(eval env('WROVER_HW') == 'MOCK' and env('WROVER_LOCAL') == 'true')" />
+
+  <node pkg="rviz" name="$(anon rviz)" type="rviz" output="screen"
+    args="-d $(find wr_logic_longrange)/config/obstacle_avoidance_mock.rviz"
+    if="$(eval env('WROVER_HW') == 'REAL' and env('WROVER_LOCAL') == 'true')" />
+
+</launch>
