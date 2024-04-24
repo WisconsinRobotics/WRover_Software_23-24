@@ -100,6 +100,35 @@ def get_laser_ranges(t=0):
                 
         else:
             inputData.append(10)
+        # if(t >= angle1 and t <= angle1 + ((angle2 - angle1) / 2)):
+        #     if(t != 0):
+        #         #Using point-slope formula and knowing the equation for the line between the two points and the line made by the angle,
+        #         #you can find the intersection of those lines and plot that point in rviz
+
+        #         #y=(y_1+x_1*m_slope)/(1-(m_slope/m_angle))
+        #         #x=y/m_angle
+        #         m_angle = math.tan(math.radians(t))
+
+        #         y = (obstacle.coord1[1] - obstacle.coord1[0]*m_slope * 2)/(1-(m_slope * 2/m_angle))
+        #         x = y/m_angle
+
+        #         inputData.append(cartesianToRadian(x,y))
+                
+        # elif (t >= angle1 and t <= angle2):
+        #     if(t != 0):
+        #         #Using point-slope formula and knowing the equation for the line between the two points and the line made by the angle,
+        #         #you can find the intersection of those lines and plot that point in rviz
+
+        #         #y=(y_1+x_1*m_slope)/(1-(m_slope/m_angle))
+        #         #x=y/m_angle
+        #         m_angle = math.tan(math.radians(t))
+
+        #         y = (obstacle.coord1[1] - obstacle.coord1[0]*m_slope)/(1-(m_slope/m_angle))
+        #         x = y/m_angle
+
+        #         inputData.append(cartesianToRadian(x,y))
+        # else:
+        #     inputData.append(10)
 
     for i in range(180):
         inputData.append(.3)
