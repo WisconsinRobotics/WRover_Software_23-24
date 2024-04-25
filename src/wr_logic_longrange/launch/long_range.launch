@@ -1,6 +1,10 @@
 <launch>
+
+  <arg name="long_range_output" default="/long_range_nav"/>
+
   <node pkg="wr_logic_longrange" name="long_range_action_server" type="long_range_action_server.py" output="screen">
     <param name="wrover_hw" value="$(env WROVER_HW)" />
+    <param name="motor_speeds" value="$(arg long_range_output)"/>
   </node>
 
   <node pkg="rviz" name="$(anon rviz)" type="rviz" output="screen" machine="base_station"
