@@ -16,6 +16,32 @@ from visualization_msgs.msg import Marker
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Float64
 
+global drive_pub
+global smoothing_constant
+global speed_factor
+global heading_pub
+global frameCount
+global heading_msg
+global actual_heading_msg
+global actual_heading_pub
+global delta_heading_pub
+global delta_heading_msg
+global marker
+global marker_pub
+global marker_circle
+global marker_circle_pub
+global marker_flag
+global marker_flag_pub
+global laser_adjuster_pub
+global wRover
+global wRover_pub
+global current_lat
+global current_long
+global target_angle
+global target_sector
+global NAV_THRESH_DISTANCE
+# global delta_heading
+
 # Navigation parameters
 # distance before obstacle avoidance logics is triggered (in meters)
 LIDAR_THRESH_DISTANCE = 5
@@ -30,6 +56,7 @@ current_long = 0
 # target location
 target_angle = 0
 target_sector = 0
+frameCount = 0
 
 # used for obtaining navigation angle and valleys
 smoothing_constant = 3
@@ -37,43 +64,8 @@ smoothing_constant = 3
 # global speed factor updated through navigation
 speed_factor = 0
 
-# Start the tasks managed to drive autonomously
-def initialize() -> None:
-    """Initialize publisher and subscribers for nodes
-
-    Publishers:
-
-        drive_pub: Sends motor speeds to robot
-        raw_heading_pug: Publishes data of our current heading relative to the right of the robot. (90 Degrees is where the robot is pointing)
-        heading_pub: Data from heading is transformed to be worked with rviz tester.
-
-    Subscriber:
-
-        gps_coord_data: gets lat and long coordinates from GPS
-        heading_data: Gets data of our heading with East beign 0.
-        scan: Get values from lidar scan
-
-    """
-    global drive_pub
-    global smoothing_constant
-    global speed_factor
-    global heading_pub
-    global frameCount
-    global heading_msg
-    global actual_heading_msg
-    global actual_heading_pub
-    global delta_heading_pub
-    global delta_heading_msg
-    global marker
-    global marker_pub
-    global marker_circle
-    global marker_circle_pub
-    global marker_flag
-    global marker_flag_pub
-    global laser_adjuster_pub
-    global wRover
-    global wRover_pub
-    global delta_heading
+# count to handle whent to update poses for simulation
+frameCount = 0
 
 # Publish data out to the marker 
 wRover_pub = rospy.Publisher('wRover_marker', Marker, queue_size=10)
