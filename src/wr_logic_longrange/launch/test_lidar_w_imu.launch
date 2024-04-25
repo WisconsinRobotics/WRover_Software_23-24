@@ -14,7 +14,7 @@
 
   <include file="$(find wr_control_drive_ds)/launch/std.launch"/>
 
-  <!-- <node name="imu" pkg="wrevolution" type="Pigeon2" /> -->
+  <node name="imu" pkg="wrevolution" type="Pigeon2" if="$(eval env('WROVER_HW') == 'REAL'" />
 
   <arg name="mux_name" default="nav_mux" />
   <arg name="long_range_output" default="/long_range_nav" />
