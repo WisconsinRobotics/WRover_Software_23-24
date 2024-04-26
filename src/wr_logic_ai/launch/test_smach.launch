@@ -20,14 +20,17 @@
     if="$(eval env('WROVER_HW') == 'REAL')" /> -->
 
   <!-- Launch files when simulating data -->
-  <node name="fake_data" pkg="wr_logic_longrange" type="inputFakeData.py" output="screen"
-    unless="$(eval env('WROVER_HW') == 'REAL')" />
+  <!-- <node name="fake_data" pkg="wr_logic_longrange" type="inputFakeData.py" output="screen"
+    unless="$(eval env('WROVER_HW') == 'REAL')" /> -->
 
   <node pkg="wr_logic_ai" name="wait_for_user_input" type="wait_for_user_input.py" output="screen" />
   <!-- <node pkg="wr_logic_ai" name="nav_state_machine_driver" type="state_machine.py" output="screen" /> -->
   <node pkg="wr_logic_ai" name="nav_state_machine" type="state_machine.py" output="screen" />
 
-  <include file="$(find wr_logic_longrange)/launch/long_range.launch" />
+  <!-- <include file="$(find wr_logic_longrange)/launch/long_range.launch" /> -->
+  <node name="long_range" pkg="wr_logic_longrange" type="long_range_action_server.py" />
+  <node name="search_pattern" pkg="wr_logic_search" type="search_action_server.py" />
+  <node name="short_range" pkg="wr_logic_shortrange" type="shortrange_action_server.py" />
 
   <!-- <include file="$(find wr_led_matrix)/launch/led_matrix.launch" /> -->
 
