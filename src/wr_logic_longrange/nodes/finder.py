@@ -19,7 +19,7 @@ import os
 import pdb
 import pickle
 
-ROVER_WIDTH = 1.06
+ROVER_WIDTH = 1.5
 
 ## Publisher for LiDAR data for debugging on rviz
 scan_rviz_pub = rospy.Publisher("/scan_rviz", LaserScan, queue_size=10)
@@ -244,14 +244,11 @@ def get_obstacle_list(
             for i in range(len(one_obstacle)):
                 # Calculate size of anti-window and add to obstacle bounds
                 # pass in distance to target to caculate angle that allows robot to pass through
-                angleToIncrease = calculate_anti_window(
-                    hist[one_obstacle[i]])/sector_angle
+                angleToIncrease = calculate_anti_window(hist[one_obstacle[i]]) / sector_angle
 
                 # Update left and right bound
                 left_bound = max(min(left_bound, one_obstacle[i] - angleToIncrease), 0)
-                right_bound = min(
-                    max(right_bound, one_obstacle[i] + angleToIncrease), len(hist)
-                )
+                right_bound = min(max(right_bound, one_obstacle[i] + angleToIncrease), len(hist))
 
             # Check to see if the obstacle we just found can actually be merged with a previous obstacle
             while len(obstacle_list) > 0 and obstacle_list[-1][1] >= left_bound:
