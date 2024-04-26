@@ -50,8 +50,9 @@ class SearchActionServer(object):
         @param goal (SearchGoal): Goal for the navigation segment, which contains 
         the GPS coordinates of the target.
         """
-        distance = 4
+        distance = 4 # in meters, the shortest unit of movement
         num_vertices = 22
+        object_detected = False
 
         # start_lat, start_long = coord_sub.get_coord_result()
 
@@ -59,32 +60,41 @@ class SearchActionServer(object):
         hard_coded_lat = 0
         hard_coded_long = 0
 
+        # # get list of coordinates
         # coords = coord_calculations.get_coords(
         #     start_lat, start_long, distance, num_vertices)
         coords = coord_calculations.get_coords(
             hard_coded_lat, hard_coded_long, distance, num_vertices)
-        SEARCH_TIMEOUT_TIME = travel_timer.calc_state_time() # default = 20 meters
+        
+        # in seconds, get max time for a single state
+        SEARCH_TIMEOUT_TIME = travel_timer.calc_state_time() 
 
         i = 0
+        # start timer for the state and the first coordinate
         state_time = rospy.get_rostime()
         point_time = rospy.get_rostime()
         while (
+            # if rover takes too long for the state or a point, move on
             rospy.get_rostime() - state_time < SEARCH_TIMEOUT_TIME
-            and rospy.get_rostime() - point_time < travel_timer.calc_point_time(
-                coords[i]['distance'])
             and not rospy.is_shutdown()
             and i < num_vertices
+            # if False -> continue, if True -> successful and finished
+            and not object_detected
         ):
-            if obstacle_avoidance.update_target(
-                coords[i]['lat'], coords[i]['long']) == False:
-                # return self._as.set_succeeded()
-                return self._as.set_aborted()
-            
-            # if camera_sub.get_detection_result():
-            #     break
+            while (rospy.get_rostime() - point_time < travel_timer.calc_point_time(coords[i]['distance'])):
+                # go to the current target coordinate
+                if obstacle_avoidance.update_target(
+                    coords[i]['lat'], coords[i]['long']) == False:
+                    # return self._as.set_succeeded()
+                    # something went wrong, should always be True
+                    return self._as.set_aborted() 
+                
+                # # scan surrounding area for target object
+                # object_detected = camera_sub.get_detection_result()
+                break # camera was used before max time was reached for current coordinate
 
-            i += 1
-            point_time = rospy.get_rostime()
+            i += 1 # next coordinate
+            point_time = rospy.get_rostime() # start timer for next coordinate
 
 if __name__ == "__main__":
     try:
