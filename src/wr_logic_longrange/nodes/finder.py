@@ -13,6 +13,7 @@ import scipy.ndimage as gaussian_smooth
 import rospy
 from sensor_msgs.msg import LaserScan
 from geometry_msgs.msg import PoseArray, Pose
+from sensor_msgs.msg import LaserScan
 from copy import deepcopy
 import os
 import pdb
@@ -82,9 +83,14 @@ def is_wide_valley(sector_i: int, sector_f: int, max_valley: int) -> bool:
 # Transforms the raw lidar data from compass coordinates (0 at north, clockwise) to math coordinates(0 at east, counterclockwise)
 
 
-def offset_lidar_data(data, sector_angle, is_rviz=False):
-    # the 0 angle should be the right side but the lidar going counterclockwise
-    #It is actually the front 0 and it does go counterclockwise
+def offset_lidar_data(data: LaserScan, sector_angle: float, is_rviz=False):
+    """
+    Returns
+    Lidar data comes as 0 being forward and going counterclockwise
+
+    @param sector_angle (float): transforms angle (0-360) to be based on angle increments from the lidar
+    @return offest_data: lidar data transformed so that the 0 angle is the right side of the lidar going counterclockwise
+    """
     offset_data = [0] * len(data)
     data = list(data)    
     offset_data = list((data[math.floor(270/sector_angle):]))
@@ -119,17 +125,7 @@ def get_valley(
 
     rviz_data = deepcopy(data)
     #rviz_data.ranges = gaussian_smooth.gaussian_filter1d(rviz_data.ranges, smoothing)
-    if rospy.get_param("~wrover_hw") == "REAL":
-        is_rviz = False
-    else:
-        is_rviz = True
-    rviz_data.ranges = offset_lidar_data(
-        rviz_data.ranges, sector_angle, is_rviz)
 
-    #scan_rviz_pub.publish(rviz_data)
-
-    # rospy.loginfo(f"{data.ranges}")
-    # TODO: remove dependency on this variable by making the mock script more like real hardware input
     if rospy.get_param("~wrover_hw") == "REAL":
         #hist = offset_lidar_data(gaussian_smooth.gaussian_filter1d(data.ranges, smoothing), sector_angle)
         hist = offset_lidar_data(data.ranges, sector_angle, is_rviz = False)
