@@ -1,0 +1,48 @@
+# ros build output
+build/
+devel/
+
+# python env
+/venv/
+
+# ide
+/.vscode/*
+# except recommended extensions
+!/.vscode/extensions.json
+!/.vscode/settings.json
+
+# fetched external libs
+# NOTE: these may be removed in the future, tbd
+src/InertialSenseSDK
+src/sick_scan
+src/wreadinput
+src/wready
+src/wroboclaw
+src/wrosout
+src/wresponsecontrol
+
+# external lib destination dirs
+# TODO (@bennowotny): We aren't really using these ignores
+src/drive/lib
+src/manager/lib
+src/science/lib
+
+*.pyc
+src/arm/lib
+
+# potential clang excludes
+compile_commands.json
+.cache
+
+*.png
+*.data
+*.swp
+*.old
+
+# documentation
+docs/doxygen
+docs/generated-images
+
+# non-generated documentation images
+!src/wr_logic_teleop_ds/control_scheme_power_levels.png
+!src/wr_logic_teleop_ds/control_scheme_tank_drive.png
