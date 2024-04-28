@@ -30,6 +30,9 @@ LIDAR_THRESH_DISTANCE = 5
 # distance before rover believes it has reached the target (in meters)
 NAV_THRESH_DISTANCE = 0.5
 
+# Set the speed factor
+speed_factor = 0.3
+
 # initialize target angle to move forward
 # current location
 current_lat = 0
@@ -177,60 +180,48 @@ def update_navigation(data: LaserScan) -> None:
     global frameCount
 
     # rospy.loginfo(f"target angle: {target_angle}, current heading: {cur_heading}")
-    # calculates average distance 
-    data_avg = sum(cur_range for cur_range in data.ranges) / len(data.ranges)
 
-    #print("Data Avg: " + str(data_avg))
     # TODO: data threshold might depend of lidar model, double check
-    # Change if units/lidar changes
-    # data_avg is above 0.5 almost always, but result stays the same (?)
-    # TODO (@bennowotny ): This depended on data_avg, why?
-    if True:
-        ## Gets best possible angle, considering obstacles
-        delta_heading = angle_diff(target_angle, cur_heading)
-        
-        result = get_navigation_angle(
-            ((((90 + delta_heading) % 360) + 360) % 360)
-            / math.degrees(
-                data.angle_increment
-            ),  # sector angle, #Changes delta_heading to be based on the right of the robot as 0 (Counter-clockwise), and go in increments of sector angle.
-            LIDAR_THRESH_DISTANCE,
-            data,
-            smoothing_constant,
-        )
-        
-        # rospy.loginfo(f"raw heading: {result}")
+    # Change if units/lidar changes\
+    # TODO (@bennowotny ): This depended on data_avg, why?\
+     ## Gets best possible angle, considering obstacles
+    delta_heading = angle_diff(target_angle, cur_heading)
+    
+    result = get_navigation_angle(
+        ((90 + delta_heading) % 360)
+        / math.degrees(
+            data.angle_increment
+        ),  # sector angle, #Changes delta_heading to be based on the right of the robot as 0 (Counter-clockwise), and go in increments of sector angle.
+        LIDAR_THRESH_DISTANCE,
+        data,
+        smoothing_constant,
+    )
+    
+    # rospy.loginfo(f"raw heading: {result}")
 
-        # Set the bounds of the speed multiplier by clamping it
-        speed_factor = 0.3
-        if(speed_factor < 0):
-            speed_factor = 0
-        elif(speed_factor > 1):
-            speed_factor = 1
+    # Get the DriveTrainCmd relating to the heading of the robot and the resulting best navigation angle
+    # Reason we do 90 - result is to get a value where 0 is up, + is clockwise, and - is counterclockwise
+    msg = angle_calc.logistic(angle_diff(90, result), 0)
 
-        # Get the DriveTrainCmd relating to the heading of the robot and the resulting best navigation angle
-        # Reason we do 90 - result is to get a value where 0 is up, + is clockwise, and - is counterclockwise
-        msg = angle_calc.logistic(angle_diff(90, result), 0)
+    # rospy.loginfo(f"left drive value: {msg.left_value}, right drive value: {msg.right_value}")
+    # Scale the resultant DriveTrainCmd by the speed multiplier
+    msg.left_value *= speed_factor 
+    msg.right_value *= speed_factor
+    
+    if msg.left_value > msg.right_value:
+        valueToTurn = "Turn right"
+    elif msg.left_value < msg.right_value:
+        valueToTurn = "Turn left"
+    else:
+        valueToTurn = "Stay straight"
+    
+    # Publish the DriveTrainCmd to the topic
+    rospy.loginfo("Drive to: " + str(valueToTurn))
+    #rospy.loginfo("Target Value: " + str(target_angle))
+    drive_pub.publish(msg)
 
-        # rospy.loginfo(f"left drive value: {msg.left_value}, right drive value: {msg.right_value}")
-        # Scale the resultant DriveTrainCmd by the speed multiplier
-        msg.left_value *= speed_factor 
-        msg.right_value *= speed_factor
-        
-        if msg.left_value > msg.right_value:
-            valueToTurn = "Turn right"
-        elif msg.left_value < msg.right_value:
-            valueToTurn = "Turn left"
-        else:
-            valueToTurn = "Stay straight"
-        
-        # Publish the DriveTrainCmd to the topic
-        rospy.loginfo("Drive to: " + str(valueToTurn))
-        #rospy.loginfo("Target Value: " + str(target_angle))
-        drive_pub.publish(msg)
-
-        # TESTING
-        testing_rviz.update_navigation_rviz_sim(delta_heading, result, cur_heading)
+    # TESTING
+    testing_rviz.update_navigation_rviz_sim(delta_heading, result, cur_heading)
         
 
 
