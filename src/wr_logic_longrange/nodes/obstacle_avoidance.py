@@ -98,7 +98,7 @@ def initialize() -> None:
     rospy.Subscriber("/gps_coord_data", CoordinateMsg, update_gps_coord)
 
     # Subscribe to heading data
-    rospy.Subscriber("/heading_data", Float64, update_heading)
+    rospy.Subscriber("/heading", Float64, update_heading)
 
     # Subscribe to lidar data
     rospy.Subscriber('/scan', LaserScan, update_navigation)
