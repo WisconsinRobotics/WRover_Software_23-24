@@ -47,7 +47,7 @@ target_sector = 0
 smoothing_constant = 3
 
 # global speed factor updated through navigation
-speed_factor = 0
+speed_factor = 0.3
 
 # Start the tasks managed to drive autonomously
 def initialize() -> None:
@@ -201,7 +201,7 @@ def update_navigation(data: LaserScan) -> None:
 
     # Get the DriveTrainCmd relating to the heading of the robot and the resulting best navigation angle
     # Reason we do 90 - result is to get a value where 0 is up, + is clockwise, and - is counterclockwise
-    msg = angle_calc.logistic(angle_diff(90, result), 0)
+    msg = angle_calc.piecewise_linear(angle_diff(90, result), 0)
 
     # rospy.loginfo(f"left drive value: {msg.left_value}, right drive value: {msg.right_value}")
     # Scale the resultant DriveTrainCmd by the speed multiplier
