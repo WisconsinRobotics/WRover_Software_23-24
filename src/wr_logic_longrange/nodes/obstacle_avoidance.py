@@ -70,6 +70,7 @@ def initialize() -> None:
     global smoothing_constant
     global speed_factor
     global heading_pub
+    global frameCount
     global heading_msg
     global actual_heading_msg
     global actual_heading_pub
@@ -97,7 +98,7 @@ def initialize() -> None:
     rospy.Subscriber("/gps_coord_data", CoordinateMsg, update_gps_coord)
 
     # Subscribe to heading data
-    rospy.Subscriber("/heading", Float64, update_heading)
+    rospy.Subscriber("/heading_data", Float64, update_heading)
 
     # Subscribe to lidar data
     rospy.Subscriber('/scan', LaserScan, update_navigation)
@@ -121,7 +122,6 @@ def update_heading(msg: Float64) -> None:
     """
     global cur_heading
     cur_heading = (90 - msg.data) % 360  # Shifting to East
-    rospy.logerr(f"current heading: {cur_heading}")
     # rviz_sim_cur_heading_pub.publish(cur_heading)
 
 
@@ -176,6 +176,8 @@ def update_navigation(data: LaserScan) -> None:
     @param msg: Get the DriveTrainCmd(motor values) relating to the heading of the robot and the resulting best navigation angle
     @param data: Lidar data received
     """
+
+    global frameCount
 
     # rospy.loginfo(f"target angle: {target_angle}, current heading: {cur_heading}")
 

@@ -1,8 +1,0 @@
-#goal definition
-float64 target_lat         # Info of current and target latitudes and longitudes
-float64 target_long
-uint8 dist
----
-#result definition
----
-#feedback definition
