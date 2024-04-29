@@ -14,5 +14,5 @@ joystickBase.appendChild(joystickHandle);
 
 function updateJoystick(joystickX, joystickY) {
     // joystickHandle.style.transform = "none";
-    joystickHandle.style.transform = "translate(" + joystickX*5 + "px, " + joystickY*5 + "px)";
+    joystickHandle.style.transform = "translate(" + joystickX*5 + "px, " + joystickY*-5 + "px)";
 }
