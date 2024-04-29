@@ -47,7 +47,7 @@ target_sector = 0
 smoothing_constant = 3
 
 # global speed factor updated through navigation
-speed_factor = 0
+speed_factor = 0.3
 
 # Start the tasks managed to drive autonomously
 def initialize() -> None:
