@@ -236,40 +236,20 @@ setInterval(function() {
 }, 1000);
 
 
-var joystickXListener = new ROSLIB.Topic({
+var joystickListener = new ROSLIB.Topic({
   ros: ros,
-  name: '/joystick_x',
-  messageType: 'std_msgs/Float32'
+  name: '/joystick',
+  messageType: 'std_msgs/Float32MultiArray'
 });
 
-joystickXListener.subscribe(function(message) {
-  // console.log('Received joystick x: ' + message.data);
-  diagnosticInput.value += 'Received joystick x: ' + message.data + '\n';
-  // joystickX = message.data;
-  updateJoystick(message.data, 0);
+joystickListener.subscribe(function(message) {
+  // console.log('Received joystick: ' + message.data);
+  diagnosticInput.value += 'Received joystick: ' + message.data + '\n';
+  updateJoystick(message.data[0], message.data[1]);
 });
 
 setInterval(function() {
-  joystickXListener.publish(new ROSLIB.Message({
-    data: Math.round(Math.random()*20-10, 2)
+  joystickListener.publish(new ROSLIB.Message({
+    data: [Math.round(Math.random()*20-10, 2), Math.round(Math.random()*20-10, 2)]
   }));
-}, 500);
-
-var joystickYListener = new ROSLIB.Topic({
-  ros: ros,
-  name: '/joystick_y',
-  messageType: 'std_msgs/Float32'
-});
-
-joystickYListener.subscribe(function(message) {
-  // console.log('Received joystick y: ' + message.data);
-  diagnosticInput.value += 'Received joystick y: ' + message.data + '\n';
-  // joystickY = message.data;
-  updateJoystick(0, message.data);
-});
-
-setInterval(function() {
-  joystickYListener.publish(new ROSLIB.Message({
-    data: Math.round(Math.random()*20-10, 2)
-  }));
-}, 500);
+}, 1000);
