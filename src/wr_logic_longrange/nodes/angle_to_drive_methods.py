@@ -9,7 +9,7 @@
 
 from wr_drive_msgs.msg import DriveTrainCmd
 import math
-import rospy
+
 
 def get_x(heading: float, target_angle: float) -> float:
     """
@@ -40,8 +40,6 @@ def piecewise_linear(heading: float, target_angle: float) -> DriveTrainCmd:
     # TODO: Flip iputs and flip x
 
     x = get_x(heading, target_angle)
-    
-    #rospy.loginfo(x)
 
     # Takes fastest angle to turn robot
     if x < 0:

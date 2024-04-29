@@ -8,8 +8,7 @@
 
    -->
  
-  <include file="$find wr_logic_longrange)/launch/delete_AFTER_STATE_MACHINE_IMPLEMENTED.py"/>
-
+  
   <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" />
   <include file="$(find wr_entry_point)/launch/comp/comp_falcon.launch"  unless="$(eval env('WROVER_LOCAL') == 'true')"/>
 
