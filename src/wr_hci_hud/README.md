@@ -3,7 +3,16 @@
 @defgroup wr_hci_hud wr_hci_hud
 @brief A package (currently empty) to act as a HUD for drivers
 
-This package was intended to be a display for the current state of the rover and act as an interface.  This node has never had any code.
+# To start the GUI
+
+Run test.py in wr_hci_hud/src  
+run roscore
+run roslaunch rosbridge_server rosbridge_websocket.launch
+
+# Video streaming
+for webRTC Streaming, might require more steps. WebRTC isn't implemented fully yet.
+Plan to use https://wiki.ros.org/web_video_server for video streaming for now
+
 
 ## History
 
@@ -44,3 +53,4 @@ Ideas for this node have gone through several iterations.  None of the following
     * Little to no visual support outside of `rqt`
 
 Given past experience at competition, even a small GUI with no input options (a literal HUD) would be massively beneficial compared to reading individaul diagnostics one at a time.  This could then be expanded to provide more detailed insights, inputs to the WRover, and specializations for the different competition modes.
+
