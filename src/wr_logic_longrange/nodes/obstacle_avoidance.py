@@ -91,7 +91,7 @@ def initialize() -> None:
 
     # Publisher
     drive_pub = rospy.Publisher(
-        rospy.get_param("~motor_speeds"), DriveTrainCmd, queue_size=1
+        rospy.get_param("~motor_speeds"), DriveTrainCmd, queue_size=10
     )
 
     # Subscribe to gps coordinate data
