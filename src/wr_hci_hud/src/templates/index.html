@@ -1,0 +1,145 @@
+<!-- FILEPATH: /c:/Users/gimin/PythonProjects/flask1/templates/index.html -->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="../static/css/index.css">
+        <title>WRover GUI</title>
+        <script src="../static/js/terminal.js" defer></script>
+        <script src="./../static/js/voltage.js" defer></script>
+        <script src="./../static/js/info.js" defer></script>
+        <script src="./../static/js/joystick.js" defer></script>
+        <!-- <script src="./../static/js/mapMarker.js" defer></script> -->
+        <script src="./../static/js/swapPage.js" defer></script>
+        <script src="../../node_modules/hls.js/dist/hls.min.js"></script>
+        <!-- <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script> -->
+        <script src="./../static/js/videoStream.js" defer> </script>
+        <!-- <script type="module" src="./../static/js/videoStream.js" defer></script> -->
+        <!-- <script src="./../static/js/mouseEffect.js" defer></script> -->
+        <script src="../../node_modules/roslib/build/roslib.min.js"></script>
+        <script src="../../node_modules/eventemitter2/lib/eventemitter2.js"></script>
+        <script src="./../static/js/ros.js" defer></script>
+        <script type="module" src="./../static/js/webRTCreceiver.js" defer></script>
+
+    </head>
+    <body>
+        <div class="square launch">
+            <div class="square-title">
+                <h1 class="square-heading current-heading" id="launchHeading">Launch</h1>
+                <h1 class="square-heading" id="dataHeading">Data</h1>
+            </div>
+            <div id="launchPage">
+                <div class="dropdown">
+                    <button class="launch-button">Competition mission</button>
+                </div>
+                <div class="dropdown">
+                    <button class="launch-button">Science mission</button>
+                </div>
+                <div class="dropdown">
+                    <button class="launch-button">Delivery mission</button>
+                </div>
+                <div class="dropdown">
+                    <button class="launch-button">Equipment servicing mission</button>
+                </div>
+            </div>
+
+            <div id="dataPage">
+                <div id="smallInfoBox">
+                    <div class="smallInfoBoxWrapper">
+                        <div class="infoLabel">Ampere</div>
+                        <div class="progress-div" id="ampere-div">2.5 V</div>
+                    </div>
+                    <div class="smallInfoBoxWrapper">
+                        <div class="infoLabel">Battery</div>
+                        <div class="progress-div" id="battery-div">100%</div>
+                    </div>
+                    <!-- <div class="infoLabel"></div> -->
+                    <div class="smallInfoBoxWrapper">
+                        <div class="infoLabel">Coordinate</div>
+                        <div id="xcoord" class="smallerInfoBox">X: 122.43</div>
+                        <div id="ycoord" class="smallerInfoBox">Y: -12.43</div>
+                    </div>
+                    <!-- <div id="gpsBox"> -->
+                    <!-- </div> -->
+                    <div class="smallInfoBoxWrapper">
+                        <div class="infoLabel">Distance</div>
+                        <div id="distance" class="smallerInfoBox">0 m</div>
+                    </div>
+                    <div class="smallInfoBoxWrapper">
+                        <div class="infoLabel">Velocity</div>
+                        <div id="xvelocity" class="smallerInfoBox">X: 0 m/s</div>
+                        <div id="yvelocity" class="smallerInfoBox">Y: 0 m/s </div>
+                    </div>
+
+                    <div class="smallInfoBoxWrapper">
+                        <div class="infoLabel">Acceleration</div>
+                        <div id="accel" class="smallerInfoBox">0 m/s^2</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="square control">
+            <div class="square-title">
+                <h1 class="square-heading">Control</h1>
+            </div>
+
+
+            <div id="controlContent">
+                <p style="margin: 0;"></p>
+                <div id="joystick"></div>
+                
+                <div id="mapWrapper"><img id="mapimg" src="../../assets/map.png" alt="Online Image" width="300" height="300"></div>
+                
+            </div>
+
+        </div>
+
+        <div class="square diagnostic">
+            <div class="square-title">
+                <h1 class="square-heading">Diagnostic</h1>
+            </div>
+            <div id="info-box">
+                <textarea class="diagnostic-input" placeholder="Diagnostics from the server will be displayed here" readonly ></textarea>
+                
+            </div>
+        </div>
+
+        <div class="square Video">
+            <div class="square-title">
+                <h1 class="square-heading current-heading" id="cam1">Cam 1</h1>
+                <h1 class="square-heading" id="cam2">Cam 2</h1>
+                <h1 class="square-heading" id="cam3">Cam 3</h1>
+                <h1 class="square-heading" id="camMulti">Multi</h1>
+                <div class="slidecontainer hideSlide">
+                    <input type="range" min="1" max="10" value="1" class="slider" id="myRange">
+                </div>
+
+                <div class="slidecontainer hideSlide">
+                    <input type="range" min="1" max="10" value="1" class="slider" id="myRange2">
+                </div>
+
+                <div class="slidecontainer hideSlide">
+                    <input type="range" min="1" max="10" value="1" class="slider" id="myRange3">
+                </div>
+
+                <h1 class="square-heading" id="vidEnlarge" >^</h1>
+            </div>
+            <div class="zoomingDiv" id="zoomingDiv1">
+
+                <video class="videoBox" id="video1" muted="muted", width="560" height="315"></video>
+            </div>
+            <div class="zoomingDiv" id="zoomingDiv2">
+                <video class="videoBox" id="video2" muted="muted" width="560" height="315"></video>
+            </div>
+            <div class="zoomingDiv" id="zoomingDiv3">
+                <video class="videoBox" id="video3" muted="muted" width="560" height="315"></video>
+            </div>
+
+            <!-- <div id="dualCamWrapper">
+                <iframe id="video3" width="350" height="225" src="https://www.youtube.com/embed/jfKfPfyJRdk" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+                <iframe id="video4" width="350" height="225" src="https://www.youtube.com/embed/i43tkaTXtwI" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
+            </div> -->
+        </div>
+    </body>
+</html>
