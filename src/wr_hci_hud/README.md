@@ -6,8 +6,11 @@
 # To start the GUI
 
 Run test.py in wr_hci_hud/src  
+
 run roscore
 run roslaunch rosbridge_server rosbridge_websocket.launch
+
+the ros.js file is currently publishing and then subscribing to the ros websocket to simulate actual input
 
 # Video streaming
 for webRTC Streaming, might require more steps. WebRTC isn't implemented fully yet.
