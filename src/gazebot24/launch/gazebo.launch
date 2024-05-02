@@ -1,0 +1,24 @@
+<launch>
+
+  <node
+    name="robot_state_publisher"
+    pkg="robot_state_publisher"
+    type="robot_state_publisher" />
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch"/>
+
+
+  <param name="robot_description"
+    textfile="$(find gazebot24)/config/robot.urdf" />
+
+
+  Run a python script to the send a service call to gazebo_ros to spawn a URDF robot 
+  <node name="spawn_urdf_model" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+    args="-urdf -model robot -param robot_description"/>
+
+   <!--  
+  <node name="spawn_urdf_model" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+        args="-urdf -model robot -file $(find gazebot24)/config/robot.urdf.xacro" />
+
+-->
+</launch>

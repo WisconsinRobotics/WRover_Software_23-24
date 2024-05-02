@@ -1,0 +1,909 @@
+#VRML_SIM R2023b utf8
+# license: Apache License 2.0
+# license url: http://www.apache.org/licenses/LICENSE-2.0
+# This is a proto file for Webots for the robot
+# Extracted from: /home/edbert/Documents/WRover_Software/src/gazebot24/config/robot.urdf
+
+PROTO robot [
+  field  SFVec3f     translation     0 0 0
+  field  SFRotation  rotation        0 0 1 0
+  field  SFString    name            "robot"  # Is `Robot.name`.
+  field  SFString    controller      "void"   # Is `Robot.controller`.
+  field  MFString    controllerArgs  []       # Is `Robot.controllerArgs`.
+  field  SFString    customData      ""       # Is `Robot.customData`.
+  field  SFBool      supervisor      FALSE    # Is `Robot.supervisor`.
+  field  SFBool      synchronization TRUE     # Is `Robot.synchronization`.
+  field  SFBool      selfCollision   FALSE    # Is `Robot.selfCollision`.
+]
+{
+  Robot {
+    translation IS translation
+    rotation IS rotation
+    controller IS controller
+    controllerArgs IS controllerArgs
+    customData IS customData
+    supervisor IS supervisor
+    synchronization IS synchronization
+    selfCollision IS selfCollision
+    children [
+      Solid {
+        children [
+          Shape {
+            appearance DEF orange PBRAppearance {
+              baseColor 0.500000 0.500000 0.500000
+              roughness 1.000000
+              metalness 0
+            }
+            geometry Box {
+               size 0.610000 0.610000 0.020000
+            }
+          }
+          Solid {
+            children [
+              Pose {
+                translation 0.000000 -0.150000 0.090000
+                children [
+                  Shape {
+                    appearance USE orange
+                    geometry Box {
+                       size 0.610000 0.250000 0.150000
+                    }
+                  }
+                ]
+              }
+            ]
+            name "elecBox"
+            boundingObject Pose {
+              translation 0.000000 -0.150000 0.090000
+              children [
+                Box {
+                   size 0.610000 0.250000 0.150000
+                }
+              ]
+            }
+            physics Physics {
+              density -1
+              mass 1.000000
+              centerOfMass [ 0.000000 0.000000 0.000000 ]
+              inertiaMatrix [
+                1.000000e+00 1.000000e+00 1.000000e+00
+                1.000000e+00 1.000000e+00 1.000000e+00
+              ]
+            }
+          }
+          Solid {
+            children [
+              Pose {
+                translation 0.000000 0.000000 0.300000
+                children [
+                  Shape {
+                    appearance USE orange
+                    geometry Cylinder {
+                      radius 0.01
+                      height 0.56
+                    }
+                  }
+                ]
+              }
+              HingeJoint {
+                jointParameters HingeJointParameters {
+                  anchor 0.000000 0.000000 0.580000
+                }
+                device [
+                  RotationalMotor {
+                    name "camera_vertical_link"
+                    maxVelocity 1.0
+                    minPosition -0.6
+                    maxPosition 0.6
+                    maxTorque 10.0
+                  }
+                  PositionSensor {
+                    name "camera_vertical_link_sensor"
+                  }
+                ]
+                endPoint Solid {
+                  translation 0.000000 0.000000 0.580000
+                  children [
+                    Pose {
+                      translation 0.000000 0.000000 0.030000
+                      children [
+                        Shape {
+                          appearance USE orange
+                          geometry Box {
+                             size 0.010000 0.010000 0.010000
+                          }
+                        }
+                      ]
+                    }
+                    HingeJoint {
+                      jointParameters HingeJointParameters {
+                        axis 0.000796 0.000000 -1.000000
+                      }
+                      device [
+                        RotationalMotor {
+                          name "cam_horizontal_link"
+                          maxVelocity 1.0
+                          minPosition -1.57
+                          maxPosition 1.57
+                          maxTorque 10.0
+                        }
+                        PositionSensor {
+                          name "cam_horizontal_link_sensor"
+                        }
+                      ]
+                      endPoint Solid {
+                        rotation 0.000000 1.000000 0.000000 1.570000
+                        children [
+                          Shape {
+                            appearance USE orange
+                            geometry Box {
+                               size 0.050000 0.050000 0.050000
+                            }
+                          }
+                        ]
+                        name "topCamera"
+                        boundingObject Box {
+                           size 0.050000 0.050000 0.050000
+                        }
+                        physics Physics {
+                          density -1
+                          mass 1.000000
+                          centerOfMass [ 0.000000 0.000000 0.000000 ]
+                          inertiaMatrix [
+                            1.000000e+00 1.000000e+00 1.000000e+00
+                            1.000000e+00 1.000000e+00 1.000000e+00
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                  name "topCameraMount"
+                  boundingObject Pose {
+                    translation 0.000000 0.000000 0.050000
+                    children [
+                      Box {
+                         size 0.010000 0.010000 0.010000
+                      }
+                    ]
+                  }
+                  physics Physics {
+                    density -1
+                    mass 1.000000
+                    centerOfMass [ 0.000000 0.000000 0.000000 ]
+                    inertiaMatrix [
+                      1.000000e+00 1.000000e+00 1.000000e+00
+                      1.000000e+00 1.000000e+00 1.000000e+00
+                    ]
+                  }
+                }
+              }
+            ]
+            name "camPole"
+            boundingObject Pose {
+              translation 0.000000 0.000000 0.300000
+              children [
+                Cylinder {
+                  radius 0.01
+                  height 0.56
+                }
+              ]
+            }
+            physics Physics {
+              density -1
+              mass 1.000000
+              centerOfMass [ 0.000000 0.000000 0.000000 ]
+              inertiaMatrix [
+                1.000000e+00 1.000000e+00 1.000000e+00
+                1.000000e+00 1.000000e+00 1.000000e+00
+              ]
+            }
+          }
+          Solid {
+            translation 0.000000 0.250000 0.020000
+            children [
+              Shape {
+                appearance USE orange
+                geometry Cylinder {
+                  radius 0.05
+                  height 0.04
+                }
+              }
+            ]
+            name "laser_frame"
+            boundingObject Cylinder {
+              radius 0.05
+              height 0.04
+            }
+            physics Physics {
+              density -1
+              mass 1.000000
+              centerOfMass [ 0.000000 0.000000 0.000000 ]
+              inertiaMatrix [
+                1.000000e+00 1.000000e+00 1.000000e+00
+                1.000000e+00 1.000000e+00 1.000000e+00
+              ]
+            }
+          }
+          HingeJoint {
+            jointParameters HingeJointParameters {
+            }
+            device [
+              RotationalMotor {
+                name "lr_to_base_link"
+                maxVelocity 1.0
+                minPosition -0.6
+                maxPosition 0.6
+                maxTorque 10.0
+              }
+              PositionSensor {
+                name "lr_to_base_link_sensor"
+              }
+            ]
+            endPoint Solid {
+              children [
+                Pose {
+                  translation 0.310000 0.235000 -0.180000
+                  rotation 1.000000 0.000000 0.000000 0.800000
+                  children [
+                    Shape {
+                      appearance USE orange
+                      geometry Cylinder {
+                        radius 0.015
+                        height 0.52
+                      }
+                    }
+                  ]
+                }
+                Solid {
+                  children [
+                    Pose {
+                      translation 0.310000 -0.130000 -0.080000
+                      rotation -1.000000 0.000000 0.000000 0.900000
+                      children [
+                        Shape {
+                          appearance USE orange
+                          geometry Cylinder {
+                            radius 0.015
+                            height 0.3
+                          }
+                        }
+                      ]
+                    }
+                    HingeJoint {
+                      jointParameters HingeJointParameters {
+                        anchor 0.310000 -0.250000 -0.180000
+                      }
+                      device [
+                        RotationalMotor {
+                          name "lbb_to_lb"
+                          maxVelocity 1.0
+                          minPosition -0.4
+                          maxPosition 0.4
+                          maxTorque 10.0
+                        }
+                        PositionSensor {
+                          name "lbb_to_lb_sensor"
+                        }
+                      ]
+                      endPoint Solid {
+                        translation 0.310000 -0.250000 -0.180000
+                        children [
+                          Pose {
+                            translation 0.000000 -0.130000 -0.100000
+                            rotation -1.000000 0.000000 0.000000 1.000000
+                            children [
+                              Shape {
+                                appearance USE orange
+                                geometry Cylinder {
+                                  radius 0.015
+                                  height 0.27
+                                }
+                              }
+                            ]
+                          }
+                          Solid {
+                            children [
+                              Pose {
+                                translation 0.000000 0.120000 -0.100000
+                                rotation 1.000000 0.000000 0.000000 1.000000
+                                children [
+                                  Shape {
+                                    appearance USE orange
+                                    geometry Cylinder {
+                                      radius 0.015
+                                      height 0.27
+                                    }
+                                  }
+                                ]
+                              }
+                              HingeJoint {
+                                jointParameters HingeJointParameters {
+                                  anchor 0.090000 0.250000 -0.160000
+                                }
+                                device [
+                                  RotationalMotor {
+                                    name "lw2_to_lrb"
+                                    maxTorque 10000
+                                  }
+                                  PositionSensor {
+                                    name "lw2_to_lrb_sensor"
+                                  }
+                                ]
+                                endPoint Solid {
+                                  translation 0.090000 0.250000 -0.160000
+                                  children [
+                                    Pose {
+                                      rotation 0.000000 1.000000 0.000000 1.570000
+                                      children [
+                                        Shape {
+                                          appearance USE orange
+                                          geometry Cylinder {
+                                            radius 0.115
+                                            height 0.14
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                  name "lw2"
+                                  boundingObject Pose {
+                                    rotation 0.000000 1.000000 0.000000 1.570000
+                                    children [
+                                      Cylinder {
+                                        radius 0.115
+                                        height 0.14
+                                      }
+                                    ]
+                                  }
+                                  physics Physics {
+                                    density -1
+                                    mass 1.000000
+                                    centerOfMass [ 0.000000 0.000000 0.000000 ]
+                                    inertiaMatrix [
+                                      1.000000e+00 1.000000e+00 1.000000e+00
+                                      1.000000e+00 1.000000e+00 1.000000e+00
+                                    ]
+                                  }
+                                }
+                              }
+                            ]
+                            name "lbf"
+                            boundingObject Pose {
+                              translation 0.000000 0.120000 -0.100000
+                              rotation 1.000000 0.000000 0.000000 1.000000
+                              children [
+                                Cylinder {
+                                  radius 0.015
+                                  height 0.27
+                                }
+                              ]
+                            }
+                            physics Physics {
+                              density -1
+                              mass 1.000000
+                              centerOfMass [ 0.000000 0.000000 0.000000 ]
+                              inertiaMatrix [
+                                1.000000e+00 1.000000e+00 1.000000e+00
+                                1.000000e+00 1.000000e+00 1.000000e+00
+                              ]
+                            }
+                          }
+                          HingeJoint {
+                            jointParameters HingeJointParameters {
+                              anchor 0.090000 -0.250000 -0.160000
+                            }
+                            device [
+                              RotationalMotor {
+                                name "lw3_to_lrb"
+                                maxTorque 10000
+                              }
+                              PositionSensor {
+                                name "lw3_to_lrb_sensor"
+                              }
+                            ]
+                            endPoint Solid {
+                              translation 0.090000 -0.250000 -0.160000
+                              children [
+                                Pose {
+                                  rotation 0.000000 1.000000 0.000000 1.570000
+                                  children [
+                                    Shape {
+                                      appearance USE orange
+                                      geometry Cylinder {
+                                        radius 0.115
+                                        height 0.14
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                              name "lw3"
+                              boundingObject Pose {
+                                rotation 0.000000 1.000000 0.000000 1.570000
+                                children [
+                                  Cylinder {
+                                    radius 0.115
+                                    height 0.14
+                                  }
+                                ]
+                              }
+                              physics Physics {
+                                density -1
+                                mass 1.000000
+                                centerOfMass [ 0.000000 0.000000 0.000000 ]
+                                inertiaMatrix [
+                                  1.000000e+00 1.000000e+00 1.000000e+00
+                                  1.000000e+00 1.000000e+00 1.000000e+00
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                        name "lbb"
+                        boundingObject Pose {
+                          translation 0.000000 -0.130000 -0.100000
+                          rotation -1.000000 0.000000 0.000000 1.000000
+                          children [
+                            Cylinder {
+                              radius 0.015
+                              height 0.27
+                            }
+                          ]
+                        }
+                        physics Physics {
+                          density -1
+                          mass 1.000000
+                          centerOfMass [ 0.000000 0.000000 0.000000 ]
+                          inertiaMatrix [
+                            1.000000e+00 1.000000e+00 1.000000e+00
+                            1.000000e+00 1.000000e+00 1.000000e+00
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                  name "lb"
+                  boundingObject Pose {
+                    translation 0.310000 -0.130000 -0.080000
+                    rotation -1.000000 0.000000 0.000000 0.900000
+                    children [
+                      Cylinder {
+                        radius 0.015
+                        height 0.3
+                      }
+                    ]
+                  }
+                  physics Physics {
+                    density -1
+                    mass 1.000000
+                    centerOfMass [ 0.000000 0.000000 0.000000 ]
+                    inertiaMatrix [
+                      1.000000e+00 1.000000e+00 1.000000e+00
+                      1.000000e+00 1.000000e+00 1.000000e+00
+                    ]
+                  }
+                }
+                HingeJoint {
+                  jointParameters HingeJointParameters {
+                    anchor 0.400000 0.430000 -0.360000
+                  }
+                  device [
+                    RotationalMotor {
+                      name "lw1_to_lrb"
+                      maxTorque 10000
+                    }
+                    PositionSensor {
+                      name "lw1_to_lrb_sensor"
+                    }
+                  ]
+                  endPoint Solid {
+                    translation 0.400000 0.430000 -0.360000
+                    children [
+                      Pose {
+                        rotation 0.000000 1.000000 0.000000 1.570000
+                        children [
+                          Shape {
+                            appearance USE orange
+                            geometry Cylinder {
+                              radius 0.115
+                              height 0.14
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                    name "lw1"
+                    boundingObject Pose {
+                      rotation 0.000000 1.000000 0.000000 1.570000
+                      children [
+                        Cylinder {
+                          radius 0.115
+                          height 0.14
+                        }
+                      ]
+                    }
+                    physics Physics {
+                      density -1
+                      mass 1.000000
+                      centerOfMass [ 0.000000 0.000000 0.000000 ]
+                      inertiaMatrix [
+                        1.000000e+00 1.000000e+00 1.000000e+00
+                        1.000000e+00 1.000000e+00 1.000000e+00
+                      ]
+                    }
+                  }
+                }
+              ]
+              name "lr"
+              boundingObject Pose {
+                translation 0.310000 0.235000 -0.180000
+                rotation 1.000000 0.000000 0.000000 0.800000
+                children [
+                  Cylinder {
+                    radius 0.015
+                    height 0.52
+                  }
+                ]
+              }
+              physics Physics {
+                density -1
+                mass 1.000000
+                centerOfMass [ 0.000000 0.000000 0.000000 ]
+                inertiaMatrix [
+                  1.000000e+00 1.000000e+00 1.000000e+00
+                  1.000000e+00 1.000000e+00 1.000000e+00
+                ]
+              }
+            }
+          }
+          HingeJoint {
+            jointParameters HingeJointParameters {
+            }
+            device [
+              RotationalMotor {
+                name "rrb_to_base_link"
+                maxVelocity 1.0
+                minPosition -0.8
+                maxPosition 0.8
+                maxTorque 10.0
+              }
+              PositionSensor {
+                name "rrb_to_base_link_sensor"
+              }
+            ]
+            endPoint Solid {
+              children [
+                Pose {
+                  translation -0.310000 0.235000 -0.180000
+                  rotation 1.000000 0.000000 0.000000 0.800000
+                  children [
+                    Shape {
+                      appearance USE orange
+                      geometry Cylinder {
+                        radius 0.015
+                        height 0.52
+                      }
+                    }
+                  ]
+                }
+                Solid {
+                  children [
+                    Pose {
+                      translation -0.310000 -0.130000 -0.080000
+                      rotation -1.000000 0.000000 0.000000 0.900000
+                      children [
+                        Shape {
+                          appearance USE orange
+                          geometry Cylinder {
+                            radius 0.015
+                            height 0.3
+                          }
+                        }
+                      ]
+                    }
+                    HingeJoint {
+                      jointParameters HingeJointParameters {
+                        anchor -0.310000 -0.250000 -0.180000
+                      }
+                      device [
+                        RotationalMotor {
+                          name "rbb_to_rb"
+                          maxVelocity 1.0
+                          minPosition -0.4
+                          maxPosition 0.4
+                          maxTorque 10.0
+                        }
+                        PositionSensor {
+                          name "rbb_to_rb_sensor"
+                        }
+                      ]
+                      endPoint Solid {
+                        translation -0.310000 -0.250000 -0.180000
+                        children [
+                          Pose {
+                            translation 0.000000 -0.130000 -0.100000
+                            rotation -1.000000 0.000000 0.000000 1.000000
+                            children [
+                              Shape {
+                                appearance USE orange
+                                geometry Cylinder {
+                                  radius 0.015
+                                  height 0.27
+                                }
+                              }
+                            ]
+                          }
+                          Solid {
+                            children [
+                              Pose {
+                                translation 0.000000 0.120000 -0.100000
+                                rotation 1.000000 0.000000 0.000000 1.000000
+                                children [
+                                  Shape {
+                                    appearance USE orange
+                                    geometry Cylinder {
+                                      radius 0.015
+                                      height 0.27
+                                    }
+                                  }
+                                ]
+                              }
+                              HingeJoint {
+                                jointParameters HingeJointParameters {
+                                  anchor -0.090000 0.250000 -0.160000
+                                }
+                                device [
+                                  RotationalMotor {
+                                    name "rw2_to_rrb"
+                                    maxTorque 10000
+                                  }
+                                  PositionSensor {
+                                    name "rw2_to_rrb_sensor"
+                                  }
+                                ]
+                                endPoint Solid {
+                                  translation -0.090000 0.250000 -0.160000
+                                  children [
+                                    Pose {
+                                      rotation 0.000000 1.000000 0.000000 1.570000
+                                      children [
+                                        Shape {
+                                          appearance USE orange
+                                          geometry Cylinder {
+                                            radius 0.115
+                                            height 0.14
+                                          }
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                  name "rw2"
+                                  boundingObject Pose {
+                                    rotation 0.000000 1.000000 0.000000 1.570000
+                                    children [
+                                      Cylinder {
+                                        radius 0.115
+                                        height 0.14
+                                      }
+                                    ]
+                                  }
+                                  physics Physics {
+                                    density -1
+                                    mass 1.000000
+                                    centerOfMass [ 0.000000 0.000000 0.000000 ]
+                                    inertiaMatrix [
+                                      1.000000e+00 1.000000e+00 1.000000e+00
+                                      1.000000e+00 1.000000e+00 1.000000e+00
+                                    ]
+                                  }
+                                }
+                              }
+                            ]
+                            name "rbf"
+                            boundingObject Pose {
+                              translation 0.000000 0.120000 -0.100000
+                              rotation 1.000000 0.000000 0.000000 1.000000
+                              children [
+                                Cylinder {
+                                  radius 0.015
+                                  height 0.27
+                                }
+                              ]
+                            }
+                            physics Physics {
+                              density -1
+                              mass 1.000000
+                              centerOfMass [ 0.000000 0.000000 0.000000 ]
+                              inertiaMatrix [
+                                1.000000e+00 1.000000e+00 1.000000e+00
+                                1.000000e+00 1.000000e+00 1.000000e+00
+                              ]
+                            }
+                          }
+                          HingeJoint {
+                            jointParameters HingeJointParameters {
+                              anchor -0.090000 -0.250000 -0.160000
+                            }
+                            device [
+                              RotationalMotor {
+                                name "rw3_to_rrb"
+                                maxTorque 10000
+                              }
+                              PositionSensor {
+                                name "rw3_to_rrb_sensor"
+                              }
+                            ]
+                            endPoint Solid {
+                              translation -0.090000 -0.250000 -0.160000
+                              children [
+                                Pose {
+                                  rotation 0.000000 1.000000 0.000000 1.570000
+                                  children [
+                                    Shape {
+                                      appearance USE orange
+                                      geometry Cylinder {
+                                        radius 0.115
+                                        height 0.14
+                                      }
+                                    }
+                                  ]
+                                }
+                              ]
+                              name "rw3"
+                              boundingObject Pose {
+                                rotation 0.000000 1.000000 0.000000 1.570000
+                                children [
+                                  Cylinder {
+                                    radius 0.115
+                                    height 0.14
+                                  }
+                                ]
+                              }
+                              physics Physics {
+                                density -1
+                                mass 1.000000
+                                centerOfMass [ 0.000000 0.000000 0.000000 ]
+                                inertiaMatrix [
+                                  1.000000e+00 1.000000e+00 1.000000e+00
+                                  1.000000e+00 1.000000e+00 1.000000e+00
+                                ]
+                              }
+                            }
+                          }
+                        ]
+                        name "rbb"
+                        boundingObject Pose {
+                          translation 0.000000 -0.130000 -0.100000
+                          rotation -1.000000 0.000000 0.000000 1.000000
+                          children [
+                            Cylinder {
+                              radius 0.015
+                              height 0.27
+                            }
+                          ]
+                        }
+                        physics Physics {
+                          density -1
+                          mass 1.000000
+                          centerOfMass [ 0.000000 0.000000 0.000000 ]
+                          inertiaMatrix [
+                            1.000000e+00 1.000000e+00 1.000000e+00
+                            1.000000e+00 1.000000e+00 1.000000e+00
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                  name "rb"
+                  boundingObject Pose {
+                    translation -0.310000 -0.130000 -0.080000
+                    rotation -1.000000 0.000000 0.000000 0.900000
+                    children [
+                      Cylinder {
+                        radius 0.015
+                        height 0.3
+                      }
+                    ]
+                  }
+                  physics Physics {
+                    density -1
+                    mass 1.000000
+                    centerOfMass [ 0.000000 0.000000 0.000000 ]
+                    inertiaMatrix [
+                      1.000000e+00 1.000000e+00 1.000000e+00
+                      1.000000e+00 1.000000e+00 1.000000e+00
+                    ]
+                  }
+                }
+                HingeJoint {
+                  jointParameters HingeJointParameters {
+                    anchor -0.400000 0.430000 -0.360000
+                  }
+                  device [
+                    RotationalMotor {
+                      name "rw1_to_rrb"
+                      maxTorque 10000
+                    }
+                    PositionSensor {
+                      name "rw1_to_rrb_sensor"
+                    }
+                  ]
+                  endPoint Solid {
+                    translation -0.400000 0.430000 -0.360000
+                    children [
+                      Pose {
+                        rotation 0.000000 1.000000 0.000000 1.570000
+                        children [
+                          Shape {
+                            appearance USE orange
+                            geometry Cylinder {
+                              radius 0.115
+                              height 0.14
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                    name "rw1"
+                    boundingObject Pose {
+                      rotation 0.000000 1.000000 0.000000 1.570000
+                      children [
+                        Cylinder {
+                          radius 0.115
+                          height 0.14
+                        }
+                      ]
+                    }
+                    physics Physics {
+                      density -1
+                      mass 1.000000
+                      centerOfMass [ 0.000000 0.000000 0.000000 ]
+                      inertiaMatrix [
+                        1.000000e+00 1.000000e+00 1.000000e+00
+                        1.000000e+00 1.000000e+00 1.000000e+00
+                      ]
+                    }
+                  }
+                }
+              ]
+              name "rr"
+              boundingObject Pose {
+                translation -0.310000 0.235000 -0.180000
+                rotation 1.000000 0.000000 0.000000 0.800000
+                children [
+                  Cylinder {
+                    radius 0.015
+                    height 0.52
+                  }
+                ]
+              }
+              physics Physics {
+                density -1
+                mass 1.000000
+                centerOfMass [ 0.000000 0.000000 0.000000 ]
+                inertiaMatrix [
+                  1.000000e+00 1.000000e+00 1.000000e+00
+                  1.000000e+00 1.000000e+00 1.000000e+00
+                ]
+              }
+            }
+          }
+        ]
+        name "base_link"
+        boundingObject Box {
+           size 0.610000 0.610000 0.020000
+        }
+        physics Physics {
+          density -1
+          mass 1.000000
+          centerOfMass [ 0.000000 0.000000 0.000000 ]
+          inertiaMatrix [
+            1.000000e+00 1.000000e+00 1.000000e+00
+            1.000000e+00 1.000000e+00 1.000000e+00
+          ]
+        }
+      }
+    ]
+    name IS name
+  }
+}
