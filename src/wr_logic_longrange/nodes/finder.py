@@ -152,11 +152,15 @@ def get_valley(
     output_file.close()
 
     # get two obstacles lists for 2 thresholds in order to get rid of
-    # any obstacle that is skinny and far away
+    # any obstacle that is far away. obstacle_list will grab all the obstacles at the normal
+    # threshold, obstacle list close will grab all the obstacles again, except will now not 
+    # contain obstacles farther out
     obstacle_list = get_obstacle_list(sector_angle, threshold, hist)
     obstacle_list_close = get_obstacle_list(sector_angle, threshold / 2, hist)
 
-    # if the close obstacles are empty use the default list
+    # if the close obstacles are empty use the default list, this allows
+    # us to navigate around closer obstacles without worring about farther obstacles
+    # that are not in our way yet
     if len(obstacle_list_close) != 0:
         obstacle_list = obstacle_list_close
 
@@ -238,7 +242,7 @@ def get_obstacle_list(
         # This prevents single noisy points from blocking out large portions of the drive window
         if hist[i] < threshold:
             one_obstacle.append(i)
-        elif len(one_obstacle) > 1:
+        elif len(one_obstacle) >= 1:
             left_bound = len(hist)
             right_bound = 0
             for i in range(len(one_obstacle)):
@@ -265,14 +269,11 @@ def get_obstacle_list(
         for i in range(len(one_obstacle)):
             # Calculate size of anti-window and add to obstacle bounds
             # pass in distance to target to caculate angle that allows robot to pass through
-            angleToIncrease = calculate_anti_window(
-                hist[one_obstacle[i]])/sector_angle
+            angleToIncrease = calculate_anti_window(hist[one_obstacle[i]]) / sector_angle
 
             # Update left and right bound
             left_bound = max(min(left_bound, one_obstacle[i] - angleToIncrease), 0)
-            right_bound = min(
-                max(right_bound, one_obstacle[i] + angleToIncrease), len(hist)
-            )
+            right_bound = min(max(right_bound, one_obstacle[i] + angleToIncrease), len(hist))
 
         # Check to see if the obstacle we just found can actually be merged with a previous obstacle
         while len(obstacle_list) > 0 and obstacle_list[-1][1] >= left_bound:

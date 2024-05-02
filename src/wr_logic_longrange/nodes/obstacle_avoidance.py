@@ -69,25 +69,6 @@ def initialize() -> None:
     global drive_pub
     global smoothing_constant
     global speed_factor
-    global heading_pub
-    global frameCount
-    global heading_msg
-    global actual_heading_msg
-    global actual_heading_pub
-    global delta_heading_pub
-    global delta_heading_msg
-    global marker
-    global marker_pub
-    global marker_circle
-    global marker_circle_pub
-    global marker_flag
-    global marker_flag_pub
-    global laser_adjuster_pub
-    global wRover
-    global wRover_pub
-    global rviz_sim_delta_heading_pub
-    global rviz_sim_result_pub
-    global rviz_sim_cur_heading_pub
 
     # Publisher
     drive_pub = rospy.Publisher(
@@ -127,7 +108,7 @@ def update_heading(msg: Float64) -> None:
 
 # calculates difference of angles from -180 to 180 degrees
 def angle_diff(heading1: float, heading2: float) -> float:
-    """std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    """
     Returns relative angle difference from heading of robot to heading of target
 
     @param heading1 (float): Value of target relative to East (Counter-clockwise)
@@ -176,8 +157,6 @@ def update_navigation(data: LaserScan) -> None:
     @param msg: Get the DriveTrainCmd(motor values) relating to the heading of the robot and the resulting best navigation angle
     @param data: Lidar data received
     """
-
-    global frameCount
 
     # rospy.loginfo(f"target angle: {target_angle}, current heading: {cur_heading}")
 
