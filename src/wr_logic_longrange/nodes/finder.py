@@ -243,27 +243,24 @@ def get_obstacle_list(
         if hist[i] < threshold:
             one_obstacle.append(i)
         elif len(one_obstacle) >= 1:
-            left_bound = len(hist)
-            right_bound = 0
-            for i in range(len(one_obstacle)):
-                # Calculate size of anti-window and add to obstacle bounds
-                # pass in distance to target to caculate angle that allows robot to pass through
-                angleToIncrease = calculate_anti_window(hist[one_obstacle[i]]) / sector_angle
-
-                # Update left and right bound
-                left_bound = max(min(left_bound, one_obstacle[i] - angleToIncrease), 0)
-                right_bound = min(max(right_bound, one_obstacle[i] + angleToIncrease), len(hist))
-
-            # Check to see if the obstacle we just found can actually be merged with a previous obstacle
-            while len(obstacle_list) > 0 and obstacle_list[-1][1] >= left_bound:
-                left_bound = min(left_bound, obstacle_list[-1][0])
-                right_bound = max(right_bound, obstacle_list[-1][1])
-                del obstacle_list[-1]
-            obstacle_list.append([left_bound, right_bound])
-            one_obstacle.clear()
+            obstacle_list, one_obstacle = update_obstacle_bound(hist, one_obstacle, sector_angle, obstacle_list)
 
     # TODO (@bennowotny ): This code is the same as what's in the loop, so it should be abstracted out to its own function
     if len(one_obstacle) != 0:
+        obstacle_list, one_obstacle = update_obstacle_bound(hist, one_obstacle, sector_angle, obstacle_list)
+
+    return obstacle_list
+
+def update_obstacle_bound(hist: list, one_obstacle: list, sector_angle: float, obstacle_list: list):
+        '''
+        updates the list of obstacles with new bounds calculated from lidar data
+
+        @param hist (list): The lidar data as a list
+        @param one_obstacle (list): Indicies in the list the relate to the current obstacles
+        @param sector_angle (float): Number of degrees in on sector
+        @param obstacle_list (list): List of all obstacles
+        @return list, list: updates list of obstacles and one obstacle that can be merged
+        '''
         left_bound = len(hist)
         right_bound = 0
         for i in range(len(one_obstacle)):
@@ -283,8 +280,7 @@ def get_obstacle_list(
         obstacle_list.append([left_bound, right_bound])
         one_obstacle.clear()
 
-    return obstacle_list
-
+        return obstacle_list, one_obstacle
 
 def get_navigation_angle(
     target: int, threshold: float, data: LaserScan, smoothing_constant: float = 3
