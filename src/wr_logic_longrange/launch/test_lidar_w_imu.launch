@@ -7,14 +7,15 @@
   export WROVER_LOCAL=true
 
    -->
- 
+   
+  <!-- <node name='do_dishes_client' pkg="wr_logic_longrange" type="delete_AFTER_STATE_MACHINE_IMPLEMENTED.py"/> -->
   
   <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" />
   <include file="$(find wr_entry_point)/launch/comp/comp_falcon.launch"  unless="$(eval env('WROVER_LOCAL') == 'true')"/>
 
   <include file="$(find wr_control_drive_ds)/launch/std.launch"/>
 
-  <node name="imu" pkg="wrevolution" type="Pigeon2" />
+  <!-- <node name="imu" pkg="wrevolution" type="Pigeon2" /> -->
 
   <arg name="mux_name" default="nav_mux" />
   <arg name="long_range_output" default="/long_range_nav" />
@@ -32,8 +33,6 @@
     <!-- <arg name="short_range_output" value="$(arg short_range_output)" /> -->
   <!-- </include> -->
 
-  <include file="$(find wr_logic_longrange)/launch/long_range.launch">
-    <param name="long_range_output" value="$(arg long_range_output)" />
-  </include>
+  <include file="$(find wr_logic_longrange)/launch/long_range.launch"/>
 
 </launch>

@@ -1,4 +1,5 @@
-    
+#!/usr/bin/env python3    
+
 from std_msgs.msg import Float64
 import actionlib
 import rospy
@@ -16,6 +17,7 @@ if __name__ == '__main__':
             "LongRangeActionServer", LongRangeAction
         )
     client.wait_for_server()
+    CoordinateManager.read_coordinates_file()
     goal = LongRangeGoal(target_lat=CoordinateManager.get_coordinate()[
                             "lat"], target_long=CoordinateManager.get_coordinate()["long"])
     

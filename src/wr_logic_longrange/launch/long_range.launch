@@ -1,6 +1,6 @@
 <launch>
 
-  <arg name="long_range_output" default="/long_range_nav"/>
+  <arg name="long_range_output" default="/control/drive_system/cmd"/>
 
   <node pkg="wr_logic_longrange" name="long_range_action_server" type="long_range_action_server.py" output="screen">
     <param name="wrover_hw" value="$(env WROVER_HW)" />

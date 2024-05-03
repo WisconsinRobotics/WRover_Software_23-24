@@ -35,7 +35,7 @@ speed_factor = 0.3
 
 # initialize target angle to move forward
 # current location
-current_lat = 0
+current_lat = 5
 current_long = 0
 cur_heading = 0
 
@@ -47,7 +47,7 @@ target_sector = 0
 smoothing_constant = 3
 
 # global speed factor updated through navigation
-speed_factor = 0
+speed_factor = 0.3
 
 # Start the tasks managed to drive autonomously
 def initialize() -> None:
@@ -72,14 +72,14 @@ def initialize() -> None:
 
     # Publisher
     drive_pub = rospy.Publisher(
-        rospy.get_param("~motor_speeds"), DriveTrainCmd, queue_size=1
+        rospy.get_param("~motor_speeds"), DriveTrainCmd, queue_size=10
     )
 
     # Subscribe to gps coordinate data
     rospy.Subscriber("/gps_coord_data", CoordinateMsg, update_gps_coord)
 
     # Subscribe to heading data
-    rospy.Subscriber("/heading_data", Float64, update_heading)
+    rospy.Subscriber("/heading", Float64, update_heading)
 
     # Subscribe to lidar data
     rospy.Subscriber('/scan', LaserScan, update_navigation)
@@ -102,7 +102,7 @@ def update_heading(msg: Float64) -> None:
     @param cur_heading East is 0. (Counterclockwise). Extected as a value from 0 to 360.
     """
     global cur_heading
-    cur_heading = (90 - msg.data) % 360  # Shifting to East
+    cur_heading = (90 + msg.data) % 360  # Shifting to East
     # rviz_sim_cur_heading_pub.publish(cur_heading)
 
 
@@ -113,7 +113,7 @@ def angle_diff(heading1: float, heading2: float) -> float:
 
     @param heading1 (float): Value of target relative to East (Counter-clockwise)
     @param heading2 (float): Value of heading relative to East (Counter-clockwise)
-    @return float: Value from -180 to 180. Starting from bottom of robot (Counter-Clockwise)
+    @return float: Value from -180 to 180. Starting from bottom of robot (Negatives in left hand, positive in the right side)
     """
     diff = (heading1 - heading2 + 360) % 360
     return (diff + 180) % 360 - 180
@@ -180,7 +180,7 @@ def update_navigation(data: LaserScan) -> None:
 
     # Get the DriveTrainCmd relating to the heading of the robot and the resulting best navigation angle
     # Reason we do 90 - result is to get a value where 0 is up, + is clockwise, and - is counterclockwise
-    msg = angle_calc.logistic(angle_diff(90, result), 0)
+    msg = angle_calc.piecewise_linear(angle_diff(90, result), 0)
 
     # rospy.loginfo(f"left drive value: {msg.left_value}, right drive value: {msg.right_value}")
     # Scale the resultant DriveTrainCmd by the speed multiplier

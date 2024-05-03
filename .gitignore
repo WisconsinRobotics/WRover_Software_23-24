@@ -46,7 +46,3 @@ docs/generated-images
 # non-generated documentation images
 !src/wr_logic_teleop_ds/control_scheme_power_levels.png
 !src/wr_logic_teleop_ds/control_scheme_tank_drive.png
-
-.devcontainer/devcontainer.json
-src/.github/dependabot.yml
-

@@ -51,16 +51,12 @@ class LongRangeActionServer(object):
         @param goal (LongRangeGoal): Goal for the navigation segment, which contains the GPS coordinates
         of the target
         """
-
-        obstacle_avoidance.update_target(goal.target_lat, goal.target_long)
-        obstacle_avoidance.set_is_active(True)
+        rate = rospy.Rate(10)
         start_time = rospy.get_rostime()
         while rospy.get_rostime() - start_time < LONG_RANGE_TIMEOUT_TIME and not rospy.is_shutdown():
-            rospy.Rate(10).sleep()
-            if obstacle_avoidance.run_navigation():
-                obstacle_avoidance.set_is_active(False)
+            rate.sleep()
+            if obstacle_avoidance.update_target(goal.target_lat, goal.target_long):
                 return self._as.set_succeeded()
-        obstacle_avoidance.set_is_active(False)
         return self._as.set_aborted()
 
 
