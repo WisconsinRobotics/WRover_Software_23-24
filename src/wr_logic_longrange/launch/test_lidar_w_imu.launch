@@ -24,6 +24,7 @@
   <arg name="long_range_output" default="/long_range_nav" />
   <arg name="short_range_output" default="/short_range_nav" />
 
+  <include file="$(find wr_hsi_sensing)/launch/gps_data_mapper.launch" if="$(eval env('WROVER_HW') == 'REAL')" />
 
   <include file="$(find wr_logic_ai)/launch/wrplidar.launch"/>
   <node name="fake_data" pkg="wr_logic_longrange" type="inputFakeData.py" output="screen"/>
