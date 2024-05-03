@@ -5,8 +5,8 @@ import actionlib
 import rospy
 import testing_rviz
 from wr_logic_ai.coordinate_manager import CoordinateManager
-from wr_logic_ai.msg import (
-    NavigationState,
+from wr_logic_ai.msg import NavigationState
+from wr_logic_longrange import (
     LongRangeAction,
     LongRangeGoal,
     LongRangeActionResult,
