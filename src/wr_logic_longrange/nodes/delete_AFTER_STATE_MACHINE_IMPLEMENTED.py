@@ -6,10 +6,10 @@ import rospy
 import testing_rviz
 from wr_logic_ai.coordinate_manager import CoordinateManager
 from wr_logic_ai.msg import NavigationState
-from wr_logic_longrange import (
+from wr_logic_longrange.msg import (
     LongRangeAction,
     LongRangeGoal,
-    LongRangeActionResult,
+    LongRangeActionResult
 )
 if __name__ == '__main__':
     rospy.init_node('do_dishes_client')

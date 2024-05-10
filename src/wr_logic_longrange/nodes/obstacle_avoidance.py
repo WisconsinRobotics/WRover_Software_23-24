@@ -35,7 +35,7 @@ speed_factor = 0.3
 
 # initialize target angle to move forward
 # current location
-current_lat = 5
+current_lat = 0
 current_long = 0
 cur_heading = 0
 
@@ -137,8 +137,12 @@ def update_target(target_lat, target_long) -> bool:
     # Construct the planar target angle relative to east, accounting for curvature
     imu = AngleCalculations(current_lat, current_long,
                             target_lat, target_long)
-
+    
+    rospy.loginfo("Lat_current: " + str(current_lat) + " Long_current: " + str(current_long))
     target_angle = imu.get_angle() % 360
+    rospy.loginfo("Target Angle: " + str(target_angle))
+
+
 
     # check if we are close to the target
     if imu.get_distance() < NAV_THRESH_DISTANCE:
@@ -195,7 +199,7 @@ def update_navigation(data: LaserScan) -> None:
         valueToTurn = "Stay straight"
     
     # Publish the DriveTrainCmd to the topic
-    rospy.loginfo("Drive to: " + str(valueToTurn))
+    #rospy.loginfo("Drive to: " + str(valueToTurn))
     #rospy.loginfo("Target Value: " + str(target_angle))
     drive_pub.publish(msg)
 
