@@ -98,7 +98,7 @@ def update_heading(msg: Float64) -> None:
     """
     Shifted from compass coordinates to math coordinates.
 
-    @param msg (Float64): Heading value received as value from 0 to 360. North is 0 clockwise.
+    @param msg (Float64): Heading value received as value from 0 to 360. North is 0 counter-clockwise.
     @param cur_heading East is 0. (Counterclockwise). Extected as a value from 0 to 360.
     """
     global cur_heading
