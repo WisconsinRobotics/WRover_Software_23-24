@@ -1,12 +1,15 @@
+#!/usr/bin/env python3    
+
 import rospy
 import math
 import actionlib
 from wr_logic_longrange.msg import InitCompassAction, InitCompassGoal
-from wrevolution.msg import SetHeading
+from wrevolution.srv import SetHeading
 from wr_drive_msgs.msg import DriveTrainCmd
 from wr_hsi_sensing.msg import CoordinateMsg
 
-LONG_RANGE_TIMEOUT_TIME = rospy.Duration(10)
+## Timeout time for when we declare a long range navigation as failed
+LONG_RANGE_TIMEOUT_TIME = rospy.Duration(2)
 
 current_lat = 0
 current_long = 0
@@ -15,17 +18,17 @@ class InitCompassActionServer(object):
     def __init__(self, name) -> None:
         global drive_pub
         global set_heading_pub
-        rospy.loginfo("initing long range action server")
+        rospy.loginfo("initing compass set action server")
         # Publisher
         drive_pub = rospy.Publisher(
             rospy.get_param("~motor_speeds"), DriveTrainCmd, queue_size=10
         )
-        set_heading_pub = rospy.Publisher('set_heading', SetHeading, queue_size=10)
 
         #Subscribe to GPS Data
+        self.subGPS = None
         self.subGPS = rospy.Subscriber("/gps_coord_data", CoordinateMsg, update_gps_coord)
         self.rate = 100       
-        self.sub_msg = None
+        
 
         self._action_name = name
         self._as = actionlib.SimpleActionServer(
@@ -35,6 +38,8 @@ class InitCompassActionServer(object):
             auto_start=False,
         )
         self._as.start()
+        rospy.loginfo("DONE initing compass set action server")
+
         
         
 
@@ -49,8 +54,9 @@ class InitCompassActionServer(object):
 
         #Wait for subscriber to get data
         r = rospy.Rate(self.rate)
-        while self.sub_msg == None:
+        while self.subGPS == None:
             r.sleep()
+            rospy.loginfo("HEEYYY")
 
         #Get current lat and long before moving
         lat_before = current_lat
@@ -60,10 +66,15 @@ class InitCompassActionServer(object):
         while rospy.get_rostime() - start_time < LONG_RANGE_TIMEOUT_TIME and not rospy.is_shutdown():
             rate.sleep()
             drive_pub.publish(drive_msg)
+            rospy.loginfo("DRIVING FORWARD")
 
-        heading_msg = SetHeading()
-        heading_msg.heading = calculate_angle(long_before, lat_before, current_long, current_lat)
-        set_heading_pub.publish(heading_msg)
+        angle_heading = calculate_angle(long_before, lat_before, current_long, current_lat)
+        success = set_heading_client(angle_heading)
+        if success:
+            rospy.loginfo("Heading set successfully!")
+        else:
+            rospy.loginfo("Failed to set heading.")
+
         
         return self._as.set_succeeded()
 
@@ -73,6 +84,17 @@ def update_gps_coord(msg: CoordinateMsg) -> None:
     global current_long
     current_lat = msg.latitude
     current_long = msg.longitude
+    
+def set_heading_client(heading):
+    rospy.loginfo("WAITING FOR SERVICE")
+    rospy.wait_for_service('set_heading')
+    rospy.loginfo("SERVICE GOOD")
+    try:
+        set_heading = rospy.ServiceProxy('set_heading', SetHeading)
+        resp = set_heading(heading)
+        return resp.success
+    except rospy.ServiceException as e:
+        print("Service call failed:", e)
 
 def calculate_angle(x1, y1, x2, y2):
     """

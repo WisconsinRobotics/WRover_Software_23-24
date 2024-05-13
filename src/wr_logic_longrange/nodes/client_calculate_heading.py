@@ -9,10 +9,11 @@ from wr_logic_longrange.msg import (
     InitCompassGoal,
 )
 if __name__ == '__main__':
-    rospy.init_node('calculate_heading_action')
+    rospy.init_node('client_calculate_heading_action')
     client = actionlib.SimpleActionClient(
-            "LongRangeActionServer", InitCompassAction
+            "InitCompass", InitCompassAction
         )
     client.wait_for_server()
+    rospy.loginfo("Sending GOAL")
     goal = InitCompassAction()   
     client.send_goal(goal)
