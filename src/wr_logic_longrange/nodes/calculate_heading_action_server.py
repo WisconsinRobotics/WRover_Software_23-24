@@ -92,8 +92,7 @@ def set_heading_client(heading):
     rospy.loginfo("SERVICE GOOD")
     try:
         set_heading = rospy.ServiceProxy('/pigeon/set_heading', SetHeading)
-        resp = set_heading(heading)
-        return resp.success
+        return set_heading(heading)
     except rospy.ServiceException as e:
         rospy.logerr("Service call failed:", e)
 
