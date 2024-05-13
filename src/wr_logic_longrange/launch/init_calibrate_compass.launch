@@ -14,7 +14,7 @@
   <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" unless="$(eval env('WROVER_LOCAL') == 'true')" />
   <include file="$(find wr_entry_point)/launch/comp/comp_falcon.launch"  unless="$(eval env('WROVER_LOCAL') == 'true')"/>
 
-  <!-- <include file="$(find wr_control_drive_ds)/launch/std.launch"/> -->
+  <include file="$(find wr_control_drive_ds)/launch/std.launch"/>
 
   <node name='calculate_init_heading' pkg="wr_logic_longrange" type="calculate_heading_action_server.py" output="screen">
     <param name="motor_speeds" value="$(arg long_range_output)"/>
