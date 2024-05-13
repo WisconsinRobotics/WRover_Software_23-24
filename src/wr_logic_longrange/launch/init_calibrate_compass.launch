@@ -20,6 +20,9 @@
     <param name="motor_speeds" value="$(arg long_range_output)"/>
   </node>
 
+  <!-- <include file="$(find wr_hsi_sensing)/launch/gps_data_mapper.launch" 
+    if="$(eval env('WROVER_HW') == 'REAL')" /> -->
+
   <node name='client_calculate_heading_action' pkg="wr_logic_longrange" type="client_calculate_heading.py" output="screen"/>
 
 </launch>

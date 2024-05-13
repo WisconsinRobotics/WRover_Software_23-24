@@ -65,9 +65,8 @@ class InitCompassActionServer(object):
             drive_pub.publish(drive_msg)
         drive_pub.publish(0,0)
         rospy.loginfo("MOTORS STOPPED")
-        angle_heading = calculate_angle(long_before, lat_before, current_long, current_lat)
-        angle_heading = calculate_angle(long_before, lat_before, 1, 1)
 
+        angle_heading = calculate_angle(long_before, lat_before, current_long, current_lat)
         success = set_heading_client(angle_heading)
         if success:
             rospy.loginfo("Heading set successfully!")
