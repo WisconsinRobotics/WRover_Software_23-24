@@ -88,10 +88,10 @@ def update_gps_coord(msg: CoordinateMsg) -> None:
     
 def set_heading_client(heading):
     rospy.loginfo("WAITING FOR SERVICE")
-    rospy.wait_for_service('set_heading')
+    rospy.wait_for_service('/pigeon/set_heading')
     rospy.loginfo("SERVICE GOOD")
     try:
-        set_heading = rospy.ServiceProxy('set_heading', SetHeading)
+        set_heading = rospy.ServiceProxy('/pigeon/set_heading', SetHeading)
         resp = set_heading(heading)
         return resp.success
     except rospy.ServiceException as e:
