@@ -38,7 +38,6 @@ class InitCompassActionServer(object):
             auto_start=False,
         )
         self._as.start()
-        rospy.loginfo("DONE initing compass set action server")
 
         
         
@@ -56,8 +55,6 @@ class InitCompassActionServer(object):
         r = rospy.Rate(self.rate)
         while self.subGPS == None:
             r.sleep()
-            rospy.loginfo("HEEYYY")
-
         #Get current lat and long before moving
         lat_before = current_lat
         long_before = current_long
@@ -66,11 +63,9 @@ class InitCompassActionServer(object):
         while rospy.get_rostime() - start_time < LONG_RANGE_TIMEOUT_TIME and not rospy.is_shutdown():
             rate.sleep()
             drive_pub.publish(drive_msg)
-            rospy.loginfo("DRIVING FORWARD")
         drive_pub.publish(0,0)
         rospy.loginfo("MOTORS STOPPED")
-        #angle_heading = calculate_angle(long_before, lat_before, current_long, current_lat)
-        #TEST
+        angle_heading = calculate_angle(long_before, lat_before, current_long, current_lat)
         angle_heading = calculate_angle(long_before, lat_before, 1, 1)
 
         success = set_heading_client(angle_heading)
@@ -90,9 +85,7 @@ def update_gps_coord(msg: CoordinateMsg) -> None:
     current_long = msg.longitude
     
 def set_heading_client(heading):
-    rospy.loginfo("WAITING FOR SERVICE")
     rospy.wait_for_service('/pigeon/set_heading')
-    rospy.loginfo("SERVICE GOOD")
     try:
         set_heading = rospy.ServiceProxy('/pigeon/set_heading', SetHeading)
         return set_heading(heading)
