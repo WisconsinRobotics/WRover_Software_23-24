@@ -42,15 +42,15 @@ class LongRangeActionServer(object):
         self._action_name = name
         
         ##TEMPORARY convert to state machine##
-        client = actionlib.SimpleActionClient(
+        self.client = actionlib.SimpleActionClient(
                 "InitCompass", InitCompassAction
             )
-        client.wait_for_server()
+        self.client.wait_for_server()
         rospy.loginfo("Sending GOAL")
         goal = InitCompassAction()   
-        client.send_goal(goal)
-        client.wait_for_result(rospy.Duration.from_sec(10.0))
         rospy.loginfo("INIT COMPASS ENDED")
+        self.client.send_goal(goal)
+        self.client.wait_for_result(rospy.Duration.from_sec(10.0))
 
         obstacle_avoidance.initialize()
         self._as = actionlib.SimpleActionServer(
@@ -71,6 +71,8 @@ class LongRangeActionServer(object):
         @param goal (LongRangeGoal): Goal for the navigation segment, which contains the GPS coordinates
         of the target
         """
+        self.client.wait_for_result(rospy.Duration.from_sec(10.0))
+
         rate = rospy.Rate(10)
         start_time = rospy.get_rostime()
         while rospy.get_rostime() - start_time < LONG_RANGE_TIMEOUT_TIME and not rospy.is_shutdown():

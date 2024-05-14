@@ -45,7 +45,6 @@ class InitCompassActionServer(object):
     def execute_callback(self, goal: InitCompassGoal):
         
         rate = rospy.Rate(10)
-        start_time = rospy.get_rostime()
         drive_msg = DriveTrainCmd(
             left_value=.3,
             right_value=.3,
@@ -55,16 +54,16 @@ class InitCompassActionServer(object):
         r = rospy.Rate(self.rate)
         while current_lat == 0:
             r.sleep()
-            rospy.loginfo("NO GPS")
         #Get current lat and long before moving
         lat_before = current_lat
         long_before = current_long
         rospy.loginfo("Before: " + str(current_lat) + " " + str(current_long))
-        #Driving forward for 10 seconds
+        #Driving forward for 2 seconds
+        start_time = rospy.get_rostime()
         while rospy.get_rostime() - start_time < LONG_RANGE_TIMEOUT_TIME and not rospy.is_shutdown():
             rate.sleep()
             drive_pub.publish(drive_msg)
-            rospy.loginfo("DRIVING FORWARD")
+            rospy.loginfo(drive_msg)
         drive_pub.publish(0,0)
         rospy.loginfo("MOTORS STOPPED")
         rospy.loginfo("Before: " + str(current_lat) + " " + str(current_long))
