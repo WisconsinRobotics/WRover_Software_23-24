@@ -152,6 +152,11 @@ def update_target(target_lat, target_long) -> bool:
     rospy.loginfo(imu.get_distance())
     # check if we are close to the target
     if imu.get_distance() < NAV_THRESH_DISTANCE:
+        print("Stopping motors")
+        msg_stop = DriveTrainCmd()
+        msg_stop.left_value = 0
+        msg_stop.right_value = 0
+        drive_pub.publish(msg_stop)
         return True
     else:
         return False
