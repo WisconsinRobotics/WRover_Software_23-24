@@ -55,6 +55,7 @@ class InitCompassActionServer(object):
         r = rospy.Rate(self.rate)
         while current_lat == 0:
             r.sleep()
+            rospy.loginfo("NO GPS")
         #Get current lat and long before moving
         lat_before = current_lat
         long_before = current_long
@@ -63,6 +64,7 @@ class InitCompassActionServer(object):
         while rospy.get_rostime() - start_time < LONG_RANGE_TIMEOUT_TIME and not rospy.is_shutdown():
             rate.sleep()
             drive_pub.publish(drive_msg)
+            rospy.loginfo("DRIVING FORWARD")
         drive_pub.publish(0,0)
         rospy.loginfo("MOTORS STOPPED")
         rospy.loginfo("Before: " + str(current_lat) + " " + str(current_long))

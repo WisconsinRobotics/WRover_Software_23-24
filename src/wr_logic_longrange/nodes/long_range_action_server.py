@@ -50,7 +50,7 @@ class LongRangeActionServer(object):
         goal = InitCompassAction()   
         client.send_goal(goal)
         client.wait_for_result(rospy.Duration.from_sec(10.0))
-
+        rospy.loginfo("INIT COMPASS ENDED")
 
         obstacle_avoidance.initialize()
         self._as = actionlib.SimpleActionServer(
