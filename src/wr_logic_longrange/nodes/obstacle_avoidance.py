@@ -23,14 +23,6 @@ from wr_hsi_sensing.msg import CoordinateMsg
 from wr_drive_msgs.msg import DriveTrainCmd
 from std_msgs.msg import Float64
 import testing_rviz
-from std_msgs.msg import Float64
-import actionlib
-import rospy
-import testing_rviz
-from wr_logic_longrange.msg import (
-    InitCompassAction,
-    InitCompassGoal,
-)
 
 # Navigation parameters
 # distance before obstacle avoidance logics is triggered (in meters)
@@ -91,16 +83,6 @@ def initialize() -> None:
 
     # Subscribe to lidar data
     rospy.Subscriber('/scan', LaserScan, update_navigation)
-    
-    ##TEMPORARY convert to state machine##
-    client = actionlib.SimpleActionClient(
-            "InitCompass", InitCompassAction
-        )
-    client.wait_for_server()
-    rospy.loginfo("Sending GOAL")
-    goal = InitCompassAction()   
-    client.send_goal(goal)
-    client.wait_for_result(rospy.Duration.from_sec(5.0))
     
 
 

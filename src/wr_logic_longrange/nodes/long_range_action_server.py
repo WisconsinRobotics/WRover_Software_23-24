@@ -16,6 +16,14 @@ import rospy
 import actionlib
 from wr_logic_longrange.msg import LongRangeAction, LongRangeGoal
 import obstacle_avoidance
+#Temporary:
+from std_msgs.msg import Float64
+import testing_rviz
+from wr_logic_longrange.msg import (
+    InitCompassAction,
+    InitCompassGoal,
+)
+
 
 # TODO: check timeout time length validity
 ## Timeout time for when we declare a long range navigation as failed
@@ -32,6 +40,18 @@ class LongRangeActionServer(object):
     def __init__(self, name) -> None:
         rospy.loginfo("initing long range action server")
         self._action_name = name
+        
+        ##TEMPORARY convert to state machine##
+        client = actionlib.SimpleActionClient(
+                "InitCompass", InitCompassAction
+            )
+        client.wait_for_server()
+        rospy.loginfo("Sending GOAL")
+        goal = InitCompassAction()   
+        client.send_goal(goal)
+        client.wait_for_result(rospy.Duration.from_sec(10.0))
+
+
         obstacle_avoidance.initialize()
         self._as = actionlib.SimpleActionServer(
             self._action_name,
