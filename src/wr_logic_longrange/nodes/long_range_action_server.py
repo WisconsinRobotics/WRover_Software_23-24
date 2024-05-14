@@ -78,6 +78,7 @@ class LongRangeActionServer(object):
         while rospy.get_rostime() - start_time < LONG_RANGE_TIMEOUT_TIME and not rospy.is_shutdown():
             rate.sleep()
             if obstacle_avoidance.update_target(goal.target_lat, goal.target_long):
+                rospy.loginfo("SUCCESS SET LONG RANGE ACTION SERVER")
                 return self._as.set_succeeded()
         return self._as.set_aborted()
 

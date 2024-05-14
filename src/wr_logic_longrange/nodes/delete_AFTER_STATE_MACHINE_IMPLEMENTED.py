@@ -22,3 +22,5 @@ if __name__ == '__main__':
                             "lat"], target_long=CoordinateManager.get_coordinate()["long"])
     rospy.loginfo(goal)
     client.send_goal(goal)
+    client.wait_for_result()
+
