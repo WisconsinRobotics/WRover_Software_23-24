@@ -143,12 +143,13 @@ def update_target(target_lat, target_long) -> bool:
                             target_lat, target_long)
     
     target_angle = imu.get_angle() % 360
-    rospy.loginfo("Lat_current: " + str(current_lat) + " Long_current: " + str(current_long))
+    #rospy.loginfo("Lat_current: " + str(current_lat) + " Long_current: " + str(current_long))
 
-    rospy.loginfo("Lat_goal: " + str(target_lat) + " Long_target: " + str(target_long))
+    #rospy.loginfo("Lat_goal: " + str(target_lat) + " Long_target: " + str(target_long))
     
-    rospy.loginfo("Target Angle: " + str(target_angle))
+    #rospy.loginfo("Target Angle: " + str(target_angle))
 
+    rospy.loginfo(imu.get_distance())
     # check if we are close to the target
     if imu.get_distance() < NAV_THRESH_DISTANCE:
         return True
