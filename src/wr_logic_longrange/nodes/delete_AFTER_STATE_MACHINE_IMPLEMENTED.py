@@ -20,5 +20,5 @@ if __name__ == '__main__':
     CoordinateManager.read_coordinates_file()
     goal = LongRangeGoal(target_lat=CoordinateManager.get_coordinate()[
                             "lat"], target_long=CoordinateManager.get_coordinate()["long"])
-    
+    rospy.loginfo(goal)
     client.send_goal(goal)
