@@ -53,18 +53,19 @@ class InitCompassActionServer(object):
 
         #Wait for subscriber to get data
         r = rospy.Rate(self.rate)
-        while self.subGPS == None:
+        while current_lat == 0:
             r.sleep()
         #Get current lat and long before moving
         lat_before = current_lat
         long_before = current_long
-
+        rospy.loginfo("Before: " + str(current_lat) + " " + str(current_long))
         #Driving forward for 10 seconds
         while rospy.get_rostime() - start_time < LONG_RANGE_TIMEOUT_TIME and not rospy.is_shutdown():
             rate.sleep()
             drive_pub.publish(drive_msg)
         drive_pub.publish(0,0)
         rospy.loginfo("MOTORS STOPPED")
+        rospy.loginfo("Before: " + str(current_lat) + " " + str(current_long))
 
         angle_heading = calculate_angle(long_before, lat_before, current_long, current_lat)
         success = set_heading_client(angle_heading)
