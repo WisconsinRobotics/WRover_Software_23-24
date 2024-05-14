@@ -100,6 +100,7 @@ def initialize() -> None:
     rospy.loginfo("Sending GOAL")
     goal = InitCompassAction()   
     client.send_goal(goal)
+    client.wait_for_result(rospy.Duration.from_sec(5.0))
     
 
 
