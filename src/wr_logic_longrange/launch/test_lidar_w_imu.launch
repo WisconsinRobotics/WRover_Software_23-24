@@ -32,6 +32,11 @@
     <!-- <arg name="long_range_output" value="$(arg long_range_output)" /> -->
     <!-- <arg name="short_range_output" value="$(arg short_range_output)" /> -->
   <!-- </include> -->
+  <!-- TEMPORARY to test coords -->
+  <node name='calculate_init_heading' pkg="wr_logic_longrange" type="calculate_heading_action_server.py" output="screen">
+    <param name="motor_speeds" value="$(arg long_range_output)"/>
+  </node>
+  <!--TEMPORARY -->
 
   <include file="$(find wr_logic_longrange)/launch/long_range.launch"/>
   <node name='do_dishes_client' pkg="wr_logic_longrange" type="delete_AFTER_STATE_MACHINE_IMPLEMENTED.py"/>
