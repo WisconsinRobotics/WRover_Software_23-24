@@ -1,6 +1,6 @@
 debug: 1 # Range 0-4 (0 means no debug statements will print)
 
-device: /dev/ttyACM0
+device: /dev/gps
 frame_id: gps # TODO: change it in the future?
 
 config_on_startup: false

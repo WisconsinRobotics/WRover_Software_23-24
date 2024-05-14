@@ -8,8 +8,7 @@
   export WROVER_LOCAL=true
 
    -->
-   
-  <node name='do_dishes_client' pkg="wr_logic_longrange" type="delete_AFTER_STATE_MACHINE_IMPLEMENTED.py" unless="$(eval env('WROVER_LOCAL') == 'true')"/>
+  
   
   <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" unless="$(eval env('WROVER_LOCAL') == 'true')" />
   <include file="$(find wr_entry_point)/launch/comp/comp_falcon.launch"  unless="$(eval env('WROVER_LOCAL') == 'true')"/>
@@ -20,8 +19,10 @@
     <param name="motor_speeds" value="$(arg long_range_output)"/>
   </node>
 
-  <!-- <include file="$(find wr_hsi_sensing)/launch/gps_data_mapper.launch" 
-    if="$(eval env('WROVER_HW') == 'REAL')" /> -->
+  <include file="$(find wr_hsi_sensing)/launch/gps_data_mapper.launch" 
+    if="$(eval env('WROVER_HW') == 'REAL')" />
+   
+  <node name='do_dishes_client' pkg="wr_logic_longrange" type="delete_AFTER_STATE_MACHINE_IMPLEMENTED.py" unless="$(eval env('WROVER_LOCAL') == 'true')"/>
 
   <node name='client_calculate_heading_action' pkg="wr_logic_longrange" type="client_calculate_heading.py" output="screen"/>
 

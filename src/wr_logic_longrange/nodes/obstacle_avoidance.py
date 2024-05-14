@@ -102,7 +102,8 @@ def update_heading(msg: Float64) -> None:
     @param cur_heading East is 0. (Counterclockwise). Extected as a value from 0 to 360.
     """
     global cur_heading
-    cur_heading = (90 + msg.data) % 360  # Shifting to East
+    #cur_heading = (90 + msg.data) % 360  # Shifting to East
+    cur_heading = msg.data #Init calibration shifts to east the initial heading
     # rviz_sim_cur_heading_pub.publish(cur_heading)
 
 
