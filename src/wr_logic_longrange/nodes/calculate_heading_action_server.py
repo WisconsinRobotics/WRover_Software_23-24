@@ -117,5 +117,5 @@ def calculate_angle(x1, y1, x2, y2):
 
 if __name__ == "__main__":
     rospy.init_node("calculate_init_heading")
-    initComp = InitCompassActionServer("InitCompass")
+    initComp = InitCompassActionServer("InitCompassActionServer")
     rospy.spin()
