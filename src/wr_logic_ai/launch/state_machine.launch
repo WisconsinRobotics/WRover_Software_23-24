@@ -29,8 +29,8 @@
   </node>
   <node name="long_range" pkg="wr_logic_longrange" type="long_range_action_server.py" >
     <param name="motor_speeds" value="$(arg long_range_output)"/>
+    <param name="wrover_hw" value="$(env WROVER_HW)" />
   </node>
-  <node name="search_pattern" pkg="wr_logic_search" type="search_action_server.py" />
   <node name="short_range" pkg="wr_logic_shortrange" type="shortrange_action_server.py" />
 
 </launch>

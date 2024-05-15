@@ -51,6 +51,7 @@ class St_Waypoint_Complete(State):
 
         # The code will stay here until the user inputs a value ("c").
         while True:
+            rospy.loginfo("Enter c to continue")
             if input("Enter c to continue: ") == "c":
                 break
 
