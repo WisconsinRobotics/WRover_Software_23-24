@@ -79,7 +79,7 @@ def main():
                                            InitCompassAction,
                                            goal = InitCompassGoal()
                         ),
-                         transitions={'succedeed':'st_longrange',
+                         transitions={'succeded':'st_longrange',
                                       'aborted':'st_init_compass'})
                        
         # st_longrange
