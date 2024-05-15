@@ -4,48 +4,56 @@
 @defgroup wr_logic_search
 @{
 @defgroup wr_logic_search_camera_sub Coordinate Subscriber
-@brief 
-@details 
+@brief Subscriber for the coordinate topic
+@details Subscribes to the /gps_coord_data topic. Listens to the topic until it 
+receives the starting latitude and longitude. Theses values will be saved for the 
+rover to eventually travel to.
 @{
 """
 
 import rospy
-from std_msgs.msg import Float64
+from wr_hsi_sensing.msg import CoordinateMsg
 
-class CoordSub:
+start_lat = 0
+start_long = 0
 
-    start_coord = 0
+'''
+Description: Initializes the Subscriber node that listens to the 
+    /gps_coord_data topic to get the starting latitude and longitude.
+'''
+def initialize():
+    rospy.init_node('coord_subscriber', anonymous=True)
+    rospy.Subscriber("/gps_coord_data", CoordinateMsg, coord_callback)
 
-    '''
-    Description: Function that receives the data from the gps_coord_data topic and saves the starting latitude and longitude.
+'''
+Description: Receives the data from the gps_coord_data topic and 
+    saves the starting latitude and longitude.
 
-    Parameter(s):
-        data - contains two float values representing the starting latitude and longitude
-    '''
-    def coord_callback(data):
-        global start_coord
-        start_coord = data.data
+Parameter(s):
+    msg - contains two float values representing the starting latitude and 
+        longitude
+'''
+def coord_callback(msg: CoordinateMsg):
+    global start_lat
+    global start_long
+    start_lat = msg.latitude
+    start_long = msg.longitude
 
-    '''
-    Description: Function that listens to the gps_coord_data topic to get the starting latitude and longitude.
-    '''
-    def listener():
-        rospy.init_node('coord_subscriber', anonymous=True)
-        rospy.Subscriber('/gps_coord_data', Float64, CoordSub.object_detection_callback)
-        rospy.spin()
+'''
+Description: Function that returns the starting latitude and longitude.
 
-    '''
-    Description: Function that returns the starting latitude and longitude.
-
-    Return(s):
-        ______ - ______
-    '''
-    def get_coord_result():
-        global start_coord
-        return start_coord
+Return(s):
+    start_lat - the starting latitude the rover will travel to 
+    start_long - the starting longitude the rover will travel to 
+'''
+def get_coord_result():
+    global start_lat
+    global start_long
+    return start_lat, start_long
 
 if __name__ == '__main__':
     try:
-        CoordSub.listener()
+        initialize()
+        rospy.spin()
     except rospy.ROSInterruptException:
         pass
