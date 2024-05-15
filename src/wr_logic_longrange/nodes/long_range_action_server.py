@@ -42,16 +42,6 @@ class LongRangeActionServer(object):
     def __init__(self, name) -> None:
         rospy.loginfo("initing long range action server")
         self._action_name = name
-
-        # TODO add to state machine
-        self.client = actionlib.SimpleActionClient("InitCompass", InitCompassAction)
-        self.client.wait_for_server()
-        rospy.loginfo("Sending GOAL")
-        goal = InitCompassAction()
-        rospy.loginfo("INIT COMPASS ENDED")
-        self.client.send_goal(goal)
-        self.client.wait_for_result(rospy.Duration.from_sec(10.0))
-
         # Publisher
         self.drive_pub = rospy.Publisher(
             rospy.get_param("~motor_speeds"), DriveTrainCmd, queue_size=10
@@ -79,8 +69,6 @@ class LongRangeActionServer(object):
         @param goal (LongRangeGoal): Goal for the navigation segment, which contains the GPS coordinates
         of the target
         """
-        self.client.wait_for_result(rospy.Duration.from_sec(10.0))
-
         rate = rospy.Rate(10)
         start_time = rospy.get_rostime()
         while (

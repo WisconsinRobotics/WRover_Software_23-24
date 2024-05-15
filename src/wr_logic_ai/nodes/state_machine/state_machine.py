@@ -6,6 +6,7 @@ from smach_ros import SimpleActionState
 from std_srvs.srv import Empty
 
 from wr_logic_longrange.msg import LongRangeAction, LongRangeGoal
+from wr_logic_longrange.msg import InitCompassAction, InitCompassGoal
 from wr_logic_search.msg import SearchStateAction, SearchStateGoal
 from wr_logic_shortrange.msg import ShortRangeAction, ShortRangeGoal
 from  wr_logic_ai.color_matrix import COLOR_NONE, COLOR_AUTONOMOUS, COLOR_COMPLETE, COLOR_ERROR, set_matrix_color
@@ -72,6 +73,15 @@ def main():
     sm.userdata.target_long = CoordinateManager.get_coordinate()["long"]
 
     with sm:
+        # st_init_compass
+        StateMachine.add('st_init_compass', 
+                         SimpleActionState('InitCompassActionServer',
+                                           InitCompassAction,
+                                           goal = InitCompassGoal()
+                        ),
+                         transitions={'succedeed':'st_longrange',
+                                      'aborted':'st_init_compass'})
+                       
         # st_longrange
         StateMachine.add('st_longrange', 
                          SimpleActionState('LongRangeActionServer',
