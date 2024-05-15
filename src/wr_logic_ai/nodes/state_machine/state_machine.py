@@ -88,8 +88,8 @@ def main():
                                            LongRangeAction,
                                            goal_slots=['target_lat', 'target_long']),
                          transitions={'succeeded':'st_longrange_complete',
-                                      'aborted':'st_longrange',
-                                      'preempted':'st_longrange'},
+                                      'aborted':'st_init_compass',
+                                      'preempted':'st_init_compass'},
                          remapping={'target_lat':'target_lat',
                                     'target_long':'target_long'})
 
@@ -104,8 +104,8 @@ def main():
                                            SearchStateAction, 
                                            goal = SearchStateGoal()),
                          transitions={'succeeded':'st_shortrange_setup',
-                                      'aborted':'st_longrange',
-                                      'preempted':'st_longrange'})
+                                      'aborted':'st_init_compass',
+                                      'preempted':'st_init_compass'})
 
         # st_shortrange_setup
         StateMachine.add('st_shortrange_setup', St_Shortrange_Setup(),
@@ -124,7 +124,7 @@ def main():
 
         # st_waypoint_complete
         StateMachine.add('st_waypoint_complete', St_Waypoint_Complete(),
-                         transitions={'next_waypoint':'st_longrange',
+                         transitions={'next_waypoint':'st_init_compass',
                                       'complete':'succeeded'},
                          remapping={'target_lat':'target_lat',
                                     'target_long':'target_long'})
