@@ -24,7 +24,7 @@ ROVER_WIDTH = 1.5
 ## Publisher for LiDAR data for debugging on rviz
 scan_rviz_pub = rospy.Publisher("/scan_rviz", LaserScan, queue_size=10)
 # TODO (@bennowotny ) This should be disable-able for bandwidth
-#window_pub = rospy.Publisher("/lidar_windows", PoseArray, queue_size=1)
+# window_pub = rospy.Publisher("/lidar_windows", PoseArray, queue_size=1)
 
 
 def calculate_anti_window(d: float) -> int:
@@ -80,6 +80,7 @@ def is_wide_valley(sector_i: int, sector_f: int, max_valley: int) -> bool:
     # TODO: Cleaner way to write this?
     return 1 + sector_f - sector_i > max_valley
 
+
 # Transforms the raw lidar data from compass coordinates (0 at north, clockwise) to math coordinates(0 at east, counterclockwise)
 
 
@@ -92,9 +93,9 @@ def offset_lidar_data(data: LaserScan, sector_angle: float, is_rviz=False):
     @return offest_data: lidar data transformed so that the 0 angle is the right side of the lidar going counterclockwise
     """
     offset_data = [0] * len(data)
-    data = list(data)    
-    offset_data = list((data[math.floor(270/sector_angle):]))
-    offset_data.extend(list((data[:(math.floor(270/sector_angle))])))    
+    data = list(data)
+    offset_data = list((data[math.floor(270 / sector_angle) :]))
+    offset_data.extend(list((data[: (math.floor(270 / sector_angle))])))
     return offset_data
 
 
@@ -124,27 +125,26 @@ def get_valley(
     global prevData
 
     rviz_data = deepcopy(data)
-    #rviz_data.ranges = gaussian_smooth.gaussian_filter1d(rviz_data.ranges, smoothing)
+    # rviz_data.ranges = gaussian_smooth.gaussian_filter1d(rviz_data.ranges, smoothing)
 
     if rospy.get_param("~wrover_hw") == "REAL":
-        #hist = offset_lidar_data(gaussian_smooth.gaussian_filter1d(data.ranges, smoothing), sector_angle)
-        hist = offset_lidar_data(data.ranges, sector_angle, is_rviz = False)
+        # hist = offset_lidar_data(gaussian_smooth.gaussian_filter1d(data.ranges, smoothing), sector_angle)
+        hist = offset_lidar_data(data.ranges, sector_angle, is_rviz=False)
     # For testing:
     else:
-        #hist = gaussian_smooth.gaussian_filter1d(data.ranges, smoothing)
+        # hist = gaussian_smooth.gaussian_filter1d(data.ranges, smoothing)
         hist = list(data.ranges)
 
     rviz_data.ranges = hist
     scan_rviz_pub.publish(rviz_data)
 
-    #Front of scanner
-    #rospy.loginfo(hist[math.floor(90/sector_angle)])
+    # Front of scanner
+    # rospy.loginfo(hist[math.floor(90/sector_angle)])
 
     # This is to prevent expanding constant obstacles from behind the robot, which can
     # inadvertently and unpredictably (due to sensor noise) block out most of the view
     # frame due to obstacle expansion
-    del hist[int(len(hist)/2):]
-
+    del hist[int(len(hist) / 2) :]
 
     # Write the sectors data to an output file for logging
     output_file = open("sectors.data", "wb")
@@ -153,7 +153,7 @@ def get_valley(
 
     # get two obstacles lists for 2 thresholds in order to get rid of
     # any obstacle that is far away. obstacle_list will grab all the obstacles at the normal
-    # threshold, obstacle list close will grab all the obstacles again, except will now not 
+    # threshold, obstacle list close will grab all the obstacles again, except will now not
     # contain obstacles farther out
     obstacle_list = get_obstacle_list(sector_angle, threshold, hist)
     obstacle_list_close = get_obstacle_list(sector_angle, threshold / 2, hist)
@@ -163,7 +163,6 @@ def get_valley(
     # that are not in our way yet
     if len(obstacle_list_close) != 0:
         obstacle_list = obstacle_list_close
-
 
     # At this point we make an inverse list of the obstacles to have a 2d list of all
     # the places that we can drive through (our windows)
@@ -199,7 +198,7 @@ def get_valley(
             pose.orientation.z = math.sin(math.radians(i * sector_angle) / 2)
             pose.orientation.w = math.cos(math.radians(i * sector_angle) / 2)
             window_msg.poses.append(pose)
-    #window_pub.publish(window_msg)
+    # window_pub.publish(window_msg)
 
     # Initialize best valley array
     best_valley = []
@@ -218,14 +217,9 @@ def get_valley(
     return best_valley
 
 
-
-def get_obstacle_list(
-        sector_angle: float,
-        threshold: float,
-        hist: list
-    ) -> list:
+def get_obstacle_list(sector_angle: float, threshold: float, hist: list) -> list:
     """
-    Using the laserscan data coming in, it will join objects together to make an obstacle list. This 
+    Using the laserscan data coming in, it will join objects together to make an obstacle list. This
     will then be used to help find the best valley for the rover to go through. Can be varied through
     changing the threshold (how close the obstacles need to be to get fit into the obstacle list)
 
@@ -243,44 +237,54 @@ def get_obstacle_list(
         if hist[i] < threshold:
             one_obstacle.append(i)
         elif len(one_obstacle) >= 1:
-            obstacle_list, one_obstacle = update_obstacle_bound(hist, one_obstacle, sector_angle, obstacle_list)
+            obstacle_list, one_obstacle = update_obstacle_bound(
+                hist, one_obstacle, sector_angle, obstacle_list
+            )
 
     # TODO (@bennowotny ): This code is the same as what's in the loop, so it should be abstracted out to its own function
     if len(one_obstacle) != 0:
-        obstacle_list, one_obstacle = update_obstacle_bound(hist, one_obstacle, sector_angle, obstacle_list)
+        obstacle_list, one_obstacle = update_obstacle_bound(
+            hist, one_obstacle, sector_angle, obstacle_list
+        )
 
     return obstacle_list
 
-def update_obstacle_bound(hist: list, one_obstacle: list, sector_angle: float, obstacle_list: list):
-        '''
-        updates the list of obstacles with new bounds calculated from lidar data
 
-        @param hist (list): The lidar data as a list
-        @param one_obstacle (list): Indicies in the list the relate to the current obstacles
-        @param sector_angle (float): Number of degrees in on sector
-        @param obstacle_list (list): List of all obstacles
-        @return list, list: updates list of obstacles and one obstacle that can be merged
-        '''
-        left_bound = len(hist)
-        right_bound = 0
-        for i in range(len(one_obstacle)):
-            # Calculate size of anti-window and add to obstacle bounds
-            # pass in distance to target to caculate angle that allows robot to pass through
-            angleToIncrease = calculate_anti_window(hist[one_obstacle[i]]) / sector_angle
+def update_obstacle_bound(
+    hist: list, one_obstacle: list, sector_angle: float, obstacle_list: list
+):
+    """
+    updates the list of obstacles with new bounds calculated from lidar data
 
-            # Update left and right bound
-            left_bound = max(min(left_bound, one_obstacle[i] - angleToIncrease), 0)
-            right_bound = min(max(right_bound, one_obstacle[i] + angleToIncrease), len(hist))
+    @param hist (list): The lidar data as a list
+    @param one_obstacle (list): Indicies in the list the relate to the current obstacles
+    @param sector_angle (float): Number of degrees in on sector
+    @param obstacle_list (list): List of all obstacles
+    @return list, list: updates list of obstacles and one obstacle that can be merged
+    """
+    left_bound = len(hist)
+    right_bound = 0
+    for i in range(len(one_obstacle)):
+        # Calculate size of anti-window and add to obstacle bounds
+        # pass in distance to target to caculate angle that allows robot to pass through
+        angleToIncrease = calculate_anti_window(hist[one_obstacle[i]]) / sector_angle
 
-        # Check to see if the obstacle we just found can actually be merged with a previous obstacle
-        while len(obstacle_list) > 0 and obstacle_list[-1][1] >= left_bound:
-            left_bound = min(left_bound, obstacle_list[-1][0])
-            right_bound = max(right_bound, obstacle_list[-1][1])
-            del obstacle_list[-1]
-        obstacle_list.append([left_bound, right_bound])
-        one_obstacle.clear()
+        # Update left and right bound
+        left_bound = max(min(left_bound, one_obstacle[i] - angleToIncrease), 0)
+        right_bound = min(
+            max(right_bound, one_obstacle[i] + angleToIncrease), len(hist)
+        )
 
-        return obstacle_list, one_obstacle
+    # Check to see if the obstacle we just found can actually be merged with a previous obstacle
+    while len(obstacle_list) > 0 and obstacle_list[-1][1] >= left_bound:
+        left_bound = min(left_bound, obstacle_list[-1][0])
+        right_bound = max(right_bound, obstacle_list[-1][1])
+        del obstacle_list[-1]
+    obstacle_list.append([left_bound, right_bound])
+    one_obstacle.clear()
+
+    return obstacle_list, one_obstacle
+
 
 def get_navigation_angle(
     target: int, threshold: float, data: LaserScan, smoothing_constant: float = 3
@@ -322,7 +326,7 @@ def get_navigation_angle(
     if get_target_distance(best_valley[0], best_valley[1], target, sector_angle) == 0:
         # Report the current target angle; no adjustment needed
         # print("target * sector_angle = " + str(target * sector_angle))
-        #rospy.loginfo("In target valley")
+        # rospy.loginfo("In target valley")
         return target * sector_angle
 
     # If the valley is wide...
@@ -345,7 +349,7 @@ def get_navigation_angle(
         )
 
         # Aim for the center of this new max_valley valley (this helps avoid accidentally clipping an edge of the robot)
-        #rospy.loginfo("Obstacle in the way, turning to wide valley")
+        # rospy.loginfo("Obstacle in the way, turning to wide valley")
         return ((nearest_sector + border_sector) / 2.0) * sector_angle
 
     # If the valley is narrow...
@@ -353,7 +357,7 @@ def get_navigation_angle(
         # Follow the probotcol as defined above for narrow valleys
 
         # Aim for the center of the valley
-        #rospy.loginfo("Obstacle in the way, turning to narrow valley")
+        # rospy.loginfo("Obstacle in the way, turning to narrow valley")
         return ((best_valley[0] + best_valley[1]) / 2.0) * sector_angle
 
 

@@ -49,8 +49,9 @@ smoothing_constant = 3
 # global speed factor updated through navigation
 speed_factor = 0.3
 
-#final angle to drive to
+# final angle to drive to
 result = 0
+
 
 # Start the tasks managed to drive autonomously
 def initialize() -> None:
@@ -69,8 +70,6 @@ def initialize() -> None:
         scan: Get values from lidar scan
 
     """
-    global smoothing_constant
-    global speed_factor
 
     # Subscribe to gps coordinate data
     rospy.Subscriber("/gps_coord_data", CoordinateMsg, update_gps_coord)
@@ -79,8 +78,8 @@ def initialize() -> None:
     rospy.Subscriber("/heading", Float64, update_heading)
 
     # Subscribe to lidar data
-    rospy.Subscriber('/scan', LaserScan, update_navigation)
-    
+    rospy.Subscriber("/scan", LaserScan, update_navigation)
+
 
 # update current position based on gps coordinates
 def update_gps_coord(msg: CoordinateMsg) -> None:
@@ -99,8 +98,8 @@ def update_heading(msg: Float64) -> None:
     @param cur_heading East is 0. (Counterclockwise). Extected as a value from 0 to 360.
     """
     global cur_heading
-    #cur_heading = (90 + msg.data) % 360  # Shifting to East
-    cur_heading = msg.data #Init calibration shifts to east the initial heading
+    # cur_heading = (90 + msg.data) % 360  # Shifting to East
+    cur_heading = msg.data  # Init calibration shifts to east the initial heading
     # rviz_sim_cur_heading_pub.publish(cur_heading)
 
 
@@ -117,10 +116,6 @@ def angle_diff(heading1: float, heading2: float) -> float:
     return (diff + 180) % 360 - 180
 
 
-# Calculate current heading and the planar target angle
-# TODO: this should now be part of a action server callback function
-
-
 # update angle from rover to target based on new current position
 def update_target(target_lat, target_long) -> bool:
     """
@@ -133,15 +128,14 @@ def update_target(target_lat, target_long) -> bool:
     global target_angle
 
     # Construct the planar target angle relative to east, accounting for curvature
-    imu = AngleCalculations(current_lat, current_long,
-                            target_lat, target_long)
-    
-    target_angle = imu.get_angle() % 360
-    #rospy.loginfo("Lat_current: " + str(current_lat) + " Long_current: " + str(current_long))
+    imu = AngleCalculations(current_lat, current_long, target_lat, target_long)
 
-    #rospy.loginfo("Lat_goal: " + str(target_lat) + " Long_target: " + str(target_long))
-    
-    #rospy.loginfo("Target Angle: " + str(target_angle))
+    target_angle = imu.get_angle() % 360
+    # rospy.loginfo("Lat_current: " + str(current_lat) + " Long_current: " + str(current_long))
+
+    # rospy.loginfo("Lat_goal: " + str(target_lat) + " Long_target: " + str(target_long))
+
+    # rospy.loginfo("Target Angle: " + str(target_angle))
 
     rospy.loginfo(imu.get_distance())
     # check if we are close to the target
@@ -151,6 +145,7 @@ def update_target(target_lat, target_long) -> bool:
         return False
 
 
+# TODO handle cases where lidar data is not publishing, and update_navigation() does not get called
 # Update the robot's navigation and drive it towards the target angle based on our best valley
 def update_navigation(data: LaserScan) -> None:
     """
@@ -167,7 +162,7 @@ def update_navigation(data: LaserScan) -> None:
 
     ## Gets best possible angle, considering obstacles
     delta_heading = angle_diff(target_angle, cur_heading)
-    
+
     result = get_navigation_angle(
         ((90 + delta_heading) % 360)
         / math.degrees(
@@ -177,11 +172,12 @@ def update_navigation(data: LaserScan) -> None:
         data,
         smoothing_constant,
     )
-    
+
     # rospy.loginfo(f"raw heading: {result}")
 
     # TESTING
     testing_rviz.update_navigation_rviz_sim(delta_heading, result, cur_heading)
+
 
 def get_drive_power() -> DriveTrainCmd:
     """
@@ -198,20 +194,19 @@ def get_drive_power() -> DriveTrainCmd:
 
     # rospy.loginfo(f"left drive value: {msg.left_value}, right drive value: {msg.right_value}")
     # Scale the resultant DriveTrainCmd by the speed multiplier
-    msg.left_value *= speed_factor 
+    msg.left_value *= speed_factor
     msg.right_value *= speed_factor
-    
-    if msg.left_value > msg.right_value:
-        valueToTurn = "Turn right"
-    elif msg.left_value < msg.right_value:
-        valueToTurn = "Turn left"
-    else:
-        valueToTurn = "Stay straight"
-    
-    # Publish the DriveTrainCmd to the topic
-    #rospy.loginfo("Drive to: " + str(valueToTurn))
-    #rospy.loginfo("Target Value: " + str(target_angle))
-    return msg 
+
+    # if msg.left_value > msg.right_value:
+    #     valueToTurn = "Turn right"
+    # elif msg.left_value < msg.right_value:
+    #     valueToTurn = "Turn left"
+    # else:
+    #     valueToTurn = "Stay straight"
+    # rospy.loginfo("Drive to: " + str(valueToTurn))
+    # rospy.loginfo("Target Value: " + str(target_angle))
+
+    return msg
 
 
 # If this file was executed...
@@ -222,7 +217,6 @@ if __name__ == "__main__":
         # testing_rviz.initialize()
         # Spin RosPy to the next update cycle
         rospy.spin()
-        
 
     # Ignore ROS Interrupt Exceptions
     except rospy.ROSInterruptException:
