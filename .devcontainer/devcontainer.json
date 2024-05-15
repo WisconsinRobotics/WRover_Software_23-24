@@ -41,7 +41,7 @@
 				"ms-python.vscode-pylance",
 				"ms-iot.vscode-ros",
 				"twxs.cmake",
-				"ms-vscode.cmake-tools",				
+				"ms-vscode.cmake-tools",
 				"josetr.cmake-language-support-vscode",
 				"ms-vscode-remote.remote-containers",
 				"ms-vscode-remote.remote-ssh-edit",

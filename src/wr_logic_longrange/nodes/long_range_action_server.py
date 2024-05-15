@@ -17,6 +17,16 @@ import actionlib
 from wr_logic_longrange.msg import LongRangeAction, LongRangeGoal
 import obstacle_avoidance
 
+# Temporary:
+from std_msgs.msg import Float64
+import testing_rviz
+from wr_logic_longrange.msg import (
+    InitCompassAction,
+    InitCompassGoal,
+)
+from wr_drive_msgs.msg import DriveTrainCmd
+
+
 # TODO: check timeout time length validity
 ## Timeout time for when we declare a long range navigation as failed
 LONG_RANGE_TIMEOUT_TIME = rospy.Duration(1000)
@@ -32,6 +42,20 @@ class LongRangeActionServer(object):
     def __init__(self, name) -> None:
         rospy.loginfo("initing long range action server")
         self._action_name = name
+
+        # TODO add to state machine
+        self.client = actionlib.SimpleActionClient("InitCompass", InitCompassAction)
+        self.client.wait_for_server()
+        rospy.loginfo("Sending GOAL")
+        goal = InitCompassAction()
+        rospy.loginfo("INIT COMPASS ENDED")
+        self.client.send_goal(goal)
+        self.client.wait_for_result(rospy.Duration.from_sec(10.0))
+
+        # Publisher
+        self.drive_pub = rospy.Publisher(
+            rospy.get_param("~motor_speeds"), DriveTrainCmd, queue_size=10
+        )
         obstacle_avoidance.initialize()
         self._as = actionlib.SimpleActionServer(
             self._action_name,
@@ -40,8 +64,12 @@ class LongRangeActionServer(object):
             auto_start=False,
         )
         self._as.start()
-        
-        
+
+    def stop_motors(self):
+        stop_msg = DriveTrainCmd()
+        stop_msg.left_value = 0
+        stop_msg.right_value = 0
+        self.drive_pub.publish(stop_msg)
 
     def execute_callback(self, goal: LongRangeGoal):
         """
@@ -51,16 +79,26 @@ class LongRangeActionServer(object):
         @param goal (LongRangeGoal): Goal for the navigation segment, which contains the GPS coordinates
         of the target
         """
+        self.client.wait_for_result(rospy.Duration.from_sec(10.0))
 
-        obstacle_avoidance.update_target(goal.target_lat, goal.target_long)
-        obstacle_avoidance.set_is_active(True)
+        rate = rospy.Rate(10)
         start_time = rospy.get_rostime()
-        while rospy.get_rostime() - start_time < LONG_RANGE_TIMEOUT_TIME and not rospy.is_shutdown():
-            rospy.Rate(10).sleep()
-            if obstacle_avoidance.run_navigation():
-                obstacle_avoidance.set_is_active(False)
+        while (
+            rospy.get_rostime() - start_time < LONG_RANGE_TIMEOUT_TIME
+            and not rospy.is_shutdown()
+        ):
+            rate.sleep()
+            if obstacle_avoidance.update_target(goal.target_lat, goal.target_long):
+                rospy.loginfo("SUCCESS LONG RANGE ACTION SERVER")
+                # Stop motors
+                self.stop_motors()
                 return self._as.set_succeeded()
-        obstacle_avoidance.set_is_active(False)
+            else:
+                # set motor to drive to target
+                msg = obstacle_avoidance.get_drive_power()
+                self.drive_pub.publish(msg)
+
+        self.stop_motors()
         return self._as.set_aborted()
 
 
@@ -68,6 +106,3 @@ if __name__ == "__main__":
     rospy.init_node("long_range_action_server")
     server = LongRangeActionServer("LongRangeActionServer")
     rospy.spin()
-    
-    
-    

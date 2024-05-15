@@ -122,25 +122,15 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(
+#include_directories(
 # include
-sh2
-${catkin_INCLUDE_DIRS}
-)
+#${catkin_INCLUDE_DIRS}
+#)
 
 ## Declare a C++ library
 # add_library(sh2
 #   # src/${PROJECT_NAME}/wr_hsi_sensing.cpp
 # )
-
-add_library(${PROJECT_NAME}
-  sh2/euler.c
-  sh2/sh2_SensorValue.c
-  sh2/sh2_util.c
-  sh2/sh2.c
-  sh2/shtp.c
-  src/BNO085_hal.cpp
-)
 # target_link_libraries(${PROJECT_NAME} sh2)
 
 ## Add cmake target dependencies of the library
@@ -151,8 +141,8 @@ add_library(${PROJECT_NAME}
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-add_executable(BNO085_IMU src/BNO085_IMU.cpp)
-target_link_libraries(BNO085_IMU ${catkin_LIBRARIES} ${PROJECT_NAME})
+#add_executable()
+#target_link_libraries(${catkin_LIBRARIES} ${PROJECT_NAME})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
