@@ -67,6 +67,7 @@ catkin_python_setup()
 add_action_files(
   FILES
   LongRange.action
+  InitCompass.action
 )
 
 ## Generate added messages and services with any dependencies listed here

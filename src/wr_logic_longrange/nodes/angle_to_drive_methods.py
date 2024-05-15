@@ -47,12 +47,10 @@ def piecewise_linear(heading: float, target_angle: float) -> DriveTrainCmd:
     else:
         return DriveTrainCmd(left_value=1, right_value=max(-2 / 45 * x + 1, -1))
 
-    """
-    if x < 0:
-        return DriveTrainCmd(left_value = max(2/90*x+1,-1),right_value = 1)
-    else:
-        return DriveTrainCmd(left_value = 1, right_value = max(-2/90*x+1,-1))
-    """
+    # if x < 0:
+    #     return DriveTrainCmd(left_value = max(2/90*x+1,-1),right_value = 1)
+    # else:
+    #     return DriveTrainCmd(left_value = 1, right_value = max(-2/90*x+1,-1))
 
 
 def logistic(heading: float, target_angle: float) -> DriveTrainCmd:
@@ -67,8 +65,8 @@ def logistic(heading: float, target_angle: float) -> DriveTrainCmd:
 
     x = get_x(heading, target_angle)
     return DriveTrainCmd(
-        left_value=2 / (1 + math.exp(-(x + 45) / 10)) - 1,
-        right_value=2 / (1 + math.exp((x - 45) / 10)) - 1,
+        left_value=2 / (1 + math.exp(-(x + 30) / 9)) - 1,
+        right_value=2 / (1 + math.exp((x - 30) / 9)) - 1,
     )
 
 
