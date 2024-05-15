@@ -23,6 +23,7 @@ from wr_logic_longrange.msg import (
     InitCompassAction,
     InitCompassGoal,
 )
+from wr_drive_msgs.msg import DriveTrainCmd
 
 
 # TODO: check timeout time length validity
@@ -51,7 +52,10 @@ class LongRangeActionServer(object):
         rospy.loginfo("INIT COMPASS ENDED")
         self.client.send_goal(goal)
         self.client.wait_for_result(rospy.Duration.from_sec(10.0))
-
+        # Publisher
+        self.drive_pub = rospy.Publisher(
+            rospy.get_param("~motor_speeds"), DriveTrainCmd, queue_size=10
+        )
         obstacle_avoidance.initialize()
         self._as = actionlib.SimpleActionServer(
             self._action_name,
@@ -78,8 +82,18 @@ class LongRangeActionServer(object):
         while rospy.get_rostime() - start_time < LONG_RANGE_TIMEOUT_TIME and not rospy.is_shutdown():
             rate.sleep()
             if obstacle_avoidance.update_target(goal.target_lat, goal.target_long):
-                rospy.loginfo("SUCCESS SET LONG RANGE ACTION SERVER")
+                rospy.loginfo("SUCCESS LONG RANGE ACTION SERVER")
+                #Stop motors
+                msg_stop = DriveTrainCmd()
+                msg_stop.left_value = 0
+                msg_stop.right_value = 0
+                self.drive_pub.publish(msg_stop)
                 return self._as.set_succeeded()
+            else:
+                #set motor to drive to target
+                msg = obstacle_avoidance.get_drive_power()
+                self.drive_pub.publish(msg)
+
         return self._as.set_aborted()
 
 

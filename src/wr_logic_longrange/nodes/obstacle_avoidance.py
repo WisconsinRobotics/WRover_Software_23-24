@@ -49,6 +49,9 @@ smoothing_constant = 3
 # global speed factor updated through navigation
 speed_factor = 0.3
 
+#final angle to drive to
+result = 0
+
 # Start the tasks managed to drive autonomously
 def initialize() -> None:
     """Initialize publisher and subscribers for nodes
@@ -66,14 +69,8 @@ def initialize() -> None:
         scan: Get values from lidar scan
 
     """
-    global drive_pub
     global smoothing_constant
     global speed_factor
-
-    # Publisher
-    drive_pub = rospy.Publisher(
-        rospy.get_param("~motor_speeds"), DriveTrainCmd, queue_size=10
-    )
 
     # Subscribe to gps coordinate data
     rospy.Subscriber("/gps_coord_data", CoordinateMsg, update_gps_coord)
@@ -84,9 +81,6 @@ def initialize() -> None:
     # Subscribe to lidar data
     rospy.Subscriber('/scan', LaserScan, update_navigation)
     
-
-
-
 
 # update current position based on gps coordinates
 def update_gps_coord(msg: CoordinateMsg) -> None:
@@ -152,11 +146,6 @@ def update_target(target_lat, target_long) -> bool:
     rospy.loginfo(imu.get_distance())
     # check if we are close to the target
     if imu.get_distance() < NAV_THRESH_DISTANCE:
-        print("Stopping motors")
-        msg_stop = DriveTrainCmd()
-        msg_stop.left_value = 0
-        msg_stop.right_value = 0
-        drive_pub.publish(msg_stop)
         return True
     else:
         return False
@@ -172,13 +161,11 @@ def update_navigation(data: LaserScan) -> None:
     @param msg: Get the DriveTrainCmd(motor values) relating to the heading of the robot and the resulting best navigation angle
     @param data: Lidar data received
     """
+    global result
 
     # rospy.loginfo(f"target angle: {target_angle}, current heading: {cur_heading}")
 
-    # TODO: data threshold might depend of lidar model, double check
-    # Change if units/lidar changes\
-    # TODO (@bennowotny ): This depended on data_avg, why?\
-     ## Gets best possible angle, considering obstacles
+    ## Gets best possible angle, considering obstacles
     delta_heading = angle_diff(target_angle, cur_heading)
     
     result = get_navigation_angle(
@@ -193,6 +180,18 @@ def update_navigation(data: LaserScan) -> None:
     
     # rospy.loginfo(f"raw heading: {result}")
 
+    # TESTING
+    testing_rviz.update_navigation_rviz_sim(delta_heading, result, cur_heading)
+
+def get_drive_power() -> DriveTrainCmd:
+    """
+    Calculate and return the motor powers to drive towards the target angle
+
+    @param delta_heading: Relative value of target from robot from -180 to 180. Starting from bottom of robot (Counter-Clockwise)
+    @param result: Angle to drive to based on target angle, current heading, and obstacles. Value given as a sector angle with right of robot being 0 (Counterclockwise).
+    @param msg: Get the DriveTrainCmd(motor values) relating to the heading of the robot and the resulting best navigation angle
+    @param data: Lidar data received
+    """
     # Get the DriveTrainCmd relating to the heading of the robot and the resulting best navigation angle
     # Reason we do 90 - result is to get a value where 0 is up, + is clockwise, and - is counterclockwise
     msg = angle_calc.logistic(angle_diff(90, result), 0)
@@ -212,11 +211,7 @@ def update_navigation(data: LaserScan) -> None:
     # Publish the DriveTrainCmd to the topic
     #rospy.loginfo("Drive to: " + str(valueToTurn))
     #rospy.loginfo("Target Value: " + str(target_angle))
-    drive_pub.publish(msg)
-
-    # TESTING
-    testing_rviz.update_navigation_rviz_sim(delta_heading, result, cur_heading)
-        
+    return msg 
 
 
 # If this file was executed...
@@ -236,11 +231,6 @@ if __name__ == "__main__":
     # If there is some other error (i.e. ROS Termination)
     finally:
         # Stop the drive motors before shutting down
-        print("Stopping motors")
-        msg_stop = DriveTrainCmd()
-        msg_stop.left_value = 0
-        msg_stop.right_value = 0
-        drive_pub.publish(msg_stop)
         time.sleep(0.1)
 
 ## @}
