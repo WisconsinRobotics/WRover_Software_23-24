@@ -1,21 +1,18 @@
 [submodule "src/wroboclaw"]
 	path = src/wroboclaw
-	url = https://github.com/WisconsinRobotics/wroboclaw
+	url = git@github.com:WisconsinRobotics/wroboclaw.git
 [submodule "src/wreadinput"]
 	path = src/wreadinput
-	url = https://github.com/WisconsinRobotics/wreadinput
+	url = git@github.com:WisconsinRobotics/wreadinput.git
 [submodule "src/wready"]
 	path = src/wready
-	url = https://github.com/WisconsinRobotics/wready
+	url = git@github.com:WisconsinRobotics/wready.git
 [submodule "src/wresponsecontrol"]
 	path = src/wresponsecontrol
-	url = https://github.com/WisconsinRobotics/wresponsecontrol
+	url = git@github.com:WisconsinRobotics/wresponsecontrol.git
 [submodule "src/wrplidar_ros"]
 	path = src/wrplidar_ros
-	url = https://github.com/WisconsinRobotics/wrplidar_ros.git
+	url = git@github.com:WisconsinRobotics/wrplidar_ros.git
 [submodule "src/wrevolution"]
 	path = src/wrevolution
-	url = https://github.com/WisconsinRobotics/wrevolution
-[submodule "src/wr_hsi_sensing/src/sh2"]
-	path = src/wr_hsi_sensing/sh2
-	url = https://github.com/ceva-dsp/sh2
+	url = git@github.com:WisconsinRobotics/wrevolution.git

@@ -122,24 +122,15 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(
+#include_directories(
 # include
-sh2
-${catkin_INCLUDE_DIRS}
-)
+#${catkin_INCLUDE_DIRS}
+#)
 
 ## Declare a C++ library
 # add_library(sh2
 #   # src/${PROJECT_NAME}/wr_hsi_sensing.cpp
 # )
-
-add_library(${PROJECT_NAME}
-  sh2/euler.c
-  sh2/sh2_SensorValue.c
-  sh2/sh2_util.c
-  sh2/sh2.c
-  sh2/shtp.c
-)
 # target_link_libraries(${PROJECT_NAME} sh2)
 
 ## Add cmake target dependencies of the library
