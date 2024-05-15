@@ -88,7 +88,7 @@ def main():
                          SimpleActionState('LongRangeActionServer',
                                            LongRangeAction,
                                            goal_slots=['target_lat', 'target_long']),
-                         transitions={'succeeded':'st_longrange_complete',
+                         transitions={'succeded':'st_longrange_complete',
                                       'aborted':'st_init_compass',
                                       'preempted':'st_init_compass'},
                          remapping={'target_lat':'target_lat',
