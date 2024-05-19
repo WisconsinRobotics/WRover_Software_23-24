@@ -209,7 +209,7 @@ def update_navigation_rviz_sim(
         marker_pub.publish(marker)
 
     # Flipped lines to match laser scan from rpLIDAR
-    elif rospy.get_param("/long_range_action_server/wrover_hw") == "REAL":
+    elif rospy.get_param("~wrover_hw") == "REAL":
 
         heading_msg.header.seq = frameCount
         heading_msg.header.stamp = rospy.get_rostime()

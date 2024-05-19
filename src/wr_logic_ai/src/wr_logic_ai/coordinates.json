@@ -9,12 +9,12 @@
         "lat": 43.0716988,
         "long": -89.4116953,
         "note": "Somewhere in UTAH",
-        "target": "aruco"
+        "target": "none"
     },
     {
         "lat": 0,
         "long": 0,
         "note": "None",
-        "target": "vision"
+        "target": "none"
     }
 ]

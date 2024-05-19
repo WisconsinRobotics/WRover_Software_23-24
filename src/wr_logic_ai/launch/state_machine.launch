@@ -6,6 +6,7 @@
 <launch>
   <arg name="long_range_output" default="/control/drive_system/cmd"/>
 
+  <node pkg="wr_logic_ai" name="nav_state_machine" type="state_machine.py" output="screen" />
 
   <!-- Launch files for when using real robot -->
   <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" />
@@ -19,7 +20,6 @@
     if="$(eval env('WROVER_HW') == 'REAL')" />
 
   <node pkg="wr_logic_ai" name="wait_for_user_input" type="wait_for_user_input.py" output="screen" />
-  <node pkg="wr_logic_ai" name="nav_state_machine" type="state_machine.py" output="screen" />
 
   <!-- <include file="$(find wr_logic_longrange)/launch/long_range.launch" /> -->
 

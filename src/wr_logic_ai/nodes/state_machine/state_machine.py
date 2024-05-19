@@ -25,8 +25,8 @@ class St_Longrange_Complete(State):
 
     def execute(self, userdata):
         # Checks if the waypoint requires target search and approach
-        if CoordinateManager.get_coordinate()["target"] != "none":
-            return "longrange_only"
+        if CoordinateManager.get_coordinate()["target"] == "none":
+            return 'longrange_only'
         else:
             return "shortrange"
 
