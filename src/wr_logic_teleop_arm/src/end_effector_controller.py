@@ -37,6 +37,7 @@ if __name__ == "__main__":
     openSubscriber = rospy.Subscriber("/hci/arm/gamepad/button/a", std_msgs.Bool, lambda msg: claw.open_claw(msg.data))
     closeSubscriber = rospy.Subscriber("/hci/arm/gamepad/button/b", std_msgs.Bool, lambda msg: claw.close_claw(msg.data))
 
+    """
     rospy.loginfo("Starting GPIO setup...")
 
     with open("/sys/class/gpio/export", "w") as exportFile:
@@ -49,8 +50,11 @@ if __name__ == "__main__":
 
     rospy.loginfo("GPIO setup complete!")
     solenoidSubscriber = rospy.Subscriber("/hci/arm/gamepad/button/y", std_msgs.Bool, actuateSolenoid, queue_size=1)
+    """
 
     rospy.spin()
     
+    """
     with open("/sys/class/gpio/unexport", "w") as unexportFile:
         unexportFile.write("6")
+    """
