@@ -1,4 +1,4 @@
-com_port: '/dev/ttyTHS1'
+com_port: '/dev/ttyTHS0'
 baud: 38400
 claws:
   aux0: # arm turntable/shoulder, science ?
