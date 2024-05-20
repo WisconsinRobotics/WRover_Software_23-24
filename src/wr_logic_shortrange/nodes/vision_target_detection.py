@@ -102,7 +102,7 @@ def main():
             "-preset",
             "ultrafast",
             "-tune",
-            "lowlatency",
+            "zerolatency",
             "-b:v",
             "8M",
             # Stream using RTP
