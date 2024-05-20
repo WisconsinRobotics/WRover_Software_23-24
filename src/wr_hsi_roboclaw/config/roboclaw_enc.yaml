@@ -1,4 +1,4 @@
-com_port: '/dev/ttyTHS0'
+com_port: '/dev/roboclaw'
 # baud: 115200
 baud: 9600
 claws:
