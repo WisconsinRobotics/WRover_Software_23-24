@@ -18,11 +18,11 @@ import wr_logic_shortrange.aruco_lib as aruco_lib
 from wr_logic_shortrange.msg import VisionTarget
 
 ## Width of the camera frame, in pixels
-CAMERA_WIDTH = 640
+CAMERA_WIDTH = 1280
 ## Height of the camera frame, in pixels
-CAMERA_HEIGHT = 480
+CAMERA_HEIGHT = 720
 ## Frames per second
-CAMERA_FPS = 30
+CAMERA_FPS = 5
 
 
 def process_corners(target_id: int, corners: np.ndarray) -> VisionTarget:
@@ -93,35 +93,27 @@ def main():
             # Framerate
             "-r",
             f"{CAMERA_FPS}",
-            # HW acceleration options
-            "-hwaccel",
-            "cuda",
-            "-hwaccel_output_format",
-            "cuda",
             # Pipe video to ffmpeg
             "-i",
             "-",
             # Encode video with h264
             "-vcodec",
-            "h264_nvenc",
-            "-rc",
-            "vbr",
+            "libx264",
             "-preset",
-            "p1",
+            "ultrafast",
             "-tune",
-            "ll",
+            "lowlatency",
             "-b:v",
-            "5M",
-            "-bufsize",
-            "5M",
-            "-maxrate",
-            "10M",
+            "8M",
             # Stream using RTP
             "-f",
-            "rtp",
-            "rtp://127.0.0.1:5000",
+            "mpegts",
+            "udp://192.168.1.44:5000",
         ]
         stream = subprocess.Popen(ffmpeg_command, stdin=subprocess.PIPE)
+
+        # Command for viewing stream
+        # ffplay -fflags nobuffer -flags low_delay -probesize 32 -analyzeduration 1 -strict experimental -framedrop -f mpegts -vf setpts=0 udp://192.168.1.134:5000
 
     if not cap.isOpened():
         rospy.logerr("Failed to open camera")

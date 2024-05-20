@@ -1,5 +1,5 @@
 <launch>
-    <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" />
+    <!-- <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" /> -->
 
     <arg name="vision_topic" default="/logic/vision_target" />
     <arg name="video_stream" default="" />
