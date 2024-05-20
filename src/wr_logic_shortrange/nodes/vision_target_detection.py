@@ -9,7 +9,7 @@
 # Then, the data for all ArUco tags detected is published as a VisionTarget message.
 # @{
 
-import math
+import subprocess
 
 import rospy
 import cv2 as cv
@@ -18,9 +18,11 @@ import wr_logic_shortrange.aruco_lib as aruco_lib
 from wr_logic_shortrange.msg import VisionTarget
 
 ## Width of the camera frame, in pixels
-CAMERA_WIDTH = 1280
+CAMERA_WIDTH = 640
 ## Height of the camera frame, in pixels
-CAMERA_HEIGHT = 720
+CAMERA_HEIGHT = 480
+## Frames per second
+CAMERA_FPS = 30
 
 
 def process_corners(target_id: int, corners: np.ndarray) -> VisionTarget:
@@ -62,22 +64,64 @@ def main():
     pub = rospy.Publisher(vision_topic, VisionTarget, queue_size=10)
 
     # Retrieve video stream from parameter server
-    # If no vision stream is specified, try to use camera directly
-    stream_url = rospy.get_param("~video_stream")
-    if stream_url is not None and stream_url != "":
-        cap = cv.VideoCapture(stream_url)
+    # If no video capture is specified, try to use /dev/video0
+    stream_path = rospy.get_param("~video_stream")
+    if stream_path is not None and stream_path != "":
+        cap = cv.VideoCapture(stream_path)
     else:
         cap = cv.VideoCapture(0)
-        cap.set(cv.CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH)
-        cap.set(cv.CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
 
-    # Save video if debugging
+    cap.set(cv.CAP_PROP_FPS, CAMERA_FPS)
+    cap.set(cv.CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH)
+    cap.set(cv.CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
+
+    # Stream video if debugging
+    stream = None
     debug = rospy.get_param("~debug")
     if debug:
-        fourcc = cv.VideoWriter_fourcc(*"MJPG")
-        out = cv.VideoWriter(
-            "output.avi", fourcc, 20.0, (CAMERA_WIDTH, CAMERA_HEIGHT), True
-        )
+        ffmpeg_command = [
+            "ffmpeg",
+            # Input format
+            "-f",
+            "rawvideo",
+            # OpenCV stores images as BGR
+            "-pixel_format",
+            "bgr24",
+            # Video resolution
+            "-s",
+            f"{CAMERA_WIDTH}x{CAMERA_HEIGHT}",
+            # Framerate
+            "-r",
+            f"{CAMERA_FPS}",
+            # HW acceleration options
+            "-hwaccel",
+            "cuda",
+            "-hwaccel_output_format",
+            "cuda",
+            # Pipe video to ffmpeg
+            "-i",
+            "-",
+            # Encode video with h264
+            "-vcodec",
+            "h264_nvenc",
+            "-rc",
+            "vbr",
+            "-preset",
+            "p1",
+            "-tune",
+            "ll",
+            "-b:v",
+            "5M",
+            "-bufsize",
+            "5M",
+            "-maxrate",
+            "10M",
+            # Stream using RTP
+            "-f",
+            "rtp",
+            "rtp://127.0.0.1:5000",
+        ]
+        stream = subprocess.Popen(ffmpeg_command, stdin=subprocess.PIPE)
 
     if not cap.isOpened():
         rospy.logerr("Failed to open camera")
@@ -100,13 +144,14 @@ def main():
                     )
 
             if debug:
-                out.write(frame)
+                stream.stdin.write(frame.tobytes())
 
         rate.sleep()
 
-    cap.release()
     if debug:
-        out.release()
+        stream.stdin.close()
+        stream.wait()
+    cap.release()
 
 
 if __name__ == "__main__":
