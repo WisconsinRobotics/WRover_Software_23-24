@@ -7,7 +7,8 @@
   <machine name="base_station" address="localhost" env-loader="/opt/ros/noetic/env.sh"
     default="false" />
   <!-- If running in local mode, define "wiscrobo" to also be the local machine (i.e. base station) -->
-  <machine name="wrover" address="wrover.local"
+  <!-- <machine name="wrover" address="wrover.local" -->
+  <machine name="wrover" address="192.168.2.100"
     env-loader="/home/wiscrobo/workspace/WRover_Software/env_remote.sh" user="wiscrobo"
     default="true" unless="$(env WROVER_LOCAL)">
   </machine>
