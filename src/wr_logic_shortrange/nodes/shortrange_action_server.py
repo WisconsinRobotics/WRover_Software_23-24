@@ -43,6 +43,16 @@ class ShortrangeActionServer:
 
         @param name (str): The name of the action
         """
+
+        # Name of the drivetrain topic to publish to
+        drivetrain_topic = rospy.get_param("~motor_speeds")
+        # Publisher to set motor speeds
+        self.drive_pub = rospy.Publisher(drivetrain_topic, DriveTrainCmd, queue_size=1)
+
+        # Name of the VisionTarget topic to subscribe to
+        vision_topic = rospy.get_param("~vision_topic")
+        self.vision_sub = rospy.Subscriber(vision_topic, VisionTarget, self.target_callback)
+
         ## The name of the action
         self._action_name = name
         ## SimpleActionServer using shortrange_callback to execute ShortrangeGoals
@@ -56,9 +66,8 @@ class ShortrangeActionServer:
         self.target_cache = None
 
     def target_callback(self, msg: VisionTarget):
-        if msg.valid:
-            # Update cache if the VisionTarget message is valid
-            self.target_cache = TargetCache(rospy.get_time(), msg)
+        # if msg.valid: # Update cache if the VisionTarget message is valid
+        self.target_cache = TargetCache(rospy.get_time(), msg)
 
     def shortrange_callback(self, goal: ShortRangeGoal):
         """
@@ -68,15 +77,6 @@ class ShortrangeActionServer:
         """
 
         rate = rospy.Rate(10)
-
-        # Name of the VisionTarget topic to subscribe to
-        vision_topic = rospy.get_param("~vision_topic")
-        sub = rospy.Subscriber(vision_topic, VisionTarget, self.target_callback)
-
-        # Name of the drivetrain topic to publish to
-        drivetrain_topic = rospy.get_param("~motor_speeds")
-        # Publisher to set motor speeds
-        drivetrain_pub = rospy.Publisher(drivetrain_topic, DriveTrainCmd, queue_size=1)
 
         success = False
 
@@ -89,7 +89,7 @@ class ShortrangeActionServer:
                 if self.target_cache.msg.distance_estimate < STOP_DISTANCE_M:
                     # Stop the rover when it is close to the ArUco tag
                     rospy.loginfo(f"Reached target {self.target_cache.msg.id}")
-                    drivetrain_pub.publish(0, 0)
+                    self.drive_pub.publish(0, 0)
 
                     success = True
                     break
@@ -99,20 +99,19 @@ class ShortrangeActionServer:
                     # drivetrain_pub.publish(SPEED + turn, SPEED - turn)
 
                     if self.target_cache.msg.x_offset > 50:
-                        drivetrain_pub.publish(SPEED, 0)
+                        self.drive_pub.publish(SPEED, 0)
                     elif self.target_cache.msg.x_offset < -50:
-                        drivetrain_pub.publish(0, SPEED)
+                        self.drive_pub.publish(0, SPEED)
                     else:
-                        drivetrain_pub.publish(SPEED, SPEED)
+                        self.drive_pub.publish(SPEED, SPEED)
             else:
                 # Turn the rover to look for the ArUco tag
                 # drivetrain_pub.publish(SPEED, -SPEED)
-                drivetrain_pub.publish(0, 0)
+                self.drive_pub.publish(0, 0)
 
             rate.sleep()
 
-        drivetrain_pub.unregister()
-        sub.unregister()
+        self.drive_pub.publish(0, 0)
 
         # Set result
         if success:
