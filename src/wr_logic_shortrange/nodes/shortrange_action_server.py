@@ -23,12 +23,13 @@ from wr_drive_msgs.msg import DriveTrainCmd
 ## Distance from target to stop at (in meters)
 STOP_DISTANCE_M = 1.5
 ## Base speed for robot to move at
-SPEED = 0.1
+SPEED = 0.2
 ## Factor to for applying turn
-kP = 0.01
+# TODO document how value works
+kP = 0.0005
 
 # Number of seconds to keep the cache
-CACHE_EXPIRY_SECS = 3
+CACHE_EXPIRY_SECS = 2
 
 class ShortrangeActionServer:
     """
@@ -95,15 +96,8 @@ class ShortrangeActionServer:
                     break
                 else:
                     # Drive the rover to the target if the cache was updated recently
-                    # turn = kP * self.target_cache.msg.x_offset
-                    # drivetrain_pub.publish(SPEED + turn, SPEED - turn)
-
-                    if self.target_cache.msg.x_offset > 50:
-                        self.drive_pub.publish(SPEED, 0)
-                    elif self.target_cache.msg.x_offset < -50:
-                        self.drive_pub.publish(0, SPEED)
-                    else:
-                        self.drive_pub.publish(SPEED, SPEED)
+                    turn = kP * self.target_cache.msg.x_offset
+                    self.drive_pub.publish(SPEED + turn, SPEED - turn)
             else:
                 # Turn the rover to look for the ArUco tag
                 # drivetrain_pub.publish(SPEED, -SPEED)
