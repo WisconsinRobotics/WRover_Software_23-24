@@ -16,10 +16,11 @@ Methods(s):
 """
 
 import math
-    
+from typing import *
+
 EARTH_RADIUS = 6378100 # in meters
 
-def get_coords(start_lat, start_long, distance, num_vertices) -> list:
+def get_coords(start_lat, start_long, distance, num_vertices) -> List[Dict[str, float]]:
     '''
     Description: 'Main' method that gets the coordinates the rover will travel to in the current 
         searching round based on the parameters. We only need to call this method.

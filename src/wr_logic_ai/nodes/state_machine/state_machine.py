@@ -73,12 +73,12 @@ class St_Waypoint_Complete(State):
         self._complete_blinker.shutdown()
 
         # If there is a next coordinate, go back to long range. If not, it is complete
-        if CoordinateManager.next_coordinate():
-            return "complete"
-        else:
+        if CoordinateManager.has_next_coordinate():
             userdata.target_lat = CoordinateManager.get_coordinate()["lat"]
             userdata.target_long = CoordinateManager.get_coordinate()["long"]
             return "next_waypoint"
+        else:
+            return "complete"
 
 
 def main():

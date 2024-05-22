@@ -64,6 +64,7 @@ add_service_files(
 ## Generate actions in the 'action' folder
 add_action_files(
   FILES
+  Spin.action
   SearchState.action
 )
 

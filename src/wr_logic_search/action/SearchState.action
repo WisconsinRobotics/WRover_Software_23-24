@@ -1,4 +1,6 @@
 #goal definition
+float64 initial_lat      # Initial GPS coordinate
+float64 initial_long
 ---
 #result definition
 ---

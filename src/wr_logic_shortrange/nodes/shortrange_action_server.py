@@ -54,6 +54,9 @@ class ShortrangeActionServer:
         vision_topic = rospy.get_param("~vision_topic")
         self.vision_sub = rospy.Subscriber(vision_topic, VisionTarget, self.target_callback)
 
+        # TODO Reorganize to handle if we know which target is expected
+        self.target_cache = None
+
         ## The name of the action
         self._action_name = name
         ## SimpleActionServer using shortrange_callback to execute ShortrangeGoals
@@ -64,7 +67,6 @@ class ShortrangeActionServer:
             auto_start=False,
         )
         self._as.start()
-        self.target_cache = None
 
     def target_callback(self, msg: VisionTarget):
         # if msg.valid: # Update cache if the VisionTarget message is valid
