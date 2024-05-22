@@ -18,9 +18,9 @@ class CoordinateManager:
         CoordinateManager.ptr = max(0, CoordinateManager.ptr - 1)
 
     @staticmethod
-    def next_coordinate() -> bool:
+    def has_next_coordinate() -> bool:
         CoordinateManager.ptr = CoordinateManager.ptr + 1
-        return CoordinateManager.ptr >= len(CoordinateManager.coordinates)
+        return CoordinateManager.ptr < len(CoordinateManager.coordinates)
 
     @staticmethod
     def read_coordinates_file():
