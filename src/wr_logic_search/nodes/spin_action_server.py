@@ -75,6 +75,7 @@ class SpinActionServer:
             if self.vision_time != 0:
                 # Check that target is visible for a certain amount of time
                 self.last_time = self.vision_time
+                self.drive_pub.publish(0, 0)
                 for _ in range(5):
                     rospy.sleep(0.5)
                     if self.last_time == self.vision_time:
@@ -91,7 +92,7 @@ class SpinActionServer:
             ):
                 break
 
-            self.drive_pub.publish(DriveTrainCmd(-self.TURN_SPEED, self.TURN_SPEED))
+            self.drive_pub.publish(-self.TURN_SPEED, self.TURN_SPEED)
             rate.sleep()
 
         self.drive_pub.publish(0, 0)

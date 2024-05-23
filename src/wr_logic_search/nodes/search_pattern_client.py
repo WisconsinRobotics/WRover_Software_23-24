@@ -14,15 +14,21 @@ removed in the future.
 import rospy
 from actionlib import SimpleActionClient
 
+from wr_logic_longrange.msg import InitCompassAction, InitCompassGoal
 from wr_logic_search.msg import SearchStateAction, SearchStateGoal
 
 
 def main():
     rospy.init_node("spin_action_client")
+    compass_client = SimpleActionClient("InitCompassActionServer", InitCompassAction)
     spin_client = SimpleActionClient("SearchActionServer", SearchStateAction)
 
     # Input test coordinates
-    test_lat, test_long = 0, 0
+    test_lat, test_long = 43.0724525, -89.4106448
+
+    compass_client.wait_for_server()
+    compass_client.send_goal(InitCompassGoal())
+    compass_client.wait_for_result()
 
     spin_client.wait_for_server()
     spin_client.send_goal(SearchStateGoal(

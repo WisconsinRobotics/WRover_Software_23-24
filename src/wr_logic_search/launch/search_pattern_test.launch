@@ -15,6 +15,16 @@
         <param name="debug" type="bool" value="$(arg debug)" />
     </node>
 
+    <!-- Launch longrange action servers -->
+    <node name='calculate_init_heading' pkg="wr_logic_longrange" type="calculate_heading_action_server.py" output="screen">
+        <param name="motor_speeds" value="$(arg motor_speeds)"/>
+    </node>
+
+    <node pkg="wr_logic_longrange" name="long_range_action_server" type="long_range_action_server.py" output="screen">
+        <param name="wrover_hw" value="$(env WROVER_HW)" />
+        <param name="motor_speeds" value="$(arg motor_speeds)"/>
+    </node>
+
     <!-- Launch spin action server -->
     <node name="spin_action" pkg="wr_logic_search" type="spin_action_server.py">
         <param name="vision_topic" value="$(arg vision_topic)" />
