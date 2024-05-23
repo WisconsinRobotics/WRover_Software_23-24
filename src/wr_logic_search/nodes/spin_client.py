@@ -15,6 +15,7 @@ def main():
     spin_client.wait_for_server()
     spin_client.send_goal(SpinGoal())
     spin_client.wait_for_result(rospy.Duration(SPIN_TIMEOUT))
+    spin_client.cancel_goal()
     spin_client.get_state()
 
 

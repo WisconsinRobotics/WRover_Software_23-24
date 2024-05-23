@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """@file
 @defgroup wr_logic_search
@@ -29,7 +29,7 @@ class SpinActionServer:
 
         heading_topic = rospy.get_param("~heading_topic")
         self.heading_sub = rospy.Subscriber(
-            heading_topic, VisionTarget, self.heading_callback
+            heading_topic, Float64, self.heading_callback
         )
 
         self.vision_target = 0
