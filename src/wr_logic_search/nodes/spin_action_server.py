@@ -18,6 +18,7 @@ from wr_drive_msgs.msg import DriveTrainCmd
 from wr_logic_search.msg import SpinAction, SpinGoal
 from wr_logic_shortrange.msg import VisionTarget
 
+
 class SpinActionServer:
     TURN_SPEED = 0.15
 
@@ -27,13 +28,17 @@ class SpinActionServer:
         self.heading_time = 0
 
         heading_topic = rospy.get_param("~heading_topic")
-        self.heading_sub = rospy.Subscriber(heading_topic, VisionTarget, self.heading_callback)
-        
+        self.heading_sub = rospy.Subscriber(
+            heading_topic, VisionTarget, self.heading_callback
+        )
+
         self.vision_target = 0
         self.vision_time = 0
 
         vision_topic = rospy.get_param("~vision_topic")
-        self.vision_sub = rospy.Subscriber(vision_topic, VisionTarget, self.vision_callback)
+        self.vision_sub = rospy.Subscriber(
+            vision_topic, VisionTarget, self.vision_callback
+        )
 
         # Name of the drivetrain topic to publish to
         drivetrain_topic = rospy.get_param("~motor_speeds")
@@ -67,13 +72,28 @@ class SpinActionServer:
         initial_heading = self.current_heading
         start_time = self.heading_time
         while not rospy.is_shutdown() and not self._as.is_preempt_requested():
-            self.drive_pub.publish(DriveTrainCmd(-self.TURN_SPEED, self.TURN_SPEED))
             if self.vision_time != 0:
-                # TODO Should check that target is visible for a certain amount of time
-                success = True
+                # Check that target is visible for a certain amount of time
+                self.last_time = self.vision_time
+                for _ in range(5):
+                    rospy.sleep(0.5)
+                    if self.last_time == self.vision_time:
+                        self.vision_time = 0
+                        break
+                else:
+                    # If loop exited normally, we have a good view of the vision target
+                    success = True
+                    break
+            elif (
+                abs(self.current_heading - initial_heading) < 5
+                # TODO don't use a magical constant here
+                and self.heading_time - start_time > 10
+            ):
                 break
+
+            self.drive_pub.publish(DriveTrainCmd(-self.TURN_SPEED, self.TURN_SPEED))
             rate.sleep()
-        
+
         self.drive_pub.publish(0, 0)
 
         if success:

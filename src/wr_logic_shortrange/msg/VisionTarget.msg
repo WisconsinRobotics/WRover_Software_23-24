@@ -1,3 +1,3 @@
-uint32 id
+int32 id
 float32 x_offset
 float32 distance_estimate

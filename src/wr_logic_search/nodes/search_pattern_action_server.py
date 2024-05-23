@@ -13,13 +13,15 @@ the surrounding area, searching for the target object of the current round.
 """
 
 import rospy
-import actionlib
+
+from actionlib import SimpleActionServer, SimpleActionClient, GoalStatus
 
 import wr_logic_search.coord_calculations as coord_calculations
 import wr_logic_search.travel_timer as travel_timer
 
 from wr_logic_longrange.msg import LongRangeAction, LongRangeGoal
 from wr_logic_search.msg import SearchStateAction, SearchStateGoal, SpinAction, SpinGoal
+
 
 class SearchActionServer:
     def __init__(self, name) -> None:
@@ -28,18 +30,14 @@ class SearchActionServer:
 
         @param name (String): Name of the action server
         """
-        self.long_range_client = actionlib.SimpleActionClient(
-            "LongrangeActionServer",
-            LongRangeAction
+        self.long_range_client = SimpleActionClient(
+            "LongrangeActionServer", LongRangeAction
         )
 
-        self.spin_client = actionlib.SimpleActionClient(
-            "SpinActionServer",
-            SpinAction
-        )
+        self.spin_client = SimpleActionClient("SpinActionServer", SpinAction)
 
         self._action_name = name
-        self._as = actionlib.SimpleActionServer(
+        self._as = SimpleActionServer(
             self._action_name,
             SearchStateAction,
             execute_cb=self.execute_callback,
@@ -47,48 +45,51 @@ class SearchActionServer:
         )
         self._as.start()
 
-    def execute_callback(self, goal: SearchStateGoal): 
+    def execute_callback(self, goal: SearchStateGoal):
         """
-        Executes the long range obstacle avoidance code, and triggers the 
-        corresponding state machine event depending on the result of the 
+        Executes the long range obstacle avoidance code, and triggers the
+        corresponding state machine event depending on the result of the
         navigation.
 
-        @param goal (SearchGoal): Goal for the navigation segment, which contains 
+        @param goal (SearchGoal): Goal for the navigation segment, which contains
         the GPS coordinates of the target.
         """
-        distance = 4 # in meters, the shortest unit of movement
+        distance = 4  # in meters, the shortest unit of movement
         num_vertices = 22
         object_detected = False
 
         # get list of coordinates
         coords = coord_calculations.get_coords(
-            goal.initial_lat, goal.initial_long, distance, num_vertices)
-        
-        # NOTE: in the future, please set timeouts using the action client, not the server
+            goal.initial_lat, goal.initial_long, distance, num_vertices
+        )
+
+        # NOTE: in the future, set timeouts using the action client, not the server
         # in seconds, get max time for a single state
-        # SEARCH_TIMEOUT_TIME = travel_timer.calc_state_time() 
+        # SEARCH_TIMEOUT_TIME = travel_timer.calc_state_time()
 
         i = 0
         # start timer for the state and the first coordinate
         # state_time = rospy.get_rostime()
         # point_time = rospy.get_rostime()
-        while (
-            not rospy.is_shutdown()
-            and i < num_vertices
-        ):
-            timeout = travel_timer.calc_point_time(coords[i]['distance'])
-            self.long_range_client.send_goal(LongRangeGoal(coords[i]['lat'], coords[i]['long']))
+        while not rospy.is_shutdown() and i < num_vertices:
+            timeout = travel_timer.calc_point_time(coords[i]["distance"])
+            self.long_range_client.send_goal(
+                LongRangeGoal(
+                    target_lat=coords[i]["lat"], target_long=coords[i]["long"]
+                )
+            )
             self.long_range_client.wait_for_result(rospy.Duration(timeout))
 
-            if self.long_range_client.get_state() == actionlib.GoalStatus.SUCCEEDED:
+            if self.long_range_client.get_state() == GoalStatus.SUCCEEDED:
+                # TODO define timeout for spin
                 # spin to search for vision target
                 self.spin_client.send_goal(SpinGoal())
                 self.spin_client.wait_for_result()
-                object_detected = self.spin_client.get_state() == actionlib.GoalStatus.SUCCEEDED
+                object_detected = self.spin_client.get_state() == GoalStatus.SUCCEEDED
                 if object_detected:
                     break
 
-            i += 1 # next coordinate
+            i += 1  # next coordinate
 
         # Set result
         if object_detected:

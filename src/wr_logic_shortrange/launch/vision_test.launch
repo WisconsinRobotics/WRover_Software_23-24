@@ -9,7 +9,7 @@
     <include file="$(find wr_entry_point)/launch/comp/comp_ds_control.launch" />
     <include file="$(find wr_entry_point)/launch/comp/comp_falcon.launch" />
 
-    <node name="vision_target_detection" pkg="wr_logic_shortrange" type="vision_target_detection.py">
+    <node name="vision_aruco_detection" pkg="wr_logic_shortrange" type="vision_aruco_detection.py">
         <param name="vision_topic" value="$(arg vision_topic)" />
         <param name="video_stream" value="$(arg video_stream)" />
         <param name="debug" type="bool" value="$(arg debug)" />

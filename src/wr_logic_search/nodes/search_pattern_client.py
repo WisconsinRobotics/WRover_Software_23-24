@@ -12,24 +12,28 @@ removed in the future.
 """
 
 import rospy
-from wr_logic_search.srv import SearchPatternService, SearchPatternServiceRequest, SearchPatternServiceResponse
+from actionlib import SimpleActionClient
+
+from wr_logic_search.msg import SearchStateAction, SearchStateGoal
+
 
 def main():
+    rospy.init_node("spin_action_client")
+    spin_client = SimpleActionClient("SearchActionServer", SearchStateAction)
+
+    # Input test coordinates
+    test_lat, test_long = 0, 0
+
+    spin_client.wait_for_server()
+    spin_client.send_goal(SearchStateGoal(
+        initial_lat=test_lat, initial_long=test_long
+    ))
+    spin_client.wait_for_result()
+    spin_client.get_state()
     rospy.init_node("search_pattern_client")
-    search_pattern_service = rospy.ServiceProxy('search_pattern_service', SearchPatternService)
-    rate = rospy.Rate(10)
-    rospy.wait_for_service('object_detection')
 
-    while not rospy.is_shutdown():
-        try:
-            response:SearchPatternServiceResponse = search_pattern_service()
-            return response.output
-        except rospy.ServiceException as e:
-            print(f"Service call failed: {e}")
 
-        rate.sleep()
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
 
 ## @}
