@@ -145,6 +145,7 @@ def estimate_distance_ft(corners: np.ndarray) -> float:
 
 
 # might do a perspective transform to get a better idea of pixel area n so distance
+# TODO document a calibration procedure
 def estimate_distance_m(corners: np.ndarray) -> float:
     """
     Estimate the distance to an ArUco tag in meters

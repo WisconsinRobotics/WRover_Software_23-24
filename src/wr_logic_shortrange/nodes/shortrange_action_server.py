@@ -3,7 +3,7 @@
 ##@defgroup wr_shortrange_ai
 # @{
 # @defgroup wr_shortrange_ai_action_server Shortrange Action Server
-# @brief Shortrange action server 
+# @brief Shortrange action server
 # @details The shortrange action server drives the rover to a vision target.
 #
 # @{
@@ -14,7 +14,11 @@ import rospy
 import actionlib
 from actionlib_msgs.msg import GoalStatus
 
-from wr_logic_shortrange.shortrange_util import ShortrangeStateEnum, ShortrangeState, TargetCache
+from wr_logic_shortrange.shortrange_util import (
+    ShortrangeStateEnum,
+    ShortrangeState,
+    TargetCache,
+)
 from wr_logic_shortrange.vision_navigation import VisionNavigation
 from wr_logic_shortrange.shortrange_util import ShortrangeStateEnum
 from wr_logic_shortrange.msg import ShortRangeAction, ShortRangeGoal, VisionTarget
@@ -30,6 +34,7 @@ kP = 0.0005
 
 # Number of seconds to keep the cache
 CACHE_EXPIRY_SECS = 2
+
 
 class ShortrangeActionServer:
     """
@@ -52,7 +57,9 @@ class ShortrangeActionServer:
 
         # Name of the VisionTarget topic to subscribe to
         vision_topic = rospy.get_param("~vision_topic")
-        self.vision_sub = rospy.Subscriber(vision_topic, VisionTarget, self.target_callback)
+        self.vision_sub = rospy.Subscriber(
+            vision_topic, VisionTarget, self.target_callback
+        )
 
         # TODO Reorganize to handle if we know which target is expected
         self.target_cache = None

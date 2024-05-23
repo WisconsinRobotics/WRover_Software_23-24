@@ -21,11 +21,6 @@
         <param name="motor_speeds" value="$(arg motor_speeds)" />
     </node>
 
-    <!-- Launch search pattern action server -->
-    <node name="search_pattern_action" pkg="wr_logic_search" type="search_pattern_action_server.py">
-        <param name="motor_speeds" value="$(arg motor_speeds)" />
-    </node>
-
-    <node name="search_pattern_client" pkg="wr_logic_search" type="search_pattern_client.py" />
+    <node name="spin_client" pkg="wr_logic_search" type="spin_client.py" />
 
 </launch>

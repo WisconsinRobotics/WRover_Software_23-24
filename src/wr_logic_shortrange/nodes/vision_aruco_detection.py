@@ -55,7 +55,7 @@ def main():
 
     This function initializes and runs a node to read camera input and publish ArUco tag data to a topic.
     """
-    rospy.init_node("vision_target_detection")
+    rospy.init_node("vision_aruco_detection")
 
     rate = rospy.Rate(10)
 
@@ -77,7 +77,7 @@ def main():
 
     # Stream video if debugging
     stream = None
-    debug = rospy.get_param("~debug")
+    debug = rospy.get_param("~debug", False)
     if debug:
         ffmpeg_command = [
             "ffmpeg",
@@ -105,7 +105,7 @@ def main():
             "zerolatency",
             "-b:v",
             "8M",
-            # Stream using RTP
+            # Stream using MPEG-TS over UDP
             "-f",
             "mpegts",
             "udp://192.168.1.44:5000",

@@ -1,5 +1,0 @@
-<launch>
-    <node name="vision_target_detection" pkg="wr_logic_shortrange" type="vision_target_detection.py">
-        <rosparam file="$(find wr_logic_ai)/config/vision_params.yaml" />
-    </node>
-</launch>
