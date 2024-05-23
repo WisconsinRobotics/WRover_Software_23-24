@@ -79,6 +79,7 @@ class SearchActionServer:
                 )
             )
             self.long_range_client.wait_for_result(rospy.Duration(timeout))
+            self.long_range_client.cancel_goal()
 
             if self.long_range_client.get_state() == GoalStatus.SUCCEEDED:
                 # TODO define timeout for spin
