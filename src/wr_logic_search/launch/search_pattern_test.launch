@@ -2,6 +2,7 @@
     <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" />
 
     <arg name="vision_topic" default="/logic/vision_target" />
+    <arg name="heading_topic" default="/heading" />
     <arg name="video_stream" default="" />
     <arg name="debug" default="true" />
     <arg name="motor_speeds" default="/control/drive_system/cmd" />
@@ -14,6 +15,12 @@
         <param name="video_stream" value="$(arg video_stream)" />
         <param name="debug" type="bool" value="$(arg debug)" />
     </node>
+
+    <!-- Launch GPS -->
+    <include file="$(find wr_hsi_sensing)/launch/gps_data_mapper.launch" if="$(eval env('WROVER_HW') == 'REAL')" />
+
+    <!-- Launch RPLidar -->
+    <include file="$(find wr_logic_ai)/launch/wrplidar.launch"/>
 
     <!-- Launch longrange action servers -->
     <node name='calculate_init_heading' pkg="wr_logic_longrange" type="calculate_heading_action_server.py" output="screen">
@@ -29,6 +36,7 @@
     <node name="spin_action" pkg="wr_logic_search" type="spin_action_server.py">
         <param name="vision_topic" value="$(arg vision_topic)" />
         <param name="motor_speeds" value="$(arg motor_speeds)" />
+        <param name="heading_topic" value="$(arg heading_topic)" />
     </node>
 
     <!-- Launch search pattern action server -->

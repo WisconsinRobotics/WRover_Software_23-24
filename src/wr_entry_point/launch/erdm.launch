@@ -17,4 +17,6 @@
 
   <include file="$(find wr_entry_point)/launch/comp/comp_arm.launch" />
   <include file="$(find wr_entry_point)/launch/comp/comp_falcon.launch" />
+
+  <include file="$(find wr_hsi_sensing)/launch/gps_data_mapper.launch" />
 </launch>
