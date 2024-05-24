@@ -31,7 +31,7 @@ class SearchActionServer:
         @param name (String): Name of the action server
         """
         self.long_range_client = SimpleActionClient(
-            "LongrangeActionServer", LongRangeAction
+            "LongRangeActionServer", LongRangeAction
         )
 
         self.spin_client = SimpleActionClient("SpinActionServer", SpinAction)
@@ -67,7 +67,9 @@ class SearchActionServer:
         # in seconds, get max time for a single state
         # SEARCH_TIMEOUT_TIME = travel_timer.calc_state_time()
 
-        i = 0
+        self.long_range_client.wait_for_server()
+
+        i = 1
         # start timer for the state and the first coordinate
         # state_time = rospy.get_rostime()
         # point_time = rospy.get_rostime()
@@ -78,7 +80,8 @@ class SearchActionServer:
                     target_lat=coords[i]["lat"], target_long=coords[i]["long"]
                 )
             )
-            self.long_range_client.wait_for_result(rospy.Duration(timeout))
+            # self.long_range_client.wait_for_result(rospy.Duration(timeout))
+            self.long_range_client.wait_for_result()
             self.long_range_client.cancel_goal()
 
             if self.long_range_client.get_state() == GoalStatus.SUCCEEDED:

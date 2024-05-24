@@ -19,7 +19,7 @@ from wr_logic_search.msg import SearchStateAction, SearchStateGoal
 
 
 def main():
-    rospy.init_node("spin_action_client")
+    rospy.init_node("search_pattern_client")
     compass_client = SimpleActionClient("InitCompassActionServer", InitCompassAction)
     spin_client = SimpleActionClient("SearchActionServer", SearchStateAction)
 
