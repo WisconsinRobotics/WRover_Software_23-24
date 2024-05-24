@@ -35,7 +35,8 @@ def main():
     cap.set(cv.CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
 
     # Load model
-    model_path = rospy.get_param("~model_path", "yolov8n.pt")
+    # TODO add scripts/documentation for TensorRT
+    model_path = rospy.get_param("~model_path", "yolov8n.engine")
     model = YOLO(model_path)
 
     # Stream video if debugging
@@ -92,19 +93,20 @@ def main():
             results = model(frame, stream=True)
             if results is not None:
                 for r in results:
-                    x1, y1, x2, y2 = r.xyxy[0]
-                    x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+                    for box in r.boxes:
+                        x1, y1, x2, y2 = box.xyxy[0]
+                        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
 
-                    cv.rectangle(frame, (x1, y1), (x2, y2))
+                        cv.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
-                    cv.putText(
-                        frame,
-                        text=model.names[r.cls[0]],
-                        org=(x1, y1),
-                        fontFace=cv.FONT_HERSHEY_PLAIN,
-                        fontScale=1.5,
-                        color=(0, 0, 255),
-                    )
+                        cv.putText(
+                            frame,
+                            text=model.names[int(box.cls[0])],
+                            org=(x1, y1),
+                            fontFace=cv.FONT_HERSHEY_PLAIN,
+                            fontScale=1.5,
+                            color=(0, 0, 255),
+                        )
 
             if debug:
                 stream.stdin.write(frame.tobytes())
