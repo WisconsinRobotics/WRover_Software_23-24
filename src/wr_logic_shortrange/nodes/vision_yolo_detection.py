@@ -1,61 +1,19 @@
-#!/usr/bin/env python3
-
-##@defgroup wr_shortrange_ai
-# @{
-# @defgroup wr_shortrange_ai_vision_node Vision Target Detection Node
-# @brief ROS Node for publishing vision data
-# @details This ROS Node reads video input from a stream or camera.
-# It reads a frame and processes it using [detect_aruco()](@ref wr_logic_ai.shortrange.aruco_lib.detect_aruco).
-# Then, the data for all ArUco tags detected is published as a VisionTarget message.
-# @{
-
 import subprocess
 
-import rospy
 import cv2 as cv
-import numpy as np
+import rospy
+from ultralytics import YOLO
 
-import wr_logic_shortrange.aruco_lib as aruco_lib
 from wr_logic_shortrange.msg import VisionTarget
 
 ## Width of the camera frame, in pixels
-CAMERA_WIDTH = 1280
+CAMERA_WIDTH = 640
 ## Height of the camera frame, in pixels
-CAMERA_HEIGHT = 720
+CAMERA_HEIGHT = 480
 ## Frames per second
-CAMERA_FPS = 5
-
-
-def process_corners(target_id: int, corners: np.ndarray) -> VisionTarget:
-    """
-    Creates a VisionTarget message based on the detected ArUco tag
-
-    @param target_id (int): ArUco tag ID
-    @param corners (np.ndarray): ArUco tag corners
-    @returns VisionTarget: VisionTarget message defined in msg/VisionTarget.msg
-    """
-    # Find the middle of the ArUco tag in the frame
-    side_lengths = []
-    min_x = corners[0][0]
-    max_x = corners[0][0]
-    for i in range(len(corners)):
-        side_lengths.append(np.linalg.norm(corners[i - 1] - corners[i]))
-        min_x = min(min_x, corners[i][0])
-        max_x = max(max_x, corners[i][0])
-    x_offset = (min_x + max_x - CAMERA_WIDTH) / 2
-
-    # Estimate the distance of the ArUco tag in meters
-    distance_estimate = aruco_lib.estimate_distance_m(corners)
-
-    return VisionTarget(target_id, x_offset, distance_estimate)
-
+CAMERA_FPS = 30
 
 def main():
-    """
-    @brief Vision processing node main function
-
-    This function initializes and runs a node to read camera input and publish ArUco tag data to a topic.
-    """
     rospy.init_node("vision_aruco_detection")
 
     rate = rospy.Rate(10)
@@ -75,6 +33,10 @@ def main():
     cap.set(cv.CAP_PROP_FPS, CAMERA_FPS)
     cap.set(cv.CAP_PROP_FRAME_WIDTH, CAMERA_WIDTH)
     cap.set(cv.CAP_PROP_FRAME_HEIGHT, CAMERA_HEIGHT)
+
+    # Load model
+    model_path = rospy.get_param("~model_path", "yolov8n.pt")
+    model = YOLO(model_path)
 
     # Stream video if debugging
     stream = None
@@ -127,14 +89,21 @@ def main():
         if not ret:
             rospy.logerr("Failed to read frame")
         else:
-            (corners, ids, _) = aruco_lib.detect_aruco(frame)
-            if ids is not None:
-                for i, target_id in enumerate(ids):
-                    pub.publish(process_corners(target_id[0], corners[i][0]))
+            results = model(frame, stream=True)
+            if results is not None:
+                for r in results:
+                    x1, y1, x2, y2 = r.xyxy[0]
+                    x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
 
-                    closest_tag = aruco_lib.estimate_distance_m(corners[i][0])
-                    frame = aruco_lib.mark_aruco_tag(
-                        frame, corners[i][0], False, closest_tag
+                    cv.rectangle(frame, (x1, y1), (x2, y2))
+
+                    cv.putText(
+                        frame,
+                        text=model.names[r.cls[0]],
+                        org=(x1, y1),
+                        fontFace=cv.FONT_HERSHEY_PLAIN,
+                        fontScale=1.5,
+                        color=(0, 0, 255),
                     )
 
             if debug:
@@ -148,8 +117,7 @@ def main():
     cap.release()
 
 
+
+
 if __name__ == "__main__":
     main()
-
-## @}
-# @}
