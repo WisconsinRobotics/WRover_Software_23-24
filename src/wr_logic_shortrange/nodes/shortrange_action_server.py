@@ -27,13 +27,13 @@ from wr_drive_msgs.msg import DriveTrainCmd
 ## Distance from target to stop at (in meters)
 STOP_DISTANCE_M = 1.5
 ## Base speed for robot to move at
-SPEED = 0.2
+SPEED = 0.1
 ## Factor to for applying turn
 # TODO document how value works
-kP = 0.0005
+kP = 0.0002
 
 # Number of seconds to keep the cache
-CACHE_EXPIRY_SECS = 2
+CACHE_EXPIRY_SECS = 1
 
 
 class ShortrangeActionServer:

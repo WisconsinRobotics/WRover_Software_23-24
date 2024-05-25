@@ -53,7 +53,7 @@
     <param name="motor_speeds" value="$(arg motor_output)"/>
   </node>
   <node name="long_range" pkg="wr_logic_longrange" type="long_range_action_server.py" >
-    <param name="motor_speeds" value="$(arg long_range_output)"/>
+    <param name="motor_speeds" value="$(arg motor_output)"/>
     <param name="wrover_hw" value="$(env WROVER_HW)" />
   </node>
 
@@ -72,5 +72,5 @@
   </node>
 
   <!-- Run state machine from base station -->
-  <node pkg="wr_logic_ai" name="nav_state_machine" type="state_machine.py" machine="basestation" output="screen" />
+  <node pkg="wr_logic_ai" name="nav_state_machine" type="state_machine.py" machine="base_station" output="screen" />
 </launch>

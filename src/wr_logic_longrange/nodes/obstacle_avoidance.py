@@ -28,10 +28,10 @@ import testing_rviz
 # distance before obstacle avoidance logics is triggered (in meters)
 LIDAR_THRESH_DISTANCE = 5
 # distance before rover believes it has reached the target (in meters)
-NAV_THRESH_DISTANCE = 0.5
+NAV_THRESH_DISTANCE = 1
 
 # Set the speed factor
-speed_factor = 0.3
+speed_factor = 0.2
 
 # initialize target angle to move forward
 # current location
@@ -47,7 +47,7 @@ target_sector = 0
 smoothing_constant = 3
 
 # global speed factor updated through navigation
-speed_factor = 0.3
+# speed_factor = 0.3
 
 # final angle to drive to
 result = 0
