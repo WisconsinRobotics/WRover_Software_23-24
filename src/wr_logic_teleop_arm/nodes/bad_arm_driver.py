@@ -6,6 +6,10 @@ import rospy
 from std_msgs.msg import Bool, Float32, Int16
 import time
 
+
+FOREARM_SPEED = 16384
+WRIST_SPEED = 12288
+
 class Watchdog:
     def __init__(self, timeout: float):
         self._timeout = timeout
@@ -70,21 +74,21 @@ def main():
     while not rospy.is_shutdown():
         if not w.isMad():
             if trigger_l.data is not None and trigger_r.data is not None:
-                pub_turntable.publish(float_to_int16_msg(trigger_r.data - trigger_l.data))
+                pub_turntable.publish(float_to_int16_msg(0.5 * (trigger_r.data - trigger_l.data)))
             
             if stick_l.data is not None:
-                pub_shoulder.publish(float_to_int16_msg(stick_l.data))
+                pub_shoulder.publish(float_to_int16_msg(0.5 * stick_l.data))
             
             if stick_r.data is not None:
-                pub_elbow.publish(float_to_int16_msg(stick_r.data))
+                pub_elbow.publish(float_to_int16_msg(0.5 * stick_r.data))
             
             if bumper_l.data is not None and bumper_r.data is not None:
                 if bumper_l.data:
                     if bumper_r.data:
                         pub_forearm.publish(Int16(0))
-                    pub_forearm.publish(Int16(32767))
+                    pub_forearm.publish(Int16(FOREARM_SPEED))
                 elif bumper_r.data:
-                    pub_forearm.publish(Int16(-32768))
+                    pub_forearm.publish(Int16(-FOREARM_SPEED))
                 else:
                     pub_forearm.publish(Int16(0))
             
@@ -103,8 +107,8 @@ def main():
                 elif pov_y.data < 0:
                     wrist_spd_a = -1
                     wrist_spd_b = 1
-                pub_wrist_a.publish(Int16(24576 * wrist_spd_a))
-                pub_wrist_b.publish(Int16(-24576 * wrist_spd_b))
+                pub_wrist_a.publish(Int16(WRIST_SPEED * wrist_spd_a))
+                pub_wrist_b.publish(Int16(-WRIST_SPEED * wrist_spd_b))
 
             # if btn_a.data is not None and btn_b.data is not None:
             #     if btn_a.data:
