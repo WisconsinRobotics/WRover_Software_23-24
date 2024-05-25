@@ -69,11 +69,12 @@ class SearchActionServer:
 
         self.long_range_client.wait_for_server()
 
-        i = 1
+        i = 0
         # start timer for the state and the first coordinate
         # state_time = rospy.get_rostime()
         # point_time = rospy.get_rostime()
         while not rospy.is_shutdown() and i < num_vertices:
+            # TODO figure out timeout
             timeout = travel_timer.calc_point_time(coords[i]["distance"])
             self.long_range_client.send_goal(
                 LongRangeGoal(

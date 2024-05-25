@@ -8,7 +8,7 @@ import time
 
 TURNTABLE_SPEED_FACTOR = 0.2
 SHOULDER_SPEED_FACTOR = 0.4
-ELBOW_SPEED_FACTOR = 0.4
+ELBOW_SPEED_FACTOR = 0.3
 FOREARM_SPEED = 16384
 WRIST_SPEED = 12288
 
@@ -36,7 +36,7 @@ class SubBuf(Generic[T]):
         w.pet()
 
 def float_to_int16_msg(value: float, factor: float = 1.0) -> Int16:
-    factor = max(abs(factor), 1.0)
+    factor = min(abs(factor), 1.0)
     return Int16(round(factor * value * 32767))
 
 def main():

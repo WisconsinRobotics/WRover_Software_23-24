@@ -41,7 +41,7 @@ def get_coords(start_lat, start_long, distance, num_vertices) -> List[Dict[str, 
     bearing = 0
 
     # create starting coordinate as the first coordinate
-    coords.append({"lat": start_lat, "long": start_long})
+    coords.append({"lat": start_lat, "long": start_long, "distance": 0})
 
     for i in range(num_vertices):
         # update the distance after it has been traveled twice to create the square spiral shape

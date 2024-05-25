@@ -129,13 +129,16 @@ def main():
         StateMachine.add(
             "st_search",
             SimpleActionState(
-                "SearchActionServer", SearchStateAction, goal=SearchStateGoal()
+                "SearchActionServer",
+                SearchStateAction,
+                goal_slots=["initial_lat", "initial_long"]
             ),
             transitions={
                 "succeeded": "st_shortrange_setup",
                 "aborted": "st_init_compass",
                 "preempted": "st_init_compass",
             },
+            remapping={"initial_lat": "target_lat", "initial_long": "target_long"},
         )
 
         # st_shortrange_setup
