@@ -9,8 +9,9 @@ from wr_drive_msgs.msg import DriveTrainCmd
 from wr_hsi_sensing.msg import CoordinateMsg
 
 ## Timeout time for when we declare a long range navigation as failed
-LONG_RANGE_TIMEOUT_TIME = rospy.Duration(2)
+LONG_RANGE_TIMEOUT_TIME = rospy.Duration(3)
 
+DRIVE_SPEED = 0.15
 
 class InitCompassActionServer(object):
     def __init__(self, name) -> None:
@@ -47,8 +48,8 @@ class InitCompassActionServer(object):
     def execute_callback(self, goal: InitCompassGoal):
         rate = rospy.Rate(10)
         drive_msg = DriveTrainCmd(
-            left_value=0.3,
-            right_value=0.3,
+            left_value=DRIVE_SPEED,
+            right_value=DRIVE_SPEED
         )
 
         # Wait for subscriber to get data
@@ -60,7 +61,7 @@ class InitCompassActionServer(object):
         # Get current lat and long before moving
         lat_before = self.current_lat
         long_before = self.current_long
-        rospy.loginfo("Before: " + str(self.current_lat) + " " + str(self.current_long))
+        #rospy.loginfo("Before: " + str(self.current_lat) + " " + str(self.current_long))
         # Driving forward for 2 seconds
         start_time = rospy.get_rostime()
         while (
@@ -69,10 +70,10 @@ class InitCompassActionServer(object):
         ):
             rate.sleep()
             self.drive_pub.publish(drive_msg)
-            rospy.loginfo(drive_msg)
+            #rospy.loginfo(drive_msg)
         self.drive_pub.publish(0, 0)
-        rospy.loginfo("MOTORS STOPPED")
-        rospy.loginfo("Before: " + str(self.current_lat) + " " + str(self.current_long))
+        #rospy.loginfo("MOTORS STOPPED")
+        #rospy.loginfo("Before: " + str(self.current_lat) + " " + str(self.current_long))
 
         # TODO set failed if current coordinate is too old (check coord_time)
         angle_heading = calculate_angle(
