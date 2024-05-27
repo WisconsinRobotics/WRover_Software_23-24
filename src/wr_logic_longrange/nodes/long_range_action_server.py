@@ -25,6 +25,7 @@ from wr_logic_longrange.msg import (
     InitCompassGoal,
 )
 from wr_drive_msgs.msg import DriveTrainCmd
+from sensor_msgs.msg import LaserScan
 
 
 # TODO: check timeout time length validity
@@ -47,6 +48,11 @@ class LongRangeActionServer(object):
             rospy.get_param("~motor_speeds"), DriveTrainCmd, queue_size=10
         )
         obstacle_avoidance.initialize()
+        
+        # Subscribe to lidar data
+        rospy.wait_for_message("/scan", LaserScan, timeout=None)
+
+
         self._as = actionlib.SimpleActionServer(
             self._action_name,
             LongRangeAction,
