@@ -32,7 +32,7 @@ class SpinActionServer:
             heading_topic, Float64, self.heading_callback
         )
 
-        self.vision_target = 0
+        self.vision_target = None
         self.vision_time = 0
 
         vision_topic = rospy.get_param("~vision_topic")
@@ -52,6 +52,7 @@ class SpinActionServer:
             execute_cb=self.execute_callback,
             auto_start=False,
         )
+        self._as.preempt_callback(self.preempt_callback)
         self._as.start()
 
     def heading_callback(self, msg: Float64):
@@ -59,12 +60,16 @@ class SpinActionServer:
         self.heading_time = rospy.get_time()
 
     def vision_callback(self, msg: VisionTarget):
-        self.vision_target = msg.id
-        self.vision_time = rospy.get_time()
+        if self.vision_target and (
+            self.vision_target == msg.id or self.vision_target == SpinGoal.ANY
+        ):
+            self.vision_time = rospy.get_time()
 
     def execute_callback(self, goal: SpinGoal):
         success = False
         rate = rospy.Rate(10)
+
+        self.vision_target = goal.target_id
 
         while not rospy.is_shutdown() and self.heading_time == 0:
             rate.sleep()
@@ -96,11 +101,18 @@ class SpinActionServer:
             rate.sleep()
 
         self.drive_pub.publish(0, 0)
+        self.vision_target = None
+        self.vision_time = 0
 
         if success:
             self._as.set_succeeded()
         else:
             self._as.set_aborted()
+
+    def preempt_callback(self):
+        self.drive_pub.publish(0, 0)
+        self.vision_target = None
+        self.vision_time = 0
 
 
 if __name__ == "__main__":

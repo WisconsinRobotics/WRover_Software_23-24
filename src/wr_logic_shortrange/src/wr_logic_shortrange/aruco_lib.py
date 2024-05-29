@@ -22,7 +22,7 @@ FT_TO_M = 0.3048
 
 FOCAL_LENGTH_MM = 1360.17
 
-REAL_WORLD_ARUCO_DIM = 200  # in mm
+REAL_WORLD_ARUCO_DIM = 150  # in mm
 
 
 def detect_aruco(img: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -170,7 +170,7 @@ def estimate_distance_with_measured_focal_length(corners: np.ndarray) -> float:
     else:
         c = corners
 
-    side_lengths = [np.linalg.norm(c[i - 1] - c[i]) for i in range(len(c))][0]
+    side_lengths = max([np.linalg.norm(c[i - 1] - c[i]) for i in range(len(c))])
 
     return REAL_WORLD_ARUCO_DIM * FOCAL_LENGTH_MM / (side_lengths * 1000)
 

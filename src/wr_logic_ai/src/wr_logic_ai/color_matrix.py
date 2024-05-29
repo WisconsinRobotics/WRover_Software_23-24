@@ -7,11 +7,13 @@ from wr_led_matrix.srv import (
 )
 
 ## LED matrix color for when the rover is navigating towards the target using autonomous navigation
-COLOR_AUTONOMOUS = LEDMatrixRequest(RED=0, GREEN=0, BLUE=255)
+COLOR_AUTONOMOUS = LEDMatrixRequest(RED=255, GREEN=0, BLUE=0)
+## LED matrix color for when the rover is navigating towards the previous target in teleop
+COLOR_TELEOP = LEDMatrixRequest(RED=0, GREEN=0, BLUE=255)
 ## LED matrix color for when the rover has reached its target
 COLOR_COMPLETE = LEDMatrixRequest(RED=0, GREEN=255, BLUE=0)
 ## LED matrix color for when the rover has encountered an error while executing autonomous navigation
-COLOR_ERROR = LEDMatrixRequest(RED=255, GREEN=0, BLUE=0)
+COLOR_ERROR = LEDMatrixRequest(RED=255, GREEN=0, BLUE=255)
 ## Initial LED matrix color
 COLOR_NONE = LEDMatrixRequest(RED=0, GREEN=0, BLUE=0)
 

@@ -14,23 +14,18 @@ import rospy
 import actionlib
 from actionlib_msgs.msg import GoalStatus
 
-from wr_logic_shortrange.shortrange_util import (
-    ShortrangeStateEnum,
-    ShortrangeState,
-    TargetCache,
-)
+from wr_logic_shortrange.shortrange_util import TargetCache
 from wr_logic_shortrange.vision_navigation import VisionNavigation
 from wr_logic_shortrange.shortrange_util import ShortrangeStateEnum
 from wr_logic_shortrange.msg import ShortRangeAction, ShortRangeGoal, VisionTarget
 from wr_drive_msgs.msg import DriveTrainCmd
 
 ## Distance from target to stop at (in meters)
-STOP_DISTANCE_M = 1.5
+STOP_DISTANCE_M = 2
 ## Base speed for robot to move at
 SPEED = 0.1
-## Factor to for applying turn
-# TODO document how value works
-kP = 0.0002
+## Factor to for applying turn to x offset value (-1 to 1)
+kP = 0.05
 
 # Number of seconds to keep the cache
 CACHE_EXPIRY_SECS = 1
@@ -62,7 +57,7 @@ class ShortrangeActionServer:
         )
 
         # TODO Reorganize to handle if we know which target is expected
-        self.target_cache = None
+        self.targets_list: List[TargetCache] = [TargetCache(0, None) * 10]
 
         ## The name of the action
         self._action_name = name
@@ -73,11 +68,14 @@ class ShortrangeActionServer:
             execute_cb=self.shortrange_callback,
             auto_start=False,
         )
+        self._as.register_preempt_callback(self.preempt_callback)
         self._as.start()
 
     def target_callback(self, msg: VisionTarget):
         # if msg.valid: # Update cache if the VisionTarget message is valid
-        self.target_cache = TargetCache(rospy.get_time(), msg)
+        target_data = TargetCache(rospy.get_time(), msg)
+        self.targets_list[msg.id] = target_data
+        self.targets_list[ShortRangeGoal.ANY] = target_data
 
     def shortrange_callback(self, goal: ShortRangeGoal):
         """
@@ -85,18 +83,19 @@ class ShortrangeActionServer:
 
         @param goal (ShortRangeGoal): ShortRangeGoal message defined in action/ShortRange.action
         """
-
         rate = rospy.Rate(10)
-
         success = False
+        target_id = goal.target_id
 
         # Loop for running ArUco tag approach
         while not rospy.is_shutdown() and not self._as.is_preempt_requested():
+            target_data = self.targets_list[target_id]
+
             if (
-                self.target_cache is not None
-                and rospy.get_time() - self.target_cache.timestamp < CACHE_EXPIRY_SECS
+                target_data.msg is not None
+                and rospy.get_time() - target_data.timestamp < CACHE_EXPIRY_SECS
             ):
-                if self.target_cache.msg.distance_estimate < STOP_DISTANCE_M:
+                if target_data.msg.distance_estimate < STOP_DISTANCE_M:
                     # Stop the rover when it is close to the ArUco tag
                     rospy.loginfo(f"Reached target {self.target_cache.msg.id}")
                     self.drive_pub.publish(0, 0)
@@ -105,12 +104,12 @@ class ShortrangeActionServer:
                     break
                 else:
                     # Drive the rover to the target if the cache was updated recently
-                    turn = kP * self.target_cache.msg.x_offset
+                    turn = kP * target_data.msg.x_offset
                     self.drive_pub.publish(SPEED + turn, SPEED - turn)
             else:
-                # Turn the rover to look for the ArUco tag
-                # drivetrain_pub.publish(SPEED, -SPEED)
+                # Stop the rover and wait for data
                 self.drive_pub.publish(0, 0)
+                # TODO add abort condition/timeout
 
             rate.sleep()
 
@@ -121,6 +120,9 @@ class ShortrangeActionServer:
             self._as.set_succeeded()
         else:
             self._as.set_aborted()
+
+    def preempt_callback(self):
+        self.drive_pub(0, 0)
 
 
 if __name__ == "__main__":

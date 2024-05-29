@@ -20,7 +20,13 @@ import wr_logic_search.coord_calculations as coord_calculations
 import wr_logic_search.travel_timer as travel_timer
 
 from wr_logic_longrange.msg import LongRangeAction, LongRangeGoal
-from wr_logic_search.msg import SearchStateAction, SearchStateGoal, SpinAction, SpinGoal
+from wr_logic_search.msg import (
+    SearchStateAction,
+    SearchStateGoal,
+    SearchStateResult,
+    SpinAction,
+    SpinGoal,
+)
 
 
 class SearchActionServer:
@@ -75,21 +81,23 @@ class SearchActionServer:
         # point_time = rospy.get_rostime()
         while not rospy.is_shutdown() and i < num_vertices:
             # TODO figure out timeout
-            timeout = travel_timer.calc_point_time(coords[i]["distance"])
+            timeout = travel_timer.calc_point_time(coords[i]["distance"]) + 15
             self.long_range_client.send_goal(
                 LongRangeGoal(
                     target_lat=coords[i]["lat"], target_long=coords[i]["long"]
                 )
             )
-            # self.long_range_client.wait_for_result(rospy.Duration(timeout))
-            self.long_range_client.wait_for_result()
+            self.long_range_client.wait_for_result(rospy.Duration(timeout))
+            # self.long_range_client.wait_for_result()
             self.long_range_client.cancel_goal()
 
             if self.long_range_client.get_state() == GoalStatus.SUCCEEDED:
                 # TODO define timeout for spin
                 # spin to search for vision target
-                self.spin_client.send_goal(SpinGoal())
-                self.spin_client.wait_for_result()
+                self.spin_client.send_goal(SpinGoal(
+                    target_id=goal.target_id
+                ))
+                self.spin_client.wait_for_result(rospy.Duration(60))
                 object_detected = self.spin_client.get_state() == GoalStatus.SUCCEEDED
                 if object_detected:
                     break
@@ -98,9 +106,13 @@ class SearchActionServer:
 
         # Set result
         if object_detected:
-            self._as.set_succeeded()
+            self._as.set_succeeded(
+                SearchStateResult(
+                    final_lat=coords[i]["lat"], final_long=coords[i]["long"]
+                )
+            )
         else:
-            self._as.set_aborted()
+            self._as.set_aborted(SearchStateResult(0, 0))
 
 
 if __name__ == "__main__":

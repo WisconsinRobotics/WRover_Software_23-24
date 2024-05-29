@@ -59,13 +59,11 @@ class LongRangeActionServer(object):
             execute_cb=self.execute_callback,
             auto_start=False,
         )
+        self._as.preempt_callback(self.stop_motors)
         self._as.start()
 
     def stop_motors(self):
-        stop_msg = DriveTrainCmd()
-        stop_msg.left_value = 0
-        stop_msg.right_value = 0
-        self.drive_pub.publish(stop_msg)
+        self.drive_pub.publish(0, 0)
 
     def execute_callback(self, goal: LongRangeGoal):
         """
@@ -80,6 +78,7 @@ class LongRangeActionServer(object):
         while (
             rospy.get_rostime() - start_time < LONG_RANGE_TIMEOUT_TIME
             and not rospy.is_shutdown()
+            and not self._as.is_preempt_requested()
         ):
             rate.sleep()
             if obstacle_avoidance.update_target(goal.target_lat, goal.target_long):

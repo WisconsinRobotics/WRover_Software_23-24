@@ -1,3 +1,11 @@
-int32 id
+uint8 id
 float32 x_offset
 float32 distance_estimate
+uint8 ARUCO_ID_0 = 0
+uint8 ARUCO_ID_1 = 1
+uint8 ARUCO_ID_2 = 2
+uint8 ARUCO_ID_3 = 3
+uint8 ARUCO_ID_4 = 4
+uint8 OBJ_MALLET = 5
+uint8 OBJ_BOTTLE = 6
+uint8 ANY = 9

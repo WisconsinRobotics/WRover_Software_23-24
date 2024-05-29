@@ -25,15 +25,18 @@ def main():
 
     # Input test coordinates
     test_lat, test_long = 43.0724525, -89.4106448
+    test_target = SearchStateGoal.ANY
 
     compass_client.wait_for_server()
     compass_client.send_goal(InitCompassGoal())
     compass_client.wait_for_result()
 
     spin_client.wait_for_server()
-    spin_client.send_goal(SearchStateGoal(
-        initial_lat=test_lat, initial_long=test_long
-    ))
+    spin_client.send_goal(
+        SearchStateGoal(
+            initial_lat=test_lat, initial_long=test_long, target_id=test_target
+        )
+    )
     spin_client.wait_for_result()
     spin_client.get_state()
     rospy.init_node("search_pattern_client")

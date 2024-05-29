@@ -42,7 +42,8 @@ def process_corners(target_id: int, corners: np.ndarray) -> VisionTarget:
         side_lengths.append(np.linalg.norm(corners[i - 1] - corners[i]))
         min_x = min(min_x, corners[i][0])
         max_x = max(max_x, corners[i][0])
-    x_offset = (min_x + max_x - CAMERA_WIDTH) / 2
+    # x offset is returned as -1 to 1
+    x_offset = (min_x + max_x - CAMERA_WIDTH) / CAMERA_WIDTH
 
     # Estimate the distance of the ArUco tag in meters
     distance_estimate = aruco_lib.estimate_distance_m(corners)
