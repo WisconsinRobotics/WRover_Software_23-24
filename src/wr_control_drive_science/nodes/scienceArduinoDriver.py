@@ -14,12 +14,15 @@ from serial import Serial
 from threading import Lock
 import struct
 import rospy
+from std_msgs.msg import Float32
 
 import time
 
 from wr_control_drive_science.srv import ScienceService
 from wr_control_drive_science.srv import ScienceServiceRequest
 from wr_control_drive_science.srv import ScienceServiceResponse
+
+from wr_control_drive_science.msg import LightMsg
 
 ## Moisture sensor data format
 MOISTURE_SENSOR_PACKET_FORMAT = "<ffh"
@@ -36,6 +39,9 @@ temperature_reading = 0
 conductivity_reading = 0
 ## Lock to avoid synchronization issues
 moisture_sensor_lock = Lock()
+
+lightDNA = 0
+lightProtein = 0
 
 
 def get_moisture(ser: Serial) -> Tuple[Optional[int]]:
@@ -71,8 +77,11 @@ def arduinoSerialProcessing(ser: Serial) -> None:
     global temperature_reading
     global conductivity_reading
     global moisture_sensor_lock
-    curr_vol_water, curr_temperature, curr_conductivity = get_moisture(ser)
-    # curr_vol_water, curr_temperature, curr_conductivity = 0,0,0
+    global lightDNA
+    global lightProtein
+
+    #curr_vol_water, curr_temperature, curr_conductivity, lightDNA, lightProtein = get_moisture(ser)
+    curr_vol_water, curr_temperature, curr_conductivity, lightDNA,lightProtein = 0,0,0,0,0
     with moisture_sensor_lock:
         vol_water_reading = (
             curr_vol_water if curr_vol_water is not None else vol_water_reading
@@ -93,6 +102,12 @@ def clientHandler(request: ScienceServiceRequest):
 
     return response
 
+def publishLightData(pubLightSensor):
+    msg = LightMsg(
+        LightDNA = lightDNA,
+        LightProtein = lightProtein
+    )
+    pubLightSensor.publish(msg)
 
 
 def initialize() -> None:
@@ -100,18 +115,23 @@ def initialize() -> None:
 
     rospy.init_node("scienceArduinoDriver")
     # No reasonable default, must be supplied
-    serial_name = rospy.get_param("~serial_name")
-    serial_baud = rospy.get_param("~serial_baud", 115200)
+    # serial_name = rospy.get_param("~serial_name")
+    # serial_baud = rospy.get_param("~serial_baud", 115200)
 
-    ser = Serial(port=serial_name, baudrate=serial_baud)
-    # ser = None
+    # ser = Serial(port=serial_name, baudrate=serial_baud)
+    ser = None
 
     # Arduino comms loop
     rospy.Timer(rospy.Duration.from_sec(0.1), lambda _: arduinoSerialProcessing(ser))
 
+    pubLightSensor = rospy.Publisher('light_data', LightMsg, queue_size=10)
+
     s = rospy.Service("science_service", ScienceService, clientHandler)
     rospy.loginfo("OOO")
 
+    send_light_data = rospy.Timer(
+        rospy.Duration.from_sec(1), lambda _: publishLightData(pubLightSensor)
+    )
 
 
 if __name__ == "__main__":

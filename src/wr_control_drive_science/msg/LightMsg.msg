@@ -1,0 +1,2 @@
+float64 LightDNA
+float64 LightProtein

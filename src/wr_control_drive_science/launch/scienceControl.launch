@@ -4,7 +4,7 @@
     
     <!-- Runs in the base station -->
      <node name="science_client" pkg="wr_control_drive_science" type="scienceClient.py"
-        output="screen">
+        output="screen"/>
 
     <!-- Runs in the wrover -->
      <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" />
