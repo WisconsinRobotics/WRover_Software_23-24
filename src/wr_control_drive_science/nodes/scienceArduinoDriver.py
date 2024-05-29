@@ -14,8 +14,12 @@ from serial import Serial
 from threading import Lock
 import struct
 import rospy
-import std_msgs.msg as std_msgs
+
 import time
+
+from wr_control_drive_science.srv import ScienceService
+from wr_control_drive_science.srv import ScienceServiceRequest
+from wr_control_drive_science.srv import ScienceServiceResponse
 
 ## Moisture sensor data format
 MOISTURE_SENSOR_PACKET_FORMAT = "<ffh"
@@ -67,7 +71,8 @@ def arduinoSerialProcessing(ser: Serial) -> None:
     global temperature_reading
     global conductivity_reading
     global moisture_sensor_lock
-    curr_vol_water, curr_temperature, curr_conductivity = get_moisture(ser)
+    #curr_vol_water, curr_temperature, curr_conductivity = get_moisture(ser)
+    curr_vol_water, curr_temperature, curr_conductivity = 0,0,0
     with moisture_sensor_lock:
         vol_water_reading = (
             curr_vol_water if curr_vol_water is not None else vol_water_reading
@@ -79,33 +84,15 @@ def arduinoSerialProcessing(ser: Serial) -> None:
             curr_conductivity if curr_conductivity is not None else conductivity_reading
         )
 
+def clientHandler(request: ScienceServiceRequest):
+    response = ScienceServiceResponse(
+        vol_water_reading=str(vol_water_reading),
+        temperature_reading=str(temperature_reading),
+        conductivity_reading=str(conductivity_reading)
+    )
 
-def ros_publish_moisture(
-    volWaterPub: rospy.Publisher,
-    temperaturePub: rospy.Publisher,
-    conductivityPub: rospy.Publisher,
-) -> None:
-    """Publishes cached moisture data over ROS topics
+    return response
 
-    @param volWaterPub The publisher for volumetric water data
-    @param temperaturePub The publisher for temperature
-    @param conductivityPub The publisher for soil conductivity
-    """
-
-    global vol_water_reading
-    global temperature_reading
-    global conductivity_reading
-    global moisture_sensor_lock
-    vol_water = 0
-    temperature = 0
-    conductivity = 0
-    with moisture_sensor_lock:
-        vol_water = vol_water_reading
-        temperature = temperature_reading
-        conductivity = conductivity_reading
-    volWaterPub.publish(std_msgs.Float32(data=vol_water))
-    temperaturePub.publish(std_msgs.Float32(data=temperature))
-    conductivityPub.publish(std_msgs.Float32(data=conductivity))
 
 
 def initialize() -> None:
@@ -113,27 +100,18 @@ def initialize() -> None:
 
     rospy.init_node("scienceArduinoDriver")
     # No reasonable default, must be supplied
-    serial_name = rospy.get_param("~serial_name")
-    serial_baud = rospy.get_param("~serial_baud", 115200)
+    # serial_name = rospy.get_param("~serial_name")
+    # serial_baud = rospy.get_param("~serial_baud", 115200)
 
-    ser = Serial(port=serial_name, baudrate=serial_baud)
-    # Moisture publishing
-    vol_water_publisher = rospy.Publisher("/vol_water", std_msgs.Float32, queue_size=1)
-    temperature_publisher = rospy.Publisher(
-        "/temperature", std_msgs.Float32, queue_size=1
-    )
-    conductivity_publisher = rospy.Publisher(
-        "/conductivity", std_msgs.Float32, queue_size=1
-    )
-    rospy.Timer(
-        rospy.Duration.from_sec(0.1),
-        lambda _: ros_publish_moisture(
-            vol_water_publisher, temperature_publisher, conductivity_publisher
-        ),
-    )
+    # ser = Serial(port=serial_name, baudrate=serial_baud)
+    ser = None
 
     # Arduino comms loop
     rospy.Timer(rospy.Duration.from_sec(0.1), lambda _: arduinoSerialProcessing(ser))
+
+    s = rospy.Service("science_service", ScienceService, clientHandler)
+    rospy.loginfo("OOO")
+
 
 
 if __name__ == "__main__":

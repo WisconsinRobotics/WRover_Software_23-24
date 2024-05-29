@@ -11,6 +11,7 @@ set(CXX_STANDARD 14)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
+	message_generation
 )
 
 
@@ -58,11 +59,10 @@ find_package(PythonLibs 2.7 REQUIRED)
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(
+  FILES
+  ScienceService.srv
+)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -72,10 +72,10 @@ find_package(PythonLibs 2.7 REQUIRED)
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
+generate_messages(
 #   DEPENDENCIES
 #   std_msgs  # Or other packages containing msgs
-# )
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
