@@ -1,6 +1,14 @@
 <?xml version="1.0"?>
 <!DOCTYPE launch SYSTEM "https://gist.githubusercontent.com/nalt/dfa2abc9d2e3ae4feb82ca5608090387/raw/roslaunch.dtd">
 <launch>
+    
+    <!-- Runs in the base station -->
+     <node name="science_client" pkg="wr_control_drive_science" type="scienceClient.py"
+        output="screen">
+
+    <!-- Runs in the wrover -->
+     <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" />
+
     <node name="ScienceArduinoDriver" pkg="wr_control_drive_science" type="scienceArduinoDriver.py"
         output="screen">
         <!-- TODO (Ben Nowotny): This is probably not correct, needs to be tuned -->
