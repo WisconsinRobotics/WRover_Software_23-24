@@ -71,8 +71,8 @@ def arduinoSerialProcessing(ser: Serial) -> None:
     global temperature_reading
     global conductivity_reading
     global moisture_sensor_lock
-    #curr_vol_water, curr_temperature, curr_conductivity = get_moisture(ser)
-    curr_vol_water, curr_temperature, curr_conductivity = 0,0,0
+    curr_vol_water, curr_temperature, curr_conductivity = get_moisture(ser)
+    # curr_vol_water, curr_temperature, curr_conductivity = 0,0,0
     with moisture_sensor_lock:
         vol_water_reading = (
             curr_vol_water if curr_vol_water is not None else vol_water_reading
@@ -100,11 +100,11 @@ def initialize() -> None:
 
     rospy.init_node("scienceArduinoDriver")
     # No reasonable default, must be supplied
-    # serial_name = rospy.get_param("~serial_name")
-    # serial_baud = rospy.get_param("~serial_baud", 115200)
+    serial_name = rospy.get_param("~serial_name")
+    serial_baud = rospy.get_param("~serial_baud", 115200)
 
-    # ser = Serial(port=serial_name, baudrate=serial_baud)
-    ser = None
+    ser = Serial(port=serial_name, baudrate=serial_baud)
+    # ser = None
 
     # Arduino comms loop
     rospy.Timer(rospy.Duration.from_sec(0.1), lambda _: arduinoSerialProcessing(ser))
