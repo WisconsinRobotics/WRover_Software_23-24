@@ -23,6 +23,8 @@ class RecordData:
         rospy.wait_for_service("science_service")
 
         rate = rospy.Rate(10)
+
+        rospy.loginfo("Enter c to print data \nEnter a to start recording data \nEnter b to stop recording data \nEnter s to retract servo \n")
         '''
         The funciton rospy.is_shutdown() checks if the module is still running or not. 
         '''
@@ -36,7 +38,7 @@ class RecordData:
             '''
             Calls the service when user presses c
             '''
-            userInput = input("Enter c to print data \nEnter a to start recording data \nEnter b to stop recording data: ")
+            userInput = input("Enter input: ")
             if userInput == "c":
                 # rospy.loginfo("HEYYYYYYYY")
                 response:ScienceServiceResponse = science_service()
@@ -62,7 +64,8 @@ class RecordData:
                 rospy.loginfo("Stopped recording data")
                 subToLight.unregister()
                 self.file.close()
-            
+            elif userInput == "s":
+                pass
             '''
             Waits for 100ms before resuming the program. This ensures that the loop runs at 10hz, 
             which was provided in the constructor.

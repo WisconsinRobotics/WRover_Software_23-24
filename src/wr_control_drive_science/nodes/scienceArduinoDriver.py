@@ -15,6 +15,7 @@ from threading import Lock
 import struct
 import rospy
 from std_msgs.msg import Float32
+from std_srvs.srv import Empty, EmptyRequest, EmptyResponse
 
 import time
 
@@ -54,6 +55,7 @@ def get_moisture(ser: Serial) -> Tuple[Optional[int]]:
 
     # Get the moisture sensor reading from hardware
     print(f"in waiting: {ser.in_waiting}")
+
     if ser.in_waiting >= struct.calcsize(MOISTURE_SENSOR_PACKET_FORMAT) + 4:
         m = ser.read(4)
         if m != bytearray([0xAA, 0xAA, 0xAA, 0xAA]):
@@ -114,17 +116,20 @@ def publishLightData(pubLightSensor):
     )
     pubLightSensor.publish(msg)
 
+def handleServo(ser: Serial):
+    rospy.loginfo("<<<<<<<<<Moving servo>>>>>>>>")
+    ser.write(b'W')
 
 def initialize() -> None:
     """Set up the ROS interface and callbacks to run the node"""
 
     rospy.init_node("scienceArduinoDriver")
     # No reasonable default, must be supplied
-    # serial_name = rospy.get_param("~serial_name")
-    # serial_baud = rospy.get_param("~serial_baud", 115200)
+    serial_name = rospy.get_param("~serial_name")
+    serial_baud = rospy.get_param("~serial_baud", 115200)
 
-    # ser = Serial(port=serial_name, baudrate=serial_baud)
-    ser = None
+    ser = Serial(port=serial_name, baudrate=serial_baud)
+    # ser = None
 
     # Arduino comms loop
     rospy.Timer(rospy.Duration.from_sec(0.1), lambda _: arduinoSerialProcessing(ser))
@@ -132,6 +137,8 @@ def initialize() -> None:
     pubLightSensor = rospy.Publisher('light_data', LightMsg, queue_size=10)
 
     s = rospy.Service("science_service", ScienceService, clientHandler)
+    rospy.loginfo("OOO")
+    s = rospy.Service("move_servo", Empty, lambda _: handleServo(ser))
     rospy.loginfo("OOO")
 
     send_light_data = rospy.Timer(
