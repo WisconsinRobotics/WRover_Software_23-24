@@ -1,0 +1,63 @@
+# -------------------------------
+# MapProxy example configuration.
+# -------------------------------
+#
+# This is a minimal MapProxy configuration.
+# See full_example.yaml and the documentation for more options.
+#
+
+# Starts the following services:
+# Demo:
+#     http://localhost:8080/demo
+# WMS:
+#     capabilities: http://localhost:8080/service?REQUEST=GetCapabilities
+# WMTS:
+#     capabilities: http://localhost:8080/wmts/1.0.0/WMTSCapabilities.xml
+#     first tile: http://localhost:8080/wmts/osm/webmercator/0/0/0.png
+# Tile service (compatible with OSM/etc.)
+#     first tile: http://localhost:8080/tiles/osm/webmercator/0/0/0.png
+# TMS:
+#     note: TMS is not compatible with OSM/Google Maps/etc.
+#     first tile: http://localhost:8080/tms/1.0.0/osm/webmercator/0/0/0.png
+# KML:
+#     initial doc: http://localhost:8080/kml/osm/webmercator
+
+services:
+  demo:
+  tms:
+    use_grid_names: true
+    # origin for /tiles service
+    origin: 'nw'
+  kml:
+      use_grid_names: true
+  wmts:
+  wms:
+    md:
+      title: MapProxy WMS Proxy
+      abstract: This is a minimal MapProxy example.
+
+layers:
+  - name: gm_layer
+    title: Google Maps tiles
+    sources: [gm_cache]
+
+caches:
+  gm_cache:
+    grids: [gm_grid]
+    sources: [gm]
+    cache:
+      type: file
+      directory_layout: tms
+
+sources:
+  gm:
+    type: tile
+    url: https://mt0.google.com/vt/lyrs=s&hl=en&x=%(x)s&y=%(y)s&z=%(z)s
+    grid: gm_grid
+
+grids:
+    gm_grid:
+        base: GLOBAL_MERCATOR
+        origin: ul
+
+globals:
