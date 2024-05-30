@@ -40,8 +40,8 @@ conductivity_reading = 0
 ## Lock to avoid synchronization issues
 moisture_sensor_lock = Lock()
 
-lightDNA = 0
-lightProtein = 0
+light_DNA_reading = 0
+light_protein_reading = 0
 
 
 def get_moisture(ser: Serial) -> Tuple[Optional[int]]:
@@ -77,11 +77,11 @@ def arduinoSerialProcessing(ser: Serial) -> None:
     global temperature_reading
     global conductivity_reading
     global moisture_sensor_lock
-    global lightDNA
-    global lightProtein
+    global light_DNA_reading
+    global light_protein_reading
 
-    #curr_vol_water, curr_temperature, curr_conductivity, lightDNA, lightProtein = get_moisture(ser)
-    curr_vol_water, curr_temperature, curr_conductivity, lightDNA,lightProtein = 0,0,0,0,0
+    curr_vol_water, curr_temperature, curr_conductivity, curr_lightDNA, curr_lightProtein = get_moisture(ser)
+    #curr_vol_water, curr_temperature, curr_conductivity, lightDNA, lightProtein = 0,0,0,0,0
     with moisture_sensor_lock:
         vol_water_reading = (
             curr_vol_water if curr_vol_water is not None else vol_water_reading
@@ -92,6 +92,12 @@ def arduinoSerialProcessing(ser: Serial) -> None:
         conductivity_reading = (
             curr_conductivity if curr_conductivity is not None else conductivity_reading
         )
+        light_DNA_reading = (
+            curr_lightDNA if curr_lightDNA is not None else light_DNA_reading
+        )
+        light_protein_reading = (
+            curr_lightProtein if curr_lightProtein is not None else light_protein_reading
+        )
 
 def clientHandler(request: ScienceServiceRequest):
     response = ScienceServiceResponse(
@@ -99,13 +105,12 @@ def clientHandler(request: ScienceServiceRequest):
         temperature_reading=str(temperature_reading),
         conductivity_reading=str(conductivity_reading)
     )
-
     return response
 
 def publishLightData(pubLightSensor):
     msg = LightMsg(
-        LightDNA = lightDNA,
-        LightProtein = lightProtein
+        LightDNA = light_DNA_reading,
+        LightProtein = light_protein_reading
     )
     pubLightSensor.publish(msg)
 
