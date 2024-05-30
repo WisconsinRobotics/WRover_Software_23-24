@@ -14,5 +14,8 @@
         <!-- TODO (Ben Nowotny): This is probably not correct, needs to be tuned -->
         <param name="serial_name" value="/dev/ttyACM0" />
         <param name="serial_baud" value="115200" />
+
+        <param name="light_sensor_serial_name" value="/dev/ttyUSB1" />
+        <param name="light_sensor_serial_baud" value="115200" />
     </node>
 </launch>

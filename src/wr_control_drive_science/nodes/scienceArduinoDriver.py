@@ -13,6 +13,7 @@ from typing import Tuple, Optional
 from serial import Serial
 from threading import Lock
 import struct
+import re
 import rospy
 from std_msgs.msg import Float32
 from std_srvs.srv import Empty, EmptyRequest, EmptyResponse
@@ -75,31 +76,35 @@ def arduinoSerialProcessing(ser: Serial) -> None:
     """
 
     # expect call from ROS timer
-    global vol_water_reading
-    global temperature_reading
-    global conductivity_reading
-    global moisture_sensor_lock
     global light_DNA_reading
-    global light_protein_reading
+    global vol_water_reading
+    global conductivity_reading
+    global temperature_reading
+    global moisture_sensor_lock
+    # global light_protein_reading
 
-    curr_vol_water, curr_temperature, curr_conductivity, curr_lightDNA, curr_lightProtein = get_moisture(ser)
-    #curr_vol_water, curr_temperature, curr_conductivity, lightDNA, lightProtein = 0,0,0,0,0
     with moisture_sensor_lock:
-        vol_water_reading = (
-            curr_vol_water if curr_vol_water is not None else vol_water_reading
-        )
-        temperature_reading = (
-            curr_temperature if curr_temperature is not None else temperature_reading
-        )
-        conductivity_reading = (
-            curr_conductivity if curr_conductivity is not None else conductivity_reading
-        )
-        light_DNA_reading = (
-            curr_lightDNA if curr_lightDNA is not None else light_DNA_reading
-        )
-        light_protein_reading = (
-            curr_lightProtein if curr_lightProtein is not None else light_protein_reading
-        )
+        if ser.in_waiting > 25:
+            ser.reset_input_buffer()
+            ser.readline()
+
+        data_str = ser.readline().decode()
+        data_arr = re.match(r'(\+|-)', data_str)
+        if len(data_arr) == 7:
+            light_DNA_reading = float(data_arr[0])
+            vol_water_reading = (1 if data_arr[1] == '+' else -1) * float(data_arr[2])
+            conductivity_reading = (1 if data_arr[3] == '+' else -1) * float(data_arr[4])
+            temperature_reading = (1 if data_arr[5] == '+' else -1) * float(data_arr[6])
+
+
+def lightProteinProcessing(ser: Serial):
+    global light_protein_reading
+    if ser.in_waiting > 10:
+        ser.reset_input_buffer()
+        ser.readline()
+
+    light_protein_reading = float(ser.readline())
+
 
 def clientHandler(request: ScienceServiceRequest):
     response = ScienceServiceResponse(
@@ -117,8 +122,11 @@ def publishLightData(pubLightSensor):
     pubLightSensor.publish(msg)
 
 def handleServo(ser: Serial):
-    rospy.loginfo("<<<<<<<<<Moving servo>>>>>>>>")
-    ser.write(b'W')
+    global moisture_sensor_lock
+
+    with moisture_sensor_lock:
+        rospy.loginfo("<<<<<<<<<Moving servo>>>>>>>>")
+        ser.write(b'W')
 
 def initialize() -> None:
     """Set up the ROS interface and callbacks to run the node"""
@@ -129,17 +137,21 @@ def initialize() -> None:
     serial_baud = rospy.get_param("~serial_baud", 115200)
 
     ser = Serial(port=serial_name, baudrate=serial_baud)
+
+    light_sensor_serial_name = rospy.get_param("~light_sensor_serial_name")
+    light_sensor_serial_baud = rospy.get_param("~lignt_sensor_serial_baud", 115200)
+
+    light_sensor_ser = Serial(port=light_sensor_serial_name, baudrate=light_sensor_serial_baud)
     # ser = None
 
     # Arduino comms loop
     rospy.Timer(rospy.Duration.from_sec(0.1), lambda _: arduinoSerialProcessing(ser))
+    rospy.Timer(rospy.Duration.from_sec(0.1), lambda _: lightProteinProcessing(light_sensor_ser))
 
     pubLightSensor = rospy.Publisher('light_data', LightMsg, queue_size=10)
 
-    s = rospy.Service("science_service", ScienceService, clientHandler)
-    rospy.loginfo("OOO")
-    s = rospy.Service("move_servo", Empty, lambda _: handleServo(ser))
-    rospy.loginfo("OOO")
+    science_data_service = rospy.Service("science_service", ScienceService, clientHandler)
+    move_servo_service = rospy.Service("move_servo", Empty, lambda _: handleServo(ser))
 
     send_light_data = rospy.Timer(
         rospy.Duration.from_sec(1), lambda _: publishLightData(pubLightSensor)
