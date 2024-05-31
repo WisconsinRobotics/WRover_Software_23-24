@@ -42,17 +42,22 @@ def get_coords(start_lat, start_long, distance, num_vertices) -> List[Dict[str, 
 
     # create starting coordinate as the first coordinate
     coords.append({"lat": start_lat, "long": start_long, "distance": 0})
-
-    for i in range(num_vertices):
+    count = 0
+    while count < num_vertices:
         # update the distance after it has been traveled twice to create the square spiral shape
-        if (i > 1) and (i % 2) == 0:
+        if count == 2 or count  == 6 or count == 12:
             cumulative_dist += distance
 
-        coords.append(
-            calc_dest_coord(
-                coords[i]["lat"], coords[i]["long"], cumulative_dist, bearing
+        for a in range(int(cumulative_dist/distance)):
+            #print(a)
+            #print(int(cumulative_dist/distance - 1))
+            coords.append(
+                calc_dest_coord(
+                    coords[count]["lat"], coords[count]["long"], distance, bearing
+                )
             )
-        )
+            count = count + 1
+
         bearing += 90
 
     return coords

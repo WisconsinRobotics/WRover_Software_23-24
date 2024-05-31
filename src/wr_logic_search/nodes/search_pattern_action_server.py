@@ -60,8 +60,8 @@ class SearchActionServer:
         @param goal (SearchGoal): Goal for the navigation segment, which contains
         the GPS coordinates of the target.
         """
-        distance = 4  # in meters, the shortest unit of movement
-        num_vertices = 22
+        distance = 8  # in meters, the shortest unit of movement
+        num_vertices = 25
         object_detected = False
 
         # get list of coordinates

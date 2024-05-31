@@ -20,7 +20,7 @@ from wr_logic_shortrange.msg import VisionTarget
 
 
 class SpinActionServer:
-    TURN_SPEED = 0.1
+    TURN_SPEED = 0.2
 
     def __init__(self, name) -> None:
 
