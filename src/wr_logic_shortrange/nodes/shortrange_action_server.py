@@ -74,7 +74,8 @@ class ShortrangeActionServer:
     def target_callback(self, msg: VisionTarget):
         # if msg.valid: # Update cache if the VisionTarget message is valid
         target_data = TargetCache(rospy.get_time(), msg)
-        self.targets_list[msg.id] = target_data
+        if msg.id < len(self.targets_list):
+            self.targets_list[msg.id] = target_data
         self.targets_list[ShortRangeGoal.ANY] = target_data
 
     def shortrange_callback(self, goal: ShortRangeGoal):
@@ -97,7 +98,7 @@ class ShortrangeActionServer:
             ):
                 if target_data.msg.distance_estimate < STOP_DISTANCE_M:
                     # Stop the rover when it is close to the ArUco tag
-                    rospy.loginfo(f"Reached target {self.target_cache.msg.id}")
+                    rospy.logerr(f"Shortrange reached target {self.target_cache.msg.id}")
                     self.drive_pub.publish(0, 0)
 
                     success = True
@@ -110,6 +111,7 @@ class ShortrangeActionServer:
                 # Stop the rover and wait for data
                 self.drive_pub.publish(0, 0)
                 # TODO add abort condition/timeout
+                rospy.logerr(f"Shortrange waiting for data")
 
             rate.sleep()
 

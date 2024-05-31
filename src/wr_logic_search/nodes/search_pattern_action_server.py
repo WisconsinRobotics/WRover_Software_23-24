@@ -82,25 +82,31 @@ class SearchActionServer:
         while not rospy.is_shutdown() and i < num_vertices:
             # TODO figure out timeout
             timeout = travel_timer.calc_point_time(coords[i]["distance"]) + 15
+
+            next_lat, next_long = coords[i]["lat"], coords[i]["long"]
             self.long_range_client.send_goal(
                 LongRangeGoal(
-                    target_lat=coords[i]["lat"], target_long=coords[i]["long"]
+                    target_lat=next_lat, target_long=next_long
                 )
             )
+            rospy.logerr(f"Next GPS coord: {next_lat} {next_long}")
             self.long_range_client.wait_for_result(rospy.Duration(timeout))
             # self.long_range_client.wait_for_result()
             self.long_range_client.cancel_goal()
 
             if self.long_range_client.get_state() == GoalStatus.SUCCEEDED:
-                # TODO define timeout for spin
-                # spin to search for vision target
-                self.spin_client.send_goal(SpinGoal(
-                    target_id=goal.target_id
-                ))
-                self.spin_client.wait_for_result(rospy.Duration(60))
-                object_detected = self.spin_client.get_state() == GoalStatus.SUCCEEDED
-                if object_detected:
-                    break
+                rospy.logerr(f"Reached GPS coordinate")
+            else: 
+                rospy.logerr(f"Timed out, skipping GPS coordinate")
+            # TODO define timeout for spin
+            # spin to search for vision target
+            self.spin_client.send_goal(SpinGoal(
+                target_id=goal.target_id
+            ))
+            self.spin_client.wait_for_result(rospy.Duration(60))
+            object_detected = self.spin_client.get_state() == GoalStatus.SUCCEEDED
+            if object_detected:
+                break
 
             i += 1  # next coordinate
 

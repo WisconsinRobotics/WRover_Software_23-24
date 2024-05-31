@@ -166,7 +166,7 @@ def update_navigation_rviz_sim(
 
     global frameCount
 
-    if rospy.get_param("/long_range_action_server/wrover_hw") == "MOCK":
+    if rospy.get_param("~wrover_hw") == "MOCK":
         heading_msg.header.seq = frameCount
         heading_msg.header.stamp = rospy.get_rostime()
 

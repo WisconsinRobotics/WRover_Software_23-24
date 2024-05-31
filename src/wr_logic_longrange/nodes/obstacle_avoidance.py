@@ -176,7 +176,7 @@ def update_navigation(data: LaserScan) -> None:
     # rospy.loginfo(f"raw heading: {result}")
 
     # TESTING
-    testing_rviz.update_navigation_rviz_sim(delta_heading, result, cur_heading)
+    # testing_rviz.update_navigation_rviz_sim(delta_heading, result, cur_heading)
 
 
 def get_drive_power() -> DriveTrainCmd:
