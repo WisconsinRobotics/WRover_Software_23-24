@@ -3,6 +3,7 @@ import rospy
 import std_msgs.msg as std_msgs
 import time
 
+
 class ClawController:
     OPEN_SPEED = 32767
     CLOSE_SPEED = -32768
@@ -21,21 +22,53 @@ class ClawController:
         self._publish_claw_speed()
 
     def _publish_claw_speed(self):
-        speed = std_msgs.Int16(ClawController.OPEN_SPEED if self._open_pressed else (ClawController.CLOSE_SPEED if self._close_pressed else 0))
+        speed = std_msgs.Int16(
+            ClawController.OPEN_SPEED
+            if self._open_pressed
+            else (ClawController.CLOSE_SPEED if self._close_pressed else 0)
+        )
         self._publisher.publish(speed)
 
+
+class SolenoidController:
+    OFF = 0
+    ON = 32767
+
+    def __init__(self, topicName: str):
+        self._publisher = rospy.Publisher(topicName, std_msgs.Int16, queue_size=1)
+
+    def actuate_solenoid(self, open):
+        speed = SolenoidController.ON if open else SolenoidController.OFF
+        self._publisher.publish(speed)
+
+
+"""
 def actuateSolenoid(msg: std_msgs.Bool):
     with open("/sys/class/gpio/gpio6/value", "w") as gpioFile:
         gpioFile.write("1" if msg.data else "0")
         gpioFile.flush()
+"""
 
 if __name__ == "__main__":
 
     rospy.init_node("end_effector_controller")
 
     claw = ClawController("/hsi/roboclaw/aux3/cmd/left")
-    openSubscriber = rospy.Subscriber("/hci/arm/gamepad/button/a", std_msgs.Bool, lambda msg: claw.open_claw(msg.data))
-    closeSubscriber = rospy.Subscriber("/hci/arm/gamepad/button/b", std_msgs.Bool, lambda msg: claw.close_claw(msg.data))
+    openSubscriber = rospy.Subscriber(
+        "/hci/arm/gamepad/button/a", std_msgs.Bool, lambda msg: claw.open_claw(msg.data)
+    )
+    closeSubscriber = rospy.Subscriber(
+        "/hci/arm/gamepad/button/b",
+        std_msgs.Bool,
+        lambda msg: claw.close_claw(msg.data),
+    )
+
+    solenoid = SolenoidController("/hsi/roboclaw/aux3/cmd/right")
+    solenoidSubscriber = rospy.Subscriber(
+        "/hci/arm/gamepad/button/y",
+        std_msgs.Bool,
+        lambda msg: solenoid.actuate_solenoid(msg.data),
+    )
 
     """
     rospy.loginfo("Starting GPIO setup...")
@@ -53,7 +86,7 @@ if __name__ == "__main__":
     """
 
     rospy.spin()
-    
+
     """
     with open("/sys/class/gpio/unexport", "w") as unexportFile:
         unexportFile.write("6")
