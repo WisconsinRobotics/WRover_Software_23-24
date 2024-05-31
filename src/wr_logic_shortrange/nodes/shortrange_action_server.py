@@ -57,7 +57,7 @@ class ShortrangeActionServer:
         )
 
         # TODO Reorganize to handle if we know which target is expected
-        self.targets_list: List[TargetCache] = [TargetCache(0, None) * 10]
+        self.targets_list: List[TargetCache] = [TargetCache(0, None)] * 10
 
         ## The name of the action
         self._action_name = name
@@ -68,7 +68,7 @@ class ShortrangeActionServer:
             execute_cb=self.shortrange_callback,
             auto_start=False,
         )
-        self._as.register_preempt_callback(self.preempt_callback)
+        # self._as.register_preempt_callback(self.preempt_callback)
         self._as.start()
 
     def target_callback(self, msg: VisionTarget):

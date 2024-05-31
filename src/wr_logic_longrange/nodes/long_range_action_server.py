@@ -50,7 +50,7 @@ class LongRangeActionServer(object):
         obstacle_avoidance.initialize()
         
         # Subscribe to lidar data
-        rospy.wait_for_message("/scan", LaserScan, timeout=None)
+        #rospy.wait_for_message("/scan", LaserScan, timeout=None)
 
 
         self._as = actionlib.SimpleActionServer(
@@ -59,7 +59,7 @@ class LongRangeActionServer(object):
             execute_cb=self.execute_callback,
             auto_start=False,
         )
-        self._as.preempt_callback(self.stop_motors)
+        #self._as.preempt_callback(self.stop_motors)
         self._as.start()
 
     def stop_motors(self):

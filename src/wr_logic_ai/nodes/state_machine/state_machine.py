@@ -31,7 +31,7 @@ TARGET_CONSTANTS = {
 
 class St_Longrange_Complete(State):
     def __init__(self):
-        State.__init__(self, outcomes=["longrange_only", "shortrange"])
+        State.__init__(self, outcomes=["longrange_only", "shortrange"], input_keys=["target_lat", "target_long"], output_keys=["search_lat", "search_long", "shortrange_target_type"])
 
     def execute(self, userdata):
         # Checks if the waypoint requires target search and approach
@@ -232,14 +232,14 @@ def main():
         StateMachine.add(
             "st_shortrange",
             SimpleActionState(
-                "ShortRangeActionServer", ShortRangeAction, goal_slots=["target_type"]
+                "ShortRangeActionServer", ShortRangeAction, goal_slots=["target_id"]
             ),
             transitions={
                 "succeeded": "st_waypoint_complete",
                 "aborted": "st_search",
                 "preempted": "st_search",
             },
-            remapping={"target_type": "shortrange_target_type"},
+            remapping={"target_id": "shortrange_target_type"},
         )
 
         # st_waypoint_complete

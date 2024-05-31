@@ -1,9 +1,9 @@
 [
     {
-        "lat": 43.072074,
-        "long": -89.411769,
+        "lat": 38.3717873,
+        "long": -110.704258,
         "note": "EHall Entrance",
-        "target": "none"
+        "target": "aruco 1"
     },
     {
         "lat": 43.0716988,

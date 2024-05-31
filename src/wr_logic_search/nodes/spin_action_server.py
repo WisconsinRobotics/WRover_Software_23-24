@@ -52,7 +52,7 @@ class SpinActionServer:
             execute_cb=self.execute_callback,
             auto_start=False,
         )
-        self._as.preempt_callback(self.preempt_callback)
+        # self._as.preempt_callback(self.preempt_callback)
         self._as.start()
 
     def heading_callback(self, msg: Float64):

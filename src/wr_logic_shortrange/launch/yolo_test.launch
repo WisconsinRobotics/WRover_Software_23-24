@@ -2,12 +2,14 @@
     <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" />
 
     <arg name="vision_topic" default="/logic/vision_target" />
-    <arg name="video_stream" default="" />
+    <arg name="video_stream" default="/dev/v4l/by-id/usb-046d_0825_68DBE850-video-index0" />
+    <arg name="model_path" default="best.engine" />
     <arg name="debug" default="true" />
 
     <node name="vision_yolo_detection" pkg="wr_logic_shortrange" type="vision_yolo_detection.py">
         <param name="vision_topic" value="$(arg vision_topic)" />
         <param name="video_stream" value="$(arg video_stream)" />
+        <param name="model_path" value="$(arg model_path)" />l
         <param name="debug" type="bool" value="$(arg debug)" />
     </node>
 

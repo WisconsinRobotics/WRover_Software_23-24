@@ -2,7 +2,7 @@
     <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" />
 
     <arg name="vision_topic" default="/logic/vision_target" />
-    <arg name="video_stream" default="" />
+    <arg name="video_stream" default="/dev/v4l/by-id/usb-046d_0825_3481A150-video-index0" />
     <arg name="debug" default="true" />
     <arg name="motor_speeds" default="/control/drive_system/cmd" />
 
@@ -21,6 +21,6 @@
         <param name="motor_speeds" value="$(arg motor_speeds)" />
     </node>
 
-    <node name="shortrange_client" pkg="wr_logic_shortrange" type="shortrange_client.py" />
+    <!-- <node name="shortrange_client" pkg="wr_logic_shortrange" type="shortrange_client.py" /> -->
 
 </launch>
