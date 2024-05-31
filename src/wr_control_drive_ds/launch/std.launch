@@ -4,8 +4,8 @@
     <group ns="drive_system">
       <node name="control" pkg="wr_control_drive_ds" type="DriveTrainControlSystem" machine="wrover"/>
     </group>
-    <group ns="camera">
+    <!-- <group ns="camera">
       <node name="cam_mast_control" pkg="wr_control_drive_ds" type="cam_mast_control.py" machine="wrover"/>
-    </group>
+    </group> -->
   </group>
 </launch>
