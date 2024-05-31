@@ -1,17 +1,79 @@
 import subprocess
 
 import cv2 as cv
+import numpy as np
 import rospy
+import torch
 from ultralytics import YOLO
 
 from wr_logic_shortrange.msg import VisionTarget
 
 ## Width of the camera frame, in pixels
-CAMERA_WIDTH = 640
+# CAMERA_WIDTH = 640
+CAMERA_WIDTH = 1280
 ## Height of the camera frame, in pixels
-CAMERA_HEIGHT = 480
+# CAMERA_HEIGHT = 480
+CAMERA_HEIGHT = 720
 ## Frames per second
-CAMERA_FPS = 30
+CAMERA_FPS = 5
+
+FOCAL_LENGTH_MM = 1360.17
+
+OBJECT_NAME_TO_ID = {
+    "hammer": VisionTarget.OBJ_MALLET,
+    "bottle": VisionTarget.OBJ_BOTTLE,
+}
+
+
+def draw_bounding_box(frame: np.ndarray, box: torch.Tensor, label: str) -> np.ndarray:
+    x1, y1, x2, y2 = box
+    x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+
+    frame = cv.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+
+    return cv.putText(
+        frame,
+        text=label,
+        org=(x1, y1),
+        fontFace=cv.FONT_HERSHEY_PLAIN,
+        fontScale=1.5,
+        color=(0, 0, 255),
+    )
+
+
+def generate_vision_msg(box: torch.Tensor, label: str):
+    x1, y1, x2, y2 = box
+    x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
+
+    # Find long edge and short edge
+    x_edge = abs(x2 - x1)
+    y_edge = abs(y2 - y1)
+    long_edge = max(x_edge, y_edge)
+    short_edge = min(x_edge, y_edge)
+
+    # x offset is returned as -1 to 1
+    x_offset = (x1 + x2 - CAMERA_WIDTH) / CAMERA_WIDTH
+
+    distance = 0
+    target_id = VisionTarget.ANY
+    if label in OBJECT_NAME_TO_ID:
+        target_id = OBJECT_NAME_TO_ID[label]
+        if target_id == VisionTarget.OBJ_MALLET:
+            # length of mallet handle in mm
+            long_edge_distance = 305 * FOCAL_LENGTH_MM / (long_edge * 1000)
+            # length of mallet head in mm
+            short_edge_distance = 100 * FOCAL_LENGTH_MM / (short_edge * 1000)
+            distance = max(long_edge_distance, short_edge_distance)
+        elif target_id == VisionTarget.OBJ_BOTTLE:
+            # height of water bottle in mm
+            long_edge_distance = 215 * FOCAL_LENGTH_MM / (long_edge * 1000)
+            # diameter of water bottle in mm
+            short_edge_distance = 90 * FOCAL_LENGTH_MM / (short_edge * 1000)
+            distance = max(long_edge_distance, short_edge_distance)
+
+    # assume we are close to object
+    return VisionTarget(id=target_id, x_offset=x_offset, distance=distance)
+
 
 def main():
     rospy.init_node("vision_aruco_detection")
@@ -94,19 +156,9 @@ def main():
             if results is not None:
                 for r in results:
                     for box in r.boxes:
-                        x1, y1, x2, y2 = box.xyxy[0]
-                        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-
-                        cv.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-
-                        cv.putText(
-                            frame,
-                            text=model.names[int(box.cls[0])],
-                            org=(x1, y1),
-                            fontFace=cv.FONT_HERSHEY_PLAIN,
-                            fontScale=1.5,
-                            color=(0, 0, 255),
-                        )
+                        box_label = model.names[int(box.cls[0])]
+                        if debug:
+                            frame = draw_bounding_box(frame, box.xyxy[0], box_label)
 
             if debug:
                 stream.stdin.write(frame.tobytes())
@@ -117,8 +169,6 @@ def main():
         stream.stdin.close()
         stream.wait()
     cap.release()
-
-
 
 
 if __name__ == "__main__":
