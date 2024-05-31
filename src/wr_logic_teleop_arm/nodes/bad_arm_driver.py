@@ -10,7 +10,8 @@ TURNTABLE_SPEED_FACTOR = 0.2
 SHOULDER_SPEED_FACTOR = 0.4
 ELBOW_SPEED_FACTOR = 0.3
 FOREARM_SPEED = 16384
-WRIST_SPEED = 12288
+# WRIST_SPEED = 12288
+WRIST_SPEED = 14746
 
 class Watchdog:
     def __init__(self, timeout: float):
@@ -67,7 +68,7 @@ def main():
     pub_turntable = rospy.Publisher(f'{claw_ns_0}/cmd/left', Int16, queue_size=4)
     pub_shoulder = rospy.Publisher(f'{claw_ns_0}/cmd/right', Int16, queue_size=4)
     pub_elbow = rospy.Publisher(f'{claw_ns_1}/cmd/left', Int16, queue_size=4)
-    # pub_forearm = rospy.Publisher(f'{claw_ns_1}/cmd/right', Int16, queue_size=4)
+    pub_forearm = rospy.Publisher(f'{claw_ns_1}/cmd/right', Int16, queue_size=4)
     pub_wrist_a = rospy.Publisher(f'{claw_ns_2}/cmd/left', Int16, queue_size=4)
     pub_wrist_b = rospy.Publisher(f'{claw_ns_2}/cmd/right', Int16, queue_size=4)
     # pub_eef = rospy.Publisher(f'{claw_ns_3}/cmd/left', Int16, queue_size=4)
@@ -85,18 +86,16 @@ def main():
             if stick_r.data is not None:
                 pub_elbow.publish(float_to_int16_msg(stick_r.data, ELBOW_SPEED_FACTOR))
             
-            # Forearm joint removed
-            """
+            # Bumpers used for cam mast control
             if bumper_l.data is not None and bumper_r.data is not None:
                 if bumper_l.data:
                     if bumper_r.data:
                         pub_forearm.publish(Int16(0))
-                    pub_forearm.publish(Int16(FOREARM_SPEED))
-                elif bumper_r.data:
                     pub_forearm.publish(Int16(-FOREARM_SPEED))
+                elif bumper_r.data:
+                    pub_forearm.publish(Int16(FOREARM_SPEED))
                 else:
                     pub_forearm.publish(Int16(0))
-            """
             
             if pov_x.data is not None and pov_y.data is not None:
                 wrist_spd_a = 0
@@ -131,7 +130,7 @@ def main():
             pub_turntable.publish(Int16(0))
             pub_shoulder.publish(Int16(0))
             pub_elbow.publish(Int16(0))
-            # pub_forearm.publish(Int16(0))
+            pub_forearm.publish(Int16(0))
             pub_wrist_a.publish(Int16(0))
             pub_wrist_b.publish(Int16(0))
             # pub_eef.publish(Int16(0))
