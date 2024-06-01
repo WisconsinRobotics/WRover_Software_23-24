@@ -1,0 +1,20 @@
+<launch>
+    <arg name="vision_topic" default="/logic/vision_target" />
+    <arg name="video_stream" default="/dev/video4" />
+    <arg name="debug" default="false" />
+    <arg name="motor_speeds" default="/control/drive_system/cmd" />
+
+    <node name="vision_aruco_detection" pkg="wr_logic_shortrange" type="vision_aruco_detection.py">
+        <param name="vision_topic" value="$(arg vision_topic)" />
+        <param name="video_stream" value="$(arg video_stream)" />
+        <param name="debug" type="bool" value="$(arg debug)" />
+    </node>
+
+
+    <node name="shortrange_navigation" pkg="wr_logic_shortrange" type="shortrange_action_server.py">
+        <param name="vision_topic" value="$(arg vision_topic)" />
+        <param name="motor_speeds" value="$(arg motor_speeds)" />
+    </node>
+
+    <node name="shortrange_client" pkg="wr_logic_shortrange" type="shortrange_client.py" output="screen"/>
+</launch>
