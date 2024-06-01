@@ -1,0 +1,28 @@
+<launch>
+    <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" />
+
+    <arg name="vision_topic" default="/logic/vision_target" />
+    <arg name="heading_topic" default="/heading" />
+    <arg name="video_stream" default="" />
+    <arg name="debug" default="true" />
+    <arg name="motor_speeds" default="/control/drive_system/cmd" />
+
+    <include file="$(find wr_entry_point)/launch/comp/comp_ds_control.launch" />
+    <include file="$(find wr_entry_point)/launch/comp/comp_falcon.launch" />
+
+    <node name="vision_aruco_detection" pkg="wr_logic_shortrange" type="vision_aruco_detection.py">
+        <param name="vision_topic" value="$(arg vision_topic)" />
+        <param name="video_stream" value="$(arg video_stream)" />
+        <param name="debug" type="bool" value="$(arg debug)" />
+    </node>
+
+    <!-- Launch spin action server -->
+    <node name="spin_action" pkg="wr_logic_search" type="spin_action_server.py">
+        <param name="vision_topic" value="$(arg vision_topic)" />
+        <param name="motor_speeds" value="$(arg motor_speeds)" />
+        <param name="heading_topic" value="$(arg heading_topic)" />
+    </node>
+
+    <node name="spin_client" pkg="wr_logic_search" type="spin_client.py" />
+
+</launch>

@@ -1,0 +1,50 @@
+[
+    {
+        "lat": 38.42390688,
+        "long": -110.7852678,
+        "note": "Start",
+        "target": "none"
+    },
+    {
+        "lat": 38.42426632,
+        "long": -110.7851849,
+        "note": "GNSS Post 1",
+        "target": "none"
+    },
+    {
+        "lat": 38.42466641,
+        "long": -110.784802,
+        "note": "GNSS Post 2",
+        "target": "none"
+    },
+    {
+        "lat": 38.42512274,
+        "long": -110.785219,
+        "note": "AR Post 1",
+        "target": "aruco 1"
+    },
+    {
+        "lat": 38.42487533,
+        "long": -110.7856899,
+        "note": "AR Post 2",
+        "target": "aruco 2"
+    },
+    {
+        "lat": 38.42447147,
+        "long": -110.7861446,
+        "note": "AR Post 3",
+        "target": "aruco 3"
+    },
+    {
+        "lat": 38.42425466,
+        "long": -110.7855771,
+        "note": "Mallet",
+        "target": "mallet"
+    },
+    {
+        "lat": 38.42437042,
+        "long": -110.7857335,
+        "note": "Water Bottle",
+        "target": "bottle"
+    }
+]

@@ -1,5 +1,6 @@
-com_port: '/dev/ttyAMA0'
-baud: 115200
+com_port: '/dev/roboclaw'
+# baud: 115200
+baud: 9600
 claws:
   aux0: # arm turntable/shoulder, science ?
     topic: '/hsi/roboclaw/aux0'

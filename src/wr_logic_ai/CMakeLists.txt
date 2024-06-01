@@ -54,8 +54,6 @@ add_message_files(
   FILES
   NavigationState.msg
   ObstaclesMsg.msg
-  VisionTarget.msg
-  Waypoint.msg
 )
 
 # # Generate services in the 'srv' folder
@@ -68,9 +66,9 @@ add_message_files(
 # # Generate actions in the 'action' folder
 add_action_files(
   FILES
-  LongRange.action
-  ShortRange.action
-  SearchState.action
+  WaitForInput.action
+#   ShortRange.action
+#   SearchState.action
 )
 
 # # Generate added messages and services with any dependencies listed here

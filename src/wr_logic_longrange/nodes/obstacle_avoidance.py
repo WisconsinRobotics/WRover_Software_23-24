@@ -1,0 +1,231 @@
+#!/usr/bin/env python3
+
+"""@file
+@defgroup wr_logic_ai_longrange_ai
+@{
+@defgroup wr_logic_ai_longrange_ai_obstacle_avoidance Obstacle Avoidance
+@brief Driver code for long range navigation logics
+@details Navigates the rover to the target coordinate using the rover's current coordinates and 
+a target coordinate. This code also takes obstacle avoidance into account, by calculating an 
+"open window" that is closest towards the target heading and navigating towards that window. 
+@{
+"""
+
+import math
+import rospy
+import time
+from visualization_msgs.msg import Marker
+from finder import get_navigation_angle
+from angle_calculations import AngleCalculations
+import angle_to_drive_methods as angle_calc
+from sensor_msgs.msg import LaserScan
+from wr_hsi_sensing.msg import CoordinateMsg
+from wr_drive_msgs.msg import DriveTrainCmd
+from std_msgs.msg import Float64
+import testing_rviz
+
+# Navigation parameters
+# distance before obstacle avoidance logics is triggered (in meters)
+LIDAR_THRESH_DISTANCE = 5
+# distance before rover believes it has reached the target (in meters)
+NAV_THRESH_DISTANCE = 1
+
+# Set the speed factor
+speed_factor = 0.2
+
+# initialize target angle to move forward
+# current location
+current_lat = 0
+current_long = 0
+cur_heading = 0
+
+# target location
+target_angle = 0
+target_sector = 0
+
+# used for obtaining navigation angle and valleys
+smoothing_constant = 3
+
+# global speed factor updated through navigation
+# speed_factor = 0.3
+
+# final angle to drive to
+result = 0
+
+
+# Start the tasks managed to drive autonomously
+def initialize() -> None:
+    """Initialize publisher and subscribers for nodes
+
+    Publishers:
+
+        drive_pub: Sends motor speeds to robot
+        raw_heading_pug: Publishes data of our current heading relative to the right of the robot. (90 Degrees is where the robot is pointing)
+        heading_pub: Data from heading is transformed to be worked with rviz tester.
+
+    Subscriber:
+
+        gps_coord_data: gets lat and long coordinates from GPS
+        heading_data: Gets data of our heading with East beign 0.
+        scan: Get values from lidar scan
+
+    """
+
+    # Subscribe to gps coordinate data
+    rospy.Subscriber("/gps_coord_data", CoordinateMsg, update_gps_coord)
+
+    # Subscribe to heading data
+    rospy.Subscriber("/heading", Float64, update_heading)
+
+    # Subscribe to lidar data
+    rospy.Subscriber("/scan", LaserScan, update_navigation)
+
+
+# update current position based on gps coordinates
+def update_gps_coord(msg: CoordinateMsg) -> None:
+    global current_lat
+    global current_long
+    current_lat = msg.latitude
+    current_long = msg.longitude
+
+
+# extends from 0 to 360 degrees, heading is shifted based on east (90 is north -> 0)
+def update_heading(msg: Float64) -> None:
+    """
+    Shifted from compass coordinates to math coordinates.
+
+    @param msg (Float64): Heading value received as value from 0 to 360. North is 0 counter-clockwise.
+    @param cur_heading East is 0. (Counterclockwise). Extected as a value from 0 to 360.
+    """
+    global cur_heading
+    # cur_heading = (90 + msg.data) % 360  # Shifting to East
+    cur_heading = msg.data  # Init calibration shifts to east the initial heading
+    # rviz_sim_cur_heading_pub.publish(cur_heading)
+
+
+# calculates difference of angles from -180 to 180 degrees
+def angle_diff(heading1: float, heading2: float) -> float:
+    """
+    Returns relative angle difference from heading of robot to heading of target
+
+    @param heading1 (float): Value of target relative to East (Counter-clockwise)
+    @param heading2 (float): Value of heading relative to East (Counter-clockwise)
+    @return float: Value from -180 to 180. Starting from bottom of robot (Negatives in left hand, positive in the right side)
+    """
+    diff = (heading1 - heading2 + 360) % 360
+    return (diff + 180) % 360 - 180
+
+
+# update angle from rover to target based on new current position
+def update_target(target_lat, target_long) -> bool:
+    """
+    Updates target_angle with values from IMU which use gps coords
+
+    @param target_angle: Gives target angle relative to East (counter-clockwise)
+    @param imu An object that creates a planar target angle relative to east, accounting for curvature of Earth
+    @return bool: If we have arrived to the destination, based on our current and target coords
+    """
+    global target_angle
+
+    # Construct the planar target angle relative to east, accounting for curvature
+    imu = AngleCalculations(current_lat, current_long, target_lat, target_long)
+
+    target_angle = imu.get_angle() % 360
+    # rospy.loginfo("Lat_current: " + str(current_lat) + " Long_current: " + str(current_long))
+
+    # rospy.loginfo("Lat_goal: " + str(target_lat) + " Long_target: " + str(target_long))
+
+    # rospy.loginfo("Target Angle: " + str(target_angle))
+
+    # rospy.loginfo(imu.get_distance())
+    # check if we are close to the target
+    if imu.get_distance() < NAV_THRESH_DISTANCE:
+        return True
+    else:
+        return False
+
+
+# TODO handle cases where lidar data is not publishing, and update_navigation() does not get called
+# Update the robot's navigation and drive it towards the target angle based on our best valley
+def update_navigation(data: LaserScan) -> None:
+    """
+    Update the robot's navigation and drive it towards the target angle
+
+    @param delta_heading: Relative value of target from robot from -180 to 180. Starting from bottom of robot (Counter-Clockwise)
+    @param result: Angle to drive to based on target angle, current heading, and obstacles. Value given as a sector angle with right of robot being 0 (Counterclockwise).
+    @param msg: Get the DriveTrainCmd(motor values) relating to the heading of the robot and the resulting best navigation angle
+    @param data: Lidar data received
+    """
+    global result
+
+    # rospy.loginfo(f"target angle: {target_angle}, current heading: {cur_heading}")
+
+    ## Gets best possible angle, considering obstacles
+    delta_heading = angle_diff(target_angle, cur_heading)
+
+    result = get_navigation_angle(
+        ((90 + delta_heading) % 360)
+        / math.degrees(
+            data.angle_increment
+        ),  # sector angle, #Changes delta_heading to be based on the right of the robot as 0 (Counter-clockwise), and go in increments of sector angle.
+        LIDAR_THRESH_DISTANCE,
+        data,
+        smoothing_constant,
+    )
+
+    # rospy.loginfo(f"raw heading: {result}")
+
+    # TESTING
+    # testing_rviz.update_navigation_rviz_sim(delta_heading, result, cur_heading)
+
+
+def get_drive_power() -> DriveTrainCmd:
+    """
+    Calculate and return the motor powers to drive towards the target angle
+
+    @param delta_heading: Relative value of target from robot from -180 to 180. Starting from bottom of robot (Counter-Clockwise)
+    @param result: Angle to drive to based on target angle, current heading, and obstacles. Value given as a sector angle with right of robot being 0 (Counterclockwise).
+    @param msg: Get the DriveTrainCmd(motor values) relating to the heading of the robot and the resulting best navigation angle
+    @param data: Lidar data received
+    """
+    # Get the DriveTrainCmd relating to the heading of the robot and the resulting best navigation angle
+    # Reason we do 90 - result is to get a value where 0 is up, + is clockwise, and - is counterclockwise
+    msg = angle_calc.logistic(angle_diff(90, result), 0)
+
+    # rospy.loginfo(f"left drive value: {msg.left_value}, right drive value: {msg.right_value}")
+    # Scale the resultant DriveTrainCmd by the speed multiplier
+    msg.left_value *= speed_factor
+    msg.right_value *= speed_factor
+
+    # if msg.left_value > msg.right_value:
+    #     valueToTurn = "Turn right"
+    # elif msg.left_value < msg.right_value:
+    #     valueToTurn = "Turn left"
+    # else:
+    #     valueToTurn = "Stay straight"
+    # rospy.loginfo("Drive to: " + str(valueToTurn))
+    # rospy.loginfo("Target Value: " + str(target_angle))
+
+    return msg
+
+
+# If this file was executed...
+if __name__ == "__main__":
+    try:
+        # Initialize the running environment for this program
+        initialize()
+        # testing_rviz.initialize()
+        # Spin RosPy to the next update cycle
+        rospy.spin()
+
+    # Ignore ROS Interrupt Exceptions
+    except rospy.ROSInterruptException:
+        pass
+
+    # If there is some other error (i.e. ROS Termination)
+    finally:
+        # Stop the drive motors before shutting down
+        time.sleep(0.1)
+
+## @}
+## @}

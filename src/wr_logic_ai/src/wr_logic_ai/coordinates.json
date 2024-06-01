@@ -1,14 +1,38 @@
 [
     {
-        "lat": 10,
-        "long": 10,
-        "note": "EHall Entrance",
-        "num_vision_posts": 0
+        "lat": 38.3717950,
+        "long": -110.7045599,
+        "note": "Start",
+        "target": "none"
     },
     {
-        "lat": 11,
-        "long": 10,
-        "note": "EHall Entrance",
-        "num_vision_posts": 0
+        "lat": 38.3720316,
+        "long": -110.7045954,
+        "note": "Top",
+        "target": "none"
+    },
+    {
+        "lat": 38.3718175,
+        "long": -110.7044866,
+        "note": "Middle",
+        "target": "aruco 1"
+    },
+    {
+        "lat": 38.3718175,
+        "long": -110.7044866,
+        "note": "Middle Right",
+        "target": "arico 2"
+    },
+    {
+        "lat": 38.3717950,
+        "long": -110.7045599,
+        "note": "Start",
+        "target": "mallet"
+    },
+    {
+        "lat": 38.3718175,
+        "long": -110.7044866,
+        "note": "Middle",
+        "target": "bottle"
     }
 ]

@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!DOCTYPE launch SYSTEM "https://gist.githubusercontent.com/nalt/dfa2abc9d2e3ae4feb82ca5608090387/raw/roslaunch.dtd">
+
+<!-- Running this launch group should start the robot -->
+
+<launch>
+  <!-- Hardware group -->
+
+  <!-- Launch files for when using real robot -->
+  <!-- <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" />
+  <include file="$(find wr_hsi_sensing)/launch/hw_test.launch"
+    if="$(eval env('WROVER_HW') == 'REAL')" />
+  <include file="$(find wr_hsi_sensing)/launch/gps_data_mapper.launch" 
+    if="$(eval env('WROVER_HW') == 'REAL')" />
+  <node name="control" pkg="wr_control_drive_ds" type="DriveTrainControlSystem"
+    machine="wrover" />
+  <include file="$(find wrevolution)/launch/ros_control_test.launch"
+    if="$(eval env('WROVER_HW') == 'REAL')" />
+  <include file="$(find rplidar_ros)/launch/rplidar.launch" 
+    if="$(eval env('WROVER_HW') == 'REAL')" /> -->
+
+  <!-- Launch files when simulating data -->
+  <!-- <node name="fake_data" pkg="wr_logic_longrange" type="inputFakeData.py" output="screen"
+    unless="$(eval env('WROVER_HW') == 'REAL')" /> -->
+
+  <node pkg="wr_logic_ai" name="wait_for_user_input" type="wait_for_user_input.py" output="screen" />
+  <!-- <node pkg="wr_logic_ai" name="nav_state_machine_driver" type="state_machine.py" output="screen" /> -->
+  <node pkg="wr_logic_ai" name="nav_state_machine" type="state_machine.py" output="screen" />
+
+  <!-- <include file="$(find wr_logic_longrange)/launch/long_range.launch" /> -->
+  <node name="long_range" pkg="wr_logic_longrange" type="long_range_action_server.py" />
+  <node name="search_pattern" pkg="wr_logic_search" type="search_action_server.py" />
+  <node name="short_range" pkg="wr_logic_shortrange" type="shortrange_action_server.py" />
+
+  <!-- <include file="$(find wr_led_matrix)/launch/led_matrix.launch" /> -->
+
+</launch>

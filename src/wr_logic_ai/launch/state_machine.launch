@@ -4,39 +4,82 @@
 <!-- Running this launch group should start the robot -->
 
 <launch>
-  <arg name="mux_name" default="nav_mux" />
-  <arg name="long_range_output" default="/long_range_nav" />
-  <arg name="short_range_output" default="/short_range_nav" />
+  <arg name="motor_output" default="/control/drive_system/cmd"/>
+  <arg name="vision_topic" default="/logic/vision"/>
+  <arg name="heading_topic" default="/heading"/>
 
-  <!-- Hardware group -->
+  <!-- LED parameters -->
+  <arg name="led_baud" default="9600"/>
+  <arg name="led_com" default="/dev/led"/>
+
+  <!-- Vision parameters -->
+  <arg name="mast_camera" default="/dev/v4l/by-id/usb-046d_0825_3481A150-video-index0" />
+  <arg name="ground_camera" default="/dev/v4l/by-id/usb-046d_0825_68DBE850-video-index0" />
+  <arg name="stream_vision" default="false" />
+  <arg name="model_path" default="best.engine" />
 
   <!-- Launch files for when using real robot -->
   <include file="$(find wr_entry_point)/launch/comp/comp_init.launch" />
-  <include file="$(find wr_hsi_sensing)/launch/hw_test.launch"
-    if="$(eval env('WROVER_HW') == 'REAL')" />
-  <node name="control" pkg="wr_control_drive_ds" type="DriveTrainControlSystem"
-    machine="wrover" />
-  <include file="$(find wrevolution)/launch/ros_control_test.launch"
-    if="$(eval env('WROVER_HW') == 'REAL')" />
-  <include file="$(find rplidar_ros)/launch/rplidar.launch" if="$(eval env('WROVER_HW') == 'REAL')" />
+  <include file="$(find wr_entry_point)/launch/comp/comp_falcon.launch"  unless="$(eval env('WROVER_LOCAL') == 'true')"/>
+  <include file="$(find wr_control_drive_ds)/launch/std.launch"/>
 
-  <!-- Launch files when simulating data -->
-  <node name="fake_data" pkg="wr_logic_ai" type="inputFakeData.py" output="screen"
-    unless="$(eval env('WROVER_HW') == 'REAL')" />
+  <!-- GPS -->
+  <include file="$(find wr_hsi_sensing)/launch/gps_data_mapper.launch" 
+    if="$(eval env('WROVER_HW') == 'REAL')" />
+  
+  <!-- lidar -->
+  <include file="$(find wr_logic_ai)/launch/wrplidar.launch" 
+    if="$(eval env('WROVER_HW') == 'REAL')" />
+
+  <!-- computer vision -->
+  <node name="vision_aruco_detection" pkg="wr_logic_shortrange" type="vision_aruco_detection.py">
+    <param name="vision_topic" value="$(arg vision_topic)" />
+    <param name="video_stream" value="$(arg mast_camera)" />
+    <param name="debug" type="bool" value="$(arg stream_vision)" />
+  </node>
+
+  <node name="vision_yolo_detection" pkg="wr_logic_shortrange" type="vision_yolo_detection.py">
+    <param name="vision_topic" value="$(arg vision_topic)" />
+    <param name="video_stream" value="$(arg ground_camera)" />
+    <param name="model_path" value="$(arg model_path)" />
+    <param name="debug" type="bool" value="$(arg stream_vision)" />
+  </node>
 
   <node pkg="wr_logic_ai" name="wait_for_user_input" type="wait_for_user_input.py" output="screen" />
-  <node pkg="wr_logic_ai" name="nav_state_machine_driver" type="state_machine.py" output="screen" />
 
-  <include file="$(find wr_logic_ai)/launch/mux_select.launch">
-    <arg name="mux_name" default="nav_mux" />
-    <arg name="long_range_output" value="$(arg long_range_output)" />
-    <arg name="short_range_output" value="$(arg short_range_output)" />
-  </include>
+  <!-- <include file="$(find wr_logic_longrange)/launch/long_range.launch" /> -->
 
-  <include file="$(find wr_logic_ai)/launch/long_range.launch">
-    <arg name="long_range_output" value="$(arg long_range_output)" />
-  </include>
+  <!-- <include file="$(find wr_led_matrix)/launch/led_matrix.launch" /> -->
 
-  <include file="$(find wr_led_matrix)/launch/led_matrix.launch" />
+  <!-- LED matrix-->
+  <node name="led_matrix" pkg="wr_led_matrix" type="led_matrix.py">
+    <param name="baud" value="$(arg led_baud)" />
+		<param name="com_port" value="$(arg led_com)"/>
+	</node>
 
+  <!-- Action servers for long range -->
+  <node name='calculate_init_heading' pkg="wr_logic_longrange" type="calculate_heading_action_server.py" output="screen">
+    <param name="motor_speeds" value="$(arg motor_output)"/>
+  </node>
+  <node name="long_range" pkg="wr_logic_longrange" type="long_range_action_server.py" >
+    <param name="motor_speeds" value="$(arg motor_output)"/>
+    <param name="wrover_hw" value="$(env WROVER_HW)" />
+  </node>
+
+  <!-- Action servers for search pattern -->
+  <node name="search_pattern_action" pkg="wr_logic_search" type="search_pattern_action_server.py" />
+  <node name="spin_action" pkg="wr_logic_search" type="spin_action_server.py">
+    <param name="vision_topic" value="$(arg vision_topic)" />
+    <param name="motor_speeds" value="$(arg motor_output)" />
+    <param name="heading_topic" value="$(arg heading_topic)" />
+  </node>
+
+  <!-- Action servers for short range -->
+  <node name="short_range" pkg="wr_logic_shortrange" type="shortrange_action_server.py" >
+    <param name="vision_topic" value="$(arg vision_topic)" />
+    <param name="motor_speeds" value="$(arg motor_output)" />
+  </node>
+
+  <!-- Run state machine from base station -->
+  <node pkg="wr_logic_ai" name="nav_state_machine" type="state_machine.py" machine="base_station" output="screen" />
 </launch>
