@@ -98,7 +98,7 @@ class ShortrangeActionServer:
             ):
                 if target_data.msg.distance_estimate < STOP_DISTANCE_M:
                     # Stop the rover when it is close to the ArUco tag
-                    rospy.logerr(f"Shortrange reached target {self.target_cache.msg.id}")
+                    rospy.logerr(f"Shortrange reached target {target_data.msg.id}")
                     self.drive_pub.publish(0, 0)
 
                     success = True
