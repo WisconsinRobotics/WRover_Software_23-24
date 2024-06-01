@@ -12,6 +12,7 @@
     <param name="local_xy_origin" value="auto"/>
     <param name="local_xy_navsatfix_topic" value="/gps/fix"/>
     <remap from="fix" to="/gps/fix"/>
+    <!-- <remap from="fix" to="/navsat/fix"/> -->
     
   </node>
 
