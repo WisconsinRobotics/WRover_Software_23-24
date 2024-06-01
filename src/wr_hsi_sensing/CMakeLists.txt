@@ -10,6 +10,9 @@ project(wr_hsi_sensing)
 find_package(catkin REQUIRED COMPONENTS 
     message_generation
     std_msgs
+    sensor_msgs
+    geometry_msgs
+    visualization_msgs
     roscpp
     rospy
     ublox_gps
@@ -53,7 +56,7 @@ catkin_python_setup()
 
 ## Generate messages in the 'msg' folder
 add_message_files(
-  FILES
+    FILES
 #   Message1.msg
 #   Message2.msg
     CoordinateMsg.msg

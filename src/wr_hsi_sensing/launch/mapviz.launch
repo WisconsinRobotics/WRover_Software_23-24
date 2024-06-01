@@ -2,6 +2,7 @@
   <!-- Launches mapviz visualization. -->
   <!-- Requires ardusimple_provided node to be running -->
   <!-- <include file="$(find wr_hsi_sensing)/launch/ardusimple_provided.launch" /> -->
+  <node pkg="wr_hsi_sensing" type="publish_points.py" name="gps_data_points_pub" />
 
   <node pkg="mapviz" type="mapviz" name="mapviz">
     <!-- <param name="config" value=""/> -->

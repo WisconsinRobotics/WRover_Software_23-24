@@ -9,9 +9,9 @@
 
 import rospy
 from sensor_msgs.msg import NavSatFix
-from wr_hsi_sensing.msg import CoordinateMsg
 from visualization_msgs.msg import Marker
 from visualization_msgs.msg import MarkerArray
+from geometry_msgs.msg import Point
 
 
 
@@ -29,22 +29,24 @@ def main():
     coord_data_publisher.publish(NavSatFix(latitde=lat2,longitude=long2))
         
 def publish_markers():
-    locations = MarkerArray()
+    # locations = MarkerArray()
     
     coord_data_publisher = rospy.Publisher("/marker_data", MarkerArray, queue_size=1)
+
+    markers = []
     lat1 = 38.371768
     long1 = -110.704255
-    locations.add(Marker(latitude = lat1, longitude = long1))
+    markers.add(Marker(points=[Point(y = lat1, x = long1)]))
     
     lat2 = 38.371240
     long2 = -110.704195
-    locations.add(Marker(latitude = lat2, longitude = long2))
+    markers.add(Marker(points=[Point(y = lat2, x = long2)]))
     
-    coord_data_publisher.publish(locations)
+    coord_data_publisher.publish(MarkerArray(markers))
     
     
     
 if(__name__ == "__main__"):
-    rospy.init_node("gps_data_pub", anonymous = False)
+    rospy.init_node("gps_data_points_pub", anonymous = False)
     publish_markers()
     rospy.spin()
