@@ -40,6 +40,7 @@ def float_to_int16_msg(value: float, factor: float = 1.0) -> Int16:
     factor = min(abs(factor), 1.0)
     return Int16(round(factor * value * 32767))
 
+
 def main():
     rospy.init_node('bad_arm_driver')
 
@@ -60,9 +61,10 @@ def main():
     bumper_r: SubBuf[bool] = SubBuf(f'{controller_ns}/button/shoulder_r', Bool)
     pov_x: SubBuf[float] = SubBuf(f'{controller_ns}/axis/pov_x', Float32)
     pov_y: SubBuf[float] = SubBuf(f'{controller_ns}/axis/pov_y', Float32)
-    btn_a: SubBuf[bool] = SubBuf(f'{controller_ns}/button/a', Bool)
-    btn_b: SubBuf[bool] = SubBuf(f'{controller_ns}/button/b', Bool)
-    btn_y: SubBuf[bool] = SubBuf(f'{controller_ns}/button/y', Bool)
+    #btn_a: SubBuf[bool] = SubBuf(f'{controller_ns}/button/a', Bool)
+    #btn_b: SubBuf[bool] = SubBuf(f'{controller_ns}/button/b', Bool)
+    btn_x: SubBuf[bool] = SubBuf(f'{controller_ns}/button/x', Bool)
+    #btn_y: SubBuf[bool] = SubBuf(f'{controller_ns}/button/y', Bool)
 
     # create wroboclaw pubs
     pub_turntable = rospy.Publisher(f'{claw_ns_0}/cmd/left', Int16, queue_size=4)
@@ -77,14 +79,22 @@ def main():
     sleeper = rospy.Rate(spin_rate)
     while not rospy.is_shutdown():
         if not w.isMad():
+            shoulder_max_speed = SHOULDER_SPEED_FACTOR
+            elbow_max_speed = ELBOW_SPEED_FACTOR
+
+            # Speed control for arm shoulder and elbow joints
+            if btn_x.data is not None and btn_x.data:
+                shoulder_max_speed = 1
+                elbow_max_speed = 1
+
             if trigger_l.data is not None and trigger_r.data is not None:
                 pub_turntable.publish(float_to_int16_msg(trigger_r.data - trigger_l.data, TURNTABLE_SPEED_FACTOR))
             
             if stick_l.data is not None:
-                pub_shoulder.publish(float_to_int16_msg(stick_l.data, SHOULDER_SPEED_FACTOR))
+                pub_shoulder.publish(float_to_int16_msg(stick_l.data, shoulder_max_speed))
             
             if stick_r.data is not None:
-                pub_elbow.publish(float_to_int16_msg(stick_r.data, ELBOW_SPEED_FACTOR))
+                pub_elbow.publish(float_to_int16_msg(stick_r.data, elbow_max_speed))
             
             # Bumpers used for cam mast control
             if bumper_l.data is not None and bumper_r.data is not None:
