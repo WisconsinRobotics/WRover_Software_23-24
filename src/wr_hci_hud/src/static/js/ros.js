@@ -1,8 +1,26 @@
 let rosConnected = false;
 
-var ros = new ROSLIB.Ros({
-    url : 'ws://localhost:9090'
-});
+async function getHostIP() {
+  try {
+      const response = await fetch('/get-ip');
+      if (!response.ok) {
+          throw new Error('Network response was not ok');
+      }
+      const data = await response.json();
+      console.log('Host IP:', data.ip);
+      return data.ip;
+  } catch (error) {
+      console.error('Error fetching IP:', error);
+  }
+}
+
+async function setupROS(){
+  var ip = await getHostIP();
+  var ros = new ROSLIB.Ros({
+    url : 'ws://' + ip + ':9090'
+  });
+  console.log('Connecting to websocket server at ws://' + ip + ':9090');
+
 
 
 ros.on('connection', function() {
@@ -32,6 +50,7 @@ var reconnectIntervalId = setInterval(function() {
     clearInterval(reconnectIntervalId); 
   }
 }, 1000);
+
 
 // var streamListener = new ROSLIB.Topic({
 //   ros : ros,
@@ -236,20 +255,23 @@ setInterval(function() {
 }, 1000);
 
 
-var joystickListener = new ROSLIB.Topic({
-  ros: ros,
-  name: '/joystick',
-  messageType: 'std_msgs/Float32MultiArray'
-});
+// var joystickListener = new ROSLIB.Topic({
+//   ros: ros,
+//   name: '/joystick',
+//   messageType: 'std_msgs/Float32MultiArray'
+// });
 
-joystickListener.subscribe(function(message) {
-  // console.log('Received joystick: ' + message.data);
-  diagnosticInput.value += 'Received joystick: ' + message.data + '\n';
-  updateJoystick(message.data[0], message.data[1]);
-});
+// joystickListener.subscribe(function(message) {
+//   // console.log('Received joystick: ' + message.data);
+//   diagnosticInput.value += 'Received joystick: ' + message.data + '\n';
+//   updateJoystick(message.data[0], message.data[1]);
+// });
 
-setInterval(function() {
-  joystickListener.publish(new ROSLIB.Message({
-    data: [Math.round(Math.random()*20-10, 2), Math.round(Math.random()*20-10, 2)]
-  }));
-}, 1000);
+// setInterval(function() {
+//   joystickListener.publish(new ROSLIB.Message({
+//     data: [Math.round(Math.random()*20-10, 2), Math.round(Math.random()*20-10, 2)]
+//   }));
+// }, 1000);
+}
+
+setupROS();

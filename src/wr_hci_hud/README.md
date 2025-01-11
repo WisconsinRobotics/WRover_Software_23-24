@@ -4,11 +4,21 @@
 @brief A package (currently empty) to act as a HUD for drivers
 
 # To start the GUI
+npm install
+pip install -r requirements.txt
 
-Run test.py in wr_hci_hud/src  
+docker-compose up
+app.py in wr_hci_hud/src 
 
-run roscore
-run roslaunch rosbridge_server rosbridge_websocket.launch
+May have to set port 5000 and 9090 inbound to open in firewall 
+<!-- flask run --host=0.0.0.0 -->
+
+<!-- # Have jazzy installed and start the ros websocket server: -->
+
+<!-- sudo apt-get install ros-jazzy-rosbridge-suite -->
+<!-- source /opt/ros/jazzy/setup.bash -->
+
+<!-- ros2 run rosbridge_server rosbridge_websocket -->
 
 the ros.js file is currently publishing and then subscribing to the ros websocket to simulate actual input
 

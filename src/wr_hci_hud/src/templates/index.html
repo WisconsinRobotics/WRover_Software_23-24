@@ -8,7 +8,8 @@
         <script src="../static/js/terminal.js" defer></script>
         <script src="./../static/js/voltage.js" defer></script>
         <script src="./../static/js/info.js" defer></script>
-        <script src="./../static/js/joystick.js" defer></script>
+        <!-- <script src="./../static/js/joystick.js" defer></script> -->
+        <script src="./../static/js/startup.js" defer></script>
         <!-- <script src="./../static/js/mapMarker.js" defer></script> -->
         <script src="./../static/js/swapPage.js" defer></script>
         <script src="../../node_modules/hls.js/dist/hls.min.js"></script>
@@ -19,7 +20,7 @@
         <script src="../../node_modules/roslib/build/roslib.min.js"></script>
         <script src="../../node_modules/eventemitter2/lib/eventemitter2.js"></script>
         <script src="./../static/js/ros.js" defer></script>
-        <script type="module" src="./../static/js/webRTCreceiver.js" defer></script>
+        <!-- <script type="module" src="./../static/js/webRTCreceiver.js" defer></script> -->
 
     </head>
     <body>
@@ -87,7 +88,7 @@
 
             <div id="controlContent">
                 <p style="margin: 0;"></p>
-                <div id="joystick"></div>
+                <!-- <div id="joystick"></div> -->
                 
                 <div id="mapWrapper"><img id="mapimg" src="../../assets/map.png" alt="Online Image" width="300" height="300"></div>
                 
@@ -110,6 +111,7 @@
                 <h1 class="square-heading current-heading" id="cam1">Cam 1</h1>
                 <h1 class="square-heading" id="cam2">Cam 2</h1>
                 <h1 class="square-heading" id="cam3">Cam 3</h1>
+                <h1 class="square-heading" id="cam4">Cam 4</h1>
                 <h1 class="square-heading" id="camMulti">Multi</h1>
                 <div class="slidecontainer hideSlide">
                     <input type="range" min="1" max="10" value="1" class="slider" id="myRange">
@@ -123,6 +125,10 @@
                     <input type="range" min="1" max="10" value="1" class="slider" id="myRange3">
                 </div>
 
+                <div class="slidecontainer hideSlide">
+                    <input type="range" min="1" max="10" value="1" class="slider" id="myRange4">
+                </div>
+
                 <h1 class="square-heading" id="vidEnlarge" >^</h1>
             </div>
             <div class="zoomingDiv" id="zoomingDiv1">
@@ -134,6 +140,9 @@
             </div>
             <div class="zoomingDiv" id="zoomingDiv3">
                 <video class="videoBox" id="video3" muted="muted" width="560" height="315"></video>
+            </div>
+            <div class="zoomingDiv" id="zoomingDiv4">
+                <video class="videoBox" id="video4" muted="muted" width="560" height="315"></video>
             </div>
 
             <!-- <div id="dualCamWrapper">

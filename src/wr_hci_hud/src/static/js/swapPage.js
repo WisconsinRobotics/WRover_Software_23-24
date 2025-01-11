@@ -4,6 +4,7 @@ const data = document.getElementById('dataHeading');
 const cam1 = document.getElementById('cam1');
 const cam2 = document.getElementById('cam2');
 const cam3 = document.getElementById('cam3');
+const cam4 = document.getElementById('cam4');
 const camMulti = document.getElementById('camMulti');
 
 const launchPage = document.getElementById('launchPage');
@@ -12,13 +13,16 @@ const dataPage = document.getElementById('dataPage');
 const video1 = document.getElementById('video1');
 const video2 = document.getElementById('video2');
 const video3 = document.getElementById('video3');
+const video4 = document.getElementById('video4');
 
 video2.style.display = 'none';
 video3.style.display = 'none';
+video4.style.display = 'none';
 
 const slide = document.getElementsByClassName('slidecontainer')[0];
 const slide2 = document.getElementsByClassName('slidecontainer')[1];
 const slide3 = document.getElementsByClassName('slidecontainer')[2];
+const slide4 = document.getElementsByClassName('slidecontainer')[3];
 
 const enlarge = document.getElementById('vidEnlarge');
 
@@ -42,19 +46,24 @@ cam1.addEventListener('click', () => {
     video1.style.display = 'block';
     video2.style.display = 'none';
     video3.style.display = 'none';
+    video4.style.display = 'none';
     camMulti.classList.remove('current-heading');
+    cam4.classList.remove('current-heading');
     cam3.classList.remove('current-heading');
     cam2.classList.remove('current-heading');
     cam1.classList.add('current-heading');
     // video1.classList.remove('enlargeDualVideo');
     video2.classList.remove('enlargeDualVideo');
     video3.classList.remove('enlargeDualVideo');
+    video4.classList.remove('enlargeDualVideo');
     video2.classList.remove('dualVideo');
     video3.classList.remove('dualVideo');
+    video4.classList.remove('dualVideo');
     if(videoSquare.classList.contains('enlargedVideoWrapper')) {
         slide.classList.remove('hideSlide');
         slide2.classList.add('hideSlide');
         slide3.classList.add('hideSlide');
+        slide4.classList.add('hideSlide');
     }
 });
 
@@ -62,19 +71,24 @@ cam2.addEventListener('click', () => {
     video1.style.display = 'none';
     video2.style.display = 'block';
     video3.style.display = 'none';
+    video4.style.display = 'none';
     camMulti.classList.remove('current-heading');
+    cam4.classList.remove('current-heading');
     cam3.classList.remove('current-heading');
     cam1.classList.remove('current-heading');
     cam2.classList.add('current-heading');
     // video1.classList.remove('enlargeDualVideo');
     video2.classList.remove('enlargeDualVideo');
     video3.classList.remove('enlargeDualVideo');
+    video4.classList.remove('enlargeDualVideo');
     video2.classList.remove('dualVideo');
     video3.classList.remove('dualVideo');
+    video4.classList.remove('dualVideo');
     if(videoSquare.classList.contains('enlargedVideoWrapper')) {
         slide.classList.add('hideSlide');
         slide2.classList.remove('hideSlide');
         slide3.classList.add('hideSlide');
+        slide4.classList.add('hideSlide');
     }
 });
 
@@ -82,30 +96,60 @@ cam3.addEventListener('click', () => {
     video1.style.display = 'none';
     video2.style.display = 'none';
     video3.style.display = 'block';
+    video4.style.display = 'none';
     cam1.classList.remove('current-heading');
     cam2.classList.remove('current-heading');
     cam3.classList.add('current-heading');
+    cam4.classList.remove('current-heading');
     camMulti.classList.remove('current-heading');
     // video1.classList.add('enlargeDualVideo');
     video2.classList.remove('enlargeDualVideo');
     video3.classList.remove('enlargeDualVideo');
+    video4.classList.remove('enlargeDualVideo');
     video2.classList.remove('dualVideo');
     video3.classList.remove('dualVideo');
+    video4.classList.remove('dualVideo');
     if(videoSquare.classList.contains('enlargedVideoWrapper')) {
         slide.classList.add('hideSlide');
         slide2.classList.add('hideSlide');
         slide3.classList.remove('hideSlide');
+        slide4.classList.add('hideSlide');
     }
     
+});
+
+cam4.addEventListener('click', () => {
+    video1.style.display = 'none';
+    video2.style.display = 'none';
+    video3.style.display = 'none';
+    video4.style.display = 'block';
+    cam1.classList.remove('current-heading');
+    cam2.classList.remove('current-heading');
+    cam3.classList.remove('current-heading');
+    camMulti.classList.remove('current-heading');
+    cam4.classList.add('current-heading');
+    video2.classList.remove('enlargeDualVideo');
+    video3.classList.remove('enlargeDualVideo');
+    video4.classList.remove('enlargeDualVideo');
+    video2.classList.remove('dualVideo');
+    video3.classList.remove('dualVideo');
+    video4.classList.remove('dualVideo');
+    if(videoSquare.classList.contains('enlargedVideoWrapper')) {
+        slide.classList.add('hideSlide');
+        slide2.classList.add('hideSlide');
+        slide3.classList.add('hideSlide');
+    }
 });
 
 camMulti.addEventListener('click', () => {
     video1.style.display = 'none';
     video2.style.display = 'block';
     video3.style.display = 'block';
+    video4.style.display = 'none';
     cam1.classList.remove('current-heading');
     cam2.classList.remove('current-heading');
     cam3.classList.remove('current-heading');
+    cam4.classList.remove('current-heading');
     camMulti.classList.add('current-heading');
     // video1.classList.add('enlargeDualVideo');
     video2.classList.add('dualVideo');
@@ -118,6 +162,7 @@ camMulti.addEventListener('click', () => {
         slide.classList.add('hideSlide');
         slide2.classList.add('hideSlide');
         slide3.classList.add('hideSlide');
+        slide4.classList.add('hideSlide');
     }
 });
 
@@ -127,12 +172,15 @@ enlarge.addEventListener('click', () => {
     video1.classList.toggle('enlargedVideo');
     video2.classList.toggle('enlargedVideo');
     video3.classList.toggle('enlargedVideo');
+    video4.classList.toggle('enlargedVideo');
     if(cam1.classList.contains('current-heading')) {
         slide.classList.toggle('hideSlide');
     } else if(cam2.classList.contains('current-heading')) {
         slide2.classList.toggle('hideSlide');
     } else if(cam3.classList.contains('current-heading')) {
         slide3.classList.toggle('hideSlide');
+    } else if(cam4.classList.contains('current-heading')) {
+        slide4.classList.toggle('hideSlide');
     } else if(camMulti.classList.contains('current-heading')) {
         video2.classList.toggle('enlargeDualVideo');
         video3.classList.toggle('enlargeDualVideo');

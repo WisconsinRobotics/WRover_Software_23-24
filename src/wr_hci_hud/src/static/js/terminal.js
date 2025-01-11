@@ -22,7 +22,7 @@ function handleButtonClick(event) {
     }
     
     diagnosticInput.value = '';
-    clearInterval(intervalId); // Clear the interval
+    // clearInterval(intervalId);
 
     // Check if the clicked button already has the 'clicked-button' class
     if (event.target.classList.contains('clicked-button')) {
@@ -40,7 +40,7 @@ function handleButtonClick(event) {
         }
     }
 
-    diagnosticInput.value = "Launching " + event.target.textContent + "..." + "\n";
+    diagnosticInput.value = "Launching " + event.target.textContent + "...\n";
 
     // Store the text of the clicked button
     storedText = event.target.textContent;
@@ -50,7 +50,7 @@ function handleButtonClick(event) {
     event.target.textContent = 'Stop';
 
     // Start the timer
-    startTime = new Date().getTime();
+    // startTime = new Date().getTime();
 
     // Update the diagnostic input every second
 }
