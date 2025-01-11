@@ -3,12 +3,12 @@
 @defgroup wr_hci_hud wr_hci_hud
 @brief A package (currently empty) to act as a HUD for drivers
 
-# To start the GUI
+# To start the GUI from ./WR_HCI_HUD
 npm install
 pip install -r requirements.txt
 
 docker-compose up
-app.py in wr_hci_hud/src 
+run app.py in wr_hci_hud/src 
 
 May have to set port 5000 and 9090 inbound to open in firewall 
 <!-- flask run --host=0.0.0.0 -->

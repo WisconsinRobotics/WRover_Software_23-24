@@ -3,7 +3,7 @@ version: '3.9'
 services:
   rosbridge:
     build:
-      context: ./rosbridge
+      context: ./src/rosbridge
     container_name: rosbridge_container
     # network_mode: host # Share the host network for easier access
     ports:
