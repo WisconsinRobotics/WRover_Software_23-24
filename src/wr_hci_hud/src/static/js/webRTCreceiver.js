@@ -1,180 +1,245 @@
-var hostArray = window.location.host.split(':');
-console.log(hostArray);
-  var serverLoc = 'ws://' + hostArray[0] + ':8080/'
-  var socket = new WebSocket(serverLoc); 
+function initCapture(api) {
+  const captureSection = document.getElementById("capture");
+  const clientIdElement = captureSection.querySelector(".client-id");
+  const videoElement = captureSection.getElementsByTagName("video")[0];
 
-  var localvid = document.getElementById('localvideo');
-  var remotevid = document.getElementById('remotevideo');
-  var localStream = null;
-  var pc = null;
-  var mediaFlowing = false;
-  var useH264 = true;
-  var mediaConstraints = {'mandatory': {
-                          'offerToReceiveAudio':true, 
-                          'offerToReceiveVideo':true }};
+  const listener = {
+    connected: function(clientId) { clientIdElement.textContent = clientId; },
+    disconnected: function() { clientIdElement.textContent = "none"; }
+  };
+  api.registerConnectionListener(listener);
 
+  document.getElementById("capture-button").addEventListener("click", (event) => {
+    event.preventDefault();
 
-  function useH264Codec(sdp) {
+    if (captureSection._producerSession) {
+      captureSection._producerSession.close();
+    } else if (!captureSection.classList.contains("starting")) {
+      captureSection.classList.add("starting");
 
-    var isFirefox = typeof InstallTrigger !== 'undefined';
-    if (isFirefox)
-        updated_sdp = sdp.replace("m=video 9 UDP/TLS/RTP/SAVPF 120 126 97\r\n","m=video 9 UDP/TLS/RTP/SAVPF 126 120 97\r\n");
-    else
-        updated_sdp = sdp.replace("m=video 9 UDP/TLS/RTP/SAVPF 100 101 107 116 117 96 97 99 98\r\n","m=video 9 UDP/TLS/RTP/SAVPF 107 101 100 116 117 96 97 99 98\r\n");
+      const constraints = {
+        video: { width: 1280, height: 720 }
+      };
+      navigator.mediaDevices.getUserMedia(constraints).then((stream) => {
+        const session = api.createProducerSession(stream);
+        if (session) {
+          captureSection._producerSession = session;
 
-    return updated_sdp;
-  }
+          session.addEventListener("error", (event) => {
+            if (captureSection._producerSession === session) {
+              console.error(event.message, event.error);
+            }
+          });
 
-  function setLocalDescAndSendMessageOffer(sessionDescription) {
+          session.addEventListener("closed", () => {
+            if (captureSection._producerSession === session) {
+              videoElement.pause();
+              videoElement.srcObject = null;
+              captureSection.classList.remove("has-session", "starting");
+              delete captureSection._producerSession;
+            }
+          });
 
-    if (useH264) {
-      // use H264 video codec in offer every time
-      sessionDescription.sdp = useH264Codec(sessionDescription.sdp); 
-    }
+          session.addEventListener("stateChanged", (event) => {
+            if ((captureSection._producerSession === session) &&
+              (event.target.state === GstWebRTCAPI.SessionState.streaming)) {
+              videoElement.srcObject = stream;
+              videoElement.play().catch(() => {});
+              captureSection.classList.remove("starting");
+            }
+          });
 
-    pc.setLocalDescription(sessionDescription);
+          session.addEventListener("clientConsumerAdded", (event) => {
+            if (captureSection._producerSession === session) {
+              console.info(`client consumer added: ${event.detail.peerId}`);
+            }
+          });
 
-    console.log("Sending SDP offer: ");
-    console.log(sessionDescription);
+          session.addEventListener("clientConsumerRemoved", (event) => {
+            if (captureSection._producerSession === session) {
+              console.info(`client consumer removed: ${event.detail.peerId}`);
+            }
+          });
 
-    socket.send(JSON.stringify({
-                  "messageType": "offer",
-                  "peerDescription": sessionDescription
-             }));
-  }
+          captureSection.classList.add("has-session");
+          session.start();
+        } else {
+          for (const track of stream.getTracks()) {
+            track.stop();
+          }
 
-  function setLocalDescAndSendMessageAnswer(sessionDescription) {
-
-    if (useH264) {
-      // use H264 video codec in offer every time 
-      sessionDescription.sdp = useH264Codec(sessionDescription.sdp);
-    }
-    pc.setLocalDescription(sessionDescription);
-       
-    console.log("Sending SDP answer:");
-    console.log(sessionDescription);
-
-    socket.send(JSON.stringify({
-                  "messageType": "answer",
-                  "peerDescription": sessionDescription
-             }));
-  }
-
-  function onCreateOfferFailed() {
-    console.log("Create Offer failed");
-  }
-
-  // start the connection on button click 
-  function connect() {
-    if (!mediaFlowing && localStream) {
-      createPeerConnection();
-      mediaFlowing = true;
-      pc.createOffer(setLocalDescAndSendMessageOffer, onCreateOfferFailed, mediaConstraints);
-    } else {
-      alert("Local stream not running yet or media still flowing");
-    }
-  }
-
-  // stop the connection on button click 
-  function disconnect() {
-    console.log("disconnect.");    
-    socket.send(JSON.stringify({messageType: "bye"}));
-    stop();
-  }
-
-  function stop() {
-    pc.close();
-    pc = null;
-    remotevid.src = null; 
-    mediaFlowing = false;    
-  }
-
-  function onCreateAnswerFailed(error) {
-    console.log("Create Answer failed:",error);
-  }
-
-  socket.addEventListener("message", onWebSocketMessage, false);
-
-  // process messages from web socket 
-  function onWebSocketMessage(evt) {
-    var message = JSON.parse(evt.data);
-
-    if (message.messageType === 'offer') {
-      console.log("Received offer...")
-      console.log(evt);
-      if (!mediaFlowing) {
-        createPeerConnection();
-        mediaFlowing = true;
-      }
-      console.log('Creating remote session description...' );
-
-      var remoteDescription = message.peerDescription;
-      
-      var RTCSessionDescription = window.RTCSessionDescription || window.webkitRTCSessionDescription || window.RTCSessionDescription;
-      pc.setRemoteDescription(new RTCSessionDescription(remoteDescription), function() {
-        console.log('Sending answer...');
-        pc.createAnswer(setLocalDescAndSendMessageAnswer, onCreateAnswerFailed);
-      }, function() {  
-        console.log('Error setting remote description');   
+          captureSection.classList.remove("starting");
+        }
+      }).catch((error) => {
+        console.error("cannot have access to webcam and microphone", error);
+        captureSection.classList.remove("starting");
       });
-
-    } else if (message.messageType === 'answer' && mediaFlowing) {
-      console.log('Received answer...');
-      console.log('Setting remote session description...' );
-      var remoteDescription = message.peerDescription;
-      var RTCSessionDescription = window.RTCSessionDescription || window.webkitRTCSessionDescription || window.RTCSessionDescription;
-      pc.setRemoteDescription(new RTCSessionDescription(remoteDescription));
-
-    } else if (message.messageType === "iceCandidate" && mediaFlowing) {
-      console.log('Received ICE candidate...');
-      var RTCIceCandidate = window.RTCIceCandidate || window.webkitRTCIceCandidate || window.RTCIceCandidate;
-      var candidate = new RTCIceCandidate({sdpMLineIndex:message.candidate.sdpMLineIndex, sdpMid:message.candidate.sdpMid, candidate:message.candidate.candidate});
-      pc.addIceCandidate(candidate );
-
-    } else if (message.messageType === 'bye' && mediaFlowing) {
-      console.log("Received bye");
-      stop();
     }
-  }
+  });
+}
 
-  function createPeerConnection() {
-    console.log("Creating peer connection");
-    RTCPeerConnection = window.webkitRTCPeerConnection || window.RTCPeerConnection;
-    var pc_config = {"iceServers":[]};
-    try {
-      pc = new RTCPeerConnection(pc_config);
-    } catch (e) {
-      console.log("Failed to create PeerConnection, exception: " + e.message);
-    }
-    // send any ice candidates to the other peer
-    pc.onicecandidate = function (evt) {
-      if (evt.candidate) {
-        console.log('Sending ICE candidate...');
-        console.log(evt.candidate);
+function initRemoteStreams(api) {
+  const remoteStreamsElement = document.getElementById("zoomingDiv4");
 
-        socket.send(JSON.stringify({
-                     "messageType": "iceCandidate",
-                     "candidate": evt.candidate 
-                    }));   
-      } else {
-        console.log("End of candidates.");
+  const listener = {
+    producerAdded: function(producer) {
+      const producerId = producer.id
+      if (!document.getElementById(producerId)) {
+        remoteStreamsElement.insertAdjacentHTML("beforeend",
+          `<li id="${producerId}">
+            <div class="button">${producer.meta.name || producerId}
+            </div>
+            <div class="offer-options">
+              <textarea rows="5" cols="50" placeholder="offer options, empty to answer. For example:\n{\n  &quot;offerToReceiveAudio&quot;: 1\n  &quot;offerToReceiveVideo&quot;: 1\n}\n"></textarea>
+            </div>
+            <div class="request-box">
+              <textarea rows="4" cols="50" placeholder="JSON request to send over"></textarea>
+              <button disabled="disabled">Submit request</button>
+            </div>
+            <div class="video">
+                <div class="spinner">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+                <span class="remote-control">&#xA9;</span>
+                <video></video>
+                <div class="fullscreen"><span title="Toggle fullscreen">&#x25A2;</span></div>
+            </div>
+          </li>`);
+
+        const entryElement = document.getElementById(producerId);
+        const videoElement = entryElement.getElementsByTagName("video")[0];
+        const offerTextareaElement = entryElement.getElementsByTagName("textarea")[0];
+        const requestTextAreaElement = entryElement.getElementsByTagName("textarea")[1];
+        const submitRequestButtonElement = entryElement.getElementsByTagName("button")[0];
+
+        submitRequestButtonElement.addEventListener("click", (event) => {
+          try {
+            let request = requestTextAreaElement.value;
+            let id = entryElement._consumerSession.remoteController.sendControlRequest(request);
+          } catch (ex) {
+            console.error("Failed to parse mix matrix:", ex);
+            return;
+          }
+        });
+
+        videoElement.addEventListener("playing", () => {
+          if (entryElement.classList.contains("has-session")) {
+            entryElement.classList.add("streaming");
+          }
+        });
+
+        entryElement.addEventListener("click", (event) => {
+          event.preventDefault();
+          if (!event.target.classList.contains("button")) {
+            return;
+          }
+
+          if (entryElement._consumerSession) {
+            entryElement._consumerSession.close();
+          } else {
+            let session = null;
+            if (offerTextareaElement.value == '') {
+              session = api.createConsumerSession(producerId);
+            } else {
+              try {
+                let offerOptions = JSON.parse(offerTextareaElement.value);
+                session = api.createConsumerSessionWithOfferOptions(producerId, offerOptions);
+              } catch (ex) {
+                console.error("Failed to parse offer options:", ex);
+                return;
+              }
+            }
+            if (session) {
+              entryElement._consumerSession = session;
+
+              session.mungeStereoHack = true;
+
+              session.addEventListener("error", (event) => {
+                if (entryElement._consumerSession === session) {
+                  console.error(event.message, event.error);
+                }
+              });
+
+              session.addEventListener("closed", () => {
+                if (entryElement._consumerSession === session) {
+                  videoElement.pause();
+                  videoElement.srcObject = null;
+                  entryElement.classList.remove("has-session", "streaming", "has-remote-control");
+                  delete entryElement._consumerSession;
+                }
+              });
+
+              session.addEventListener("streamsChanged", () => {
+                if (entryElement._consumerSession === session) {
+                  const streams = session.streams;
+                  if (streams.length > 0) {
+                    videoElement.srcObject = streams[0];
+                    videoElement.play().catch(() => {});
+                  }
+                }
+              });
+
+              session.addEventListener("remoteControllerChanged", () => {
+                if (entryElement._consumerSession === session) {
+                  const remoteController = session.remoteController;
+                  if (remoteController) {
+                    entryElement.classList.add("has-remote-control");
+                    submitRequestButtonElement.disabled = false;
+                    remoteController.attachVideoElement(videoElement);
+                    remoteController.addEventListener("info", (e) => {
+                      console.log("Received info message from producer: ", e.detail);
+                    });
+                  } else {
+                    entryElement.classList.remove("has-remote-control");
+                    submitRequestButtonElement.disabled = true;
+                  }
+                }
+              });
+
+              entryElement.classList.add("has-session");
+              session.connect();
+            }
+          }
+        });
       }
-    };
-    console.log('Adding local stream...');
-    pc.addStream(localStream);
+    },
 
-    pc.addEventListener("addstream", onRemoteStreamAdded, false);
-    pc.addEventListener("removestream", onRemoteStreamRemoved, false)
+    producerRemoved: function(producer) {
+      const element = document.getElementById(producer.id);
+      if (element) {
+        if (element._consumerSession) {
+          element._consumerSession.close();
+        }
 
-    // when remote adds a stream, hand it on to the local video element
-    function onRemoteStreamAdded(evt) {
-      console.log("Added remote stream");
-      remotevid.src = window.URL.createObjectURL(evt.stream);
+        element.remove();
+      }
     }
+  };
 
-    // when remote removes a stream, remove it from the local video element
-    function onRemoteStreamRemoved(evt) {
-      console.log("Remove remote stream");
-      remotevid.src = "";
-    }
+  api.registerProducersListener(listener);
+  for (const producer of api.getAvailableProducers()) {
+    listener.producerAdded(producer);
   }
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("click", (event) => {
+    if (event.target.matches("div.video>div.fullscreen:hover>span")) {
+      event.preventDefault();
+      event.target.parentNode.previousElementSibling.requestFullscreen();
+    }
+  });
+
+  const signalingProtocol = window.location.protocol.startsWith("https") ? "wss" : "ws";
+  const gstWebRTCConfig = {
+    meta: { name: `WebClient-${Date.now()}` },
+    signalingServerUrl: `${signalingProtocol}://${window.location.hostname}:8443`,
+  };
+
+  const api = new GstWebRTCAPI(gstWebRTCConfig);
+  // initCapture(api);
+  initRemoteStreams(api);
+});
