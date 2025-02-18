@@ -43,7 +43,7 @@ var reconnectIntervalId = setInterval(function() {
   if(!rosConnected) {
     console.log('Trying to reconnect to websocket server.');
     diagnosticInput.value += 'Trying to reconnect to websocket server.\n';
-    ros.connect('ws://localhost:9090');
+    ros.connect('ws://' + ip + ':9090');
   }
 
   if(rosConnected) {

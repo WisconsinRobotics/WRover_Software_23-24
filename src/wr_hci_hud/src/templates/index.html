@@ -91,7 +91,7 @@
                 <p style="margin: 0;"></p>
                 <!-- <div id="joystick"></div> -->
                 
-                <div id="mapWrapper"><img id="mapimg" src="../../assets/map.jpg" alt="Online Image" width="300" height="300"></div>
+                <div id="mapWrapper"><img id="mapimg" src="../../assets/map.jpg" alt="Online Image"></div>
                 
             </div>
 
@@ -99,11 +99,29 @@
 
         <div class="square diagnostic">
             <div class="square-title">
-                <h1 class="square-heading">Diagnostic</h1>
+                <h1 id="infoHeading" class="square-heading">Diagnostic</h1>
+                <h1 id="statusHeading" class="square-heading ">Status</h1>
             </div>
             <div id="info-box">
                 <textarea class="diagnostic-input" placeholder="Diagnostics from the server will be displayed here" readonly ></textarea>
                 
+            </div>
+            <div id="status-page">
+                <div style="position: relative; width: 40%; margin-left: 25%;">
+                    <img src="../../assets/rover.png" alt="Robot Image" width="100%">
+                    <div class="mapMarker" style="position: absolute; top:24%; left: 20%; transform: translate(-50%, -50%);"></div>
+                    <div class="mapMarker" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
+                    <div class="mapMarker" style="position: absolute; top: 80%; left: 50%; transform: translate(-50%, -50%);"></div>
+                    <div class="mapMarker" style="position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%);"></div>
+                    <div style="position: absolute; top:20%; left: -20%; transform: translate(-50%, -50%); background-color:#ffaaaa; border-radius: 30px; border: 2px black solid; padding: 5px;">
+                        <h3 style="margin: 0;" class="mapMarkerText">Status: Critical</h3>
+                    </div>
+                    <svg class="lines">
+                        <line x1="24%" y1="25%" x2="-25%" y2="15%" />
+                    </svg>
+                </div>
+                
+                </div>
             </div>
         </div>
 
@@ -115,41 +133,45 @@
                 <h1 class="square-heading" id="cam4">Cam 4</h1>
                 <h1 class="square-heading" id="camMulti">Multi</h1>
                 <div class="slidecontainer hideSlide">
-                    <input type="range" min="1" max="10" value="1" class="slider" id="myRange">
+                    <input type="range" min="10" max="40" value="10" class="slider" id="myRange">
                 </div>
 
                 <div class="slidecontainer hideSlide">
-                    <input type="range" min="1" max="10" value="1" class="slider" id="myRange2">
+                    <input type="range" min="10" max="40" value="10" class="slider" id="myRange2">
                 </div>
 
                 <div class="slidecontainer hideSlide">
-                    <input type="range" min="1" max="10" value="1" class="slider" id="myRange3">
+                    <input type="range" min="10" max="40" value="10" class="slider" id="myRange3">
                 </div>
 
                 <div class="slidecontainer hideSlide">
-                    <input type="range" min="1" max="10" value="1" class="slider" id="myRange4">
+                    <input type="range" min="10" max="40" value="10" class="slider" id="myRange4">
                 </div>
 
                 <h1 class="square-heading" id="vidEnlarge" >^</h1>
             </div>
-            <div class="zoomingDiv" id="zoomingDiv1">
+            <div id="videoWrapper">
+                <div class="zoomingDiv" id="zoomingDiv1">
+                    <video class="videoBox" id="video1" muted="muted", width="560" height="315"></video>
+                </div>
+                <div class="zoomingDiv" id="zoomingDiv2">
+                    <video class="videoBox" id="video2" muted="muted" width="560" height="315"></video>
+                </div>
+                <div class="zoomingDiv" id="zoomingDiv3">
+                    <!-- <li style="list-style-type: none;" id="video3Li"> -->
+                        <video id="video3" class="videoBox" muted="muted" width="560" height="315"></video>
+                      <!-- </li> -->
+                </div>
+                <div class="zoomingDiv" id="zoomingDiv4">
+                    <!-- <li style="list-style-type: none;" id="video4Li"> -->
+                        <video id="video4" class="videoBox" muted="muted" width="560" height="315"></video>
+                      <!-- </li> -->
+                </div>
+            </div>
 
-                <video class="videoBox" id="video1" muted="muted", width="560" height="315"></video>
+            <div id="logo" style="box-shadow: inset -5px 5px 5px #525252; border: 5px solid black; border-radius: 30%; padding: 15px; z-index: 1; width: 3%; background-color: #3e3e3e; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                <img style="z-index: 2;" src="../../assets/WROVER.png" alt="Centered Image" width="100%">
             </div>
-            <div class="zoomingDiv" id="zoomingDiv2">
-                <video class="videoBox" id="video2" muted="muted" width="560" height="315"></video>
-            </div>
-            <div class="zoomingDiv" id="zoomingDiv3">
-                <video class="videoBox" id="video3" muted="muted" width="560" height="315"></video>
-            </div>
-            <div class="zoomingDiv" id="zoomingDiv4">
-                <video class="videoBox" id="video4" muted="muted" width="560" height="315"></video>
-            </div>
-
-            <!-- <div id="dualCamWrapper">
-                <iframe id="video3" width="350" height="225" src="https://www.youtube.com/embed/jfKfPfyJRdk" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
-                <iframe id="video4" width="350" height="225" src="https://www.youtube.com/embed/i43tkaTXtwI" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"></iframe>
-            </div> -->
         </div>
     </body>
 </html>

@@ -1,5 +1,12 @@
 const launch = document.getElementById('launchHeading');
 const data = document.getElementById('dataHeading');
+const info = document.getElementById('infoHeading');
+const stat = document.getElementById('statusHeading');
+
+const launchPage = document.getElementById('launchPage');
+const dataPage = document.getElementById('dataPage');
+const diagnosticPage = document.getElementById('info-box');
+const statusPage = document.getElementById('status-page');
 
 const cam1 = document.getElementById('cam1');
 const cam2 = document.getElementById('cam2');
@@ -7,17 +14,21 @@ const cam3 = document.getElementById('cam3');
 const cam4 = document.getElementById('cam4');
 const camMulti = document.getElementById('camMulti');
 
-const launchPage = document.getElementById('launchPage');
-const dataPage = document.getElementById('dataPage');
 
 const video1 = document.getElementById('video1');
 const video2 = document.getElementById('video2');
 const video3 = document.getElementById('video3');
 const video4 = document.getElementById('video4');
 
-video2.style.display = 'none';
-video3.style.display = 'none';
-video4.style.display = 'none';
+const video1Div = document.getElementById('zoomingDiv1');
+const video2Div = document.getElementById('zoomingDiv2');
+const video3Div = document.getElementById('zoomingDiv3');
+const video4Div = document.getElementById('zoomingDiv4');
+
+video2Div.style.display = 'none';
+video3Div.style.display = 'none';
+video4Div.style.display = 'none';
+
 
 const slide = document.getElementsByClassName('slidecontainer')[0];
 const slide2 = document.getElementsByClassName('slidecontainer')[1];
@@ -42,23 +53,32 @@ data.addEventListener('click', () => {
     data.classList.add('current-heading');
 });
 
+info.addEventListener('click', () => {
+    diagnosticPage.style.display = 'block';
+    statusPage.style.display = 'none';
+    stat.classList.remove('current-heading');
+    info.classList.add('current-heading');
+});
+
+stat.addEventListener('click', () => {
+    diagnosticPage.style.display = 'none';
+    statusPage.style.display = 'block';
+    info.classList.remove('current-heading');
+    stat.classList.add('current-heading');
+});
+
+
 cam1.addEventListener('click', () => {
-    video1.style.display = 'block';
-    video2.style.display = 'none';
-    video3.style.display = 'none';
-    video4.style.display = 'none';
+    video1Div.style.display = 'block';
+    video2Div.style.display = 'none';
+    video3Div.style.display = 'none';
+    video4Div.style.display = 'none';
     camMulti.classList.remove('current-heading');
     cam4.classList.remove('current-heading');
     cam3.classList.remove('current-heading');
     cam2.classList.remove('current-heading');
     cam1.classList.add('current-heading');
-    // video1.classList.remove('enlargeDualVideo');
-    video2.classList.remove('enlargeDualVideo');
-    video3.classList.remove('enlargeDualVideo');
-    video4.classList.remove('enlargeDualVideo');
-    video2.classList.remove('dualVideo');
-    video3.classList.remove('dualVideo');
-    video4.classList.remove('dualVideo');
+    removeMultiVideoClasses();
     if(videoSquare.classList.contains('enlargedVideoWrapper')) {
         slide.classList.remove('hideSlide');
         slide2.classList.add('hideSlide');
@@ -68,22 +88,16 @@ cam1.addEventListener('click', () => {
 });
 
 cam2.addEventListener('click', () => {
-    video1.style.display = 'none';
-    video2.style.display = 'block';
-    video3.style.display = 'none';
-    video4.style.display = 'none';
+    video1Div.style.display = 'none';
+    video2Div.style.display = 'block';
+    video3Div.style.display = 'none';
+    video4Div.style.display = 'none';
     camMulti.classList.remove('current-heading');
     cam4.classList.remove('current-heading');
     cam3.classList.remove('current-heading');
     cam1.classList.remove('current-heading');
     cam2.classList.add('current-heading');
-    // video1.classList.remove('enlargeDualVideo');
-    video2.classList.remove('enlargeDualVideo');
-    video3.classList.remove('enlargeDualVideo');
-    video4.classList.remove('enlargeDualVideo');
-    video2.classList.remove('dualVideo');
-    video3.classList.remove('dualVideo');
-    video4.classList.remove('dualVideo');
+    removeMultiVideoClasses();
     if(videoSquare.classList.contains('enlargedVideoWrapper')) {
         slide.classList.add('hideSlide');
         slide2.classList.remove('hideSlide');
@@ -93,22 +107,16 @@ cam2.addEventListener('click', () => {
 });
 
 cam3.addEventListener('click', () => {
-    video1.style.display = 'none';
-    video2.style.display = 'none';
-    video3.style.display = 'block';
-    video4.style.display = 'none';
+    video1Div.style.display = 'none';
+    video2Div.style.display = 'none';
+    video3Div.style.display = 'block';
+    video4Div.style.display = 'none';
     cam1.classList.remove('current-heading');
     cam2.classList.remove('current-heading');
     cam3.classList.add('current-heading');
     cam4.classList.remove('current-heading');
     camMulti.classList.remove('current-heading');
-    // video1.classList.add('enlargeDualVideo');
-    video2.classList.remove('enlargeDualVideo');
-    video3.classList.remove('enlargeDualVideo');
-    video4.classList.remove('enlargeDualVideo');
-    video2.classList.remove('dualVideo');
-    video3.classList.remove('dualVideo');
-    video4.classList.remove('dualVideo');
+    removeMultiVideoClasses();
     if(videoSquare.classList.contains('enlargedVideoWrapper')) {
         slide.classList.add('hideSlide');
         slide2.classList.add('hideSlide');
@@ -119,44 +127,43 @@ cam3.addEventListener('click', () => {
 });
 
 cam4.addEventListener('click', () => {
-    video1.style.display = 'none';
-    video2.style.display = 'none';
-    video3.style.display = 'none';
-    video4.style.display = 'block';
+    video1Div.style.display = 'none';
+    video2Div.style.display = 'none';
+    video3Div.style.display = 'none';
+    video4Div.style.display = 'block';
     cam1.classList.remove('current-heading');
     cam2.classList.remove('current-heading');
     cam3.classList.remove('current-heading');
     camMulti.classList.remove('current-heading');
     cam4.classList.add('current-heading');
-    video2.classList.remove('enlargeDualVideo');
-    video3.classList.remove('enlargeDualVideo');
-    video4.classList.remove('enlargeDualVideo');
-    video2.classList.remove('dualVideo');
-    video3.classList.remove('dualVideo');
-    video4.classList.remove('dualVideo');
+    removeMultiVideoClasses();
     if(videoSquare.classList.contains('enlargedVideoWrapper')) {
         slide.classList.add('hideSlide');
         slide2.classList.add('hideSlide');
         slide3.classList.add('hideSlide');
+        slide4.classList.remove('hideSlide');
     }
 });
 
 camMulti.addEventListener('click', () => {
-    video1.style.display = 'none';
-    video2.style.display = 'block';
-    video3.style.display = 'block';
-    video4.style.display = 'none';
+    video1Div.style.display = 'block';
+    video2Div.style.display = 'block';
+    video3Div.style.display = 'block';
+    video4Div.style.display = 'block';
     cam1.classList.remove('current-heading');
     cam2.classList.remove('current-heading');
     cam3.classList.remove('current-heading');
     cam4.classList.remove('current-heading');
     camMulti.classList.add('current-heading');
-    // video1.classList.add('enlargeDualVideo');
-    video2.classList.add('dualVideo');
-    video3.classList.add('dualVideo');
+    video1.classList.add('multiVideo');
+    video2.classList.add('multiVideo');
+    video3.classList.add('multiVideo');
+    video4.classList.add('multiVideo');
     if(videoSquare.classList.contains('enlargedVideoWrapper')) {
-        video2.classList.add('enlargeDualVideo');
-        video3.classList.add('enlargeDualVideo');
+        video1.classList.add('enlargeMultiVideo');
+        video2.classList.add('enlargeMultiVideo');
+        video3.classList.add('enlargeMultiVideo');
+        video4.classList.add('enlargeMultiVideo');
     }
     if(videoSquare.classList.contains('enlargedVideoWrapper')) {
         slide.classList.add('hideSlide');
@@ -166,8 +173,11 @@ camMulti.addEventListener('click', () => {
     }
 });
 
+let logo = document.getElementById('logo');
 
 enlarge.addEventListener('click', () => {
+    logo.toggleAttribute('hidden');
+
     videoSquare.classList.toggle('enlargedVideoWrapper');
     video1.classList.toggle('enlargedVideo');
     video2.classList.toggle('enlargedVideo');
@@ -182,8 +192,10 @@ enlarge.addEventListener('click', () => {
     } else if(cam4.classList.contains('current-heading')) {
         slide4.classList.toggle('hideSlide');
     } else if(camMulti.classList.contains('current-heading')) {
-        video2.classList.toggle('enlargeDualVideo');
-        video3.classList.toggle('enlargeDualVideo');
+        video1.classList.toggle('enlargeMultiVideo');
+        video2.classList.toggle('enlargeMultiVideo');
+        video3.classList.toggle('enlargeMultiVideo');
+        video4.classList.toggle('enlargeMultiVideo');
     }
 
     if(enlarge.innerHTML === '^') {
@@ -193,3 +205,13 @@ enlarge.addEventListener('click', () => {
     }
 });
 
+function removeMultiVideoClasses() {
+    video1.classList.remove('enlargeMultiVideo');
+    video2.classList.remove('enlargeMultiVideo');
+    video3.classList.remove('enlargeMultiVideo');
+    video4.classList.remove('enlargeMultiVideo');
+    video1.classList.remove('multiVideo');
+    video2.classList.remove('multiVideo');
+    video3.classList.remove('multiVideo');
+    video4.classList.remove('multiVideo');
+}

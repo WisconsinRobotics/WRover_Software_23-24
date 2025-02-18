@@ -15,6 +15,7 @@ body{
 }
 
 .square {
+    z-index: 1;
     color: white;
     text-shadow: 2px 2px 4px #000000;
     background-color: rgb(62, 62, 62);
@@ -132,12 +133,13 @@ body{
 }
 
 #mapimg{
-    width: 80%;
-    height: 80%;
+    width: 70%;
+    height: 70%;
     border: #000000 3px solid;
 }
 
 .square-heading {
+    z-index: 2;
     margin: 0;
     width: fit-content;
     padding-left:10px;
@@ -259,11 +261,19 @@ body{
 
 }
 
+#status-page{
+    height: 85%;
+    width: 100%;
+    margin: 0;
+    display: none;
+}
+
+
 .enlargedVideoWrapper{
     position: absolute;
     top:0;
     left:0;
-    width:98%;
+    width:89%;
     height: 98%;
     z-index: 9999;
     animation: appear 0.2s ease-in-out ;
@@ -285,8 +295,7 @@ body{
 }
 
 .enlargedVideo{
-    /* width: 70rem; */
-    height: 700px;
+    height: 40rem;
     /* height: auto; */
     border: none;
     background-color: #000000;
@@ -303,26 +312,27 @@ body{
     /* max-height: 90%; */
     width: fit-content;
     height: fit-content;
-    margin-left: auto;
+    /* margin-left: auto; */
     margin-right: auto;
     
     overflow: hidden;
     display: inline-block;
 }
 
-.dualVideo{
-    width: 350px;
-    height: auto;
+.multiVideo{
+    width: auto;
+    height: 8rem;
     border: none;
     background-color: #000000;
     border-radius: 5px;
     box-shadow: 2px 2px 4px #000000;
 }
 
-.enlargeDualVideo{
+.enlargeMultiVideo{
     /* margin-top: 7%; */
-    width: 700px;
-    height: auto;
+    /* width: 700px; */
+    max-width: 80vb;
+    height: 20rem;
     border: none;
     background-color: #000000;
     border-radius: 5px;
@@ -330,14 +340,11 @@ body{
 
 }
 
-#dualCamWrapper{
-    display: flex;
-    height: 80%;
-    width: 100%;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
+#videoWrapper{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* grid-template-rows: 1fr 1fr; */
+    gap: 5px;
 }
 
 #vidEnlarge{
@@ -399,19 +406,33 @@ body{
     /* margin: 0; */
 }
 
-#mapMarker{
+.mapMarker{
     position: absolute;
     z-index: 5;
     width: 10px;
     height: 10px;
     background-color: #ff0000;
     border-radius: 50%;
-    margin-left: -25px;
-    margin-top: -25px;
+    /* margin-left: -25px; */
+    /* margin-top: -25px; */
     color: #000000;
     font-size: medium;
     /* cursor: grab; */
     animation: blink 1s infinite;
+}
+
+.lines{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+line {
+    stroke: white;
+    stroke-width: 2;
 }
 
 @keyframes blink {
@@ -445,29 +466,59 @@ body{
     width: 50%; /* Width of the outside container */
     height: auto;
     margin-left: auto;
-  }
-  
-  /* The slider itself */
-  .slider {
-    border-top: 10px;
+    margin-right: auto;
+    padding: 10px;
+    background-color: #333;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* The slider itself */
+.slider {
     -webkit-appearance: none;  /* Override default CSS styles */
     appearance: none;
     width: 100%; /* Full-width */
-    height: 25px; /* Specified height */
+    height: 15px; /* Specified height */
     background: #d3d3d3; /* Grey background */
     outline: none; /* Remove outline */
-    opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
+    opacity: 0.9; /* Set transparency (for mouse-over effects on hover) */
     -webkit-transition: .2s; /* 0.2 seconds transition on hover */
     transition: opacity .2s;
-    border-radius: 15px;
-  }
-  
-  /* Mouse-over effects */
-  .slider:hover {
+    border-radius: 10px;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Mouse-over effects */
+.slider:hover {
     opacity: 1; /* Fully shown on mouse-over */
-  }
-  
-  .slider::-webkit-slider-thumb {
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: #ffffff; /* Green thumb */
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.slider::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: #ffffff; /* Green thumb */
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Mouse-over effects */
+.slider:hover {
+    opacity: 1; /* Fully shown on mouse-over */
+}
+
+.slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     width: 40px;
@@ -478,9 +529,9 @@ body{
     border: #000000 3px solid;
     /* background:rgb(42, 42, 42); */
     cursor: pointer;
-  }
+}
 
-  #mouseCircle{
+#mouseCircle{
     position: absolute;
     z-index: 9999;
     width: 20px;
@@ -488,5 +539,12 @@ body{
     border: 2px solid #ffffff;
     border-radius: 50%;
     pointer-events: none;
-  }
-  
+}
+
+.Video{
+    padding-left: 10%;
+}
+
+.control{
+    padding-left: 10%;
+}
