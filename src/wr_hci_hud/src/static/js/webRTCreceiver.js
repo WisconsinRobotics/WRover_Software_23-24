@@ -78,8 +78,6 @@ function initCapture(api) {
   });
 }
 
-var ip = ""
-
 function producerAddedHandler(api, producer, id) {
   const producerId = producer.id
 

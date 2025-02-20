@@ -8,10 +8,12 @@ services:
     # network_mode: host # Share the host network for easier access
     ports:
       - "9090:9090"
+      - "8443:8443"
     restart: unless-stopped
     # environment:
     #   - ROS_DOMAIN_ID=0  # Adjust this if you're using a specific ROS domain ID
     #   - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
     volumes:
       - ./rosbridge/launch:/root/rosbridge_launch
-    command: ["ros2", "launch", "rosbridge_server", "rosbridge_websocket_launch.xml"]
+    # command: ["ros2", "launch", "rosbridge_server", "rosbridge_websocket_launch.xml"]
+    command: ["/root/start.sh"]
