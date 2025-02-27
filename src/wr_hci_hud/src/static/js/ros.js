@@ -105,8 +105,11 @@ listener.subscribe(function(message) {
 });
 
 setInterval(function() {
+  if(storedText == '') {
+    return;
+  }
   listener.publish(new ROSLIB.Message({
-    data : 'Hello World!'
+    data : 'Commencing: ' + storedText
   }));
 }, 5000);
 

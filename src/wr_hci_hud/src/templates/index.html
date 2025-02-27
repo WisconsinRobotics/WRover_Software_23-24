@@ -8,20 +8,25 @@
         <script src="../static/js/terminal.js" defer></script>
         <script src="./../static/js/voltage.js" defer></script>
         <script src="./../static/js/info.js" defer></script>
-        <!-- <script src="./../static/js/joystick.js" defer></script> -->
+        <script src="./../static/js/map.js" defer></script>
         <script src="./../static/js/startup.js" defer></script>
-        <!-- <script src="./../static/js/mapMarker.js" defer></script> -->
         <script src="./../static/js/swapPage.js" defer></script>
-        <script src="../../node_modules/hls.js/dist/hls.min.js"></script>
-        <!-- <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script> -->
-        <script src="./../static/js/videoStream.js" defer> </script>
-        <!-- <script type="module" src="./../static/js/videoStream.js" defer></script> -->
+        <script src="./../static/js/zoomBar.js" defer> </script>
         <!-- <script src="./../static/js/mouseEffect.js" defer></script> -->
         <script src="../../node_modules/roslib/build/roslib.min.js"></script>
         <script src="../../node_modules/eventemitter2/lib/eventemitter2.js"></script>
         <script src="./../static/js/ros.js" defer></script>
         <script src="./../static/js/gstwebrtc-api-2.0.0.min.js" defer></script>
         <script src="./../static/js/webRTCreceiver.js" defer></script>
+        <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>        
+
 
     </head>
     <body>
@@ -91,7 +96,9 @@
                 <p style="margin: 0;"></p>
                 <!-- <div id="joystick"></div> -->
                 
-                <div id="mapWrapper"><img id="mapimg" src="../../assets/map.jpg" alt="Online Image"></div>
+                <!-- <div id="mapWrapper"><img id="mapimg" src="../../assets/map.jpg" alt="Online Image"></div> -->
+
+                <div id="map"></div>
                 
             </div>
 

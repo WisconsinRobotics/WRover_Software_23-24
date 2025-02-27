@@ -145,10 +145,19 @@ function initRemoteStreams(api) {
   const listener = {
     producerAdded: function(producer) {
       if( counter == 0){
-        producerAddedHandler(api, producer, "video4");
+        producerAddedHandler(api, producer, "video1");
       }
       else if( counter == 1){
+        producerAddedHandler(api, producer, "video2");
+      }
+      else if( counter == 2){
         producerAddedHandler(api, producer, "video3");
+      }
+      else if( counter == 3){
+        producerAddedHandler(api, producer, "video4");
+      }
+      else{
+        console.log("No more divs available");
       }
       counter++;
     },

@@ -1,37 +1,37 @@
-var videoSrc1 = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8';
-var videoSrc2 = 'http://sample.vodobox.net/skate_phantom_flex_4k/skate_phantom_flex_4k.m3u8';
-// var videoSrc3 = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8';
-var hls = new Hls();
-var hls2 = new Hls();
-// var hls3 = new Hls();
+// var videoSrc1 = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8';
+// var videoSrc2 = 'http://sample.vodobox.net/skate_phantom_flex_4k/skate_phantom_flex_4k.m3u8';
+// // var videoSrc3 = 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8';
+// var hls = new Hls();
+// var hls2 = new Hls();
+// // var hls3 = new Hls();
 
-hls.on(Hls.Events.MEDIA_ATTACHED, function () {
-  console.log('video and hls.js are now bound together !');
-});
-hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
-  console.log(
-    'manifest loaded, found ' + data.levels.length + ' quality level',
-  );
+// hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+//   console.log('video and hls.js are now bound together !');
+// });
+// hls.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+//   console.log(
+//     'manifest loaded, found ' + data.levels.length + ' quality level',
+//   );
 
-  console.log(data)
-});
+//   console.log(data)
+// });
 
-if (Hls.isSupported()) {
-    console.log('HLS supported')
+// if (Hls.isSupported()) {
+//     console.log('HLS supported')
     
-    hls.loadSource(videoSrc1);
-    hls.attachMedia(video1);
+//     hls.loadSource(videoSrc1);
+//     hls.attachMedia(video1);
     
-    hls2.loadSource(videoSrc2);
-    hls2.attachMedia(video2);
+//     hls2.loadSource(videoSrc2);
+//     hls2.attachMedia(video2);
 
-    // hls3.loadSource(videoSrc3);
-    // hls3.attachMedia(video3);
-    video1.play();
-    video2.play();
-    // video3.play();
+//     // hls3.loadSource(videoSrc3);
+//     // hls3.attachMedia(video3);
+//     video1.play();
+//     video2.play();
+//     // video3.play();
 
-}
+// }
 
 //zooming
 
@@ -54,6 +54,7 @@ var zoomDiv4 = document.getElementById('zoomingDiv4');
 zoomBar.oninput = function () {
     zoomValue = this.value;
     // video1.style.float = 'none';
+    console.log(zoomValue);
     video1.style.transform = 'scale(' + zoomValue/10 + ')';
     // video.style.width = 1000 * zoomValue + 'px';
     // video.style.height = 500 * zoomValue + 'px';

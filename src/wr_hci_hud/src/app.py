@@ -3,6 +3,8 @@ from flask import Flask, send_from_directory
 
 from flask_cors import CORS
 
+import folium
+
 from startup import competitionMission
 import socket
 
@@ -44,10 +46,17 @@ def get_ip():
     ip = get_local_ip()
     return jsonify({"ip": ip})
 
+def generateMap():
+    robot_location = {"lat": 38.3753855364, "lon": -110.8302205892}
+    m = folium.Map(location=[robot_location["lat"], robot_location["lon"]], zoom_start=12)
+    m.save("./templates/map.html")
+
+
 # @app.route('/ros/<path:path>')
 # def send_ros(path):
 #     return send_from_directory('./ros', path)
 
 if __name__ == '__main__':
+    # generateMap()
     app.run(host='0.0.0.0', port=5000, debug=True)
 

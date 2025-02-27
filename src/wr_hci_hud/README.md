@@ -7,18 +7,13 @@
 npm install
 pip install -r requirements.txt
 
+# To start the video streaming and ros server
+docker-compose build
 docker-compose up
+
 run app.py in wr_hci_hud/src 
 
-May have to set port 5000 and 9090 inbound to open in firewall 
-<!-- flask run --host=0.0.0.0 -->
-
-<!-- # Have jazzy installed and start the ros websocket server: -->
-
-<!-- sudo apt-get install ros-jazzy-rosbridge-suite -->
-<!-- source /opt/ros/jazzy/setup.bash -->
-
-<!-- ros2 run rosbridge_server rosbridge_websocket -->
+May have to set port 5000, 8443, 9090 inbound to open in firewall for multiple client 
 
 the ros.js file is currently publishing and then subscribing to the ros websocket to simulate actual input
 
