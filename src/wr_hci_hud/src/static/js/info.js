@@ -21,3 +21,14 @@ setInterval(() => {
     accelBox.innerHTML = accel.toFixed(2) + " m/s^2";
     distanceBox.innerHTML = distance.toFixed(2) + " m";
 }, 500);
+const tempBoxes = [];
+const positionBoxes = [];
+const currentBoxes = [];
+const adc2Boxes = [];
+
+for (let i = 1; i <= 7; i++) {
+    tempBoxes.push(document.getElementById(`temp${i}`));
+    positionBoxes.push(document.getElementById(`position${i}`));
+    currentBoxes.push(document.getElementById(`current${i}`));
+    adc2Boxes.push(document.getElementById(`adc${i}`));
+}

@@ -246,8 +246,6 @@ var distanceListener = new ROSLIB.Topic({
 });
 
 distanceListener.subscribe(function(message) {
-  // console.log('Received distance: ' + message.data);
-  // diagnosticInput.value += 'Received distance: ' + message.data + '\n';
   distance = message.data;
 });
 
@@ -258,23 +256,33 @@ setInterval(function() {
 }, 1000);
 
 
-// var joystickListener = new ROSLIB.Topic({
-//   ros: ros,
-//   name: '/joystick',
-//   messageType: 'std_msgs/Float32MultiArray'
-// });
+var tempListener = new ROSLIB.Topic({
+  ros: ros,
+  name: '/temp',
+  messageType: 'std_msgs/Float32'
+});
 
-// joystickListener.subscribe(function(message) {
-//   // console.log('Received joystick: ' + message.data);
-//   diagnosticInput.value += 'Received joystick: ' + message.data + '\n';
-//   updateJoystick(message.data[0], message.data[1]);
-// });
+tempListener.subscribe(function(message) {
+  for (let i = 0; i < 7; i++) {
+    tempBoxes[i].innerHTML = message.data;
+  }
 
-// setInterval(function() {
-//   joystickListener.publish(new ROSLIB.Message({
-//     data: [Math.round(Math.random()*20-10, 2), Math.round(Math.random()*20-10, 2)]
-//   }));
-// }, 1000);
+  // Update the motorchart with the new temperature data
+  var motorChartInstance = Chart.getChart('motorChart');
+  if (motorChartInstance) {
+    motorChartInstance.data.datasets[0].data.push(message.data);
+    motorChartInstance.update();
+  } else {
+    console.error('Motor chart instance not found');
+  }
+});
+
+setInterval(function() {
+  tempListener.publish(new ROSLIB.Message({
+    data: Math.round(Math.random()*10, 2)
+  }));
+}, 1000);
+
 }
 
 setupROS();

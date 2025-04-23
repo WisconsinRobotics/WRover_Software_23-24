@@ -1,10 +1,12 @@
 const launch = document.getElementById('launchHeading');
 const data = document.getElementById('dataHeading');
+const motor = document.getElementById('motorHeading');
 const info = document.getElementById('infoHeading');
 const stat = document.getElementById('statusHeading');
 
 const launchPage = document.getElementById('launchPage');
 const dataPage = document.getElementById('dataPage');
+const motorPage = document.getElementById('motorPage');
 const diagnosticPage = document.getElementById('info-box');
 const statusPage = document.getElementById('status-page');
 
@@ -42,15 +44,28 @@ const videoSquare = document.getElementsByClassName('Video')[0];
 launch.addEventListener('click', () => {
     launchPage.style.display = 'block';
     dataPage.style.display = 'none';
+    motorPage.style.display = 'none';
     data.classList.remove('current-heading');
+    motor.classList.remove('current-heading');
     launch.classList.add('current-heading');
 });
 
 data.addEventListener('click', () => {
     launchPage.style.display = 'none';
+    motorPage.style.display = 'none';
     dataPage.style.display = 'block';
     launch.classList.remove('current-heading');
+    motor.classList.remove('current-heading');
     data.classList.add('current-heading');
+});
+
+motor.addEventListener('click', () => {
+    launchPage.style.display = 'none';
+    dataPage.style.display = 'none';
+    motorPage.style.display = 'block';
+    launch.classList.remove('current-heading');
+    data.classList.remove('current-heading');
+    motor.classList.add('current-heading');
 });
 
 info.addEventListener('click', () => {

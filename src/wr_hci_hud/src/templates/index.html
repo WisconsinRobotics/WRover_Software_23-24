@@ -17,7 +17,7 @@
         <script src="../../node_modules/eventemitter2/lib/eventemitter2.js"></script>
         <script src="./../static/js/ros.js" defer></script>
         <script src="./../static/js/gstwebrtc-api-2.0.0.min.js" defer></script>
-        <script src="./../static/js/webRTCreceiver.js" defer></script>
+        <!-- <script src="./../static/js/webRTCreceiver.js" defer></script> -->
         <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
         <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -34,6 +34,7 @@
             <div class="square-title">
                 <h1 class="square-heading current-heading" id="launchHeading">Launch</h1>
                 <h1 class="square-heading" id="dataHeading">Data</h1>
+                <h1 class="square-heading" id="motorHeading">Motor</h1>
             </div>
             <div id="launchPage">
                 <div class="dropdown">
@@ -51,7 +52,7 @@
             </div>
 
             <div id="dataPage">
-                <div id="smallInfoBox">
+                <div class="smallInfoBox">
                     <div class="smallInfoBoxWrapper">
                         <div class="infoLabel">Ampere</div>
                         <div class="progress-div" id="ampere-div">2.5 V</div>
@@ -82,8 +83,177 @@
                         <div class="infoLabel">Acceleration</div>
                         <div id="accel" class="smallerInfoBox">0 m/s^2</div>
                     </div>
+                    
                 </div>
             </div>
+
+            <div id="motorPage">
+                <div class="smallInfoBox">
+                    <div>
+                        <div class="infoLabel"></div>
+                    
+                        <div class="smallInfoBoxWrapper">
+                            <div class="infoLabel" id="temp">Temperature</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div class="infoLabel" id="position">Motor Position</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div class="infoLabel" id="current">Current</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div class="infoLabel" id="adc">ADC2</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="infoLabel">Motor 1</div>
+                    
+                        <div class="smallInfoBoxWrapper">
+                            <div id="temp1" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="position1" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="current1" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="adc1" class="smallerInfoBox">0</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="infoLabel">Motor 2</div>
+                    
+                        <div class="smallInfoBoxWrapper">
+                            <div id="temp2" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="position2" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="current2" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="adc2" class="smallerInfoBox">0</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="infoLabel">Motor 3</div>
+                    
+                        <div class="smallInfoBoxWrapper">
+                            <div id="temp3" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="position3" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="current3" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="adc3" class="smallerInfoBox">0</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="infoLabel">Motor 4</div>
+                    
+                        <div class="smallInfoBoxWrapper">
+                            <div id="temp4" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="position4" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="current4" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="adc4" class="smallerInfoBox">0</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="infoLabel">Motor 5</div>
+                    
+                        <div class="smallInfoBoxWrapper">
+                            <div id="temp5" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="position5" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="current5" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="adc5" class="smallerInfoBox">0</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="infoLabel">Motor 6</div>
+                    
+                        <div class="smallInfoBoxWrapper">
+                            <div id="temp6" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="position6" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="current6" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="adc6" class="smallerInfoBox">0</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="infoLabel">Motor 7</div>
+                    
+                        <div class="smallInfoBoxWrapper">
+                            <div id="temp7" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="position7" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="current7" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="adc7" class="smallerInfoBox">0</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <canvas id="motorChart" width="400" height="400"></canvas>
+                    </div>
+                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                    <script>
+                        var ctx = document.getElementById('motorChart').getContext('2d');
+                        var motorChart = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: [],
+                                datasets: [{
+                                    label: 'Motor Temperatures',
+                                    data: [],
+                                    borderColor: 'rgba(75, 192, 192, 1)',
+                                    borderWidth: 1,
+                                    fill: false
+                                }]
+                            },
+                            options: {
+                                scales: {
+                                    y: {
+                                        beginAtZero: true
+                                    }
+                                }
+                            }
+                        });
+                    </script>
+                    
+                </div>
+            </div> 
         </div>
 
         <div class="square control">
@@ -160,6 +330,7 @@
             <div id="videoWrapper">
                 <div class="zoomingDiv" id="zoomingDiv1">
                     <video class="videoBox" id="video1" muted="muted", width="560" height="315"></video>
+                    <!-- <img src="/video_feed"> -->
                 </div>
                 <div class="zoomingDiv" id="zoomingDiv2">
                     <video class="videoBox" id="video2" muted="muted" width="560" height="315"></video>
