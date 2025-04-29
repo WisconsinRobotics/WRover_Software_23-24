@@ -18,6 +18,7 @@
         <script src="./../static/js/ros.js" defer></script>
         <script src="./../static/js/gstwebrtc-api-2.0.0.min.js" defer></script>
         <!-- <script src="./../static/js/webRTCreceiver.js" defer></script> -->
+        <script src="./../static/js/opencvReceiver.js" defer></script>
         <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
         <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -227,30 +228,6 @@
                     <div>
                         <canvas id="motorChart" width="400" height="400"></canvas>
                     </div>
-                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-                    <script>
-                        var ctx = document.getElementById('motorChart').getContext('2d');
-                        var motorChart = new Chart(ctx, {
-                            type: 'line',
-                            data: {
-                                labels: [],
-                                datasets: [{
-                                    label: 'Motor Temperatures',
-                                    data: [],
-                                    borderColor: 'rgba(75, 192, 192, 1)',
-                                    borderWidth: 1,
-                                    fill: false
-                                }]
-                            },
-                            options: {
-                                scales: {
-                                    y: {
-                                        beginAtZero: true
-                                    }
-                                }
-                            }
-                        });
-                    </script>
                     
                 </div>
             </div> 
@@ -329,20 +306,24 @@
             </div>
             <div id="videoWrapper">
                 <div class="zoomingDiv" id="zoomingDiv1">
-                    <video class="videoBox" id="video1" muted="muted", width="560" height="315"></video>
-                    <!-- <img src="/video_feed"> -->
+                    <!-- <video class="videoBox" id="video1" muted="muted", width="560" height="315"></video> -->
+                    <!-- <img class="videoBox" id="video1"  src="/video_feed"> -->
+                    <canvas class="videoBox" id="video1"></canvas>
                 </div>
                 <div class="zoomingDiv" id="zoomingDiv2">
-                    <video class="videoBox" id="video2" muted="muted" width="560" height="315"></video>
+                    <!-- <video class="videoBox" id="video2" muted="muted" width="560" height="315"></video> -->
+                    <canvas class="videoBox" id="video2"></canvas>
                 </div>
                 <div class="zoomingDiv" id="zoomingDiv3">
                     <!-- <li style="list-style-type: none;" id="video3Li"> -->
-                        <video id="video3" class="videoBox" muted="muted" width="560" height="315"></video>
+                        <!-- <video id="video3" class="videoBox" muted="muted" width="560" height="315"></video> -->
+                        <canvas class="videoBox" id="video3"></canvas>
                       <!-- </li> -->
                 </div>
                 <div class="zoomingDiv" id="zoomingDiv4">
                     <!-- <li style="list-style-type: none;" id="video4Li"> -->
-                        <video id="video4" class="videoBox" muted="muted" width="560" height="315"></video>
+                        <!-- <video id="video4" class="videoBox" muted="muted" width="560" height="315"></video> -->
+                        <canvas class="videoBox" id="video4"></canvas>
                       <!-- </li> -->
                 </div>
             </div>

@@ -1,0 +1,7 @@
+gst-launch-1.0 webrtcsink name=ws meta="meta,name=gst-stream" dshowvideosrc device-name="USB_Camera" ! videoconvert ! vp8enc deadline=1 ! queue ! video/x-vp8 ! ws.
+
+gst-launch-1.0 webrtcsink name=ws meta="meta,name=gst-stream" mfvideosrc ! videoconvert ! vp8enc deadline=1 ! queue ! video/x-vp8 ! ws.
+
+gst-launch-1.0 webrtcsink name=ws meta="meta,name=gst-stream" videotestsrc ! videoconvert ! vp8enc deadline=1 ! queue ! video/x-vp8 ! ws.
+
+gst-launch-1.0 webrtcsink name=ws meta="meta,name=gst-stream" signaller::uri=ws://host.docker.internal:8443 videotestsrc ! videoconvert ! vp8enc deadline=1 ! queue ! video/x-vp8 ! ws.
