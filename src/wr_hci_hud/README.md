@@ -10,16 +10,13 @@ pip install -r requirements.txt
 # To start the video streaming and ros server
 docker-compose build
 docker-compose up
+run setup.py to run websockets for streaming videos. Change the address and port if needed.
 
 run app.py in wr_hci_hud/src 
 
-May have to set port 5000, 8443, 9090 inbound to open in firewall for multiple client 
+May have to set port 5000, 9090 inbound to open in firewall for multiple client 
 
 the ros.js file is currently publishing and then subscribing to the ros websocket to simulate actual input
-
-# Video streaming
-for webRTC Streaming, might require more steps. WebRTC isn't implemented fully yet.
-Plan to use https://wiki.ros.org/web_video_server for video streaming for now
 
 
 ## History

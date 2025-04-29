@@ -93,6 +93,24 @@ var reconnectIntervalId = setInterval(function() {
 
 // Subscribing to a Topic
 // ----------------------
+
+var compassDataListener = new ROSLIB.Topic({
+  ros: ros,
+  name: '/compass_data_topic',
+  messageType: 'std_msgs/Float64'
+});
+
+compassDataListener.subscribe(function(message) {
+  console.log('Received compass data: ' + message.data);
+  compass = message.data;
+});
+
+setInterval(function() {
+  compassDataListener.publish(new ROSLIB.Message({
+    data: Math.random() * 360 // Simulating compass data in degrees
+  }));
+}, 1000);
+
 var listener = new ROSLIB.Topic({
   ros : ros,
   name : '/listener',

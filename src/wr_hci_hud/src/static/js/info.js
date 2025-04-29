@@ -4,6 +4,7 @@ const xvelocityBox = document.getElementById('xvelocity');
 const yvelocityBox = document.getElementById('yvelocity');
 const accelBox = document.getElementById('accel');
 const distanceBox = document.getElementById('distance');
+const compassBox = document.getElementById('compass');
 
 let xcoord = 0;
 let ycoord = 0;
@@ -11,6 +12,7 @@ let xvelocity = 0;
 let yvelocity = 0;
 let accel = 0;
 let distance = 0;
+let compass = 0;
 
 setInterval(() => {
 
@@ -20,6 +22,7 @@ setInterval(() => {
     yvelocityBox.innerHTML = "Y: " + yvelocity.toFixed(2) + " m/s";
     accelBox.innerHTML = accel.toFixed(2) + " m/s^2";
     distanceBox.innerHTML = distance.toFixed(2) + " m";
+    compassBox.innerHTML = compass.toFixed(2) + " °";
 }, 500);
 const tempBoxes = [];
 const positionBoxes = [];
