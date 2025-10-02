@@ -11,7 +11,13 @@ RUN apt-get update && \
     curl\
     python3-pip\
     wget
+    
+    
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+COPY ./gst-plugins-rs /root/gst-plugins-rs
 
 # Install python packages
 

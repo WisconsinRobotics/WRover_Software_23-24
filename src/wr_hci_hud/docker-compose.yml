@@ -15,6 +15,5 @@ services:
     #   - ROS_DOMAIN_ID=0  # Adjust this if you're using a specific ROS domain ID
     #   - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
     volumes:
-      - ./rosbridge/launch:/root/rosbridge_launch
-    # command: ["ros2", "launch", "rosbridge_server", "rosbridge_websocket_launch.xml"]
-    command: ["/root/start.sh"]
+      - ./rosbridge:/root/rosbridge_launch
+    command: ["/root/rosbridge_launch/start.sh"]
