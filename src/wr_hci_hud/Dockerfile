@@ -23,4 +23,6 @@ COPY ./gst-plugins-rs /root/gst-plugins-rs
 
 # Set the default command to execute
 # When creating a container, this will simulate `docker run -it`
+RUN chmod +x /root/start.sh
+
 CMD ["bash"]
