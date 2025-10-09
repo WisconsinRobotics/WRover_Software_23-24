@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "hls.js": "^1.0.3-0.canary.7275",
+    "http": "^0.0.1-security",
+    "node-media-server": "^2.6.6",
+    "roslib": "^1.4.1",
+    "ws": "^8.16.0"
+  }
+}

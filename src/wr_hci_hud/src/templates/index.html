@@ -1,0 +1,336 @@
+<!-- FILEPATH: /c:/Users/gimin/PythonProjects/flask1/templates/index.html -->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" type="text/css" href="../static/css/index.css">
+        <title>WRover GUI</title>
+        <script src="../static/js/terminal.js" defer></script>
+        <script src="./../static/js/voltage.js" defer></script>
+        <script src="./../static/js/info.js" defer></script>
+        <script src="./../static/js/map.js" defer></script>
+        <script src="./../static/js/startup.js" defer></script>
+        <script src="./../static/js/swapPage.js" defer></script>
+        <script src="./../static/js/zoomBar.js" defer> </script>
+        <!-- <script src="./../static/js/mouseEffect.js" defer></script> -->
+        <script src="../../node_modules/roslib/build/roslib.min.js"></script>
+        <script src="../../node_modules/eventemitter2/lib/eventemitter2.js"></script>
+        <script src="./../static/js/ros.js" defer></script>
+        <script src="./../static/js/gstwebrtc-api-2.0.0.min.js" defer></script>
+        <script src="./../static/js/webRTCreceiver.js" defer></script>
+        <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+        <!-- <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script> -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>        
+
+
+    </head>
+    <body>
+        <div class="square launch">
+            <div class="square-title">
+                <h1 class="square-heading current-heading" id="launchHeading">Launch</h1>
+                <h1 class="square-heading" id="dataHeading">Data</h1>
+                <h1 class="square-heading" id="motorHeading">Motor</h1>
+            </div>
+            <div id="launchPage">
+                <div class="dropdown">
+                    <button class="launch-button">Competition mission</button>
+                </div>
+                <div class="dropdown">
+                    <button class="launch-button">Science mission</button>
+                </div>
+                <div class="dropdown">
+                    <button class="launch-button">Delivery mission</button>
+                </div>
+                <div class="dropdown">
+                    <button class="launch-button">Equipment servicing mission</button>
+                </div>
+            </div>
+
+            <div id="dataPage">
+                <div class="smallInfoBox">
+                    <div class="smallInfoBoxWrapper">
+                        <div class="infoLabel">Ampere</div>
+                        <div class="progress-div" id="ampere-div">2.5 V</div>
+                    </div>
+                    <div class="smallInfoBoxWrapper">
+                        <div class="infoLabel">Battery</div>
+                        <div class="progress-div" id="battery-div">100%</div>
+                    </div>
+                    <!-- <div class="infoLabel"></div> -->
+                    <div class="smallInfoBoxWrapper">
+                        <div class="infoLabel">Coordinate</div>
+                        <div id="xcoord" class="smallerInfoBox">X: 122.43</div>
+                        <div id="ycoord" class="smallerInfoBox">Y: -12.43</div>
+                    </div>
+                    <!-- <div id="gpsBox"> -->
+                    <!-- </div> -->
+                    <div class="smallInfoBoxWrapper">
+                        <div class="infoLabel">Distance</div>
+                        <div id="distance" class="smallerInfoBox">0 m</div>
+                    </div>
+                    <div class="smallInfoBoxWrapper">
+                        <div class="infoLabel">Velocity</div>
+                        <div id="xvelocity" class="smallerInfoBox">X: 0 m/s</div>
+                        <div id="yvelocity" class="smallerInfoBox">Y: 0 m/s </div>
+                    </div>
+
+                    <div class="smallInfoBoxWrapper">
+                        <div class="infoLabel">Acceleration</div>
+                        <div id="accel" class="smallerInfoBox">0 m/s^2</div>
+                    </div>
+
+                    <div class="smallInfoBoxWrapper">
+                        <div class="infoLabel">Compass</div>
+                        <div id="compass" class="smallerInfoBox">0</div>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <div id="motorPage">
+                <div class="smallInfoBox">
+                    <div>
+                        <div class="infoLabel"></div>
+                    
+                        <div class="smallInfoBoxWrapper">
+                            <div class="infoLabel" id="temp">Temperature</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div class="infoLabel" id="position">Motor Position</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div class="infoLabel" id="current">Current</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div class="infoLabel" id="adc">ADC2</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="infoLabel">Motor 1</div>
+                    
+                        <div class="smallInfoBoxWrapper">
+                            <div id="temp1" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="position1" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="current1" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="adc1" class="smallerInfoBox">0</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="infoLabel">Motor 2</div>
+                    
+                        <div class="smallInfoBoxWrapper">
+                            <div id="temp2" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="position2" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="current2" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="adc2" class="smallerInfoBox">0</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="infoLabel">Motor 3</div>
+                    
+                        <div class="smallInfoBoxWrapper">
+                            <div id="temp3" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="position3" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="current3" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="adc3" class="smallerInfoBox">0</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="infoLabel">Motor 4</div>
+                    
+                        <div class="smallInfoBoxWrapper">
+                            <div id="temp4" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="position4" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="current4" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="adc4" class="smallerInfoBox">0</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="infoLabel">Motor 5</div>
+                    
+                        <div class="smallInfoBoxWrapper">
+                            <div id="temp5" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="position5" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="current5" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="adc5" class="smallerInfoBox">0</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="infoLabel">Motor 6</div>
+                    
+                        <div class="smallInfoBoxWrapper">
+                            <div id="temp6" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="position6" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="current6" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="adc6" class="smallerInfoBox">0</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="infoLabel">Motor 7</div>
+                    
+                        <div class="smallInfoBoxWrapper">
+                            <div id="temp7" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="position7" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="current7" class="smallerInfoBox">0</div>
+                        </div>
+                        <div class="smallInfoBoxWrapper">
+                            <div id="adc7" class="smallerInfoBox">0</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <canvas id="motorChart" width="400" height="400"></canvas>
+                    </div>
+                    
+                </div>
+            </div> 
+        </div>
+
+        <div class="square control">
+            <div class="square-title">
+                <h1 class="square-heading">Control</h1>
+            </div>
+
+
+            <div id="controlContent">
+                <p style="margin: 0;"></p>
+                <!-- <div id="joystick"></div> -->
+                
+                <!-- <div id="mapWrapper"><img id="mapimg" src="../../assets/map.jpg" alt="Online Image"></div> -->
+
+                <div id="map"></div>
+                
+            </div>
+
+        </div>
+
+        <div class="square diagnostic">
+            <div class="square-title">
+                <h1 id="infoHeading" class="square-heading">Diagnostic</h1>
+                <h1 id="statusHeading" class="square-heading ">Status</h1>
+            </div>
+            <div id="info-box">
+                <textarea class="diagnostic-input" placeholder="Diagnostics from the server will be displayed here" readonly ></textarea>
+                
+            </div>
+            <div id="status-page">
+                <div style="position: relative; width: 40%; margin-left: 25%;">
+                    <img src="../../assets/rover.png" alt="Robot Image" width="100%">
+                    <div class="mapMarker" style="position: absolute; top:24%; left: 20%; transform: translate(-50%, -50%);"></div>
+                    <div class="mapMarker" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);"></div>
+                    <div class="mapMarker" style="position: absolute; top: 80%; left: 50%; transform: translate(-50%, -50%);"></div>
+                    <div class="mapMarker" style="position: absolute; top: 35%; left: 50%; transform: translate(-50%, -50%);"></div>
+                    <div style="position: absolute; top:20%; left: -20%; transform: translate(-50%, -50%); background-color:#ffaaaa; border-radius: 30px; border: 2px black solid; padding: 5px;">
+                        <h3 style="margin: 0;" class="mapMarkerText">Status: Critical</h3>
+                    </div>
+                    <svg class="lines">
+                        <line x1="24%" y1="25%" x2="-25%" y2="15%" />
+                    </svg>
+                </div>
+                
+                </div>
+            </div>
+        </div>
+
+        <div class="square Video">
+            <div class="square-title">
+                <h1 class="square-heading current-heading" id="cam1">Cam 1</h1>
+                <h1 class="square-heading" id="cam2">Cam 2</h1>
+                <h1 class="square-heading" id="cam3">Cam 3</h1>
+                <h1 class="square-heading" id="cam4">Cam 4</h1>
+                <h1 class="square-heading" id="camMulti">Multi</h1>
+                <div class="slidecontainer hideSlide">
+                    <input type="range" min="10" max="40" value="10" class="slider" id="myRange">
+                </div>
+
+                <div class="slidecontainer hideSlide">
+                    <input type="range" min="10" max="40" value="10" class="slider" id="myRange2">
+                </div>
+
+                <div class="slidecontainer hideSlide">
+                    <input type="range" min="10" max="40" value="10" class="slider" id="myRange3">
+                </div>
+
+                <div class="slidecontainer hideSlide">
+                    <input type="range" min="10" max="40" value="10" class="slider" id="myRange4">
+                </div>
+
+                <h1 class="square-heading" id="vidEnlarge" >^</h1>
+            </div>
+            <div id="videoWrapper">
+                <div class="zoomingDiv" id="zoomingDiv1">
+                    <video class="videoBox" id="video1" muted="muted", width="560" height="315"></video>
+                    <!-- <img class="videoBox" id="video1"  src="/video_feed"> -->
+                </div>
+                <div class="zoomingDiv" id="zoomingDiv2">
+                    <video class="videoBox" id="video2" muted="muted" width="560" height="315"></video>
+                </div>
+                <div class="zoomingDiv" id="zoomingDiv3">
+                    <!-- <li style="list-style-type: none;" id="video3Li"> -->
+                        <video id="video3" class="videoBox" muted="muted" width="560" height="315"></video>
+                      <!-- </li> -->
+                </div>
+                <div class="zoomingDiv" id="zoomingDiv4">
+                    <!-- <li style="list-style-type: none;" id="video4Li"> -->
+                        <video id="video4" class="videoBox" muted="muted" width="560" height="315"></video>
+			<!-- </li> -->
+                </div>
+            </div>
+
+            <div id="logo" style="box-shadow: inset -5px 5px 5px #525252; border: 5px solid black; border-radius: 30%; padding: 15px; z-index: 1; width: 3%; background-color: #3e3e3e; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                <img style="z-index: 2;" src="../../assets/WROVER.png" alt="Centered Image" width="100%">
+            </div>
+        </div>
+    </body>
+</html>

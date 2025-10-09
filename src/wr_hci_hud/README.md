@@ -3,7 +3,21 @@
 @defgroup wr_hci_hud wr_hci_hud
 @brief A package (currently empty) to act as a HUD for drivers
 
-This package was intended to be a display for the current state of the rover and act as an interface.  This node has never had any code.
+# To start the GUI from ./WR_HCI_HUD
+npm install
+pip install -r requirements.txt
+
+# To start the video streaming and ros server
+docker-compose build
+docker-compose up
+run setup.py to run websockets for streaming videos. Change the address and port if needed.
+
+run app.py in wr_hci_hud/src 
+
+May have to set port 5000, 9090 inbound to open in firewall for multiple client 
+
+the ros.js file is currently publishing and then subscribing to the ros websocket to simulate actual input
+
 
 ## History
 
@@ -44,3 +58,4 @@ Ideas for this node have gone through several iterations.  None of the following
     * Little to no visual support outside of `rqt`
 
 Given past experience at competition, even a small GUI with no input options (a literal HUD) would be massively beneficial compared to reading individaul diagnostics one at a time.  This could then be expanded to provide more detailed insights, inputs to the WRover, and specializations for the different competition modes.
+
