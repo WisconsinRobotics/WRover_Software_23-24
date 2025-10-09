@@ -17,8 +17,7 @@
         <script src="../../node_modules/eventemitter2/lib/eventemitter2.js"></script>
         <script src="./../static/js/ros.js" defer></script>
         <script src="./../static/js/gstwebrtc-api-2.0.0.min.js" defer></script>
-        <!-- <script src="./../static/js/webRTCreceiver.js" defer></script> -->
-        <script src="./../static/js/opencvReceiver.js" defer></script>
+        <script src="./../static/js/webRTCreceiver.js" defer></script>
         <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
         <!-- <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script> -->
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -311,25 +310,21 @@
             </div>
             <div id="videoWrapper">
                 <div class="zoomingDiv" id="zoomingDiv1">
-                    <!-- <video class="videoBox" id="video1" muted="muted", width="560" height="315"></video> -->
+                    <video class="videoBox" id="video1" muted="muted", width="560" height="315"></video>
                     <!-- <img class="videoBox" id="video1"  src="/video_feed"> -->
-                    <canvas class="videoBox" id="video1"></canvas>
                 </div>
                 <div class="zoomingDiv" id="zoomingDiv2">
-                    <!-- <video class="videoBox" id="video2" muted="muted" width="560" height="315"></video> -->
-                    <canvas class="videoBox" id="video2"></canvas>
+                    <video class="videoBox" id="video2" muted="muted" width="560" height="315"></video>
                 </div>
                 <div class="zoomingDiv" id="zoomingDiv3">
                     <!-- <li style="list-style-type: none;" id="video3Li"> -->
-                        <!-- <video id="video3" class="videoBox" muted="muted" width="560" height="315"></video> -->
-                        <canvas class="videoBox" id="video3"></canvas>
+                        <video id="video3" class="videoBox" muted="muted" width="560" height="315"></video>
                       <!-- </li> -->
                 </div>
                 <div class="zoomingDiv" id="zoomingDiv4">
                     <!-- <li style="list-style-type: none;" id="video4Li"> -->
-                        <!-- <video id="video4" class="videoBox" muted="muted" width="560" height="315"></video> -->
-                        <canvas class="videoBox" id="video4"></canvas>
-                      <!-- </li> -->
+                        <video id="video4" class="videoBox" muted="muted" width="560" height="315"></video>
+			<!-- </li> -->
                 </div>
             </div>
 

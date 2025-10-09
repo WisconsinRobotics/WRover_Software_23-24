@@ -5,7 +5,6 @@ from flask import Response, render_template_string
 from flask_cors import CORS
 from startup import competitionMission
 import asyncio
-import cv2
 import folium
 import socket
 import threading

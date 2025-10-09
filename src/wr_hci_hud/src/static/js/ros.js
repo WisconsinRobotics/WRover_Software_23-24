@@ -101,7 +101,7 @@ var compassDataListener = new ROSLIB.Topic({
 });
 
 compassDataListener.subscribe(function(message) {
-  console.log('Received compass data: ' + message.data);
+  //console.log('Received compass data: ' + message.data);
   compass = message.data;
 });
 
@@ -286,13 +286,13 @@ tempListener.subscribe(function(message) {
   }
 
   // Update the motorchart with the new temperature data
-  var motorChartInstance = Chart.getChart('motorChart');
-  if (motorChartInstance) {
-    motorChartInstance.data.datasets[0].data.push(message.data);
-    motorChartInstance.update();
-  } else {
-    console.error('Motor chart instance not found');
-  }
+  //var motorChartInstance = Chart.getChart('motorChart');
+  //if (motorChartInstance) {
+  //  motorChartInstance.data.datasets[0].data.push(message.data);
+  //  motorChartInstance.update();
+  //} else {
+  //  console.error('Motor chart instance not found');
+  //}
 });
 
 setInterval(function() {
